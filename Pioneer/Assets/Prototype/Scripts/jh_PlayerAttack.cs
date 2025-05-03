@@ -1,19 +1,69 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class jh_PlayerAttack : MonoBehaviour
-{  
+public class Player : MonoBehaviour
+{
+    public float moveSpeed = 2f;
+    public float attackDistance = 1.5f;
+    public float attackDelay = 0.5f;
+
+    private Transform targetEnemy;
+    private bool isAttacking = false;
+    private bool isMoving = false;
+
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isAttacking)
         {
-            Attack();
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+            {
+                if (hit.transform.CompareTag("Enemy"))
+                {
+                    targetEnemy = hit.transform;
+                    isMoving = true;
+                }
+            }
+        }
+
+        if (isMoving && targetEnemy != null)
+        {
+            MoveToTarget();
         }
     }
 
-    private void Attack()
+    void MoveToTarget()
     {
-        Debug.Log("player left click attack");
+        Vector3 targetPos = targetEnemy.position;
+        targetPos.y = transform.position.y;
+
+        Vector3 direction = targetPos - transform.position;
+
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(direction), 0.2f);
+
+        transform.position += direction.normalized * moveSpeed * Time.deltaTime;
+
+        if (Vector3.Distance(transform.position, targetPos) <= attackDistance)
+        {
+            isMoving = false;
+            StartCoroutine(Attack());
+        }
+    }
+
+    IEnumerator Attack()
+    {
+        isAttacking = true;
+        Debug.Log("공격 시작!");
+
+        yield return new WaitForSeconds(attackDelay);
+
+        if (targetEnemy != null)
+        {
+            Debug.Log("적  처치");
+            Destroy(targetEnemy.gameObject);
+        }
+
+        targetEnemy = null;
+        isAttacking = false;
     }
 }
