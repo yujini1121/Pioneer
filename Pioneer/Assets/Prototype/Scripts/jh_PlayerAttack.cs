@@ -53,17 +53,18 @@ public class Player : MonoBehaviour
     IEnumerator Attack()
     {
         isAttacking = true;
-        Debug.Log("공격 시작!");
-
-        yield return new WaitForSeconds(attackDelay);
+        Debug.Log("공격 시작");
 
         if (targetEnemy != null)
         {
-            Debug.Log("적  처치");
+            Debug.Log("적 처치");
             Destroy(targetEnemy.gameObject);
         }
 
         targetEnemy = null;
+        
+        yield return new WaitForSeconds(attackDelay);
+
         isAttacking = false;
     }
 }
