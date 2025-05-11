@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class jh_GameManager : MonoBehaviour
+public class JH_GameManager : MonoBehaviour
 {
-    public static jh_GameManager Instance;
+    public static JH_GameManager Instance;
 
     private void Awake()
     {
@@ -27,7 +27,7 @@ public class jh_GameManager : MonoBehaviour
         player.transform.position = respawnPosition;
         player.SetActive(true);
 
-        jh_PlayerHealth health = player.GetComponent<jh_PlayerHealth>();
+        JH_PlayerHealth health = player.GetComponent<JH_PlayerHealth>();
         if (health != null)
         {
             health.Revive();

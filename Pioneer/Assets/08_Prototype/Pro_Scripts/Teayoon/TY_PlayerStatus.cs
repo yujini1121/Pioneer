@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStatus : MonoBehaviour
+public class TY_PlayerStatus : MonoBehaviour
 {
-    static public PlayerStatus instance;
+    static public TY_PlayerStatus instance;
 
     public int Wood { get => wood; }
     public int Energy { get => energy; }

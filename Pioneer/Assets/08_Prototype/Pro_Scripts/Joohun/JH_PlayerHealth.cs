@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class jh_PlayerHealth : MonoBehaviour
+public class JH_PlayerHealth : MonoBehaviour
 {
     [Header("Health Settings")]
     public int maxHP = 100;
@@ -58,7 +58,7 @@ public class jh_PlayerHealth : MonoBehaviour
     {
         isDead = true;
 
-        jh_GameManager.Instance.RespawnPlayer(gameObject, respawnPosition, respawnDelay);
+        JH_GameManager.Instance.RespawnPlayer(gameObject, respawnPosition, respawnDelay);
 
         gameObject.SetActive(false);
     }

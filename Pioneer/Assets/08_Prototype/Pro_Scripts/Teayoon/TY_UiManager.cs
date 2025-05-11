@@ -4,16 +4,16 @@ using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class UiManagerTeaYoon : MonoBehaviour
+public class TY_UiManager : MonoBehaviour
 {
-    static public UiManagerTeaYoon instance;
+    static public TY_UiManager instance;
 
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] LayerMask mapMaskLayer;
 
     public void UpdateText()
     {
-        text.text = $"Wood : {PlayerStatus.instance.Wood}\nEnergy : {PlayerStatus.instance.Energy}";
+        text.text = $"Wood : {TY_PlayerStatus.instance.Wood}\nEnergy : {TY_PlayerStatus.instance.Energy}";
     }
 
 
@@ -59,16 +59,16 @@ public class UiManagerTeaYoon : MonoBehaviour
 
             Debug.LogWarning("Cliocked");
 
-            RaycastObjectTeaYoon raycastObject = m_hitOnMap.collider.gameObject.gameObject.GetComponent<RaycastObjectTeaYoon>();
+            TY_RaycastObject raycastObject = m_hitOnMap.collider.gameObject.gameObject.GetComponent<TY_RaycastObject>();
             if (raycastObject != null)
             {
                 if (raycastObject.info == "wood")
                 {
-                    PlayerStatus.instance.AddWood(1);
+                    TY_PlayerStatus.instance.AddWood(1);
                 }
                 if (raycastObject.info == "enemy")
                 {
-                    Instantiate(PrefabHolderTeaYoon.instance.woods, m_hitOnMap.collider.transform.position + new Vector3(UnityEngine.Random.Range(-2, 2), 0, UnityEngine.Random.Range(-2, 2)), quaternion.identity);
+                    Instantiate(TY_PrefabHolder.instance.woods, m_hitOnMap.collider.transform.position + new Vector3(UnityEngine.Random.Range(-2, 2), 0, UnityEngine.Random.Range(-2, 2)), quaternion.identity);
                 }
 
                 Destroy(m_hitOnMap.collider.gameObject);

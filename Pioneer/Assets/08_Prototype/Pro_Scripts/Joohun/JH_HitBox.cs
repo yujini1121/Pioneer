@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class jh_HitBox : MonoBehaviour
+public class JH_HitBox : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {

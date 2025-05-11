@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class JH_PlayerAttack : MonoBehaviour
 {
     public float moveSpeed = 2f;
     public float attackDistance = 1.5f;

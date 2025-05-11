@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class jh_FollowCamera : MonoBehaviour
+public class JH_FollowCamera : MonoBehaviour
 {
     public GameObject attackObject;             
     public float attackCooldown = 0.5f;
