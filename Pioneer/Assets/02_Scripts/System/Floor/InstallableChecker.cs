@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class FloorPlacerPreview : MonoBehaviour
@@ -16,6 +17,9 @@ public class FloorPlacerPreview : MonoBehaviour
 
     private GameObject currentPreview;
     private Renderer previewRenderer;
+
+    private float PosModify = 0.001f;
+    private Vector3 targetPosition;
 
     void Start()
     {
@@ -49,6 +53,11 @@ public class FloorPlacerPreview : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer, QueryTriggerInteraction.Collide))
         {
             Vector3 snappedPos = SnapToGrid(hit.point);
+            targetPosition = snappedPos;
+            snappedPos.x += PosModify;
+            snappedPos.y += PosModify;
+            snappedPos.z -= PosModify;
+
             currentPreview.transform.localPosition = snappedPos;
             currentPreview.SetActive(true);
 
@@ -58,7 +67,7 @@ public class FloorPlacerPreview : MonoBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    InstallTile(snappedPos);
+                    InstallTile();
                 }
             }
             else
@@ -86,10 +95,10 @@ public class FloorPlacerPreview : MonoBehaviour
         return true;
     }
 
-    void InstallTile(Vector3 snappedPos)
+    void InstallTile()
     {
         GameObject tile = Instantiate(previewFloorPrefab, worldSpaceParent);
-        tile.transform.localPosition = snappedPos;
+        tile.transform.localPosition = targetPosition;
         tile.transform.localRotation = Quaternion.identity;
 
         Renderer r = tile.GetComponent<Renderer>();
@@ -100,10 +109,9 @@ public class FloorPlacerPreview : MonoBehaviour
         if (c != null)
             c.isTrigger = false; // 설치 완료 시 충돌 가능
 
-        tile.name = $"Tile ({snappedPos.x}, {snappedPos.y}, {snappedPos.z})";
-        tile.layer = LayerMask.NameToLayer("FloorInstallable");
+        tile.name = $"Tile ({targetPosition.x}, {targetPosition.y}, {targetPosition.z})";
 
-        Debug.Log($"설치 완료: {snappedPos}");
+        Debug.Log($"설치 완료: {targetPosition}");
     }
 
     Vector3 SnapToGrid(Vector3 worldPos)
