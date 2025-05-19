@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 464377687}
   - component: {fileID: 464377686}
   - component: {fileID: 464377685}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zone - Ship
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -337,6 +337,7 @@ GameObject:
   - component: {fileID: 522798511}
   - component: {fileID: 522798512}
   - component: {fileID: 522798513}
+  - component: {fileID: 522798514}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -426,7 +427,7 @@ Transform:
   m_GameObject: {fileID: 522798506}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 1.3, z: -2}
+  m_LocalPosition: {x: 0.5, y: 3.91, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -495,6 +496,33 @@ MonoBehaviour:
   returnSpeed: 2
   returnKey: 98
   shipPosition: {x: 0, y: 0, z: 0}
+--- !u!114 &522798514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522798506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0fa3ea3ba0f7a14e9a18ece4c2cdd7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 721405592}
+  previewFloorPrefab: {fileID: 1079864297802165401, guid: e749cfbbd7c7c1b44a4b701c3d2ea6a8,
+    type: 3}
+  installableLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  blockLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  validMaterial: {fileID: 2100000, guid: 7932f27463e793d4aa19c8f0b1ce0b36, type: 2}
+  invalidMaterial: {fileID: 2100000, guid: 8011fdad11ca1d24fba07d6afa2e1506, type: 2}
+  placedMaterial: {fileID: 2100000, guid: 5d634ac314a76d540b6ec51e85ec78d8, type: 2}
+  player: {fileID: 522798510}
+  maxPlaceDistance: 5
+  worldSpaceParent: {fileID: 1213038216}
 --- !u!1 &552816378
 GameObject:
   m_ObjectHideFlags: 0
@@ -625,7 +653,7 @@ GameObject:
   - component: {fileID: 675568512}
   - component: {fileID: 675568511}
   - component: {fileID: 675568510}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zone - Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -736,7 +764,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &718254532
 RectTransform:
   m_ObjectHideFlags: 0
@@ -908,7 +936,7 @@ Transform:
   m_GameObject: {fileID: 721405590}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0.5, y: 11.3, z: -7}
+  m_LocalPosition: {x: 0.5, y: 13.91, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1093,7 +1121,7 @@ RectTransform:
   m_Father: {fileID: 1129165135}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1147,7 +1175,7 @@ GameObject:
   - component: {fileID: 930410172}
   - component: {fileID: 930410171}
   - component: {fileID: 930410170}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zone - Sea
   m_TagString: Sea
   m_Icon: {fileID: 0}
@@ -1546,7 +1574,7 @@ Transform:
   m_GameObject: {fileID: 1689186408}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0.5, y: 11.3, z: -7}
+  m_LocalPosition: {x: 0.5, y: 13.91, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1600,7 +1628,7 @@ PrefabInstance:
     - target: {fileID: 6360450352184014391, guid: e749cfbbd7c7c1b44a4b701c3d2ea6a8,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 6360450352184014391, guid: e749cfbbd7c7c1b44a4b701c3d2ea6a8,
         type: 3}

@@ -22,6 +22,7 @@ public class JH_PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.velocity = moveInput * moveSpeed;
+        Vector3 velocity = new Vector3(moveInput.x * moveSpeed, rb.velocity.y, moveInput.z * moveSpeed);
+        rb.velocity = velocity;
     }
 }
