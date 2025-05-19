@@ -54,6 +54,8 @@ public class FloorPlacerPreview : MonoBehaviour
         {
             Vector3 snappedPos = SnapToGrid(hit.point);
             targetPosition = snappedPos;
+
+            // 지터링 방지 코드
             snappedPos.x += PosModify;
             snappedPos.y += PosModify;
             snappedPos.z -= PosModify;
