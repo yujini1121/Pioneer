@@ -28,11 +28,11 @@ public class MarinerAI : MonoBehaviour
         if (needRepairList.Count > 0)
         {
             targetRepairObject = needRepairList[0]; // 임시로 index 0번 테스트 수리
-            Debug.Log($"[Mariner {marinerId}] 수리할 오브젝트 이름 : {targetRepairObject.name}, 현재 HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
+            Debug.Log($"Mariner {marinerId} 수리할 오브젝트 이름 : {targetRepairObject.name}, 현재 HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
 
             if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
             {
-                Debug.Log($"[Mariner {marinerId}] 수리를 시작합니다 : {targetRepairObject.name}");
+                Debug.Log($"Mariner {marinerId} 수리를 시작합니다 : {targetRepairObject.name}");
                 isRepairing = true;
                 StartCoroutine(RepairProcess());
             }
@@ -41,7 +41,7 @@ public class MarinerAI : MonoBehaviour
         {
             if (!isSecondPriorityStarted)
             {
-                Debug.Log($"[Mariner {marinerId}] 수리할 오브젝트가 없음으로 2순위 행동 시작");
+                Debug.Log($"Mariner {marinerId} 수리할 오브젝트가 없음으로 2순위 행동 시작");
                 isSecondPriorityStarted = true;
                 StartCoroutine(StartSecondPriorityAction());
             }
@@ -59,7 +59,7 @@ public class MarinerAI : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log($"[Mariner {marinerId}] 수리 완료: {targetRepairObject.name}/ 수리량: {repairAmount}");
+        Debug.Log($"Mariner {marinerId} 수리 완료: {targetRepairObject.name}/ 수리량: {repairAmount}");
         targetRepairObject.Repair(repairAmount);
 
         isRepairing = false;
@@ -67,7 +67,7 @@ public class MarinerAI : MonoBehaviour
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log($"[Mariner {marinerId}] 수리 완료 직후 밤 도달 예외 행동 실행");
+            Debug.Log($"Mariner {marinerId} 수리 완료 직후 밤 도달 예외 행동 실행");
             GameManager.Instance.StoreItemsAndReturnToBase(this);
             yield break;
         }
@@ -77,7 +77,7 @@ public class MarinerAI : MonoBehaviour
 
     public IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log($"[Mariner {marinerId}] 2순위 행동 시작: 바다 쓰레기 파밍");
+        Debug.Log($"Mariner {marinerId} 2순위 행동 시작: 바다 쓰레기 파밍");
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
         List<int> triedIndexes = new List<int>();
@@ -96,7 +96,7 @@ public class MarinerAI : MonoBehaviour
             {
                 GameManager.Instance.OccupySpawner(index);
                 chosenIndex = index;
-                Debug.Log($"[Mariner {marinerId}] 현재 선택된 스포너: {index}");
+                Debug.Log($"Mariner {marinerId} 현재 선택된 스포너: {index}");
                 
                 break;
             }
@@ -111,7 +111,7 @@ public class MarinerAI : MonoBehaviour
 
         if (chosenIndex == -1)
         {
-            Debug.LogWarning($"[Mariner {marinerId}] 모든 스포너가 점유 중, fallback 위치로 이동");
+            Debug.LogWarning($"Mariner {marinerId} 모든 스포너가 점유 중, fallback 위치로 이동");
             chosenIndex = fallbackIndex; // 첫 위치로 이동
         }
 
@@ -120,13 +120,13 @@ public class MarinerAI : MonoBehaviour
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log($"[Mariner {marinerId}] 밤 예외 행동 진입");
+            Debug.Log($"Mariner {marinerId} 밤 예외 행동 진입");
             GameManager.Instance.ReleaseSpawner(chosenIndex);
             GameManager.Instance.StoreItemsAndReturnToBase(this);
             yield break;
         }
 
-        Debug.Log($"[Mariner {marinerId}] 파밍 시작 (10초)");
+        Debug.Log($"Mariner {marinerId} 파밍 시작 (10초)");
         yield return new WaitForSeconds(10f);
 
         GameManager.Instance.CollectResource("wood"); // 출력만
@@ -135,13 +135,13 @@ public class MarinerAI : MonoBehaviour
         var needRepairList = GameManager.Instance.GetRepairTargetsNeedingRepair();
         if (needRepairList.Count > 0)// 수리대상 확인
         {
-            Debug.Log($"[Mariner {marinerId}] 수리 대상 발견이 돼. 1순위 행동으로 전환됨");
+            Debug.Log($"Mariner {marinerId} 수리 대상 발견이 돼. 1순위 행동으로 전환됨");
             isSecondPriorityStarted = false;
             StartRepair();
         }
         else
         {
-            Debug.Log($"[Mariner {marinerId}] 수리 대상 미발견으로 2순위 행동 유지");
+            Debug.Log($"Mariner {marinerId} 수리 대상 미발견으로 2순위 행동 유지");
             StartCoroutine(StartSecondPriorityAction());
         }
     }

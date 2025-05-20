@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
         if (currentGameTime >= nightStartTime && IsDaytime)
         {
             IsDaytime = false;
-            Debug.Log("[GameManager] 밤이 되었습니다.");
+            Debug.Log("밤이 되었습니다.");
         }
     }
 
@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
             if (obj.currentHP < obj.maxHP * 0.5f)
             {
                 repairTargets.Add(obj);
-                Debug.Log($"[GameManager] 수리 대상 추가: {obj.name}/ HP: {obj.currentHP}/{obj.maxHP}");
+                Debug.Log($"수리 대상 추가: {obj.name}/ HP: {obj.currentHP}/{obj.maxHP}");
             }
         }
     }
@@ -76,12 +76,12 @@ public class GameManager : MonoBehaviour
 
     public void CollectResource(string type)
     {
-        Debug.Log($"[GameManager] 자원 획득: {type}"); // 임시
+        Debug.Log($" 자원 획득: {type}"); // 임시
     }
 
     public void StoreItemsAndReturnToBase(MarinerAI mariner)
     {
-        Debug.Log($"[GameManager] [Mariner {mariner.marinerId}] 아이템 저장 후 숙소 복귀");
+        Debug.Log($"승무원 {mariner.marinerId}] 아이템 저장 후 숙소 복귀");
 
         if (HasStorage())
         {
@@ -90,7 +90,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[GameManager] 보관함 없음 "); // 임시.
+            Debug.Log("보관함 없음 "); // 임시.
             mariner.StartCoroutine(mariner.StartSecondPriorityAction());
         }
     }
