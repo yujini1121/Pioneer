@@ -6,25 +6,27 @@ public class InstallableChecker : MonoBehaviour
     [Header("설치 조건")]
     public Camera mainCamera;
     public GameObject previewFloorPrefab;
-    public LayerMask installableLayer;     
-    public LayerMask blockLayerMask;       
+    public LayerMask installableLayer;
+    public LayerMask blockLayerMask;
     public Material validMaterial;
     public Material invalidMaterial;
-    public Material placedMaterial;        
+    public Material placedMaterial;
     public Transform player;
     public float maxPlaceDistance;
     public Transform worldSpaceParent;
 
-    [Header("NevMesh 연결")]
+    [Header("NavMesh 연결")]
     public NavMeshSurface navMeshSurface;
+    public NavMeshAgent playerAgent;
 
-    // 내부 상태
     private GameObject currentPreview;
     private Renderer previewRenderer;
     private Vector3 targetPosition;
 
-    // 위치 보정용 값 (지터링 방지)
     private const float positionOffset = 0.001f;
+
+    private bool isMovingToInstallPoint = false;
+    private Vector3 destinationQueued;
 
     void Start()
     {
@@ -37,7 +39,6 @@ public class InstallableChecker : MonoBehaviour
             return;
         }
 
-        // 프리뷰 오브젝트 생성 및 초기화
         currentPreview = Instantiate(previewFloorPrefab, worldSpaceParent);
         currentPreview.transform.localRotation = Quaternion.identity;
         currentPreview.transform.localPosition = Vector3.zero;
@@ -54,39 +55,97 @@ public class InstallableChecker : MonoBehaviour
 
     void Update()
     {
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        HandlePreview();
+        CheckArrivalAndInstall();
+    }
 
+    void HandlePreview()
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer, QueryTriggerInteraction.Collide))
         {
             Vector3 snappedPos = SnapToGrid(hit.point);
             targetPosition = snappedPos;
 
-            // 지터링 방지용 미세 조정
-            snappedPos.x += positionOffset;
-            snappedPos.y += positionOffset;
-            snappedPos.z -= positionOffset;
-
+            snappedPos += new Vector3(positionOffset, positionOffset, -positionOffset);
             currentPreview.transform.localPosition = snappedPos;
             currentPreview.SetActive(true);
 
-            if (IsPlaceable(snappedPos))
-            {
-                previewRenderer.material = validMaterial;
+            bool canPlace = IsPlaceable(snappedPos);
+            previewRenderer.material = canPlace ? validMaterial : invalidMaterial;
 
-                if (Input.GetMouseButtonDown(0))
-                {
-                    InstallTile();
-                }
-            }
-            else
+            // 이동 명령은 이동 중이 아닐 때만 수행
+            if (canPlace && Input.GetMouseButtonDown(0) && !isMovingToInstallPoint)
             {
-                previewRenderer.material = invalidMaterial;
+                StartMovingToInstall(snappedPos);
             }
         }
         else
         {
             currentPreview.SetActive(false);
         }
+    }
+
+    void StartMovingToInstall(Vector3 snappedPos)
+    {
+        if (playerAgent == null || !playerAgent.isOnNavMesh)
+            return;
+
+        Vector3 worldTarget = worldSpaceParent.TransformPoint(snappedPos);
+
+        playerAgent.isStopped = false;
+        playerAgent.SetDestination(worldTarget);
+
+        destinationQueued = snappedPos;
+        isMovingToInstallPoint = true;
+
+        Debug.Log("설치 지점으로 이동 시작");
+    }
+
+
+    void CheckArrivalAndInstall()
+    {
+        if (!isMovingToInstallPoint) return;
+
+        // 도착 판단
+        bool arrived = !playerAgent.pathPending &&
+                       playerAgent.remainingDistance <= playerAgent.stoppingDistance;
+
+        if (arrived)
+        {
+            InstallTile(destinationQueued);
+
+            // 상태 초기화
+            isMovingToInstallPoint = false;
+            destinationQueued = Vector3.zero;
+
+            playerAgent.isStopped = true;
+            playerAgent.ResetPath();
+
+            Debug.Log("도착 후 설치 및 상태 초기화 완료");
+        }
+    }
+
+
+    void InstallTile(Vector3 localPosition)
+    {
+        GameObject tile = Instantiate(previewFloorPrefab, worldSpaceParent);
+        tile.transform.localPosition = localPosition;
+        tile.transform.localRotation = Quaternion.identity;
+
+        Renderer r = tile.GetComponent<Renderer>();
+        if (r != null && placedMaterial != null)
+            r.material = placedMaterial;
+
+        Collider c = tile.GetComponent<Collider>();
+        if (c != null)
+            c.isTrigger = false;
+
+        if (navMeshSurface != null)
+            navMeshSurface.BuildNavMesh();
+
+        tile.name = $"Tile ({localPosition.x}, {localPosition.y}, {localPosition.z})";
+        Debug.Log($"설치 완료: {localPosition}");
     }
 
     bool IsPlaceable(Vector3 snappedPos)
@@ -99,29 +158,6 @@ public class InstallableChecker : MonoBehaviour
         Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore);
         return overlaps.Length == 0;
     }
-
-    void InstallTile()
-    {
-        GameObject tile = Instantiate(previewFloorPrefab, worldSpaceParent);
-        tile.transform.localPosition = targetPosition;
-        tile.transform.localRotation = Quaternion.identity;
-
-        Renderer r = tile.GetComponent<Renderer>();
-        if (r != null && placedMaterial != null)
-            r.material = placedMaterial;
-
-        Collider c = tile.GetComponent<Collider>();
-        if (c != null)
-            c.isTrigger = false;
-
-        // 동적으로 NavMesh에 반영 (설치한 블록까지 반영하여 재빌딩한다는 뜻)
-        if (navMeshSurface != null)
-            navMeshSurface.BuildNavMesh();
-
-        tile.name = $"Tile ({targetPosition.x}, {targetPosition.y}, {targetPosition.z})";
-        Debug.Log($"설치 완료: {targetPosition}");
-    }
-
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
