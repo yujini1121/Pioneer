@@ -555,6 +555,7 @@ MonoBehaviour:
   maxPlaceDistance: 10
   worldSpaceParent: {fileID: 1213038216}
   warningText: {fileID: 927922493}
+  warningDuration: 1.5
   navMeshSurface: {fileID: 1213038217}
   playerAgent: {fileID: 522798515}
 --- !u!195 &522798515
@@ -566,7 +567,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 522798506}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.2
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -1471,6 +1472,7 @@ GameObject:
   - component: {fileID: 1122607447}
   - component: {fileID: 1122607446}
   - component: {fileID: 1122607445}
+  - component: {fileID: 1122607449}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1519,7 +1521,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: a23a6cbb404223e4d99bc7b1444034f1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1557,13 +1559,29 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1122607444}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.37392765, z: -0, w: 0.92745787}
-  m_LocalPosition: {x: -1, y: 1, z: -2}
+  m_LocalRotation: {x: -0, y: -0.009458631, z: -0, w: 0.9999553}
+  m_LocalPosition: {x: -1, y: 1, z: -1.5}
   m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1213038216}
   m_LocalEulerAnglesHint: {x: 0, y: 43.916, z: 0}
+--- !u!208 &1122607449
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1122607444}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &1129165134
 GameObject:
   m_ObjectHideFlags: 0
@@ -1640,6 +1658,7 @@ Transform:
   - {fileID: 464377688}
   - {fileID: 930410173}
   - {fileID: 1137789312}
+  - {fileID: 1122607448}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
 --- !u!114 &1213038217
@@ -2199,6 +2218,5 @@ SceneRoots:
   - {fileID: 522798510}
   - {fileID: 1924863610}
   - {fileID: 1213038216}
-  - {fileID: 1122607448}
   - {fileID: 161498318}
   - {fileID: 1402563742}

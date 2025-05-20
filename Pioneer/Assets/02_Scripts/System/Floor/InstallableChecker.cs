@@ -188,9 +188,36 @@ public class InstallableChecker : MonoBehaviour
             return false;
 
         Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(snappedPos);
+
+        // 현재 자리에 뭔가 있으면 설치 불가
         Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore);
-        return overlaps.Length == 0;
+        if (overlaps.Length > 0)
+            return false;
+
+        // 인접 타일 있는지 확인 (붙어 있는지)
+        Vector3[] directions = {
+        Vector3.forward,
+        Vector3.back,
+        Vector3.left,
+        Vector3.right
+    };
+
+        bool isAdjacent = false;
+        float checkDistance = 1.0f;
+
+        foreach (Vector3 dir in directions)
+        {
+            Vector3 checkPos = worldSnappedPos + dir * checkDistance;
+            if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore))
+            {
+                isAdjacent = true;
+                break;
+            }
+        }
+
+        return isAdjacent;
     }
+
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
