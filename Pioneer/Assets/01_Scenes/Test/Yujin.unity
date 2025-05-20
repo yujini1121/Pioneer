@@ -527,6 +527,9 @@ MonoBehaviour:
   returnSpeed: 2
   returnKey: 98
   shipPosition: {x: 0, y: 0, z: 0}
+  seaLayerMask:
+    serializedVersion: 2
+    m_Bits: 16
 --- !u!114 &522798514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1367,7 +1370,7 @@ GameObject:
   - component: {fileID: 930410172}
   - component: {fileID: 930410171}
   - component: {fileID: 930410170}
-  m_Layer: 7
+  m_Layer: 4
   m_Name: Zone - Sea
   m_TagString: Sea
   m_Icon: {fileID: 0}

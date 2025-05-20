@@ -1,10 +1,6 @@
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
-
-// ===================================================================================================
-// 플레이어가 바다에 들어갔을 때 플레이어의 호흡에 따라 HP를 감소시키고, 
-// B키를 눌러 배로 복귀 가능하게 하는 기능을 구현합니다.
-// ===================================================================================================
 
 public class CheckBottom : MonoBehaviour
 {
@@ -18,10 +14,14 @@ public class CheckBottom : MonoBehaviour
     public KeyCode returnKey = KeyCode.B;
     public Vector3 shipPosition = Vector3.zero;
 
+    public LayerMask seaLayerMask; // 바다 감지용 레이어
+
     private bool isInSea = false;
     private float seaTimer = 0f;
     private float damageTimer = 0f;
     private bool isReturning = false;
+
+    private NavMeshAgent agent;
 
     void Start()
     {
@@ -30,11 +30,15 @@ public class CheckBottom : MonoBehaviour
             hpBar.maxValue = maxHp;
             hpBar.value = playerHp;
         }
+
+        agent = GetComponent<NavMeshAgent>();
     }
 
     void Update()
     {
-        if (isInSea)
+        DetectSeaUnderneath();
+
+        if (isInSea && !isReturning)
         {
             seaTimer += Time.deltaTime;
 
@@ -50,20 +54,60 @@ public class CheckBottom : MonoBehaviour
 
             if (Input.GetKeyDown(returnKey))
             {
-                isReturning = true;
+                StartReturningToShip();
             }
         }
 
         if (isReturning)
         {
-            transform.position = Vector3.MoveTowards(transform.position, shipPosition, returnSpeed * Time.deltaTime);
-            if (Vector3.Distance(transform.position, shipPosition) < 0.1f)
+            CheckArrivalAtShip();
+        }
+    }
+
+    void StartReturningToShip()
+    {
+        isReturning = true;
+        agent.isStopped = false;
+        agent.SetDestination(shipPosition);
+        Debug.Log("배로 복귀 중...");
+    }
+
+    void CheckArrivalAtShip()
+    {
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        {
+            if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
             {
                 isReturning = false;
                 isInSea = false;
                 seaTimer = 0f;
                 damageTimer = 0f;
-                Debug.Log("복귀 완료");
+                agent.ResetPath();      // 복귀 완료 : 대기 상태로 전환 (언제든지 다시 움직일 수 있게)
+            }
+        }
+    }
+
+    void DetectSeaUnderneath()
+    {
+        Ray ray = new Ray(transform.position + Vector3.up, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit hit, 5f, seaLayerMask, QueryTriggerInteraction.Collide))
+        {
+            if (!isInSea)
+            {
+                isInSea = true;
+                seaTimer = 0f;
+                damageTimer = 0f;
+                Debug.Log("바다에 진입");
+            }
+        }
+        else
+        {
+            if (isInSea && !isReturning)
+            {
+                isInSea = false;
+                seaTimer = 0f;
+                damageTimer = 0f;
+                Debug.Log("바다에서 나옴");
             }
         }
     }
@@ -79,27 +123,5 @@ public class CheckBottom : MonoBehaviour
         }
 
         Debug.Log($"HP 감소: {amount}, 현재 HP: {playerHp}");
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Sea"))
-        {
-            isInSea = true;
-            seaTimer = 0f;
-            damageTimer = 0f;
-            Debug.Log("바다에 진입");
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Sea"))
-        {
-            isInSea = false;
-            seaTimer = 0f;
-            damageTimer = 0f;
-            Debug.Log("바다에서 나옴");
-        }
     }
 }
