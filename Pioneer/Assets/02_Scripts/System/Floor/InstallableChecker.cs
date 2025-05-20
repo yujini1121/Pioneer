@@ -1,5 +1,7 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class InstallableChecker : MonoBehaviour
 {
@@ -14,6 +16,9 @@ public class InstallableChecker : MonoBehaviour
     public Transform player;
     public float maxPlaceDistance;
     public Transform worldSpaceParent;
+    public GameObject warningText;
+    public float warningDuration = 1.5f;
+    private Coroutine warningCoroutine;
 
     [Header("NavMesh 연결")]
     public NavMeshSurface navMeshSurface;
@@ -74,17 +79,45 @@ public class InstallableChecker : MonoBehaviour
             bool canPlace = IsPlaceable(snappedPos);
             previewRenderer.material = canPlace ? validMaterial : invalidMaterial;
 
-            // 이동 명령은 이동 중이 아닐 때만 수행
-            if (canPlace && Input.GetMouseButtonDown(0) && !isMovingToInstallPoint)
+            if (canPlace)
             {
-                StartMovingToInstall(snappedPos);
+                if (Input.GetMouseButtonDown(0) && !isMovingToInstallPoint)
+                {
+                    StartMovingToInstall(snappedPos);
+                }
+            }
+            else
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    ShowWarningText();
+                }
             }
         }
         else
         {
             currentPreview.SetActive(false);
+            warningText.SetActive(false);
         }
     }
+
+
+    void ShowWarningText()
+    {
+        if (warningCoroutine != null)
+            StopCoroutine(warningCoroutine);
+
+        warningText.SetActive(true);
+        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
+    }
+
+    IEnumerator HideWarningTextAfterDelay()
+    {
+        yield return new WaitForSeconds(warningDuration);
+        warningText.SetActive(false);
+        warningCoroutine = null;
+    }
+
 
     void StartMovingToInstall(Vector3 snappedPos)
     {
