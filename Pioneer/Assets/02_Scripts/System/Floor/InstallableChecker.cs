@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class InstallableChecker : MonoBehaviour
 {
@@ -12,7 +13,10 @@ public class InstallableChecker : MonoBehaviour
     public Material placedMaterial;        
     public Transform player;
     public float maxPlaceDistance;
-    public Transform worldSpaceParent;     
+    public Transform worldSpaceParent;
+
+    [Header("NevMesh 연결")]
+    public NavMeshSurface navMeshSurface;
 
     // 내부 상태
     private GameObject currentPreview;
@@ -108,11 +112,16 @@ public class InstallableChecker : MonoBehaviour
 
         Collider c = tile.GetComponent<Collider>();
         if (c != null)
-            c.isTrigger = false; // 충돌 가능 상태로 전환, 기본 설정이 isTrigger = true이기 때문
+            c.isTrigger = false;
+
+        // 동적으로 NavMesh에 반영 (설치한 블록까지 반영하여 재빌딩한다는 뜻)
+        if (navMeshSurface != null)
+            navMeshSurface.BuildNavMesh();
 
         tile.name = $"Tile ({targetPosition.x}, {targetPosition.y}, {targetPosition.z})";
         Debug.Log($"설치 완료: {targetPosition}");
     }
+
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
