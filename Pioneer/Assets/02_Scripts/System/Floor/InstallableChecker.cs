@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FloorPlacerPreview : MonoBehaviour
+public class InstallableChecker : MonoBehaviour
 {
     [Header("설치 조건")]
     public Camera mainCamera;
