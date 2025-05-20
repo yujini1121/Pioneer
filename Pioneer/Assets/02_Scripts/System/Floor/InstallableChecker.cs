@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 public class FloorPlacerPreview : MonoBehaviour
@@ -6,24 +5,27 @@ public class FloorPlacerPreview : MonoBehaviour
     [Header("설치 조건")]
     public Camera mainCamera;
     public GameObject previewFloorPrefab;
-    public LayerMask installableLayer;      // 설치 가능한 지형
-    public LayerMask blockLayerMask;        // 설치 불가 오브젝트
+    public LayerMask installableLayer;     
+    public LayerMask blockLayerMask;       
     public Material validMaterial;
     public Material invalidMaterial;
-    public Material placedMaterial;         // 설치 확정 시 적용
+    public Material placedMaterial;        
     public Transform player;
-    public float maxPlaceDistance = 3f;
-    public Transform worldSpaceParent;      // 설치 부모 (쿼터뷰용)
+    public float maxPlaceDistance;
+    public Transform worldSpaceParent;     
 
+    // 내부 상태
     private GameObject currentPreview;
     private Renderer previewRenderer;
-
-    private float PosModify = 0.001f;
     private Vector3 targetPosition;
+
+    // 위치 보정용 값 (지터링 방지)
+    private const float positionOffset = 0.001f;
 
     void Start()
     {
-        if (mainCamera == null) mainCamera = Camera.main;
+        if (mainCamera == null)
+            mainCamera = Camera.main;
 
         if (worldSpaceParent == null)
         {
@@ -31,7 +33,7 @@ public class FloorPlacerPreview : MonoBehaviour
             return;
         }
 
-        // 프리뷰 오브젝트 생성 → Trigger 상태
+        // 프리뷰 오브젝트 생성 및 초기화
         currentPreview = Instantiate(previewFloorPrefab, worldSpaceParent);
         currentPreview.transform.localRotation = Quaternion.identity;
         currentPreview.transform.localPosition = Vector3.zero;
@@ -55,10 +57,10 @@ public class FloorPlacerPreview : MonoBehaviour
             Vector3 snappedPos = SnapToGrid(hit.point);
             targetPosition = snappedPos;
 
-            // 지터링 방지 코드
-            snappedPos.x += PosModify;
-            snappedPos.y += PosModify;
-            snappedPos.z -= PosModify;
+            // 지터링 방지용 미세 조정
+            snappedPos.x += positionOffset;
+            snappedPos.y += positionOffset;
+            snappedPos.z -= positionOffset;
 
             currentPreview.transform.localPosition = snappedPos;
             currentPreview.SetActive(true);
@@ -91,10 +93,7 @@ public class FloorPlacerPreview : MonoBehaviour
 
         Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(snappedPos);
         Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore);
-        if (overlaps.Length > 0)
-            return false;
-
-        return true;
+        return overlaps.Length == 0;
     }
 
     void InstallTile()
@@ -109,10 +108,9 @@ public class FloorPlacerPreview : MonoBehaviour
 
         Collider c = tile.GetComponent<Collider>();
         if (c != null)
-            c.isTrigger = false; // 설치 완료 시 충돌 가능
+            c.isTrigger = false; // 충돌 가능 상태로 전환, 기본 설정이 isTrigger = true이기 때문
 
         tile.name = $"Tile ({targetPosition.x}, {targetPosition.y}, {targetPosition.z})";
-
         Debug.Log($"설치 완료: {targetPosition}");
     }
 
