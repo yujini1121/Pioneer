@@ -68,7 +68,7 @@ public class MarinerAI : MonoBehaviour
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
             Debug.Log($"Mariner {marinerId} 수리 완료 직후 밤 도달 예외 행동 실행");
-            GameManager.Instance.StoreItemsAndReturnToBase(this);
+            GameManager.Instance.StoreItemsAndReturnToBase(this); // 임시 수정 필요
             yield break;
         }
 
