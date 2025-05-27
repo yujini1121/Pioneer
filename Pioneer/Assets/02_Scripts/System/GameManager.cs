@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public List<DefenseObject> GetRepairTargetsNeedingRepair()
+    public List<DefenseObject> GetNeedsRepair()
     {
         List<DefenseObject> needRepair = new List<DefenseObject>();
         foreach (var obj in repairTargets)
