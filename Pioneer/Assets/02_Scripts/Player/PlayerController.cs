@@ -50,6 +50,12 @@ public class PlayerController : MonoBehaviour
         float verticalInput = Input.GetAxisRaw("Vertical");
 
         playerDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
+
+        if (playerDir != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(playerDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
+        }
     }
 
     private IEnumerator AttackRoutine()

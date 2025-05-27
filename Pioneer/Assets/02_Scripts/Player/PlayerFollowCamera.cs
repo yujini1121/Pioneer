@@ -13,11 +13,8 @@ public class PlayerFollowCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        float currYangle = Mathf.LerpAngle(transform.eulerAngles.y, target.eulerAngles.y, smoothRotate * Time.deltaTime);
-        Quaternion rotation = Quaternion.Euler(0, currYangle, 0);
-        Vector3 position = target.position - (rotation * Vector3.forward * distance) + (Vector3.up * height);
-
-        transform.position = position;
+        Vector3 fixedOffset = new Vector3(0, height, -distance);
+        transform.position = target.position + fixedOffset;
 
         transform.LookAt(target);
     }
