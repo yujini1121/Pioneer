@@ -23,6 +23,7 @@ public class InstallableChecker : MonoBehaviour
     [Header("NavMesh 연결")]
     public NavMeshSurface navMeshSurface;
     public NavMeshAgent playerAgent;
+    public float stopDistance = 1.5f;
 
     private GameObject currentPreview;
     private Renderer previewRenderer;
@@ -33,6 +34,8 @@ public class InstallableChecker : MonoBehaviour
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
 
+
+    //TODO: FSM으로 관리하기 (기본, 설치하러 이동, 설치, 취소 등의 상태 관리가 필요해보임)
     void Start()
     {
         if (mainCamera == null)
@@ -62,6 +65,18 @@ public class InstallableChecker : MonoBehaviour
     {
         HandlePreview();
         CheckArrivalAndInstall();
+
+        // 설치 명령 도중에 키 입력(WASD)이 들어오면 설치 취소
+        if (isMovingToInstallPoint)
+        {
+            float moveInputH = Input.GetAxisRaw("Horizontal");
+            float moveInputV = Input.GetAxisRaw("Vertical");
+
+            if (moveInputH != 0 || moveInputV != 0)
+            {
+                CancelInstall();
+            }
+        }
     }
 
     void HandlePreview()
@@ -102,23 +117,6 @@ public class InstallableChecker : MonoBehaviour
     }
 
 
-    void ShowWarningText()
-    {
-        if (warningCoroutine != null)
-            StopCoroutine(warningCoroutine);
-
-        warningText.SetActive(true);
-        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
-    }
-
-    IEnumerator HideWarningTextAfterDelay()
-    {
-        yield return new WaitForSeconds(warningDuration);
-        warningText.SetActive(false);
-        warningCoroutine = null;
-    }
-
-
     void StartMovingToInstall(Vector3 snappedPos)
     {
         if (playerAgent == null || !playerAgent.isOnNavMesh)
@@ -126,21 +124,23 @@ public class InstallableChecker : MonoBehaviour
 
         Vector3 worldTarget = worldSpaceParent.TransformPoint(snappedPos);
 
+        // 방향 계산 : 설치 지점 바로 앞에서 멈추게 하기 (가끔 설치하기도 전에 공중에 뜨는 버그가 있어서)
+        Vector3 directionToTarget = (worldTarget - player.position).normalized;
+        Vector3 stopBeforeTarget = worldTarget - directionToTarget * stopDistance;
+
         playerAgent.isStopped = false;
-        playerAgent.SetDestination(worldTarget);
+        playerAgent.SetDestination(stopBeforeTarget);
 
         destinationQueued = snappedPos;
         isMovingToInstallPoint = true;
 
-        Debug.Log("설치 지점으로 이동 시작");
+        Debug.Log("설치 지점 인근으로 이동 시작");
     }
-
 
     void CheckArrivalAndInstall()
     {
         if (!isMovingToInstallPoint) return;
 
-        // 도착 판단
         bool arrived = !playerAgent.pathPending &&
                        playerAgent.remainingDistance <= playerAgent.stoppingDistance;
 
@@ -148,17 +148,15 @@ public class InstallableChecker : MonoBehaviour
         {
             InstallTile(destinationQueued);
 
-            // 상태 초기화
             isMovingToInstallPoint = false;
             destinationQueued = Vector3.zero;
 
-            playerAgent.isStopped = true;
             playerAgent.ResetPath();
+            playerAgent.isStopped = false;
 
-            Debug.Log("도착 후 설치 및 상태 초기화 완료");
+            Debug.Log("설치 완료 및 상태 초기화");
         }
     }
-
 
     void InstallTile(Vector3 localPosition)
     {
@@ -188,19 +186,16 @@ public class InstallableChecker : MonoBehaviour
             return false;
 
         Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(snappedPos);
-
-        // 현재 자리에 뭔가 있으면 설치 불가
         Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore);
         if (overlaps.Length > 0)
             return false;
 
-        // 인접 타일 있는지 확인 (붙어 있는지)
         Vector3[] directions = {
-        Vector3.forward,
-        Vector3.back,
-        Vector3.left,
-        Vector3.right
-    };
+            Vector3.forward,
+            Vector3.back,
+            Vector3.left,
+            Vector3.right
+        };
 
         bool isAdjacent = false;
         float checkDistance = 1.0f;
@@ -218,6 +213,15 @@ public class InstallableChecker : MonoBehaviour
         return isAdjacent;
     }
 
+    void CancelInstall()
+    {
+        playerAgent.isStopped = true;
+        playerAgent.ResetPath();
+        isMovingToInstallPoint = false;
+        destinationQueued = Vector3.zero;
+
+        Debug.Log("플레이어 조작에 의해 설치 명령이 취소됨");
+    }
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
@@ -226,5 +230,21 @@ public class InstallableChecker : MonoBehaviour
         int x = Mathf.RoundToInt(localPos.x / cellSize);
         int z = Mathf.RoundToInt(localPos.z / cellSize);
         return new Vector3(x * cellSize, 0f, z * cellSize);
+    }
+
+    void ShowWarningText()
+    {
+        if (warningCoroutine != null)
+            StopCoroutine(warningCoroutine);
+
+        warningText.SetActive(true);
+        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
+    }
+
+    IEnumerator HideWarningTextAfterDelay()
+    {
+        yield return new WaitForSeconds(warningDuration);
+        warningText.SetActive(false);
+        warningCoroutine = null;
     }
 }

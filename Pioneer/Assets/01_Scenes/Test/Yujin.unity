@@ -561,6 +561,7 @@ MonoBehaviour:
   warningDuration: 1.5
   navMeshSurface: {fileID: 1213038217}
   playerAgent: {fileID: 522798515}
+  stopDistance: 1.5
 --- !u!195 &522798515
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1682,7 +1683,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 144
   m_UseGeometry: 0
   m_DefaultArea: 0
   m_IgnoreNavMeshAgent: 1
