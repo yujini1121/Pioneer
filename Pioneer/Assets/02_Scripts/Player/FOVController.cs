@@ -9,23 +9,20 @@ public class FOVController : MonoBehaviour
     [SerializeField] private float viewRadius = 10f;
 
     [Header("시야 각")]
-    [SerializeField] private float viewAngle = 60f;
+    [Range(0, 360)]
+    [SerializeField] private float viewAngle = 45f;
 
     [Header("시야 감지 간격")]
     [SerializeField] private float detectionInterval = 0.2f;
-
-    [Header("최대 감지 에너미 수")]
-    [SerializeField] private int maxTargets = 10;
 
     [Header("레이어 설정")]
     [SerializeField] private LayerMask enemyMask;
     [SerializeField] private LayerMask obstacleMask;
 
-    private Collider[] targetColliders;
+    public List<Transform> visibleTargets = new List<Transform>();
 
     private void Start()
     {
-        targetColliders = new Collider[maxTargets];
         StartCoroutine(DetectRatgets());
     }
 
@@ -44,20 +41,21 @@ public class FOVController : MonoBehaviour
     // 장애물 있는지 레이캐스트 검사
     private void DetectTargets()
     {
-        int targets = Physics.OverlapSphereNonAlloc(transform.position, viewRadius, targetColliders, enemyMask);
-        
-        for(int i = 0; i < targets; i++)
-        {
-            Transform targetTransform = targetColliders[i].transform;
-            Vector3 targetDir = (targetTransform.position - transform.position).normalized;
+        visibleTargets.Clear();
+        Collider[] targetsInRange = Physics.OverlapSphere(transform.position, viewRadius, enemyMask);
 
-            if(Vector3.Angle(transform.forward, targetDir) < (viewAngle / 2))
+        for (int i = 0; i < targetsInRange.Length; i++)
+        {
+            Transform target = targetsInRange[i].transform;
+            Vector3 dirTarget = (target.position - transform.position).normalized;
+
+            if (Vector3.Angle(transform.forward, dirTarget) < viewAngle / 2)
             {
-                float distanceToTarget = Vector3.Distance(transform.position, targetTransform.position);
-                
-                if (!Physics.Raycast(transform.position, targetDir, distanceToTarget, obstacleMask))
+                float distanceToTarget = Vector3.Distance(transform.position, target.position);
+
+                if (!Physics.Raycast(transform.position, dirTarget, distanceToTarget, obstacleMask))
                 {
-                    Debug.Log("타겟 감지됨 (NonAlloc): " + targetTransform.name);
+                    visibleTargets.Add(target);
                 }
             }
         }
