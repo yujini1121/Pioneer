@@ -1,4 +1,8 @@
-using TMPro;
+// ===================================================================================================
+// 플레이어가 바닥 설치 명령을 받을 경우, 지정된 위치로 이동 후 설치
+// 도중 조작 시 명령 취소되며, 인접 타일이 있을 경우에만 설치 허용됨
+// ===================================================================================================
+
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
@@ -23,7 +27,7 @@ public class InstallableChecker : MonoBehaviour
     [Header("NavMesh 연결")]
     public NavMeshSurface navMeshSurface;
     public NavMeshAgent playerAgent;
-    public float stopDistance = 1.5f;
+    public float stopDistance = 1.5f; // 설치 지점 도달 전 멈출 거리
 
     private GameObject currentPreview;
     private Renderer previewRenderer;
@@ -31,11 +35,11 @@ public class InstallableChecker : MonoBehaviour
 
     private const float positionOffset = 0.001f;
 
+    // 설치 명령 이동 중인지 여부
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
 
 
-    //TODO: FSM으로 관리하기 (기본, 설치하러 이동, 설치, 취소 등의 상태 관리가 필요해보임)
     void Start()
     {
         if (mainCamera == null)
@@ -66,7 +70,7 @@ public class InstallableChecker : MonoBehaviour
         HandlePreview();
         CheckArrivalAndInstall();
 
-        // 설치 명령 도중에 키 입력(WASD)이 들어오면 설치 취소
+        // 설치 도중 플레이어 조작 감지 시 설치 명령 취소
         if (isMovingToInstallPoint)
         {
             float moveInputH = Input.GetAxisRaw("Horizontal");
@@ -87,6 +91,7 @@ public class InstallableChecker : MonoBehaviour
             Vector3 snappedPos = SnapToGrid(hit.point);
             targetPosition = snappedPos;
 
+            // 지터링 보정
             snappedPos += new Vector3(positionOffset, positionOffset, -positionOffset);
             currentPreview.transform.localPosition = snappedPos;
             currentPreview.SetActive(true);
@@ -116,7 +121,6 @@ public class InstallableChecker : MonoBehaviour
         }
     }
 
-
     void StartMovingToInstall(Vector3 snappedPos)
     {
         if (playerAgent == null || !playerAgent.isOnNavMesh)
@@ -124,7 +128,7 @@ public class InstallableChecker : MonoBehaviour
 
         Vector3 worldTarget = worldSpaceParent.TransformPoint(snappedPos);
 
-        // 방향 계산 : 설치 지점 바로 앞에서 멈추게 하기 (가끔 설치하기도 전에 공중에 뜨는 버그가 있어서)
+        // 방향 계산 → stopDistance 앞에서 멈춤
         Vector3 directionToTarget = (worldTarget - player.position).normalized;
         Vector3 stopBeforeTarget = worldTarget - directionToTarget * stopDistance;
 
@@ -190,6 +194,7 @@ public class InstallableChecker : MonoBehaviour
         if (overlaps.Length > 0)
             return false;
 
+        // 바닥 연결성 체크 (상하좌우)
         Vector3[] directions = {
             Vector3.forward,
             Vector3.back,
@@ -197,20 +202,17 @@ public class InstallableChecker : MonoBehaviour
             Vector3.right
         };
 
-        bool isAdjacent = false;
-        float checkDistance = 1.0f;
-
+        float checkDistance = 1f;
         foreach (Vector3 dir in directions)
         {
             Vector3 checkPos = worldSnappedPos + dir * checkDistance;
             if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore))
             {
-                isAdjacent = true;
-                break;
+                return true;
             }
         }
 
-        return isAdjacent;
+        return false;
     }
 
     void CancelInstall()
