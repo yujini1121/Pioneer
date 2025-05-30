@@ -15,10 +15,25 @@ public class InventoryManager : MonoBehaviour
         return fastSearch[id].amount;
     }
 
-    private void mAdd(SItemStack item)
+    public void Add(SItemStack item)
     {
-        itemLists.Add(item);
-        fastSearch.Add(item.id, item);
+        if (item.amount < 1) return;
+
+        if (fastSearch.ContainsKey(item.id) == false)
+        {
+            itemLists.Add(item);
+            fastSearch.Add(item.id, item);
+            return;
+        }
+        fastSearch[item.id].amount += item.amount;
+    }
+
+    public void Remove(params SItemStack[] removeTargets)
+    {
+        for (int index = 0; index < removeTargets.Length; index++)
+        {
+            fastSearch[removeTargets[index].id].amount -= removeTargets[index].amount;
+        }
     }
 
     private void Awake()
@@ -33,7 +48,7 @@ public class InventoryManager : MonoBehaviour
 
     private void Demo()
     {
-        mAdd(new SItemStack(100, 5));
-        mAdd(new SItemStack(101, 5));
+        Add(new SItemStack(100, 5));
+        Add(new SItemStack(101, 5));
     }
 }
