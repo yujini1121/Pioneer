@@ -31,7 +31,14 @@ public class ItemRecipeManager : MonoBehaviour
     {
         Instance = this;
 
+        ValueAssign();
         Demo();
+    }
+
+    private void ValueAssign()
+    {
+        recipes = new List<SItemRecipe>();
+        recipesSearch = new Dictionary<int, SItemRecipe>();
     }
 
     private void Demo()
