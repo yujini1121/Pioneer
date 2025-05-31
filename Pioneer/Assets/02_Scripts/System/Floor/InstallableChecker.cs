@@ -1,4 +1,8 @@
-using TMPro;
+// ===================================================================================================
+// 플레이어가 바닥 설치 명령을 받을 경우, 지정된 위치로 이동 후 설치
+// 도중 조작 시 명령 취소되며, 인접 타일이 있을 경우에만 설치 허용됨
+// ===================================================================================================
+
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
@@ -23,6 +27,7 @@ public class InstallableChecker : MonoBehaviour
     [Header("NavMesh 연결")]
     public NavMeshSurface navMeshSurface;
     public NavMeshAgent playerAgent;
+    public float stopDistance = 1.5f; // 설치 지점 도달 전 멈출 거리
 
     private GameObject currentPreview;
     private Renderer previewRenderer;
@@ -30,8 +35,10 @@ public class InstallableChecker : MonoBehaviour
 
     private const float positionOffset = 0.001f;
 
+    // 설치 명령 이동 중인지 여부
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
+
 
     void Start()
     {
@@ -62,6 +69,18 @@ public class InstallableChecker : MonoBehaviour
     {
         HandlePreview();
         CheckArrivalAndInstall();
+
+        // 설치 도중 플레이어 조작 감지 시 설치 명령 취소
+        if (isMovingToInstallPoint)
+        {
+            float moveInputH = Input.GetAxisRaw("Horizontal");
+            float moveInputV = Input.GetAxisRaw("Vertical");
+
+            if (moveInputH != 0 || moveInputV != 0)
+            {
+                CancelInstall();
+            }
+        }
     }
 
     void HandlePreview()
@@ -72,6 +91,7 @@ public class InstallableChecker : MonoBehaviour
             Vector3 snappedPos = SnapToGrid(hit.point);
             targetPosition = snappedPos;
 
+            // 지터링 보정
             snappedPos += new Vector3(positionOffset, positionOffset, -positionOffset);
             currentPreview.transform.localPosition = snappedPos;
             currentPreview.SetActive(true);
@@ -101,24 +121,6 @@ public class InstallableChecker : MonoBehaviour
         }
     }
 
-
-    void ShowWarningText()
-    {
-        if (warningCoroutine != null)
-            StopCoroutine(warningCoroutine);
-
-        warningText.SetActive(true);
-        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
-    }
-
-    IEnumerator HideWarningTextAfterDelay()
-    {
-        yield return new WaitForSeconds(warningDuration);
-        warningText.SetActive(false);
-        warningCoroutine = null;
-    }
-
-
     void StartMovingToInstall(Vector3 snappedPos)
     {
         if (playerAgent == null || !playerAgent.isOnNavMesh)
@@ -126,21 +128,23 @@ public class InstallableChecker : MonoBehaviour
 
         Vector3 worldTarget = worldSpaceParent.TransformPoint(snappedPos);
 
+        // 방향 계산 → stopDistance 앞에서 멈춤
+        Vector3 directionToTarget = (worldTarget - player.position).normalized;
+        Vector3 stopBeforeTarget = worldTarget - directionToTarget * stopDistance;
+
         playerAgent.isStopped = false;
-        playerAgent.SetDestination(worldTarget);
+        playerAgent.SetDestination(stopBeforeTarget);
 
         destinationQueued = snappedPos;
         isMovingToInstallPoint = true;
 
-        Debug.Log("설치 지점으로 이동 시작");
+        Debug.Log("설치 지점 인근으로 이동 시작");
     }
-
 
     void CheckArrivalAndInstall()
     {
         if (!isMovingToInstallPoint) return;
 
-        // 도착 판단
         bool arrived = !playerAgent.pathPending &&
                        playerAgent.remainingDistance <= playerAgent.stoppingDistance;
 
@@ -148,17 +152,15 @@ public class InstallableChecker : MonoBehaviour
         {
             InstallTile(destinationQueued);
 
-            // 상태 초기화
             isMovingToInstallPoint = false;
             destinationQueued = Vector3.zero;
 
-            playerAgent.isStopped = true;
             playerAgent.ResetPath();
+            playerAgent.isStopped = false;
 
-            Debug.Log("도착 후 설치 및 상태 초기화 완료");
+            Debug.Log("설치 완료 및 상태 초기화");
         }
     }
-
 
     void InstallTile(Vector3 localPosition)
     {
@@ -188,36 +190,40 @@ public class InstallableChecker : MonoBehaviour
             return false;
 
         Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(snappedPos);
-
-        // 현재 자리에 뭔가 있으면 설치 불가
         Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore);
         if (overlaps.Length > 0)
             return false;
 
-        // 인접 타일 있는지 확인 (붙어 있는지)
+        // 바닥 연결성 체크 (상하좌우)
         Vector3[] directions = {
-        Vector3.forward,
-        Vector3.back,
-        Vector3.left,
-        Vector3.right
-    };
+            Vector3.forward,
+            Vector3.back,
+            Vector3.left,
+            Vector3.right
+        };
 
-        bool isAdjacent = false;
-        float checkDistance = 1.0f;
-
+        float checkDistance = 1f;
         foreach (Vector3 dir in directions)
         {
             Vector3 checkPos = worldSnappedPos + dir * checkDistance;
             if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore))
             {
-                isAdjacent = true;
-                break;
+                return true;
             }
         }
 
-        return isAdjacent;
+        return false;
     }
 
+    void CancelInstall()
+    {
+        playerAgent.isStopped = true;
+        playerAgent.ResetPath();
+        isMovingToInstallPoint = false;
+        destinationQueued = Vector3.zero;
+
+        Debug.Log("플레이어 조작에 의해 설치 명령이 취소됨");
+    }
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
@@ -226,5 +232,21 @@ public class InstallableChecker : MonoBehaviour
         int x = Mathf.RoundToInt(localPos.x / cellSize);
         int z = Mathf.RoundToInt(localPos.z / cellSize);
         return new Vector3(x * cellSize, 0f, z * cellSize);
+    }
+
+    void ShowWarningText()
+    {
+        if (warningCoroutine != null)
+            StopCoroutine(warningCoroutine);
+
+        warningText.SetActive(true);
+        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
+    }
+
+    IEnumerator HideWarningTextAfterDelay()
+    {
+        yield return new WaitForSeconds(warningDuration);
+        warningText.SetActive(false);
+        warningCoroutine = null;
     }
 }

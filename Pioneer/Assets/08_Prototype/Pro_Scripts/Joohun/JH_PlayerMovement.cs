@@ -8,9 +8,13 @@ public class JH_PlayerMovement : MonoBehaviour
     private Rigidbody rb;
     private Vector3 moveInput;
 
+    private Vector3 lastPosition;
+    public float moveThreshold = 0.01f;     // 혹시 모를 미세한 움직임 대비
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        lastPosition = transform.position;
     }
 
     void Update()
@@ -24,5 +28,13 @@ public class JH_PlayerMovement : MonoBehaviour
     {
         Vector3 velocity = new Vector3(moveInput.x * moveSpeed, rb.velocity.y, moveInput.z * moveSpeed);
         rb.velocity = velocity;
+    }
+
+    public bool HasMoved()
+    {
+        float dist = Vector3.Distance(transform.position, lastPosition);
+        bool moved = dist > moveThreshold;
+        if (moved) lastPosition = transform.position;
+        return moved;
     }
 }
