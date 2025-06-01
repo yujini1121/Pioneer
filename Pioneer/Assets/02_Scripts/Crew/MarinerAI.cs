@@ -12,6 +12,9 @@ public class MarinerAI : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.Instance != null)
+            GameManager.Instance.RegisterMariner(this);
+
         if (!isRepairing && GameManager.Instance.IsDaytime)
         {
             StartRepair();
