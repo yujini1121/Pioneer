@@ -1,69 +1,90 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 /// <summary>
-/// ÇöÀç °ø°İ ´ë»óÀÌ ½Ã¾ß¾È¿¡ µé¾î¿ÔÀ» ¶§ °ø°İ ·ÎÁ÷ ¹Ì±¸Çö
+/// ì¢€ë¹„ AI - íƒ€ê²Ÿì´ ì‹œì•¼ì— ë“¤ì–´ì˜¤ë©´ ì ‘ê·¼ í›„ ê³µê²© ì‹œê°í™” ë° íŒì •
 /// </summary>
 public class ZombieMarinerAI : MonoBehaviour
 {
-    public enum ZombieState { Wandering, Idle } // ¶°µ¹´Ù , ´ë±â
+    public enum ZombieState { Wandering, Idle, Attacking }
     private ZombieState currentState = ZombieState.Wandering;
 
     private float speed = 1f;
     private float hp = 40f;
     private float moveDuration = 2f;
     private float idleDuration = 4f;
-
     private float stateTimer = 0f;
     private Vector3 moveDirection;
+
+    // íƒ€ê²Ÿ íƒì§€ ë° ê³µê²©
+    public float detectionRange = 3f;
+    public LayerMask targetLayer;
+    private float attackCooldown = 0f;
+    private float attackInterval = 0.5f;
+    private Transform target;
+
+    // ê³µê²© ì‹œê°í™”
+    private bool isShowingAttackBox = false;
+    private float attackVisualDuration = 1f;
+    private Coroutine attackRoutine;
 
     private void Start()
     {
         InitZombieStats();
         SetRandomDirection();
         stateTimer = moveDuration;
-        Debug.Log("Á»ºñ ½Â¹«¿ø ÀÛµ¿ Áß");
+        Debug.Log("ì¢€ë¹„ ìŠ¹ë¬´ì› ì‘ë™ ì¤‘");
     }
 
     private void InitZombieStats()
     {
         if (hp > 40f)
         {
-            Debug.Log("Á»ºñ AI HP ÀÚµ¿ Á¶Á¤");
+            Debug.Log("ì¢€ë¹„ AI HP ìë™ ì¡°ì •");
             hp = 40f;
         }
     }
 
     private void Update()
     {
+        attackCooldown -= Time.deltaTime;
+
+        if (attackCooldown <= 0f)
+        {
+            if (DetectTarget())
+            {
+                LookAtTarget();
+
+                if (attackRoutine == null)
+                    attackRoutine = StartCoroutine(AttackSequence());
+            }
+
+            attackCooldown = attackInterval;
+        }
+
         switch (currentState)
         {
             case ZombieState.Wandering:
                 Wander();
                 break;
-
             case ZombieState.Idle:
                 Idle();
                 break;
+            case ZombieState.Attacking:
+                // ê³µê²© ë£¨í‹´ ë‚´ì—ì„œ ì²˜ë¦¬ë¨
+                break;
         }
     }
-
-    /// <summary>
-    /// ÀÌµ¿ -> ´ë±â -> ÀÌµ¿ , ÇÃ·¹ÀÌ¾î ¹ß°ß½Ã °ø°İ
-    /// </summary>
 
     private void Wander()
     {
         transform.position += moveDirection * speed * Time.deltaTime;
         stateTimer -= Time.deltaTime;
 
-        Debug.DrawRay(transform.position, moveDirection * 2f, Color.green); // ÀÌµ¿ ¹æÇâ ½Ã°¢È­
-
         if (stateTimer <= 0f)
         {
-            Debug.Log("Á»ºñ AI ÀÌµ¿ ÈÄ ´ë±â »óÅÂ");
+            Debug.Log("ì¢€ë¹„ AI ì´ë™ í›„ ëŒ€ê¸° ìƒíƒœ");
             EnterIdleState();
         }
     }
@@ -74,7 +95,7 @@ public class ZombieMarinerAI : MonoBehaviour
 
         if (stateTimer <= 0f)
         {
-            Debug.Log("Á¾ºñ AI ´ë±â¿¡¼­ ´Ù½Ã ÀÌµ¿ »óÅÂ");
+            Debug.Log("ì¢€ë¹„ AI ëŒ€ê¸°ì—ì„œ ë‹¤ì‹œ ì´ë™ ìƒíƒœ");
             EnterWanderingState();
         }
     }
@@ -84,28 +105,112 @@ public class ZombieMarinerAI : MonoBehaviour
         SetRandomDirection();
         currentState = ZombieState.Wandering;
         stateTimer = moveDuration;
-        Debug.Log("·£´ı ¹æÇâÀ¸·Î ÀÌµ¿ ½ÃÀÛ");
+        Debug.Log("ëœë¤ ë°©í–¥ìœ¼ë¡œ ì´ë™ ì‹œì‘");
     }
 
     private void EnterIdleState()
     {
         currentState = ZombieState.Idle;
         stateTimer = idleDuration;
-        Debug.Log("Á»ºñ AI ´ë±â »óÅÂ·Î ÀüÈ¯");
+        Debug.Log("ì¢€ë¹„ AI ëŒ€ê¸° ìƒíƒœë¡œ ì „í™˜");
     }
-
-
-    /// <summary>
-    /// ·£´ı ¹æÇâ »ı¼º
-    /// </summary>
 
     private void SetRandomDirection()
     {
-        float angle = Random.Range(0f, 360f); // ·£´ı ¹æÇâ ÈÄ MOVE
+        float angle = Random.Range(0f, 360f);
         moveDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
     }
 
+    private bool DetectTarget()
+    {
+        Collider[] hits = Physics.OverlapBox(
+            transform.position,
+            new Vector3(1.5f, 0.5f, 1.5f),
+            Quaternion.identity,
+            targetLayer
+        );
 
+        float minDist = float.MaxValue;
+        target = null;
 
+        foreach (var hit in hits)
+        {
+            float dist = Vector3.Distance(transform.position, hit.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                target = hit.transform;
+            }
+        }
 
+        return target != null;
+    }
+
+    private void LookAtTarget()
+    {
+        if (target == null) return;
+        Vector3 dir = (target.position - transform.position).normalized;
+        dir.y = 0f;
+
+        if (dir != Vector3.zero)
+            transform.forward = dir;
+    }
+
+    /// <summary>
+    /// ë¹¨ê°„ìƒ‰ ë°•ìŠ¤ ê³µê²© ë²”ìœ„ ìƒì„±
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator AttackSequence()
+    {
+        currentState = ZombieState.Attacking;
+
+        // ì ‘ê·¼í•  ìœ„ì¹˜ ê³„ì‚° (1m ë–¨ì–´ì§„ ì§€ì )
+        Vector3 targetOffset = (target.position - transform.position).normalized;
+        Vector3 attackPosition = target.position - targetOffset;
+        attackPosition.y = transform.position.y;
+
+        // ì´ë™
+        while (Vector3.Distance(transform.position, attackPosition) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, attackPosition, speed * Time.deltaTime);
+            yield return null;
+        }
+
+        // 1ì´ˆê°„ ê³µê²© ë°•ìŠ¤ ì‹œê°í™”
+        isShowingAttackBox = true;
+        yield return new WaitForSeconds(attackVisualDuration);
+        isShowingAttackBox = false;
+
+        // ê³µê²© íŒì • (ë””ë²„ê·¸ìš©)
+        Vector3 boxCenter = transform.position + transform.forward * 1f;
+        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
+
+        foreach (var hit in hits)
+        {
+            Debug.Log($" {hit.name}ì´ ê³µê²© ë²”ìœ„ ì•ˆì— ìˆìŒ");
+        }
+
+        // ìƒíƒœ ë³µê·€
+        currentState = ZombieState.Wandering;
+        stateTimer = moveDuration;
+        SetRandomDirection();
+        attackRoutine = null;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (isShowingAttackBox)
+        {
+            Gizmos.color = Color.red;
+            Vector3 boxCenter = transform.position + transform.forward * 1f;
+            Gizmos.matrix = Matrix4x4.TRS(boxCenter, transform.rotation, Vector3.one);
+            Gizmos.DrawWireCube(Vector3.zero, new Vector3(2f, 1f, 2f));
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireCube(transform.position, new Vector3(3f, 1f, 3f));
+    }
 }
