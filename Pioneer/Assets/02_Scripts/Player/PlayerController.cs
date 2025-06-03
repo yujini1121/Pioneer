@@ -11,13 +11,14 @@ public class PlayerController : MonoBehaviour
     [Header("Player Attack Range Object")]
     [SerializeField]private PlayerAttack playerAttack;
 
-    private float playerHP = 100;
     private float attackCoolTime = 0.5f;
 
     private bool isAttack = false;
 
     private Rigidbody playerRb;
     private Vector3 playerDir;
+
+    public float playerHP = 100;
 
     void Start()
     {
@@ -49,13 +50,7 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
 
-        playerDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
-
-        if (playerDir != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(playerDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
-        }
+        Vector3 inputDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
     }
 
     private IEnumerator AttackRoutine()
