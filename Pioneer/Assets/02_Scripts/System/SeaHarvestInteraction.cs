@@ -34,7 +34,7 @@ public class SeaHarvestInteraction : MonoBehaviour
         {
             if (playerMovement.HasMoved())
             {
-                Debug.Log("채취 실패: 움직임 감지");
+                //Debug.Log("채취 실패: 움직임 감지");
                 yield break;
             }
 
@@ -47,7 +47,7 @@ public class SeaHarvestInteraction : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log("채취 성공: 나무 +1");
+        //Debug.Log("채취 성공: 나무 +1");
         ResourceManager.Instance.AddResource(ResourceType.Wood, 1);
     }
 

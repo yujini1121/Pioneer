@@ -97,7 +97,7 @@ public class CheckBottom : MonoBehaviour
                 isInSea = true;
                 seaTimer = 0f;
                 damageTimer = 0f;
-                Debug.Log("바다에 진입");
+                //Debug.Log("바다에 진입");
             }
         }
         else
@@ -107,7 +107,7 @@ public class CheckBottom : MonoBehaviour
                 isInSea = false;
                 seaTimer = 0f;
                 damageTimer = 0f;
-                Debug.Log("바다에서 나옴");
+                //Debug.Log("바다에서 나옴");
             }
         }
     }
@@ -122,6 +122,6 @@ public class CheckBottom : MonoBehaviour
             hpBar.value = playerHp;
         }
 
-        Debug.Log($"HP 감소: {amount}, 현재 HP: {playerHp}");
+        //Debug.Log($"HP 감소: {amount}, 현재 HP: {playerHp}");
     }
 }

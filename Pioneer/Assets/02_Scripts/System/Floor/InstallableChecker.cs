@@ -138,7 +138,7 @@ public class InstallableChecker : MonoBehaviour
         destinationQueued = snappedPos;
         isMovingToInstallPoint = true;
 
-        Debug.Log("설치 지점 인근으로 이동 시작");
+        //Debug.Log("설치 지점 인근으로 이동 시작");
     }
 
     void CheckArrivalAndInstall()
@@ -158,7 +158,7 @@ public class InstallableChecker : MonoBehaviour
             playerAgent.ResetPath();
             playerAgent.isStopped = false;
 
-            Debug.Log("설치 완료 및 상태 초기화");
+            //Debug.Log("설치 완료 및 상태 초기화");
         }
     }
 
@@ -179,8 +179,7 @@ public class InstallableChecker : MonoBehaviour
         if (navMeshSurface != null)
             navMeshSurface.BuildNavMesh();
 
-        tile.name = $"Tile ({localPosition.x}, {localPosition.y}, {localPosition.z})";
-        Debug.Log($"설치 완료: {localPosition}");
+        //Debug.Log($"설치 완료: {localPosition}");
     }
 
     bool IsPlaceable(Vector3 snappedPos)
@@ -222,7 +221,7 @@ public class InstallableChecker : MonoBehaviour
         isMovingToInstallPoint = false;
         destinationQueued = Vector3.zero;
 
-        Debug.Log("플레이어 조작에 의해 설치 명령이 취소됨");
+        //Debug.Log("플레이어 조작에 의해 설치 명령이 취소됨");
     }
 
     Vector3 SnapToGrid(Vector3 worldPos)
