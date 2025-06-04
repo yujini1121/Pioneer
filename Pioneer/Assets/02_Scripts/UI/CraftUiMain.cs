@@ -9,6 +9,9 @@ public class CraftUiMain : MonoBehaviour
 {
     public static CraftUiMain instance;
 
+    [Header("Sprite")]
+    public Sprite defaultSprite;
+
     [Header("prefab")]
     public GameObject prefabCraftItemButton;
 
@@ -27,8 +30,10 @@ public class CraftUiMain : MonoBehaviour
     public float xTerm;
     public float yTerm;
 
-    private SItemRecipe currentSelectedRecipe;
+
+    private SItemRecipeSO currentSelectedRecipe;
     private TextMeshProUGUI[] materialEachText;
+    private UnityEngine.UI.Image[] materialImage;
 
     private void Awake()
     {
@@ -39,29 +44,32 @@ public class CraftUiMain : MonoBehaviour
     void Start()
     {
         //textMeshProUGUI.tex
-
-        ItemRender(); // 외부 컴포넌트에 접근하므로 반드시 어웨이크가 아닌 스타드에 있어야 합니다.
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
         materialEachText = new TextMeshProUGUI[3]
         {
             material1eaText,
             material2eaText,
             material3eaText,
         };
+        materialImage = new Image[3]
+        {
+            material1iconImage,
+            material2iconImage,
+            material3iconImage,
+        };
+
+        ItemRender(); // 외부 컴포넌트에 접근하므로 반드시 어웨이크가 아닌 스타드에 있어야 합니다.
+        ClearIcon();
     }
 
-    private void ValueAssign()
+    // Update is called once per frame
+    void Update()
     {
 
     }
 
     void ItemRender()
     {
-        void mButtonAvailable(GameObject target, SItemRecipe pRecipe)
+        void mButtonAvailable(GameObject target, SItemRecipeSO pRecipe)
         {
             Image buttonImage = target.GetComponent<Image>();
             Color buttonColor = buttonImage.color;
@@ -80,15 +88,17 @@ public class CraftUiMain : MonoBehaviour
         // 아이템을 보여줌.
         for (int index = 0; index < ItemRecipeManager.Instance.recipes.Count; ++index)
         {
-            SItemRecipe recipe = ItemRecipeManager.Instance.recipes[index];
+            SItemRecipeSO recipe = ItemRecipeManager.Instance.recipes[index];
             currentSelectedRecipe = recipe;
-            SItemType recipeResult = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
+            SItemTypeSO recipeResult = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
 
             int xPos = index % 4;
             int yPos = index / 4;
 
             GameObject buttonObject = Instantiate(prefabCraftItemButton, pivotItem.transform);
             buttonObject.transform.position = pivotItem.transform.position + startPos + new Vector3(xTerm * xPos, yTerm * yPos);
+            buttonObject.GetComponent<UnityEngine.UI.Image>().sprite =
+                ItemTypeManager.Instance.itemTypeSearch[recipe.result.id].image;
 
             UnityEngine.UI.Button button = buttonObject.GetComponent<Button>();
 
@@ -111,12 +121,13 @@ public class CraftUiMain : MonoBehaviour
             }
 
             mShowItemButton();
+
             button.onClick.AddListener(() => // 좌측 아이템 아이콘을 눌렸을 때 보여주기.
             {
                 // 레시피를 보여주는 람다식
 
                 // 결과 보여주기
-                craftName.text = recipeResult.name;
+                craftName.text = recipeResult.typeName;
                 craftLore.text = recipeResult.infomation;
 
                 // 레시피 보여주기
@@ -137,8 +148,18 @@ public class CraftUiMain : MonoBehaviour
                 mShowText();
 
 #warning 아이템 레시피 재료 이미지 보여주는 기능
+                void mShowRecipeIcon()
+                {
+                    ClearIcon();
 
-                void mShowButton()
+                    for (int rIndex = 0; rIndex < recipe.input.Length; ++rIndex)
+                    {
+                        materialImage[rIndex].sprite = ItemTypeManager.Instance.itemTypeSearch[recipe.input[rIndex].id].image;
+                    }
+                }
+                mShowRecipeIcon();
+
+                void mSetButtonTransparency()
                 {
                     ColorBlock colorblock = rightCraftButton.colors;
                     Color color = rightCraftButton.colors.selectedColor;
@@ -155,12 +176,13 @@ public class CraftUiMain : MonoBehaviour
                     colorblock.highlightedColor = color;
                     rightCraftButton.colors = colorblock;
                 }
-                mShowButton();
+                mSetButtonTransparency();
 
                 // 우측 크래프팅 버튼 작업
 #warning 우측 버튼 작업 구현할 것
                 // 버튼을 눌렀을 때, 아이템 조합 가능한지 판단
                 // 그뒤 아이템 차감 후 지급
+                rightCraftButton.onClick.RemoveAllListeners();
                 rightCraftButton.onClick.AddListener(() =>
                 {
                     if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
@@ -170,8 +192,10 @@ public class CraftUiMain : MonoBehaviour
 
                     // 레시피 보여주기
                     mShowText();
-                    mShowButton();
+                    mSetButtonTransparency();
                     mShowItemButton();
+
+
                 });
 
 
@@ -182,9 +206,13 @@ public class CraftUiMain : MonoBehaviour
             mButtonAvailable(buttonObject, recipe);
 
         }
-
-
-
     }
 
+    void ClearIcon()
+    {
+        foreach (Image one in materialImage)
+        {
+            one.sprite = defaultSprite;
+        }
+    }
 }

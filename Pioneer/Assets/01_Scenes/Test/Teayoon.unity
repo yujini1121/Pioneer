@@ -929,6 +929,7 @@ GameObject:
   - component: {fileID: 499136285}
   - component: {fileID: 499136284}
   - component: {fileID: 499136283}
+  - component: {fileID: 499136286}
   m_Layer: 0
   m_Name: ItemManager
   m_TagString: Untagged
@@ -963,6 +964,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66be42f121f51ac418111f2575fb79a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  types:
+  - {fileID: 11400000, guid: adbea07ab1f6ad642bb4b71b720933b5, type: 2}
+  - {fileID: 11400000, guid: 7b05e5bdab1ccc4419a669c9440045b5, type: 2}
+  - {fileID: 11400000, guid: 02e90dd088b1da64485a786539225ced, type: 2}
+  - {fileID: 11400000, guid: 2a0a8f60340b50d48bb0c3816d1a2459, type: 2}
 --- !u!114 &499136284
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -975,6 +981,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9151c40a59ce926488ed2e0fdb52b333, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  recipes:
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: b5d217af2ec0d794ebc7bcbf9e8cc118, type: 2}
 --- !u!114 &499136285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -987,6 +996,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b70a8ed39e99fb449ee7410028c741d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemLists: []
+--- !u!114 &499136286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499136281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0acbd18f72a03b94698a0810089f5262, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabItemButton: {fileID: 590576477171757539, guid: 9ac639694a13adc4989714d1fde1171a,
+    type: 3}
+  imageEmpty: {fileID: 21300000, guid: 344168bb29e09c04e8a7437d60165d4e, type: 3}
 --- !u!1 &516078181
 GameObject:
   m_ObjectHideFlags: 0
@@ -2048,7 +2073,7 @@ Transform:
   m_GameObject: {fileID: 1269280837}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 362.58194, y: 310.8989, z: 308.8209}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3030,6 +3055,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 56051242}
     m_Modifications:
+    - target: {fileID: 3475278462549368528, guid: d0c586a7248583a4dac8b07476067fe1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5131416281991315654, guid: d0c586a7248583a4dac8b07476067fe1,
         type: 3}
       propertyPath: m_Pivot.x
@@ -3140,11 +3170,6 @@ PrefabInstance:
       propertyPath: m_text
       value: Inventory
       objectReference: {fileID: 0}
-    - target: {fileID: 6409858974023884313, guid: d0c586a7248583a4dac8b07476067fe1,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 300
-      objectReference: {fileID: 0}
     - target: {fileID: 6769557276768550054, guid: d0c586a7248583a4dac8b07476067fe1,
         type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -3166,6 +3191,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: MakeshiftCraftUi
+      objectReference: {fileID: 0}
+    - target: {fileID: 8519361742797800084, guid: d0c586a7248583a4dac8b07476067fe1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

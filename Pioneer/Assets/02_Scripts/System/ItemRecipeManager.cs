@@ -6,12 +6,12 @@ public class ItemRecipeManager : MonoBehaviour
 {
     public static ItemRecipeManager Instance;
 
-    public List<SItemRecipe> recipes;
-    public Dictionary<int, SItemRecipe> recipesSearch;
+    public List<SItemRecipeSO> recipes;
+    public Dictionary<int, SItemRecipeSO> recipesSearch;
 
     public bool CanCraftInInventory(int id)
     {
-        SItemRecipe target = recipesSearch[id];
+        SItemRecipeSO target = recipesSearch[id];
 
         for (int index = 0; index < target.input.Length; ++index)
         {
@@ -21,7 +21,7 @@ public class ItemRecipeManager : MonoBehaviour
         return true;
     }
 
-    private void Add(SItemRecipe recipe)
+    private void Add(SItemRecipeSO recipe)
     {
         recipes.Add(recipe);
         recipesSearch.Add(recipe.result.id, recipe);
@@ -32,18 +32,32 @@ public class ItemRecipeManager : MonoBehaviour
         Instance = this;
 
         ValueAssign();
-        Demo();
+        //Demo();
+        InspectorRegister();
+    }
+
+    private void Start()
+    {
+        
     }
 
     private void ValueAssign()
     {
-        recipes = new List<SItemRecipe>();
-        recipesSearch = new Dictionary<int, SItemRecipe>();
+        //recipes = new List<SItemRecipe>(); // 인스펙터 창에 설정한 값을 없애버리고 싶은 경우.
+        recipesSearch = new Dictionary<int, SItemRecipeSO>();
+    }
+
+    private void InspectorRegister()
+    {
+        foreach (SItemRecipeSO recipe in recipes)
+        {
+            recipesSearch.Add(recipe.result.id, recipe);
+        }
     }
 
     private void Demo()
     {
-        SItemRecipe hamburger = new SItemRecipe()
+        SItemRecipeSO hamburger = new SItemRecipeSO()
         {
             input = new SItemStack[]
             {

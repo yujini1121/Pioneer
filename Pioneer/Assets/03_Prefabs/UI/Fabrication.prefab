@@ -293,6 +293,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5882414204233187999}
+  - component: {fileID: 9100740209931346276}
   m_Layer: 5
   m_Name: Fabrication
   m_TagString: Untagged
@@ -329,6 +330,27 @@ RectTransform:
   m_AnchoredPosition: {x: 500, y: 150}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &9100740209931346276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2264893589196144918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dfb3aae2c8d36444baf2293cda33b4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  craftName: {fileID: 7217613608989731476}
+  material1iconImage: {fileID: 6407571593223402636}
+  material2iconImage: {fileID: 3632720362042811640}
+  material3iconImage: {fileID: 2550585246997503020}
+  material1eaText: {fileID: 6891840032887861784}
+  material2eaText: {fileID: 7451680809783120309}
+  material3eaText: {fileID: 1726802584683882005}
+  craftLore: {fileID: 5493559627751020472}
+  craftButton: {fileID: 3303174098301808451}
 --- !u!1 &2305354138913482030
 GameObject:
   m_ObjectHideFlags: 0
