@@ -696,7 +696,7 @@ GameObject:
   - component: {fileID: 464377687}
   - component: {fileID: 464377686}
   - component: {fileID: 464377685}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Zone - Ship
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1077,15 +1077,15 @@ MonoBehaviour:
   mainCamera: {fileID: 721405592}
   player: {fileID: 522798510}
   worldSpaceParent: {fileID: 1213038216}
+  navMeshSurface: {fileID: 1213038217}
   installableLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 64
   blockLayerMask:
     serializedVersion: 2
     m_Bits: 128
   maxPlaceDistance: 8
   stopDistance: 3
-  navMeshSurface: {fileID: 1213038217}
   currentInstallableData: {fileID: 0}
 --- !u!195 &522798515
 NavMeshAgent:
