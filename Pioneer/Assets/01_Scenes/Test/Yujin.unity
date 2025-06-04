@@ -721,7 +721,7 @@ Transform:
   m_GameObject: {fileID: 522798506}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.88, z: -2}
+  m_LocalPosition: {x: 0.5, y: 1, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -806,25 +806,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 721405592}
-  previewFloorPrefab: {fileID: 1079864297802165401, guid: e749cfbbd7c7c1b44a4b701c3d2ea6a8,
-    type: 3}
+  player: {fileID: 522798510}
+  worldSpaceParent: {fileID: 1213038216}
+  objectPreviewPrefab: {fileID: 0}
   installableLayer:
     serializedVersion: 2
     m_Bits: 4294967295
   blockLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  validMaterial: {fileID: 2100000, guid: 7932f27463e793d4aa19c8f0b1ce0b36, type: 2}
-  invalidMaterial: {fileID: 2100000, guid: 8011fdad11ca1d24fba07d6afa2e1506, type: 2}
-  placedMaterial: {fileID: 2100000, guid: 5d634ac314a76d540b6ec51e85ec78d8, type: 2}
-  player: {fileID: 522798510}
   maxPlaceDistance: 8
-  worldSpaceParent: {fileID: 1213038216}
-  warningText: {fileID: 927922493}
-  warningDuration: 3
-  navMeshSurface: {fileID: 1213038217}
-  playerAgent: {fileID: 522798515}
   stopDistance: 3
+  navMeshSurface: {fileID: 1213038217}
 --- !u!195 &522798515
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3035,7 +3028,7 @@ PrefabInstance:
     - target: {fileID: 1079864297802165401, guid: e749cfbbd7c7c1b44a4b701c3d2ea6a8,
         type: 3}
       propertyPath: m_Name
-      value: Floor (2x2)
+      value: Floor (2x0.5x2)
       objectReference: {fileID: 0}
     - target: {fileID: 6360450352184014391, guid: e749cfbbd7c7c1b44a4b701c3d2ea6a8,
         type: 3}
@@ -3275,22 +3268,22 @@ PrefabInstance:
     - target: {fileID: 1359562844185151692, guid: 670b8f9aef10e7d498f24739d8c0f01a,
         type: 3}
       propertyPath: m_Name
-      value: Wood (1x1)
+      value: Wood (1x4x4)
       objectReference: {fileID: 0}
     - target: {fileID: 5843038506632297382, guid: 670b8f9aef10e7d498f24739d8c0f01a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.5
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 5843038506632297382, guid: 670b8f9aef10e7d498f24739d8c0f01a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.75
+      value: 2.25
       objectReference: {fileID: 0}
     - target: {fileID: 5843038506632297382, guid: 670b8f9aef10e7d498f24739d8c0f01a,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5843038506632297382, guid: 670b8f9aef10e7d498f24739d8c0f01a,
         type: 3}
