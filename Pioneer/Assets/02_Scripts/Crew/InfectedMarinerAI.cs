@@ -60,7 +60,7 @@ public class InfectedMarinerAI : MonoBehaviour
             {
                 Debug.Log("승무원 수리 중");
                 isRepairing = true;
-                StartCoroutine(RepairProcess());
+                StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
             }
             Debug.Log($"Infected Mariner {marinerId} 수리할 오브젝트 이름 : {targetRepairObject.name}, 현재 HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
         }
@@ -73,6 +73,21 @@ public class InfectedMarinerAI : MonoBehaviour
                 StartCoroutine(StartSecondPriorityAction());
             }
         }
+    }
+
+    private IEnumerator MoveToRepairObject(Vector3 targetPosition)
+    {
+        // NavMeshAgent로 수리 대상 위치로 이동
+        agent.SetDestination(targetPosition);
+
+        // 이동이 완료될 때까지 기다립니다.
+        while (!IsArrived())
+        {
+            yield return null;
+        }
+
+        // 이동 완료 후 수리 작업을 시작합니다.
+        StartCoroutine(RepairProcess());
     }
 
     private IEnumerator RepairProcess()
@@ -236,6 +251,12 @@ public class InfectedMarinerAI : MonoBehaviour
     private void ChangeToZombieAI()
     {
         Debug.Log("좀비 AI전환");
-        // 좀비 AI 컴포넌트 활성화 및 현재 컴포넌트 비활성화 등 구현 예정
+        if (GetComponent<ZombieMarinerAI>() == null)
+        {
+            gameObject.AddComponent<ZombieMarinerAI>();
+        }
+        // zombieAI.marinerId = this.marinerId;
+
+        Destroy(this);
     }
 }

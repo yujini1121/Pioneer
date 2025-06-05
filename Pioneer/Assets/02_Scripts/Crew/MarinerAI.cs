@@ -107,7 +107,7 @@ public class MarinerAI : MonoBehaviour
             {
                 Debug.Log("승무원 수리 중");
                 isRepairing = true;
-                StartCoroutine(RepairProcess());
+                StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
             }
             Debug.Log($"Mariner {marinerId} 수리된 오브젝트 : {targetRepairObject.name}, 현재 HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
         }
@@ -120,6 +120,19 @@ public class MarinerAI : MonoBehaviour
                 StartCoroutine(StartSecondPriorityAction());
             }
         }
+    }
+
+    // 수리할 오브젝트로 이동하는 함수
+    private IEnumerator MoveToRepairObject(Vector3 targetPosition)
+    {
+        agent.SetDestination(targetPosition);
+
+        while (!IsArrived())
+        {
+            yield return null;
+        }
+
+        StartCoroutine(RepairProcess());
     }
 
     private IEnumerator RepairProcess()
@@ -148,6 +161,7 @@ public class MarinerAI : MonoBehaviour
 
         StartRepair();
     }
+
 
     public IEnumerator StartSecondPriorityAction()
     {
