@@ -222,5 +222,14 @@ public class InfectedMarinerAI : MonoBehaviour
     private void ChangeToZombieAI()
     {
         Debug.Log("좀비 AI전환");
+
+        if (GetComponent<ZombieMarinerAI>() == null)
+        {
+            gameObject.AddComponent<ZombieMarinerAI>();
+        }
+        // 필요하다면 승무원 ID 전달? 필요없을거 같음
+        // zombieAI.marinerId = this.marinerId;
+
+        Destroy(this);
     }
 }

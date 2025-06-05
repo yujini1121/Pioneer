@@ -14,6 +14,11 @@ public class GameManager : MonoBehaviour
     [Header("스포너 지점 임시 (0~1 index만 사용 중)")]
     public GameObject[] spawnPoints;
 
+    private List<MarinerAI> allMariners = new List<MarinerAI>();
+    private bool infectionStarted = false;
+    public float infectionStartTime = 180f;
+    public float infectionInterval = 10f;
+
     private List<DefenseObject> repairTargets = new List<DefenseObject>();
     private HashSet<int> occupiedSpawners = new HashSet<int>();  
 
@@ -25,6 +30,7 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
 
         UpdateRepairTargets();
+
     }
 
     private void Update()
@@ -35,6 +41,54 @@ public class GameManager : MonoBehaviour
         {
             IsDaytime = false;
             Debug.Log("밤이 되었습니다.");
+        }
+
+        if (!infectionStarted && currentGameTime >= infectionStartTime)
+        {
+            infectionStarted = true;
+            StartCoroutine(InfectMarinersOneByOne());
+        }
+
+    }
+
+    private IEnumerator InfectMarinersOneByOne()
+    {
+        Debug.Log("감염 프로세스 시작됨");
+
+        var marinerQueue = new List<MarinerAI>(allMariners); // 사본 생성
+
+        foreach (var mariner in marinerQueue)
+        {
+            if (mariner != null)
+            {
+                InfectMariner(mariner);
+                yield return new WaitForSeconds(infectionInterval);
+            }
+        }
+
+        Debug.Log("모든 승무원 감염 완료");
+    }
+
+    private void InfectMariner(MarinerAI mariner)
+    {
+        if (mariner == null) return;
+
+        Debug.Log("감염 발생");
+
+        int id = mariner.marinerId;
+        GameObject go = mariner.gameObject;
+
+        Destroy(mariner); // MarinerAI 제거
+
+        InfectedMarinerAI infected = go.AddComponent<InfectedMarinerAI>();
+        infected.marinerId = id;
+    }
+
+    public void RegisterMariner(MarinerAI mariner)
+    {
+        if (!allMariners.Contains(mariner))
+        {
+            allMariners.Add(mariner);
         }
     }
 

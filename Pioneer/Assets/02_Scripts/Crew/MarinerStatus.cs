@@ -11,6 +11,11 @@ public class MarinerStatus : MonoBehaviour
     public bool IsDead = false;
     public bool IsConfused = false;
 
+    private void Start()
+    {
+        currentHP = maxHP;
+    }
+
     public void UpdateStatus()
     {
         if (currentHP <= 0 && !IsDead)
@@ -25,4 +30,3 @@ public class MarinerStatus : MonoBehaviour
         Destroy(gameObject);
     }
 }
-
