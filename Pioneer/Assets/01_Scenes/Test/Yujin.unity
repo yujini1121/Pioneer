@@ -1080,13 +1080,13 @@ MonoBehaviour:
   navMeshSurface: {fileID: 1213038217}
   installableLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 192
   blockLayerMask:
     serializedVersion: 2
-    m_Bits: 128
-  maxPlaceDistance: 8
-  stopDistance: 3
-  currentInstallableData: {fileID: 0}
+    m_Bits: 0
+  maxPlaceDistance: 5
+  stopDistance: 1.5
+  rayMissTolerance: 10
 --- !u!195 &522798515
 NavMeshAgent:
   m_ObjectHideFlags: 0

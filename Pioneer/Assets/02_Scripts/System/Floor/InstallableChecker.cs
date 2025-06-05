@@ -4,7 +4,7 @@ using System.Collections;
 
 public class InstallableChecker : MonoBehaviour
 {
-    [Header("기본 설정")]
+    [Header("필수 연결")]
     public Camera mainCamera;
     public Transform player;
     public Transform worldSpaceParent;
@@ -15,26 +15,20 @@ public class InstallableChecker : MonoBehaviour
     public LayerMask blockLayerMask;
 
     [Header("설치 거리 설정")]
-    public float maxPlaceDistance = 3f;
+    public float maxPlaceDistance = 5f;
     public float stopDistance = 1.5f;
 
-    [Header("설치 데이터")]
-    public SInstallableObjectDataSO currentInstallableData;
+    [Header("프리뷰 유지 설정")]
+    public float rayMissTolerance = 0.2f; // 마우스가 약간 벗어나도 유지
+    private Vector3 lastValidHit = Vector3.zero;
 
+    private SInstallableObjectDataSO currentInstallableData;
     private GameObject previewObject;
     private Renderer previewRenderer;
     private Color originalColor;
 
-    private Vector3 targetPosition;
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
-
-    void Start()
-    {
-        if (mainCamera == null) mainCamera = Camera.main;
-        if (currentInstallableData != null)
-            InitPreview(currentInstallableData);
-    }
 
     void Update()
     {
@@ -46,33 +40,8 @@ public class InstallableChecker : MonoBehaviour
             return;
         }
 
-        if (previewObject == null) return;
-        HandlePreviewRaycast();
-    }
-
-    void HandlePreviewRaycast()
-    {
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer))
-        {
-            Vector3 snappedPos = SnapToGrid(hit.point);
-            Vector3 finalPos = snappedPos + new Vector3(0, currentInstallableData.yOffset, 0);
-            targetPosition = finalPos;
-
-            previewObject.transform.localPosition = finalPos;
-            previewObject.SetActive(true);
-
-            bool canPlace = IsPlaceable(finalPos, currentInstallableData.size);
-            ApplyPreviewColor(canPlace ? new Color(0f, 1f, 0f, 0.5f) : new Color(1f, 0f, 0f, 0.5f));
-
-            if (canPlace && Input.GetMouseButtonDown(0))
-                MoveToInstall(finalPos);
-        }
-        else
-        {
-            previewObject.SetActive(false);
-            ResetPreviewColor();
-        }
+        if (previewObject != null && currentInstallableData != null)
+            HandlePreviewRaycast();
     }
 
     public void SetCurrentInstallableObject(SInstallableObjectDataSO data)
@@ -81,18 +50,17 @@ public class InstallableChecker : MonoBehaviour
             Destroy(previewObject);
 
         currentInstallableData = data;
-        InitPreview(data);
-    }
 
-    void InitPreview(SInstallableObjectDataSO data)
-    {
         previewObject = Instantiate(data.prefab, worldSpaceParent);
         previewObject.transform.localRotation = Quaternion.identity;
         previewObject.transform.localPosition = Vector3.zero;
 
         previewRenderer = previewObject.GetComponent<Renderer>();
         if (previewRenderer != null)
+        {
             originalColor = previewRenderer.material.color;
+            previewRenderer.material = new Material(data.previewMaterial); // 인스턴싱
+        }
 
         Collider col = previewObject.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
@@ -100,29 +68,62 @@ public class InstallableChecker : MonoBehaviour
         previewObject.SetActive(false);
     }
 
-    void MoveToInstall(Vector3 finalPos)
+    void HandlePreviewRaycast()
     {
-        destinationQueued = finalPos;
-        isMovingToInstallPoint = true;
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        Vector3 targetWorldPos;
 
-        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
-        Vector3 worldTarget = worldSpaceParent.TransformPoint(finalPos);
-        Vector3 direction = (worldTarget - player.position).normalized;
-        Vector3 stopBeforeTarget = worldTarget - direction * stopDistance;
-
-        // NavMesh 위치 샘플링으로 경로 보정
-        if (agent != null && agent.isOnNavMesh)
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer))
         {
-            if (NavMesh.SamplePosition(stopBeforeTarget, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))
+            lastValidHit = hit.point;
+            targetWorldPos = hit.point;
+        }
+        else if (lastValidHit != Vector3.zero)
+        {
+            Vector3 projected = ray.origin + ray.direction * 10f;
+            if (Vector3.Distance(projected, lastValidHit) <= rayMissTolerance)
             {
-                agent.isStopped = false;
-                agent.SetDestination(hit.position);
+                targetWorldPos = lastValidHit;
             }
             else
             {
-                Debug.LogWarning("NavMeshAgent가 이동할 수 없는 위치입니다.");
-                isMovingToInstallPoint = false;
+                previewObject.SetActive(false);
+                return;
             }
+        }
+        else
+        {
+            previewObject.SetActive(false);
+            return;
+        }
+
+        Vector3 snappedLocalPos = SnapToGrid(targetWorldPos);
+        Vector3 finalWorldPos = worldSpaceParent.TransformPoint(snappedLocalPos + new Vector3(0, currentInstallableData.yOffset, 0));
+
+        previewObject.transform.localPosition = snappedLocalPos + new Vector3(0, currentInstallableData.yOffset, 0);
+        previewObject.SetActive(true);
+
+        bool canPlace = IsPlaceable(previewObject.transform.position, currentInstallableData.size);
+        ApplyPreviewColor(canPlace ? Color.green : Color.red);
+
+        if (canPlace && Input.GetMouseButtonDown(0))
+            MoveToInstall(snappedLocalPos);
+    }
+
+    void MoveToInstall(Vector3 localInstallPos)
+    {
+        destinationQueued = localInstallPos;
+        isMovingToInstallPoint = true;
+
+        Vector3 worldTarget = worldSpaceParent.TransformPoint(localInstallPos);
+        Vector3 direction = (worldTarget - player.position).normalized;
+        Vector3 stopBeforeTarget = worldTarget - direction * stopDistance;
+
+        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(stopBeforeTarget);
         }
     }
 
@@ -133,7 +134,7 @@ public class InstallableChecker : MonoBehaviour
         {
             if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
             {
-                InstallTile();
+                InstallObject(destinationQueued);
                 isMovingToInstallPoint = false;
                 destinationQueued = Vector3.zero;
 
@@ -158,57 +159,49 @@ public class InstallableChecker : MonoBehaviour
         Debug.Log("설치 명령 취소됨");
     }
 
-    void InstallTile()
+    void InstallObject(Vector3 localPos)
     {
-        GameObject tile = Instantiate(currentInstallableData.prefab, worldSpaceParent);
-        tile.transform.localPosition = destinationQueued;
-        tile.transform.localRotation = Quaternion.identity;
+        GameObject placed = Instantiate(currentInstallableData.prefab, worldSpaceParent);
+        placed.transform.localPosition = localPos + new Vector3(0, currentInstallableData.yOffset, 0);
+        placed.transform.localRotation = Quaternion.identity;
 
-        Collider c = tile.GetComponent<Collider>();
-        if (c != null) c.isTrigger = false;
+        Renderer r = placed.GetComponent<Renderer>();
+        if (r != null)
+            r.material = currentInstallableData.defaultMaterial;
 
-        Renderer r = tile.GetComponent<Renderer>();
-        if (r != null) r.material.color = originalColor;
+        Collider c = placed.GetComponent<Collider>();
+        if (c != null)
+            c.isTrigger = false;
 
-        tile.layer = LayerMask.NameToLayer("ClickTarget");
-
-        if (tile.GetComponent<NavMeshObstacle>() == null)
+        if (placed.GetComponent<NavMeshObstacle>() == null)
         {
-            NavMeshObstacle obstacle = tile.AddComponent<NavMeshObstacle>();
+            NavMeshObstacle obstacle = placed.AddComponent<NavMeshObstacle>();
             obstacle.shape = NavMeshObstacleShape.Box;
             obstacle.size = currentInstallableData.size;
             obstacle.carving = true;
         }
 
-        StartCoroutine(DelayedRebakeNavMesh());
-        Debug.Log("설치 완료");
+        StartCoroutine(RebakeNavMesh());
+        Debug.Log("설치 완료: " + placed.name);
     }
 
-    IEnumerator DelayedRebakeNavMesh()
+    IEnumerator RebakeNavMesh()
     {
         yield return null;
-        if (navMeshSurface != null)
-            navMeshSurface.BuildNavMesh();
+        navMeshSurface?.BuildNavMesh();
     }
 
     bool IsPlaceable(Vector3 worldPos, Vector3 size)
     {
         Vector3 halfExtents = size / 2f;
-        Collider[] overlaps = Physics.OverlapBox(worldPos, halfExtents, Quaternion.identity, blockLayerMask);
-        if (overlaps.Length > 0) return false;
-
-        Vector3 checkOrigin = worldSpaceParent.TransformPoint(worldPos) + Vector3.up * 0.5f;
-        if (!Physics.Raycast(checkOrigin, Vector3.down, out RaycastHit floorHit, 1f, installableLayer))
-            return false;
-
+        Collider[] hits = Physics.OverlapBox(worldPos, halfExtents * 0.95f, Quaternion.identity, blockLayerMask);
         float distance = Vector3.Distance(player.position, worldPos);
-        return distance <= maxPlaceDistance;
+        return hits.Length == 0 && distance <= maxPlaceDistance;
     }
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
         Vector3 localPos = worldSpaceParent.InverseTransformPoint(worldPos);
-
         float cellX = Mathf.Max(currentInstallableData.size.x, 1f);
         float cellZ = Mathf.Max(currentInstallableData.size.z, 1f);
 
@@ -218,7 +211,10 @@ public class InstallableChecker : MonoBehaviour
         float offsetX = (currentInstallableData.size.x % 2 == 0) ? 0.5f : 0f;
         float offsetZ = (currentInstallableData.size.z % 2 == 0) ? 0.5f : 0f;
 
-        return new Vector3((x + offsetX) * cellX, 0f, (z + offsetZ) * cellZ);
+        float finalX = (x + offsetX) * cellX;
+        float finalZ = (z + offsetZ) * cellZ;
+
+        return new Vector3(finalX, 0f, finalZ);
     }
 
     void ApplyPreviewColor(Color color)
