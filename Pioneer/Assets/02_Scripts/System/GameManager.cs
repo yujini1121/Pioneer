@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     public float infectionInterval = 10f;
 
     private List<DefenseObject> repairTargets = new List<DefenseObject>();
-    private HashSet<int> occupiedSpawners = new HashSet<int>();  
+    private HashSet<int> occupiedSpawners = new HashSet<int>();
 
     private void Awake()
     {
@@ -135,12 +135,13 @@ public class GameManager : MonoBehaviour
 
     public void StoreItemsAndReturnToBase(MarinerAI mariner)
     {
-        Debug.Log($"승무원 {mariner.marinerId}] 아이템 저장 후 숙소 복귀");
+        Debug.Log($"승무원 [{mariner.marinerId}] 아이템 저장 후 숙소 복귀");
 
         if (HasStorage())
         {
             Vector3 dormPosition = new Vector3(0f, 0f, 0f); // 예시 위치
-            mariner.StartCoroutine(mariner.MoveToTarget(dormPosition));
+            mariner.MoveTo(dormPosition); // 이동 명령
+            mariner.StartCoroutine(WaitUntilArrivalThenIdle(mariner));
         }
         else
         {
@@ -148,6 +149,18 @@ public class GameManager : MonoBehaviour
             mariner.StartCoroutine(mariner.StartSecondPriorityAction());
         }
     }
+
+    private IEnumerator WaitUntilArrivalThenIdle(MarinerAI mariner)
+    {
+        while (!mariner.IsArrived())
+        {
+            yield return null;
+        }
+
+        Debug.Log($"승무원 [{mariner.marinerId}] 숙소 도착 후 대기 상태로 전환");
+        // 필요시 상태 초기화 등의 추가 로직 작성 가능
+    }
+
 
     public bool HasStorage() // 보관함 임시로 항상 True 설정
     {

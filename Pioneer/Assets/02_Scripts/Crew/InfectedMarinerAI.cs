@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class InfectedMarinerAI : MonoBehaviour
 {
@@ -16,8 +17,17 @@ public class InfectedMarinerAI : MonoBehaviour
     private bool isConfused = false;
     private bool isNightBehaviorStarted = false;
 
+    private NavMeshAgent agent;
+
     private void Start()
     {
+        agent = GetComponent<NavMeshAgent>();
+        agent.speed = 2f;
+        agent.stoppingDistance = 2f;
+        agent.angularSpeed = 360f;
+        agent.acceleration = 30f;
+        agent.autoBraking = false;
+
         nightConfusionTime = Random.Range(0f, 30f);
         Debug.Log($"{marinerId} 밤 혼란 시드값 생성: {nightConfusionTime:F2}초");
     }
@@ -113,7 +123,7 @@ public class InfectedMarinerAI : MonoBehaviour
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
         List<int> triedIndexes = new List<int>();
         int fallbackIndex = (marinerId % 2 == 0) ? 0 : 1; // 임시 홀짝 fallback
-        
+
         int chosenIndex = -1;
 
         while (triedIndexes.Count < spawnPoints.Length)
@@ -138,14 +148,19 @@ public class InfectedMarinerAI : MonoBehaviour
             }
         }
 
-        if (chosenIndex == -1) // 예외 처리 필요할까?
+        if (chosenIndex == -1)
         {
             Debug.LogWarning("모든 승무원이 사용중 임으로 처음 위치로 이동함.");
             chosenIndex = fallbackIndex;
         }
 
         Transform targetSpawn = spawnPoints[chosenIndex].transform;
-        yield return StartCoroutine(MoveToTarget(targetSpawn.position));
+        MoveTo(targetSpawn.position);
+
+        while (!IsArrived())
+        {
+            yield return null;
+        }
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
@@ -156,7 +171,6 @@ public class InfectedMarinerAI : MonoBehaviour
         }
 
         Debug.Log("감염된 승무원 가짜 파밍 10초");
-
         yield return new WaitForSeconds(10f);
         GameManager.Instance.ReleaseSpawner(chosenIndex);
 
@@ -177,23 +191,27 @@ public class InfectedMarinerAI : MonoBehaviour
     private void StoreItemsAndReturnToBase()
     {
         Debug.Log("승문원이 감염됨으로 아이템 없음, 버림?");
+        // TODO: 감염된 승무원 아이템 버리는 행동 추가 가능
     }
 
-    public IEnumerator MoveToTarget(Vector3 destination, float stoppingDistance = 2f)
+    // ↓ 기존 MoveToTarget 제거 후 NavMeshAgent 버전 추가
+
+    public void MoveTo(Vector3 destination)
     {
-        float speed = 2f;
-        while (Vector3.Distance(transform.position, destination) > stoppingDistance)
+        if (agent != null && agent.isOnNavMesh)
         {
-            Vector3 direction = (destination - transform.position).normalized;
-            transform.position += direction * speed * Time.deltaTime;
-            yield return null;
+            agent.SetDestination(destination);
         }
+    }
+
+    public bool IsArrived()
+    {
+        return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
     }
 
     /// <summary>
     /// 밤 로직
     /// </summary>
-
     private IEnumerator NightBehaviorRoutine() // 혼란 상태
     {
         isNightBehaviorStarted = true;
@@ -204,9 +222,10 @@ public class InfectedMarinerAI : MonoBehaviour
         float escapedTime = 0;
 
         float angle = Random.Range(0f, 360f);
-        Vector3 direction = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0f, Mathf.Sin(angle * Mathf.Deg2Rad)).normalized; // 랜덤 방향 설정
+        Vector3 direction = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0f, Mathf.Sin(angle * Mathf.Deg2Rad)).normalized;
 
-        while (escapedTime < nightConfusionTime) {
+        while (escapedTime < nightConfusionTime)
+        {
             escapedTime += Time.deltaTime;
             transform.position += direction * confusedSpeed * Time.deltaTime;
 
@@ -222,14 +241,6 @@ public class InfectedMarinerAI : MonoBehaviour
     private void ChangeToZombieAI()
     {
         Debug.Log("좀비 AI전환");
-
-        if (GetComponent<ZombieMarinerAI>() == null)
-        {
-            gameObject.AddComponent<ZombieMarinerAI>();
-        }
-        // 필요하다면 승무원 ID 전달? 필요없을거 같음
-        // zombieAI.marinerId = this.marinerId;
-
-        Destroy(this);
+        // 좀비 AI 컴포넌트 활성화 및 현재 컴포넌트 비활성화 등 구현 예정
     }
 }
