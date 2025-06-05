@@ -22,11 +22,6 @@ public class InfectedMarinerAI : MonoBehaviour
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = 2f;
-        agent.stoppingDistance = 2f;
-        agent.angularSpeed = 360f;
-        agent.acceleration = 30f;
-        agent.autoBraking = false;
 
         nightConfusionTime = Random.Range(0f, 30f);
         Debug.Log($"{marinerId} 广 去鄂 矫靛蔼 积己: {nightConfusionTime:F2}檬");

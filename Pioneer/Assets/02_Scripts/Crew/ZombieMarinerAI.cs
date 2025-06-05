@@ -187,7 +187,17 @@ public class ZombieMarinerAI : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            Debug.Log($" {hit.name}이 공격 범위 안에 있음");
+            Debug.Log($"{hit.name} 공격 범위 내");
+
+            MarinerStatus marinerStatus = hit.GetComponent<MarinerStatus>();
+            if (marinerStatus != null)
+            {
+                int damage = marinerStatus.attackPower;
+                marinerStatus.currentHP -= damage;
+                Debug.Log($"{hit.name}에게 {damage}의 데미지를 입혔습니다.");
+
+                marinerStatus.UpdateStatus();
+            }
         }
 
         // 상태 복귀
