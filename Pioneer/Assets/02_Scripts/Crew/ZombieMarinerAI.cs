@@ -29,6 +29,22 @@ public class ZombieMarinerAI : MonoBehaviour
     private float attackVisualDuration = 1f;
     private Coroutine attackRoutine;
 
+    //ray
+    private FOVController fovController;
+    private void Awake()
+    {
+        fovController = GetComponent<FOVController>();
+    }
+
+    private bool IsTargetInFOV()
+    {
+        if (target == null || fovController == null)
+            return false;
+
+        return fovController.visibleTargets.Contains(target);
+
+    }
+
     private void Start()
     {
         InitZombieStats();
@@ -54,10 +70,15 @@ public class ZombieMarinerAI : MonoBehaviour
         {
             if (DetectTarget())
             {
-                LookAtTarget();
+                if (IsTargetInFOV())
+                {
+                    LookAtTarget(); 
 
-                if (attackRoutine == null)
-                    attackRoutine = StartCoroutine(AttackSequence());
+                    if (attackRoutine == null)
+                    {
+                        attackRoutine = StartCoroutine(AttackSequence());
+                    }
+                }
             }
 
             attackCooldown = attackInterval;
@@ -72,7 +93,6 @@ public class ZombieMarinerAI : MonoBehaviour
                 Idle();
                 break;
             case ZombieState.Attacking:
-                // 공격 루틴 내에서 처리됨
                 break;
         }
     }

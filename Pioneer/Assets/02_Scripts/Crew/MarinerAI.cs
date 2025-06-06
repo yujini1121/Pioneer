@@ -35,6 +35,22 @@ public class MarinerAI : MonoBehaviour
 
     private NavMeshAgent agent;
 
+    //ray
+    private FOVController fovController;
+
+    private void Awake()
+    {
+        fovController = GetComponent<FOVController>();
+    }
+
+    private bool IsTargetInFOV()
+    {
+        if (target == null || fovController == null)
+            return false;
+
+        return fovController.visibleTargets.Contains(target);
+
+    }
     private void Start()
     {
         SetRandomDirection();
@@ -63,17 +79,24 @@ public class MarinerAI : MonoBehaviour
         }
         else
         {
-            // 밤: Mariner AI 
+            // 밤: Mariner AI
             attackCooldown -= Time.deltaTime;
 
             if (attackCooldown <= 0f)
             {
                 if (DetectTarget())
                 {
-                    LookAtTarget();
+                    // 시야 내에 적이 있는지 확인
+                    if (IsTargetInFOV())
+                    {
+                        LookAtTarget();  // 시야 내에 있으면 적을 바라봄
 
-                    if (attackRoutine == null)
-                        attackRoutine = StartCoroutine(AttackSequence());
+                        // 공격 조건을 체크하여 공격 시작
+                        if (attackRoutine == null)
+                        {
+                            attackRoutine = StartCoroutine(AttackSequence());
+                        }
+                    }
                 }
 
                 attackCooldown = attackInterval;
@@ -88,10 +111,8 @@ public class MarinerAI : MonoBehaviour
                     Idle();
                     break;
                 case MarinerState.Attacking:
-                    // 공격 시퀀스에서 처리
                     break;
             }
-
         }
     }
 
