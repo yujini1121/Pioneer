@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 282441268}
   - component: {fileID: 282441267}
   - component: {fileID: 282441266}
+  - component: {fileID: 282441270}
   m_Layer: 0
   m_Name: SpawnPoint_2
   m_TagString: Untagged
@@ -227,6 +228,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!208 &282441270
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282441265}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &461237109
 GameObject:
   m_ObjectHideFlags: 0
@@ -802,7 +819,7 @@ Transform:
   m_GameObject: {fileID: 855283294}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.65, y: 0.5, z: -0.04}
+  m_LocalPosition: {x: -2.75, y: 0.5, z: -0.04}
   m_LocalScale: {x: 0.93813, y: 0.93813, z: 1.0774221}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1004,7 +1021,7 @@ GameObject:
   - component: {fileID: 1245226465}
   - component: {fileID: 1245226464}
   - component: {fileID: 1245226463}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1129,6 +1146,7 @@ GameObject:
   - component: {fileID: 1422884988}
   - component: {fileID: 1422884987}
   - component: {fileID: 1422884994}
+  - component: {fileID: 1422884995}
   m_Layer: 11
   m_Name: MarinerAI
   m_TagString: Untagged
@@ -1292,6 +1310,28 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1422884995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1422884986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b206fcdc475c5d40a9d51ce88671b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewRadius: 2
+  viewAngle: 360
+  detectionInterval: 0.2
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 256
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 512
+  visibleTargets: []
 --- !u!1 &1442185086
 GameObject:
   m_ObjectHideFlags: 0
@@ -1356,6 +1396,7 @@ GameObject:
   - component: {fileID: 1802483876}
   - component: {fileID: 1802483875}
   - component: {fileID: 1802483874}
+  - component: {fileID: 1802483878}
   m_Layer: 0
   m_Name: SpawnPoint_1
   m_TagString: Untagged
@@ -1449,6 +1490,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!208 &1802483878
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1802483873}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &1940524394
 GameObject:
   m_ObjectHideFlags: 0
@@ -1465,6 +1522,7 @@ GameObject:
   - component: {fileID: 1940524397}
   - component: {fileID: 1940524396}
   - component: {fileID: 1940524395}
+  - component: {fileID: 1940524403}
   m_Layer: 8
   m_Name: ZombieAI
   m_TagString: Untagged
@@ -1625,6 +1683,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1940524403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1940524394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b206fcdc475c5d40a9d51ce88671b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewRadius: 2
+  viewAngle: 45
+  detectionInterval: 0.2
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 2048
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 512
+  visibleTargets: []
 --- !u!1 &1942979476
 GameObject:
   m_ObjectHideFlags: 0

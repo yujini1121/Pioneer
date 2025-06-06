@@ -86,12 +86,10 @@ public class MarinerAI : MonoBehaviour
             {
                 if (DetectTarget())
                 {
-                    // 시야 내에 적이 있는지 확인
                     if (IsTargetInFOV())
                     {
-                        LookAtTarget();  // 시야 내에 있으면 적을 바라봄
+                        LookAtTarget();  
 
-                        // 공격 조건을 체크하여 공격 시작
                         if (attackRoutine == null)
                         {
                             attackRoutine = StartCoroutine(AttackSequence());
@@ -190,12 +188,13 @@ public class MarinerAI : MonoBehaviour
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
         List<int> triedIndexes = new List<int>();
-        int fallbackIndex = (marinerId % 2 == 0) ? 0 : 1; // 임시로 스포너는 0 과 1로 홀짝 구현은 나중에?
+        int fallbackIndex = (marinerId % 2 == 0) ? 0 : spawnPoints.Length - 1; // 짝수는 0, 홀수는 마지막 인덱스
         int chosenIndex = -1;
 
         while (triedIndexes.Count < spawnPoints.Length)
         {
-            int index = triedIndexes.Count == 0 ? fallbackIndex : Random.Range(0, spawnPoints.Length);
+            int index = triedIndexes.Count == 0 ? (marinerId % 2 == 0 ? fallbackIndex + marinerId : spawnPoints.Length - 1 - marinerId) : Random.Range(0, spawnPoints.Length);
+
             // 현재 0과 1만 사용 중 나중에 스포너 범위 들어오면 수정
 
             if (triedIndexes.Contains(index)) continue; // 이미 시도한 스포너는 건뛰
