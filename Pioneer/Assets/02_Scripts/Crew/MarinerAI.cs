@@ -118,26 +118,34 @@ public class MarinerAI : MonoBehaviour
     {
         List<DefenseObject> needRepairList = GameManager.Instance.GetNeedsRepair();
 
-        if (needRepairList.Count > 0)
+        for (int i = 0; i < needRepairList.Count; i++)
         {
-            targetRepairObject = needRepairList[0]; // 임시로 index 0번 테스트 수리
+            DefenseObject obj = needRepairList[i];
 
-            if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
+            if (GameManager.Instance.TryOccupyRepairObject(obj, marinerId))
             {
-                Debug.Log("승무원 수리 중");
-                isRepairing = true;
-                StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
+                targetRepairObject = obj;
+
+                if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
+                {
+                    Debug.Log($"Mariner {marinerId} 수리 시작: {targetRepairObject.name}");
+                    isRepairing = true;
+                    StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
+                    return;
+                }
+                else
+                {
+                    GameManager.Instance.ReleaseRepairObject(obj); // 점유 해제
+                }
             }
-            Debug.Log($"Mariner {marinerId} 수리된 오브젝트 : {targetRepairObject.name}, 현재 HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
         }
-        else
+
+        // 점유할 수 있는 수리 대상이 없는 경우
+        if (!isSecondPriorityStarted)
         {
-            if (!isSecondPriorityStarted)
-            {
-                Debug.Log("수리 오브젝트 없음으로 2순위 행동 시작");
-                isSecondPriorityStarted = true;
-                StartCoroutine(StartSecondPriorityAction());
-            }
+            Debug.Log("수리 대상 없음 -> 2순위 행동 시작");
+            isSecondPriorityStarted = true;
+            StartCoroutine(StartSecondPriorityAction());
         }
     }
 
@@ -156,7 +164,7 @@ public class MarinerAI : MonoBehaviour
 
     private IEnumerator RepairProcess()
     {
-        float repairDuration = 3f;
+        float repairDuration = 10f;
         float elapsedTime = 0f;
 
         while (elapsedTime < repairDuration)
@@ -179,6 +187,8 @@ public class MarinerAI : MonoBehaviour
         }
 
         StartRepair();
+        GameManager.Instance.ReleaseRepairObject(targetRepairObject); // 수리 완료 후 점유 해제
+
     }
 
 
@@ -240,7 +250,7 @@ public class MarinerAI : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("승무원 10초 동안 수리");
+        Debug.Log("승무원 10초 동안 파밍");
         yield return new WaitForSeconds(10f);
 
         GameManager.Instance.CollectResource("wood"); // 출력만

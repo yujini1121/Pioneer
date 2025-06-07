@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
 
     private List<DefenseObject> repairTargets = new List<DefenseObject>();
     private HashSet<int> occupiedSpawners = new HashSet<int>();
+    private Dictionary<int, int> repairOccupancy = new Dictionary<int, int>();
 
     private void Awake()
     {
@@ -167,6 +168,9 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 파밍 스포너 점유 여부
+    /// </summary>
     public bool IsSpawnerOccupied(int index) // 점유중인지
     {
         return occupiedSpawners.Contains(index); // 점유시 true, 아니면 false
@@ -180,5 +184,34 @@ public class GameManager : MonoBehaviour
     public void ReleaseSpawner(int index) // 끝날 시
     {
         occupiedSpawners.Remove(index); // 삭제
+    }
+
+
+    /// <summary>
+    /// 수리 오브젝트 점유 여부
+    /// </summary>
+    
+
+    public bool IsRepairObjectOccupied(DefenseObject obj)
+    {
+        return repairOccupancy.ContainsKey(obj.GetInstanceID());
+    }
+
+    public bool TryOccupyRepairObject(DefenseObject obj, int marinerId)
+    {
+        int id = obj.GetInstanceID();
+        if (!repairOccupancy.ContainsKey(id))
+        {
+            repairOccupancy[id] = marinerId;
+            return true;
+        }
+        return false;
+    }
+
+    public void ReleaseRepairObject(DefenseObject obj)
+    {
+        int id = obj.GetInstanceID();
+        if (repairOccupancy.ContainsKey(id))
+            repairOccupancy.Remove(id);
     }
 }

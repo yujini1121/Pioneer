@@ -52,28 +52,36 @@ public class InfectedMarinerAI : MonoBehaviour
     {
         List<DefenseObject> needRepairList = GameManager.Instance.GetNeedsRepair();
 
-        if (needRepairList.Count > 0)
+        for (int i = 0; i < needRepairList.Count; i++)
         {
-            targetRepairObject = needRepairList[0]; // 임시로 index 0번 테스트 수리
+            DefenseObject obj = needRepairList[i];
 
-            if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
+            if (GameManager.Instance.TryOccupyRepairObject(obj, marinerId))
             {
-                Debug.Log("승무원 수리 중");
-                isRepairing = true;
-                StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
+                targetRepairObject = obj;
+
+                if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
+                {
+                    Debug.Log($"감염된 승무원 {marinerId} 수리 시작: {targetRepairObject.name}");
+                    isRepairing = true;
+                    StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
+                    return;
+                }
+                else
+                {
+                    GameManager.Instance.ReleaseRepairObject(obj); // 점유 해제
+                }
             }
-            Debug.Log($"Infected Mariner {marinerId} 수리할 오브젝트 이름 : {targetRepairObject.name}, 현재 HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
         }
-        else
+
+        if (!isSecondPriorityStarted)
         {
-            if (!isSecondPriorityStarted)
-            {
-                Debug.Log("수리 오브젝트 없음으로 2순위 행동 시작");
-                isSecondPriorityStarted = true;
-                StartCoroutine(StartSecondPriorityAction());
-            }
+            Debug.Log("감염된 승무원 수리 대상 없음 -> 2순위 행동 시작");
+            isSecondPriorityStarted = true;
+            StartCoroutine(StartSecondPriorityAction());
         }
     }
+
 
     private IEnumerator MoveToRepairObject(Vector3 targetPosition)
     {
@@ -124,6 +132,7 @@ public class InfectedMarinerAI : MonoBehaviour
         }
 
         StartRepair();
+        GameManager.Instance.ReleaseRepairObject(targetRepairObject);
     }
 
     public IEnumerator StartSecondPriorityAction()
