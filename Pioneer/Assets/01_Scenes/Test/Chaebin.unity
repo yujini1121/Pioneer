@@ -252,6 +252,7 @@ GameObject:
   - component: {fileID: 591538887}
   - component: {fileID: 591538886}
   - component: {fileID: 591538889}
+  - component: {fileID: 591538890}
   - component: {fileID: 591538885}
   m_Layer: 8
   m_Name: Enemy
@@ -361,6 +362,34 @@ MonoBehaviour:
   fogWar: {fileID: 657293969}
   visibility: 0
   additionalRadius: 0
+--- !u!114 &591538890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591538884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad82bf2deb4334b40bc241a069140aef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  attackPower: 0
+  speed: 0
+  detectionRange: 0
+  attackRange: 0
+  attackVisualTime: 0
+  restTime: 0
+  detectList: []
+  currentState: 0
+  hp: 0
+  attackPower: 0
+  speed: 0
+  detectionRange: 0
+  attackRange: 0
+  attackVisualTime: 0
+  restTime: 0
 --- !u!1 &657293968
 GameObject:
   m_ObjectHideFlags: 0
