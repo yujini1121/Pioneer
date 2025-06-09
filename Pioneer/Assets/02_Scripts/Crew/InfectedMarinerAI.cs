@@ -237,6 +237,7 @@ public class InfectedMarinerAI : MonoBehaviour
         isConfused = true;
         Debug.Log("혼란 상태 시작");
 
+
         float confusedSpeed = 3f;
         float escapedTime = 0;
 
@@ -254,11 +255,15 @@ public class InfectedMarinerAI : MonoBehaviour
         isConfused = false;
         Debug.Log("혼란 종료 후 좀비 AI로 변경");
 
+        agent.ResetPath(); // 밤 시작임으로 경로 초기화
         ChangeToZombieAI();
     }
 
     private void ChangeToZombieAI()
     {
+
+        
+
         Debug.Log("좀비 AI전환");
         if (GetComponent<ZombieMarinerAI>() == null)
         {

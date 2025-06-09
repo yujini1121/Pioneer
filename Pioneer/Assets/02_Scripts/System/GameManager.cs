@@ -140,9 +140,8 @@ public class GameManager : MonoBehaviour
 
         if (HasStorage())
         {
-            Vector3 dormPosition = new Vector3(0f, 0f, 0f); // 예시 위치
-            mariner.MoveTo(dormPosition); // 이동 명령
-            mariner.StartCoroutine(WaitUntilArrivalThenIdle(mariner));
+            Vector3 dormPosition = new Vector3(0f, 0f, 0f); // 예시
+            mariner.StartCoroutine(mariner.MoveToThenReset(dormPosition));
         }
         else
         {

@@ -32,7 +32,6 @@ public class MarinerAI : MonoBehaviour
     private float attackVisualDuration = 1f;
     private Coroutine attackRoutine;
 
-
     private NavMeshAgent agent;
 
     //ray
@@ -242,6 +241,8 @@ public class MarinerAI : MonoBehaviour
             yield return null;
         }
 
+        agent.ResetPath(); // 초기화 코드
+
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
             Debug.Log("승무원 밤 행동 시작");
@@ -423,6 +424,21 @@ public class MarinerAI : MonoBehaviour
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireCube(transform.position, new Vector3(3f, 1f, 3f));
+    }
+    
+    
+    //목적지 초기화 코드
+    public IEnumerator MoveToThenReset(Vector3 destination)
+    {
+        MoveTo(destination);
+
+        while (!IsArrived())
+        {
+            yield return null;
+        }
+
+        agent.ResetPath();
+        Debug.Log(" ResetPath 호출");
     }
 
 }
