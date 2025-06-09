@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
 
-        Vector3 inputDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
+        playerDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
     }
 
     private IEnumerator AttackRoutine()
