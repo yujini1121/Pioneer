@@ -60,4 +60,9 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(attackCoolTime);
         isAttack = false;
     }
+
+    public void TakeDemage(float demaage)
+    {
+        playerHP -= demaage;
+    }
 }

@@ -130,6 +130,7 @@ public class Minion : EnemyBase
     {
         if (currentSpawnNest < 2 && !isCooldown && nestPrefab != null)
         {
+            // µÕÁö »ý¼º
             GameObject nest = Instantiate(nestPrefab, transform.position, transform.rotation);
             spawnedNests.Add(nest);
             currentSpawnNest++;
@@ -372,7 +373,7 @@ public class Minion : EnemyBase
     private void DealDamageInRange()
     {
         Vector3 attackCenter = transform.position + transform.forward * 1f;
-        Vector3 attackSize = new Vector3(2f, 1f, 1f);
+        Vector3 attackSize = new Vector3(1f, 1f, 2f);
 
         Collider[] hits = Physics.OverlapBox(attackCenter, attackSize / 2, transform.rotation);
 
