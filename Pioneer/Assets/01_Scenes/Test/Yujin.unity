@@ -696,7 +696,7 @@ GameObject:
   - component: {fileID: 464377687}
   - component: {fileID: 464377686}
   - component: {fileID: 464377685}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zone - Ship
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -900,7 +900,7 @@ GameObject:
   - component: {fileID: 522798515}
   - component: {fileID: 522798512}
   - component: {fileID: 522798513}
-  - component: {fileID: 522798514}
+  - component: {fileID: 522798516}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1062,31 +1062,6 @@ MonoBehaviour:
   seaLayerMask:
     serializedVersion: 2
     m_Bits: 16
---- !u!114 &522798514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 522798506}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0fa3ea3ba0f7a14e9a18ece4c2cdd7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainCamera: {fileID: 721405592}
-  player: {fileID: 522798510}
-  worldSpaceParent: {fileID: 1213038216}
-  navMeshSurface: {fileID: 1213038217}
-  installableLayer:
-    serializedVersion: 2
-    m_Bits: 192
-  blockLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  maxPlaceDistance: 5
-  stopDistance: 1.5
-  rayMissTolerance: 10
 --- !u!195 &522798515
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1109,6 +1084,30 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &522798516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522798506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06894bfcc2dd0af41b22a226ef86891d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 721405592}
+  worldSpaceParent: {fileID: 1213038216}
+  navMeshSurface: {fileID: 1213038217}
+  playerAgent: {fileID: 522798515}
+  stopDistance: 2
+  installaleLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  blockLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  currentObject: {fileID: 11400000, guid: 65c4e07933485dc4e9785585ca954081, type: 2}
 --- !u!1 &546096969
 GameObject:
   m_ObjectHideFlags: 0
@@ -2829,7 +2828,7 @@ GameObject:
   - component: {fileID: 1122607446}
   - component: {fileID: 1122607445}
   - component: {fileID: 1122607449}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Obstacle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3917,7 +3916,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 781672fe411f71a4f803a2dc8a4bad15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  installableChecker: {fileID: 522798514}
 --- !u!1001 &6350656820739109261
 PrefabInstance:
   m_ObjectHideFlags: 0
