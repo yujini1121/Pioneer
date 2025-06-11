@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,9 +32,15 @@ using UnityEngine;
 
 public class MinionAI : EnemyBase
 {
+    // 탐지
     [Header("탐지 및 공격 콜라이더")]
     [SerializeField] private Collider detectCollider;
     [SerializeField] private Collider attackCollider;
+
+    [SerializeField] private LayerMask targetLayers;
+
+    private float closeTargetDistance;
+    private Collider closeTarget;
 
     // 둥지 관련 변수
     [Header("둥지 관련")]
@@ -144,19 +151,34 @@ public class MinionAI : EnemyBase
 
     #region 감지
 
-    private void SetDetectRange()
+    // 현재 감지 범위 내에서 가장 가까운 위치의 에너미를 반환 중
+    private Collider DetectTarget()
     {
+        Vector3 boxSize = new Vector3(detectionRange / 2f, 1f, detectionRange / 2f);
+        Vector3 boxCenter = transform.position + Vector3.up * 1f;
 
-    }
+        // box 콜라이더 안에서 감지 실행
+        Collider[] detectColliders = Physics.OverlapBox(boxCenter, boxSize, transform.rotation, targetLayers);
 
-    private void DetectTarget()
-    {
-        if ()
+        if (detectColliders.Length == 0)
+            return null;
+
+        closeTargetDistance = Mathf.Infinity;
+        closeTarget = null;
+
+        foreach(Collider collider in detectColliders)
         {
+            float distance = Vector3.Distance(transform.position, collider.transform.position);
             
+            if(distance <  closeTargetDistance)
+            {
+                closeTargetDistance = distance;
+                closeTarget = collider;
+            }
         }
-    }
 
+        return closeTarget;
+    }
     #endregion
 
     /// <summary>
