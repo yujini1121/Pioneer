@@ -24,7 +24,7 @@ public class DayAndNight : MonoBehaviour
         timer += Time.deltaTime;
         float t = (timer % dayDuration) / dayDuration;
 
-        colorAdjustments.colorFilter.value = dayToNight.Evaluate(t);
+        colorAdjustments.colorFilter.value = nightToDay.Evaluate(t);
         colorAdjustments.postExposure.value = exposureByTime.Evaluate(t);
     }
 }

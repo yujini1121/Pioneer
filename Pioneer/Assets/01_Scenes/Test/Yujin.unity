@@ -901,6 +901,7 @@ GameObject:
   - component: {fileID: 522798512}
   - component: {fileID: 522798513}
   - component: {fileID: 522798516}
+  - component: {fileID: 522798517}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1096,6 +1097,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06894bfcc2dd0af41b22a226ef86891d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &522798517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522798506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0fa3ea3ba0f7a14e9a18ece4c2cdd7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 721405592}
+  player: {fileID: 522798510}
+  worldSpaceParent: {fileID: 1213038216}
+  navMeshSurface: {fileID: 1213038217}
+  installableLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  blockLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  maxPlaceDistance: 5
+  stopDistance: 1.5
+  rayMissTolerance: 0.2
 --- !u!1 &535503428
 GameObject:
   m_ObjectHideFlags: 0
@@ -1144,7 +1170,7 @@ MonoBehaviour:
   dayToNight:
     serializedVersion: 2
     key0: {r: 1, g: 1, b: 1, a: 1}
-    key1: {r: 0.052585598, g: 0, b: 0.4056604, a: 1}
+    key1: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
