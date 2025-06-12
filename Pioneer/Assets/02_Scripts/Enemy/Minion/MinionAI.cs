@@ -203,20 +203,18 @@ public class MinionAI : EnemyBase
     {
         if (targetObject == null)
         {
-            SetTargetObj();  // 타겟이 null이면 엔진으로 목표 재설정
+            SetTargetObj();
             return false;
         }
 
         Vector3 directionToTarget = targetObject.transform.position - transform.position;
-        directionToTarget.y = 0f;  // Y축을 0으로 설정해 수평 회전만 적용
+        directionToTarget.y = 0f;
         Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f); // 회전 속도 조정
-
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
 
         Vector3 boxSize = new Vector3(attackRange, 1f, 1f);
-        Vector3 boxCenter = transform.position + transform.forward * (attackRange / 2f);
+        Vector3 boxCenter = transform.position + transform.forward * 1f;
 
-        // box 콜라이더 안에서 감지 실행
         Collider[] hits = Physics.OverlapBox(boxCenter, boxSize, transform.rotation, targetLayers);
 
         bool hitTarget = false;
@@ -447,10 +445,12 @@ public class MinionAI : EnemyBase
         }
 
         // 공격 실행
-        StartCoroutine(VisualizeAttackRange());
+        // StartCoroutine(VisualizeAttackRange());
+        attackSuccess = AttackTarget();
 
         if (attackSuccess)
         {
+            lastAttackTime = Time.time;
             UnityEngine.Debug.Log($"[공격] 성공! 다음 공격까지 {attackCooldown}초");
             return INode.ENodeState.Success;
         }
@@ -502,7 +502,7 @@ public class MinionAI : EnemyBase
         if (attackRange > 0)
         {
             Gizmos.color = Color.red;
-            Vector3 boxCenter = transform.position + transform.forward * (1f / 2f) + Vector3.up * 0.5f;
+            Vector3 boxCenter = transform.position + transform.forward * 1f;
             Vector3 boxSize = new Vector3(attackRange, 1f, 1f);
 
             // 회전 매트릭스 적용
