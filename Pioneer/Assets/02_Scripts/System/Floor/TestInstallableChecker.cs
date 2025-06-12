@@ -53,6 +53,8 @@ public class TestInstallableChecker : MonoBehaviour
     private Renderer previewRenderer;
     private Color defaultColor;
 
+    private JH_PlayerMovement playerMovement;
+
 
     void Start()
     {
@@ -78,6 +80,7 @@ public class TestInstallableChecker : MonoBehaviour
         previewObject.transform.localPosition = Vector3.zero;
 
         previewRenderer = previewObject.GetComponent<Renderer>();
+        playerMovement = GetComponent<JH_PlayerMovement>();
 
         Collider previewCollider = previewObject.GetComponent<Collider>();
         if (previewCollider != null)
@@ -90,14 +93,9 @@ public class TestInstallableChecker : MonoBehaviour
         CheckArrivalAndInstall();
 
         // 설치 도중 플레이어 조작 감지 시 설치 명령 취소
-        if (isMovingToInstall)
+        if (isMovingToInstall && playerMovement.moveInput != Vector3.zero)
         {
-            Vector3 moveInput = GetComponent<JH_PlayerMovement>().moveInput;
-
-            if (moveInput != Vector3.zero)
-            {
-                CancelInstall();
-            }
+            CancelInstall();
         }
     }
 
@@ -114,9 +112,10 @@ public class TestInstallableChecker : MonoBehaviour
 
             #region 지터링 보정
             //snappedPos += new Vector3(positionOffset, positionOffset, -positionOffset);
-            //currentPreview.transform.localPosition = snappedPos;
-            //currentPreview.SetActive(true);
             #endregion
+
+            if (!previewObject.activeSelf)
+                previewObject.SetActive(true);
 
             bool canPlace = IsPlaceable(snappedPos);
             ApplyPreviewColor(canPlace ? Color.green : Color.red);
@@ -129,7 +128,8 @@ public class TestInstallableChecker : MonoBehaviour
                 }
                 else if (!canPlace)
                 {
-                    ShowWarningText();
+                    // ShowWarningText();
+                    Debug.LogError("설치할 수 없습니다~~!!");
                 }
             }
         }
@@ -186,8 +186,9 @@ public class TestInstallableChecker : MonoBehaviour
 
     void InstallTile(Vector3 localPosition)
     {
-        GameObject tile = Instantiate(previewObject, worldSpaceParent);
-        tile.transform.localPosition = localPosition;
+        GameObject tile = Instantiate(currentObject.prefab, worldSpaceParent);
+        float yOffset = currentObject.yOffset;
+        tile.transform.localPosition = localPosition + new Vector3(0f, yOffset, 0f);
         tile.transform.localRotation = Quaternion.identity;
 
         Renderer r = tile.GetComponent<Renderer>();
@@ -212,7 +213,7 @@ public class TestInstallableChecker : MonoBehaviour
             return false;
 
         Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(snappedPos);
-        Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore);
+        Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.45f, Quaternion.identity, blockLayer, QueryTriggerInteraction.Ignore);
         if (overlaps.Length > 0)
             return false;
 
@@ -228,7 +229,7 @@ public class TestInstallableChecker : MonoBehaviour
         foreach (Vector3 dir in directions)
         {
             Vector3 checkPos = worldSnappedPos + dir * checkDistance;
-            if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, Quaternion.identity, blockLayerMask, QueryTriggerInteraction.Ignore))
+            if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, Quaternion.identity, blockLayer, QueryTriggerInteraction.Ignore))
             {
                 return true;
             }
@@ -241,8 +242,8 @@ public class TestInstallableChecker : MonoBehaviour
     {
         playerAgent.isStopped = true;
         playerAgent.ResetPath();
-        isMovingToInstallPoint = false;
-        destinationQueued = Vector3.zero;
+        isMovingToInstall = false;
+        installPosition = Vector3.zero;
 
         Debug.Log("플레이어 조작에 의해 설치 명령이 취소됨");
     }
@@ -256,30 +257,21 @@ public class TestInstallableChecker : MonoBehaviour
         return new Vector3(x * cellSize, 0f, z * cellSize);
     }
 
-    void ShowWarningText()
-    {
-        if (warningCoroutine != null)
-            StopCoroutine(warningCoroutine);
+    //void ShowWarningText()
+    //{
+    //    if (warningCoroutine != null)
+    //        StopCoroutine(warningCoroutine);
 
-        warningText.SetActive(true);
-        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
-    }
+    //    warningText.SetActive(true);
+    //    warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
+    //}
 
-    IEnumerator HideWarningTextAfterDelay()
-    {
-        yield return new WaitForSeconds(warningDuration);
-        warningText.SetActive(false);
-        warningCoroutine = null;
-    }
-
-
-
-
-
-
-
-
-
+    //IEnumerator HideWarningTextAfterDelay()
+    //{
+    //    yield return new WaitForSeconds(warningDuration);
+    //    warningText.SetActive(false);
+    //    warningCoroutine = null;
+    //}
 
     void ApplyPreviewColor(Color color)
     {
