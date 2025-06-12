@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class InstallableObjectSelector : MonoBehaviour
 {
-    public InstallableChecker installableChecker;
+    //public InstallableChecker installableChecker;
 
-    public void SetInstallable(SInstallableObjectDataSO data)
-    {
-        installableChecker.SetCurrentInstallableObject(data);
-    }
+    //public void SetInstallable(SInstallableObjectDataSO data)
+    //{
+    //    installableChecker.SetCurrentInstallableObject(data);
+    //}
 }
