@@ -47,6 +47,7 @@ public class AudioManager : MonoBehaviour
         Finish
     }
 
+
     void Awake()
     {
         if (instance == null)
@@ -169,6 +170,7 @@ public class AudioManager : MonoBehaviour
         volume = Mathf.Clamp(volume, 0.001f, 1f);
         audioMixer.SetFloat("BGMVol", Mathf.Log10(volume) * 20);
         PlayerPrefs.SetFloat("BGMVol", volume);
+        Debug.Log("BGM Volume Set: " + volume);
     }
 
     public void SetSfxVolume(float volume)
