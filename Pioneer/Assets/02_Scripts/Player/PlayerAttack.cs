@@ -44,7 +44,15 @@ public class PlayerAttack : MonoBehaviour
     {
         if(other.CompareTag("Enemy"))
         {
-            other.gameObject.SetActive(false);
+            EnemyBase enemy = other.GetComponent<EnemyBase>();
+            if (enemy != null)
+            {
+                int damage = 10; // 예시로 데미지 값을 설정
+                enemy.TakeDamage(damage, gameObject); // 적에게 데미지 전달
+
+                if (enemy.hp <= 0)
+                    enemy.Die();
+            }            
         }
     }
 }

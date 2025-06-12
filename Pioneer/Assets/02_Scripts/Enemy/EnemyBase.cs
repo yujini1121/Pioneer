@@ -123,7 +123,7 @@ public class EnemyBase : MonoBehaviour
     /// <summary>
     /// 사망 처리 메서드
     /// </summary>
-    protected virtual void Die()
+    public virtual void Die()
     {
         if (isDead)
             return;
@@ -230,5 +230,4 @@ public class EnemyBase : MonoBehaviour
     }
 
     #endregion
-
 }
