@@ -38,7 +38,7 @@ public class MinionAI : EnemyBase
 
     // 둥지 관련 변수
     [Header("둥지 관련")]
-    [SerializeField] private GameObject nestPrefab; // 둥지 프리팹
+    [SerializeField] private GameObject nestPrefab;
 
     public GameObject[] spawnNestList;
 
@@ -79,7 +79,7 @@ public class MinionAI : EnemyBase
         speed = 2.0f;
         detectionRange = 4;
         attackRange = 2;
-        attackVisualTime = 1.0f;  // 선제 시간
+        attackVisualTime = 1.0f;
         restTime = 2.0f;
         SetTargetObj();
     }
@@ -107,6 +107,18 @@ public class MinionAI : EnemyBase
         isAttack = false;
         attacker = null;
         counterAttackTimer = 0f;
+    }
+
+    private IEnumerator DeactivateAttackRangeAfterDelay()
+    {
+        attackRangeObject.SetActive(true);
+
+        yield return new WaitForSeconds(1f);
+
+        if(attackRangeObject != null)
+        {
+            attackRangeObject.SetActive(false);
+        }
     }
 
     #region 둥지
@@ -174,31 +186,6 @@ public class MinionAI : EnemyBase
     #endregion   
 
     #region 공격
-    // 공격 범위 시각화
-    private IEnumerator VisualizeAttackRange()
-    {
-        isAttack = true;
-
-        if (attackRangeObject != null)
-            attackRangeObject.SetActive(true);
-
-        yield return new WaitForSeconds(attackVisualTime);        
-
-        attackSuccess = AttackTarget();
-
-        if (attackSuccess)
-        {
-            lastAttackTime = Time.time;
-            UnityEngine.Debug.Log($"[공격] 성공! 다음 공격까지 {attackCooldown}초");
-        }
-
-        if (attackRangeObject != null)
-            attackRangeObject.SetActive(false);
-
-        yield return new WaitForSeconds(CooldownRemaining);
-        isAttack = false;
-    }
-
     private bool AttackTarget()
     {
         if (targetObject == null)
@@ -226,7 +213,7 @@ public class MinionAI : EnemyBase
                 case int layer when layer == LayerMask.NameToLayer("Player"):
                     if (PlayerController.Instance != null)
                     {
-                        PlayerController.Instance.TakeDamage(attackPower); // 메서드명 수정
+                        PlayerController.Instance.TakeDamage(attackPower);
                         UnityEngine.Debug.Log("[공격] 데미지 적용 완료!");
                         hitTarget = true;
                     }
@@ -260,14 +247,12 @@ public class MinionAI : EnemyBase
     {
         if (targetObject != null)
         {
-            // 타겟 주변 랜덤 위치 설정
             Vector3 targetPos = targetObject.transform.position;
             Vector3 randomOffset = GetRandomHorizontalOffset(2f);
             targetPosition = targetPos + randomOffset;
         }
         else
         {
-            // 엔진 주변 랜덤 위치 설정 (캐시된 엔진 참조 사용)
             if (engineObject == null)
             {
                 engineObject = GameObject.FindGameObjectWithTag("Engine");
@@ -285,7 +270,7 @@ public class MinionAI : EnemyBase
     private Vector3 GetRandomHorizontalOffset(float radius)
     {
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
-        randomDirection.y = 0f; // 수평 이동만
+        randomDirection.y = 0f;
         return randomDirection;
     }
 
@@ -333,7 +318,7 @@ public class MinionAI : EnemyBase
             if (hit.gameObject == attacker)
             {
                 Vector3 lookDir = attacker.transform.position;
-                lookDir.y = transform.position.y; // 수평 회전만 적용
+                lookDir.y = transform.position.y;
                 transform.LookAt(lookDir);
 
                 targetObject = attacker;
@@ -389,7 +374,6 @@ public class MinionAI : EnemyBase
     INode.ENodeState Movement()
     {     
         targetObject = DetectTarget()?.gameObject;
-        // 타겟 오브젝트 정보에 null이 들어갔다면 다시 탐색? -> 기획서에는 그렇게 적혀있으나 엔진을 목표로 둘것임.
         if(targetObject == null)
         {
             SetTargetObj();
@@ -409,14 +393,14 @@ public class MinionAI : EnemyBase
         
         if (Vector3.Distance(transform.position, targetPosition) < 0.5f)
         {
-            hasTargetPosition = false; // 새로운 위치 재설정을 위해
+            hasTargetPosition = false;
             return INode.ENodeState.Success;
         }
 
-        if (agent.velocity.sqrMagnitude > 0.1f) // 이동 중일 때만 회전
+        if (agent.velocity.sqrMagnitude > 0.1f)
         {
-            Vector3 direction = agent.velocity.normalized; // agent의 속도를 따라 회전
-            direction.y = 0f; // y축은 수평 회전만 적용
+            Vector3 direction = agent.velocity.normalized;
+            direction.y = 0f;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f); // 회전 속도
         }
@@ -440,12 +424,12 @@ public class MinionAI : EnemyBase
 
         if (IsOnCooldown)
         {
-            // UnityEngine.Debug.Log($"[공격] 쿨타임 중... 남은 시간: {CooldownRemaining:F1}초");
-            return INode.ENodeState.Running; // 또는 Failure (게임 디자인에 따라)
+            return INode.ENodeState.Running;
         }
 
+        StartCoroutine(DeactivateAttackRangeAfterDelay());
+
         // 공격 실행
-        // StartCoroutine(VisualizeAttackRange());
         attackSuccess = AttackTarget();
 
         if (attackSuccess)
