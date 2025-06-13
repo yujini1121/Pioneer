@@ -86,7 +86,8 @@ public class Ballista : MonoBehaviour
                 colliders = Physics.OverlapSphere(centerVec, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
             }
 
-            if (colliders.Length > 0)
+            enemyDetect = colliders.Length > 0;
+            if (enemyDetect)
             {
                 LookAt();
                 Fire();
