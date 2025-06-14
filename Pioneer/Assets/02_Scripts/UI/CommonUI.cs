@@ -42,11 +42,20 @@ public class CommonUI : MonoBehaviour
 
             for (int rIndex = 0; rIndex < 3; rIndex++)
             {
-                ui.materialEachText[rIndex].text = "";
-                ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
+                //ui.materialEachText[rIndex].text = "";
+                ui.materialEachText[rIndex].enabled = false;
+                //ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
+                ui.materialIconImage[rIndex].enabled = false;
             }
+
+
+
+
             for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
             {
+                ui.materialEachText[rIndex].enabled = true;
+                ui.materialIconImage[rIndex].enabled = true;
+
                 int need = recipe.input[rIndex].amount;
                 int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
 

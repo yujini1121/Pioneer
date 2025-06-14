@@ -8,6 +8,7 @@ public class SItemTypeSO : ScriptableObject
 {
     public int id;
     public string typeName;
+    public EDataType categories;
     public string infomation;
     public Sprite image;
 
