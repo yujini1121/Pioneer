@@ -701,7 +701,7 @@ PrefabInstance:
     - target: {fileID: 1571101729482385079, guid: b29b3b3b34967bd48a11ef91cb4a5881,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.911
+      value: -9.45
       objectReference: {fileID: 0}
     - target: {fileID: 1571101729482385079, guid: b29b3b3b34967bd48a11ef91cb4a5881,
         type: 3}
@@ -711,7 +711,7 @@ PrefabInstance:
     - target: {fileID: 1571101729482385079, guid: b29b3b3b34967bd48a11ef91cb4a5881,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.151
+      value: 1.36
       objectReference: {fileID: 0}
     - target: {fileID: 1571101729482385079, guid: b29b3b3b34967bd48a11ef91cb4a5881,
         type: 3}
@@ -752,6 +752,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SpikeTrap
+      objectReference: {fileID: 0}
+    - target: {fileID: 9203130893738546543, guid: b29b3b3b34967bd48a11ef91cb4a5881,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -958,6 +963,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &485253992
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 485253993}
+  m_Layer: 0
+  m_Name: ----------[ ENEMY ]-----------------------------------------
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &485253993
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485253992}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &522798506
 GameObject:
   m_ObjectHideFlags: 0
@@ -1253,7 +1289,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 535503428}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 933acc5f422677443812aa0a68a629ba, type: 3}
   m_Name: 
@@ -1616,7 +1652,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &566895641
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3921,6 +3957,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ballista
       objectReference: {fileID: 0}
+    - target: {fileID: 25404151105859072, guid: c6c28d640bd90fb4e94f2819fa43e9ad,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4916341009839751858, guid: c6c28d640bd90fb4e94f2819fa43e9ad,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -4180,7 +4221,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1762436673
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4412,7 +4453,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1785452963
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4729,7 +4770,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &1883768472
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5278,6 +5319,7 @@ SceneRoots:
   - {fileID: 1883911729}
   - {fileID: 1199598969}
   - {fileID: 535503429}
+  - {fileID: 485253993}
   - {fileID: 1762436677}
   - {fileID: 1785452967}
   - {fileID: 566895645}
