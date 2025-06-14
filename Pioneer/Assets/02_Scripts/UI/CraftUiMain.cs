@@ -196,6 +196,11 @@ public class CraftUiMain : MonoBehaviour
                     mShowItemButton();
 
 
+                    // TODO : 유진씨 여기다 설치형 아이템인지 여부를 파악한뒤 / 설치형 아이템이면 설치 모드로 바뀌는 로직 넣어주시고
+                    // 아이템 배치 시 재료 아이템 차감하도록 하는 로직 넣어주세요오
+
+
+
                 });
 
 
