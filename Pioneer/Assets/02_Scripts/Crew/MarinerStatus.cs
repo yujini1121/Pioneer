@@ -7,6 +7,7 @@ public class MarinerStatus : MonoBehaviour
 {
     public int maxHP = 70;
     public int currentHP;
+    public int attackPower = 6; // 기본 공격력은 6
 
     public bool IsDead = false;
     public bool IsConfused = false;
@@ -27,6 +28,7 @@ public class MarinerStatus : MonoBehaviour
     public void Die()
     {
         IsDead = true;
+        Debug.Log("승무원 사망");
         Destroy(gameObject);
     }
 }

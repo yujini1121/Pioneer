@@ -29,6 +29,23 @@ public class ZombieMarinerAI : MonoBehaviour
     private float attackVisualDuration = 1f;
     private Coroutine attackRoutine;
 
+
+    //ray
+    private FOVController fovController;
+    private void Awake()
+    {
+        fovController = GetComponent<FOVController>();
+    }
+
+    private bool IsTargetInFOV()
+    {
+        if (target == null || fovController == null)
+            return false;
+
+        return fovController.visibleTargets.Contains(target);
+
+    }
+
     private void Start()
     {
         InitZombieStats();
@@ -54,10 +71,15 @@ public class ZombieMarinerAI : MonoBehaviour
         {
             if (DetectTarget())
             {
-                LookAtTarget();
+                if (IsTargetInFOV())
+                {
+                    LookAtTarget(); 
 
-                if (attackRoutine == null)
-                    attackRoutine = StartCoroutine(AttackSequence());
+                    if (attackRoutine == null)
+                    {
+                        attackRoutine = StartCoroutine(AttackSequence());
+                    }
+                }
             }
 
             attackCooldown = attackInterval;
@@ -72,7 +94,6 @@ public class ZombieMarinerAI : MonoBehaviour
                 Idle();
                 break;
             case ZombieState.Attacking:
-                // 공격 루틴 내에서 처리됨
                 break;
         }
     }
@@ -160,42 +181,55 @@ public class ZombieMarinerAI : MonoBehaviour
     /// 빨간색 박스 공격 범위 생성
     /// </summary>
     /// <returns></returns>
+    public GameObject attackRangeObject; 
+
     private IEnumerator AttackSequence()
     {
         currentState = ZombieState.Attacking;
 
-        // 접근할 위치 계산 (1m 떨어진 지점)
         Vector3 targetOffset = (target.position - transform.position).normalized;
         Vector3 attackPosition = target.position - targetOffset;
         attackPosition.y = transform.position.y;
 
-        // 이동
         while (Vector3.Distance(transform.position, attackPosition) > 0.1f)
         {
             transform.position = Vector3.MoveTowards(transform.position, attackPosition, speed * Time.deltaTime);
             yield return null;
         }
 
-        // 1초간 공격 박스 시각화
-        isShowingAttackBox = true;
-        yield return new WaitForSeconds(attackVisualDuration);
-        isShowingAttackBox = false;
+        if (attackRangeObject != null)
+        {
+            attackRangeObject.SetActive(true); 
+        }
 
-        // 공격 판정 (디버그용)
-        Vector3 boxCenter = transform.position + transform.forward * 1f;
-        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
+        yield return new WaitForSeconds(attackVisualDuration);
+
+        if (attackRangeObject != null)
+        {
+            attackRangeObject.SetActive(false); 
+        }
+
+        // 공격 판정 
+        Collider[] hits = Physics.OverlapBox(attackRangeObject.transform.position, attackRangeObject.transform.localScale / 2, transform.rotation, targetLayer);
 
         foreach (var hit in hits)
         {
-            Debug.Log($" {hit.name}이 공격 범위 안에 있음");
+            MarinerStatus marinerStatus = hit.GetComponent<MarinerStatus>();
+            if (marinerStatus != null)
+            {
+                int damage = marinerStatus.attackPower;
+                marinerStatus.currentHP -= damage;
+                marinerStatus.UpdateStatus();
+                Debug.Log($"{hit.name}에게 {damage}의 데미지를 입혔습니다.");
+            }
         }
 
-        // 상태 복귀
         currentState = ZombieState.Wandering;
         stateTimer = moveDuration;
         SetRandomDirection();
         attackRoutine = null;
     }
+
 
     private void OnDrawGizmos()
     {

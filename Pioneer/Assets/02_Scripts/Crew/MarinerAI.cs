@@ -1,30 +1,115 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class MarinerAI : MonoBehaviour
 {
+    public enum MarinerState { Wandering, Idle, Attacking }
+
+    private MarinerState currentState = MarinerState.Wandering;
+
+    public LayerMask targetLayer;
+    public float detectionRange = 3f;
+    public float attackInterval = 0.5f;
+    private float attackCooldown = 0f;
+    private Transform target;
+
     public int marinerId;
     public bool isRepairing = false;
     private DefenseObject targetRepairObject;
     private int repairAmount = 30;
     private bool isSecondPriorityStarted = false;
 
+    // ê³µê²©ê´€ë ¨
+    private float speed = 1f;
+    private float moveDuration = 2f;
+    private float idleDuration = 4f;
+    private float stateTimer = 0f;
+    private Vector3 moveDirection;
+
+    private bool isShowingAttackBox = false;
+    private float attackVisualDuration = 1f;
+    private Coroutine attackRoutine;
+
     private NavMeshAgent agent;
 
+    //ray
+    private FOVController fovController;
+
+    private void Awake()
+    {
+        fovController = GetComponent<FOVController>();
+    }
+
+    private bool IsTargetInFOV()
+    {
+        if (target == null || fovController == null)
+            return false;
+
+        return fovController.visibleTargets.Contains(target);
+
+    }
     private void Start()
     {
+        SetRandomDirection();
+        stateTimer = moveDuration;
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = 2f;
-        agent.stoppingDistance = 2f;
     }
 
     private void Update()
     {
-        if (!isRepairing && GameManager.Instance.IsDaytime)
+        if (GameManager.Instance == null) return;
+
+        GameManager.Instance.RegisterMariner(this);
+
+        if (GameManager.Instance.IsDaytime)
         {
-            StartRepair();
+            // ë‚®: ìˆ˜ë¦¬ ë° 2ìˆœìœ„ í–‰ë™
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+                isShowingAttackBox = false;
+            }
+
+            if (!isRepairing)
+                StartRepair();
+        }
+        else
+        {
+            // ë°¤: Mariner AI
+            attackCooldown -= Time.deltaTime;
+
+            if (attackCooldown <= 0f)
+            {
+                if (DetectTarget())
+                {
+                    if (IsTargetInFOV())
+                    {
+                        LookAtTarget();  
+
+                        if (attackRoutine == null)
+                        {
+                            attackRoutine = StartCoroutine(AttackSequence());
+                        }
+                    }
+                }
+
+                attackCooldown = attackInterval;
+            }
+
+            switch (currentState)
+            {
+                case MarinerState.Wandering:
+                    Wander();
+                    break;
+                case MarinerState.Idle:
+                    Idle();
+                    break;
+                case MarinerState.Attacking:
+                    break;
+            }
         }
     }
 
@@ -32,32 +117,53 @@ public class MarinerAI : MonoBehaviour
     {
         List<DefenseObject> needRepairList = GameManager.Instance.GetNeedsRepair();
 
-        if (needRepairList.Count > 0)
+        for (int i = 0; i < needRepairList.Count; i++)
         {
-            targetRepairObject = needRepairList[0]; // ÀÓ½Ã·Î index 0¹ø Å×½ºÆ® ¼ö¸®
+            DefenseObject obj = needRepairList[i];
 
-            if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
+            if (GameManager.Instance.TryOccupyRepairObject(obj, marinerId))
             {
-                Debug.Log("½Â¹«¿ø ¼ö¸® Áß");
-                isRepairing = true;
-                StartCoroutine(RepairProcess());
+                targetRepairObject = obj;
+
+                if (GameManager.Instance.CanMarinerRepair(marinerId, targetRepairObject))
+                {
+                    Debug.Log($"Mariner {marinerId} ìˆ˜ë¦¬ ì‹œì‘: {targetRepairObject.name}");
+                    isRepairing = true;
+                    StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
+                    return;
+                }
+                else
+                {
+                    GameManager.Instance.ReleaseRepairObject(obj); // ì ìœ  í•´ì œ
+                }
             }
-            Debug.Log($"Mariner {marinerId} ¼ö¸®µÈ ¿ÀºêÁ§Æ® : {targetRepairObject.name}, ÇöÀç HP: {targetRepairObject.currentHP}/{targetRepairObject.maxHP}");
         }
-        else
+
+        // ì ìœ í•  ìˆ˜ ìˆëŠ” ìˆ˜ë¦¬ ëŒ€ìƒì´ ì—†ëŠ” ê²½ìš°
+        if (!isSecondPriorityStarted)
         {
-            if (!isSecondPriorityStarted)
-            {
-                Debug.Log("¼ö¸® ¿ÀºêÁ§Æ® ¾øÀ½À¸·Î 2¼øÀ§ Çàµ¿ ½ÃÀÛ");
-                isSecondPriorityStarted = true;
-                StartCoroutine(StartSecondPriorityAction());
-            }
+            Debug.Log("ìˆ˜ë¦¬ ëŒ€ìƒ ì—†ìŒ -> 2ìˆœìœ„ í–‰ë™ ì‹œì‘");
+            isSecondPriorityStarted = true;
+            StartCoroutine(StartSecondPriorityAction());
         }
+    }
+
+    // ìˆ˜ë¦¬í•  ì˜¤ë¸Œì íŠ¸ë¡œ ì´ë™í•˜ëŠ” í•¨ìˆ˜
+    private IEnumerator MoveToRepairObject(Vector3 targetPosition)
+    {
+        agent.SetDestination(targetPosition);
+
+        while (!IsArrived())
+        {
+            yield return null;
+        }
+
+        StartCoroutine(RepairProcess());
     }
 
     private IEnumerator RepairProcess()
     {
-        float repairDuration = 3f;
+        float repairDuration = 10f;
         float elapsedTime = 0f;
 
         while (elapsedTime < repairDuration)
@@ -66,7 +172,7 @@ public class MarinerAI : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log($"Mariner {marinerId} ¼ö¸® ¿Ï·á: {targetRepairObject.name}/ ¼ö¸®·®: {repairAmount}");
+        Debug.Log($"Mariner {marinerId} ìˆ˜ë¦¬ ì™„ë£Œ: {targetRepairObject.name}/ ìˆ˜ë¦¬ëŸ‰: {repairAmount}");
         targetRepairObject.Repair(repairAmount);
 
         isRepairing = false;
@@ -74,92 +180,98 @@ public class MarinerAI : MonoBehaviour
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log("ÀÏ¹İ ½Â¹«¿ø ¹ã µµ´Ş ¿¹¿ÜÇàµ¿ ½ÃÀÛ");
-            GameManager.Instance.StoreItemsAndReturnToBase(this); // ÀÓ½Ã ¼öÁ¤ ÇÊ¿ä
+            Debug.Log("ì¼ë°˜ ìŠ¹ë¬´ì› ë°¤ ë„ë‹¬ ì˜ˆì™¸í–‰ë™ ì‹œì‘");
+            GameManager.Instance.StoreItemsAndReturnToBase(this); // ì„ì‹œ ìˆ˜ì • í•„ìš”
             yield break;
         }
 
         StartRepair();
+        GameManager.Instance.ReleaseRepairObject(targetRepairObject); // ìˆ˜ë¦¬ ì™„ë£Œ í›„ ì ìœ  í•´ì œ
+
     }
+
 
     public IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log("ÀÏ¹İ ½Â¹«¿ø 2¼øÀ§ ³· Çàµ¿ ½ÃÀÛ");
+        Debug.Log("ì¼ë°˜ ìŠ¹ë¬´ì› 2ìˆœìœ„ ë‚® í–‰ë™ ì‹œì‘");
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
         List<int> triedIndexes = new List<int>();
-        int fallbackIndex = (marinerId % 2 == 0) ? 0 : 1; // ÀÓ½Ã·Î ½ºÆ÷³Ê´Â 0 °ú 1·Î È¦Â¦ ±¸ÇöÀº ³ªÁß¿¡?
+        int fallbackIndex = (marinerId % 2 == 0) ? 0 : spawnPoints.Length - 1; // ì§ìˆ˜ëŠ” 0, í™€ìˆ˜ëŠ” ë§ˆì§€ë§‰ ì¸ë±ìŠ¤
         int chosenIndex = -1;
 
         while (triedIndexes.Count < spawnPoints.Length)
         {
-            int index = triedIndexes.Count == 0 ? fallbackIndex : Random.Range(0, spawnPoints.Length);
-            // ÇöÀç 0°ú 1¸¸ »ç¿ë Áß ³ªÁß¿¡ ½ºÆ÷³Ê ¹üÀ§ µé¾î¿À¸é ¼öÁ¤
+            int index = triedIndexes.Count == 0 ? (marinerId % 2 == 0 ? fallbackIndex + marinerId : spawnPoints.Length - 1 - marinerId) : Random.Range(0, spawnPoints.Length);
 
-            if (triedIndexes.Contains(index)) continue; // ÀÌ¹Ì ½ÃµµÇÑ ½ºÆ÷³Ê´Â °Ç¶Ù
+            // í˜„ì¬ 0ê³¼ 1ë§Œ ì‚¬ìš© ì¤‘ ë‚˜ì¤‘ì— ìŠ¤í¬ë„ˆ ë²”ìœ„ ë“¤ì–´ì˜¤ë©´ ìˆ˜ì •
 
-            if (!GameManager.Instance.IsSpawnerOccupied(index)) // ºñ Á¡À¯ Áß
-                                                                // ¼±ÅÃµÈ ½ºÆ÷³Ê°¡ ÀÌ¹Ì ´Ù¸¥ À¯´ÖÀÌ ¼±ÅÃÇß´Â°¡? ÇÃ·Î¿ìÂ÷Æ® È®ÀÎ
+            if (triedIndexes.Contains(index)) continue; // ì´ë¯¸ ì‹œë„í•œ ìŠ¤í¬ë„ˆëŠ” ê±´ë›°
+
+            if (!GameManager.Instance.IsSpawnerOccupied(index)) // ë¹„ ì ìœ  ì¤‘
+                                                                // ì„ íƒëœ ìŠ¤í¬ë„ˆê°€ ì´ë¯¸ ë‹¤ë¥¸ ìœ ë‹›ì´ ì„ íƒí–ˆëŠ”ê°€? í”Œë¡œìš°ì°¨íŠ¸ í™•ì¸
             {
                 GameManager.Instance.OccupySpawner(index);
                 chosenIndex = index;
-                Debug.Log("ÇöÀç ´Ù¸¥ ½Â¹«¿øÀÌ »ç¿ëÁß ÀÎ ½ºÆ÷³Ê");
+                Debug.Log("í˜„ì¬ ë‹¤ë¥¸ ìŠ¹ë¬´ì›ì´ ì‚¬ìš©ì¤‘ ì¸ ìŠ¤í¬ë„ˆ");
 
                 break;
             }
-            else // Á¡À¯Áß
+            else // ì ìœ ì¤‘
             {
                 triedIndexes.Add(index);
                 float waitTime = Random.Range(0f, 1f);
-                Debug.Log("´Ù¸¥ ½Â¹«¿øÀÌ Á¡À¯ ÁßÀÌ¶ó ·£´ı ½Ã°£ ÈÄ ´Ù½Ã Å½»ö");
+                Debug.Log("ë‹¤ë¥¸ ìŠ¹ë¬´ì›ì´ ì ìœ  ì¤‘ì´ë¼ ëœë¤ ì‹œê°„ í›„ ë‹¤ì‹œ íƒìƒ‰");
                 yield return new WaitForSeconds(waitTime);
             }
         }
 
-        if (chosenIndex == -1) // ¿¹¿Ü Ã³¸® ÇÊ¿äÇÒ±î?
+        if (chosenIndex == -1) // ì˜ˆì™¸ ì²˜ë¦¬ í•„ìš”í• ê¹Œ?
         {
-            Debug.LogWarning("¸ğµç ½Â¹«¿øÀÌ »ç¿ëÁß ÀÓÀ¸·Î Ã³À½ À§Ä¡·Î ÀÌµ¿ÇÔ.");
-            chosenIndex = fallbackIndex; // Ã¹ À§Ä¡·Î ÀÌµ¿
+            Debug.LogWarning("ëª¨ë“  ìŠ¹ë¬´ì›ì´ ì‚¬ìš©ì¤‘ ì„ìœ¼ë¡œ ì²˜ìŒ ìœ„ì¹˜ë¡œ ì´ë™í•¨.");
+            chosenIndex = fallbackIndex; // ì²« ìœ„ì¹˜ë¡œ ì´ë™
         }
 
         Transform targetSpawn = spawnPoints[chosenIndex].transform;
         MoveTo(targetSpawn.position);
 
-        // µµÂø ´ë±â
+        // ë„ì°© ëŒ€ê¸°
         while (!IsArrived())
         {
             yield return null;
         }
 
+        agent.ResetPath(); // ì´ˆê¸°í™” ì½”ë“œ
+
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log("½Â¹«¿ø ¹ã Çàµ¿ ½ÃÀÛ");
+            Debug.Log("ìŠ¹ë¬´ì› ë°¤ í–‰ë™ ì‹œì‘");
             GameManager.Instance.ReleaseSpawner(chosenIndex);
             GameManager.Instance.StoreItemsAndReturnToBase(this);
             yield break;
         }
 
-        Debug.Log("½Â¹«¿ø 10ÃÊ µ¿¾È ¼ö¸®");
+        Debug.Log("ìŠ¹ë¬´ì› 10ì´ˆ ë™ì•ˆ íŒŒë°");
         yield return new WaitForSeconds(10f);
 
-        GameManager.Instance.CollectResource("wood"); // Ãâ·Â¸¸
+        GameManager.Instance.CollectResource("wood"); // ì¶œë ¥ë§Œ
         GameManager.Instance.ReleaseSpawner(chosenIndex);
 
         var needRepairList = GameManager.Instance.GetNeedsRepair();
-        if (needRepairList.Count > 0)// ¼ö¸®´ë»ó È®ÀÎ
+        if (needRepairList.Count > 0)// ìˆ˜ë¦¬ëŒ€ìƒ í™•ì¸
         {
-            Debug.Log("½Â¹«¿ø ¼ö¸® ´ë»ó ¹ß°ßÀ¸·Î 1¼øÀ§ Çàµ¿ ½ÇÇà");
+            Debug.Log("ìŠ¹ë¬´ì› ìˆ˜ë¦¬ ëŒ€ìƒ ë°œê²¬ìœ¼ë¡œ 1ìˆœìœ„ í–‰ë™ ì‹¤í–‰");
             isSecondPriorityStarted = false;
             StartRepair();
         }
         else
         {
-            Debug.Log("½Â¹«¿ø ¼ö¸® ´ë»ó ¹Ì¹ß°ßÀ¸·Î 2¼øÀ§ Çàµ¿ ½ÇÇà");
+            Debug.Log("ìŠ¹ë¬´ì› ìˆ˜ë¦¬ ëŒ€ìƒ ë¯¸ë°œê²¬ìœ¼ë¡œ 2ìˆœìœ„ í–‰ë™ ì‹¤í–‰");
             StartCoroutine(StartSecondPriorityAction());
         }
     }
 
-    // ¡é ±âÁ¸ MoveToTargetÀº »èÁ¦ÇÏ°í ¾Æ·¡·Î ´ëÃ¼
+    // â†“ ê¸°ì¡´ MoveToTargetì€ ì‚­ì œí•˜ê³  ì•„ë˜ë¡œ ëŒ€ì²´
 
     public void MoveTo(Vector3 destination)
     {
@@ -173,4 +285,160 @@ public class MarinerAI : MonoBehaviour
     {
         return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
     }
+
+    // --- ë°¤ í–‰ë™ í•¨ìˆ˜ë“¤ ---
+
+    private void Wander()
+    {
+        transform.position += moveDirection * speed * Time.deltaTime;
+        stateTimer -= Time.deltaTime;
+
+        if (stateTimer <= 0f)
+        {
+            Debug.Log("Night Mariner AI ì´ë™ í›„ ëŒ€ê¸° ìƒíƒœ");
+            EnterIdleState();
+        }
+    }
+
+    private void Idle()
+    {
+        stateTimer -= Time.deltaTime;
+
+        if (stateTimer <= 0f)
+        {
+            Debug.Log("Night Mariner AI ëŒ€ê¸°ì—ì„œ ë‹¤ì‹œ ì´ë™ ìƒíƒœ");
+            EnterWanderingState();
+        }
+    }
+
+    private void EnterWanderingState()
+    {
+        SetRandomDirection();
+        currentState = MarinerState.Wandering;
+        stateTimer = moveDuration;
+        Debug.Log("ëœë¤ ë°©í–¥ìœ¼ë¡œ ì´ë™ ì‹œì‘");
+    }
+
+    private void EnterIdleState()
+    {
+        currentState = MarinerState.Idle;
+        stateTimer = idleDuration;
+        Debug.Log("Night Mariner AI ëŒ€ê¸° ìƒíƒœë¡œ ì „í™˜");
+    }
+
+    private void SetRandomDirection()
+    {
+        float angle = Random.Range(0f, 360f);
+        moveDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
+    }
+
+    private bool DetectTarget()
+    {
+        Collider[] hits = Physics.OverlapBox(
+            transform.position,
+            new Vector3(1.5f, 0.5f, 1.5f),
+            Quaternion.identity,
+            targetLayer
+        );
+
+        float minDist = float.MaxValue;
+        target = null;
+
+        foreach (var hit in hits)
+        {
+            float dist = Vector3.Distance(transform.position, hit.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                target = hit.transform;
+            }
+        }
+
+        return target != null;
+    }
+
+    private void LookAtTarget()
+    {
+        if (target == null) return;
+        Vector3 dir = (target.position - transform.position).normalized;
+        dir.y = 0f;
+
+        if (dir != Vector3.zero)
+            transform.forward = dir;
+    }
+
+    private IEnumerator AttackSequence()
+    {
+        currentState = MarinerState.Attacking;
+
+        Vector3 targetOffset = (target.position - transform.position).normalized;
+        Vector3 attackPosition = target.position - targetOffset;
+        attackPosition.y = transform.position.y;
+
+        while (Vector3.Distance(transform.position, attackPosition) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, attackPosition, speed * Time.deltaTime);
+            yield return null;
+        }
+
+        isShowingAttackBox = true;
+        yield return new WaitForSeconds(attackVisualDuration);
+        isShowingAttackBox = false;
+
+        Vector3 boxCenter = transform.position + transform.forward * 1f;
+        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
+
+        foreach (var hit in hits)
+        {
+            Debug.Log($"{hit.name} ê³µê²© ë²”ìœ„ ë‚´");
+
+            MarinerStatus marinerStatus = hit.GetComponent<MarinerStatus>();
+            if (marinerStatus != null)
+            {
+                int damage = marinerStatus.attackPower;
+                marinerStatus.currentHP -= damage;
+                Debug.Log($"{hit.name}ì—ê²Œ {damage}ì˜ ë°ë¯¸ì§€ë¥¼ ì…í˜”ìŠµë‹ˆë‹¤.");
+
+                marinerStatus.UpdateStatus();
+            }
+        }
+
+        currentState = MarinerState.Wandering;
+        stateTimer = moveDuration;
+        SetRandomDirection();
+        attackRoutine = null;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (isShowingAttackBox)
+        {
+            Gizmos.color = Color.red;
+            Vector3 boxCenter = transform.position + transform.forward * 1f;
+            Gizmos.matrix = Matrix4x4.TRS(boxCenter, transform.rotation, Vector3.one);
+            Gizmos.DrawWireCube(Vector3.zero, new Vector3(2f, 1f, 2f));
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireCube(transform.position, new Vector3(3f, 1f, 3f));
+    }
+    
+    
+    //ëª©ì ì§€ ì´ˆê¸°í™” ì½”ë“œ
+    public IEnumerator MoveToThenReset(Vector3 destination)
+    {
+        MoveTo(destination);
+
+        while (!IsArrived())
+        {
+            yield return null;
+        }
+
+        agent.ResetPath();
+        Debug.Log(" ResetPath í˜¸ì¶œ");
+    }
+
 }
