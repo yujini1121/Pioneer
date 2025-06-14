@@ -6,7 +6,7 @@ public class JH_PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 2f;
     private Rigidbody rb;
-    private Vector3 moveInput;
+    public Vector3 moveInput { get; private set; }
 
     private Vector3 lastPosition;
     public float moveThreshold = 0.01f;     // 혹시 모를 미세한 움직임 대비
