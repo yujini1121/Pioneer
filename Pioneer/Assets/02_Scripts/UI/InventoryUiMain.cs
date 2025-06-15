@@ -80,6 +80,13 @@ public class InventoryUiMain : MonoBehaviour
     }
     public void ClickOut()
     {
+        if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory))
+        {
+            return;
+        }
+
+        Debug.Log($"아이템 드롭 : {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
+
         InventoryManager.Instance.MouseDrop();
 
         mouseUI.Clear();
@@ -154,7 +161,7 @@ public class InventoryUiMain : MonoBehaviour
         return $"{info.typeName}\n{categoriesName}\n{info.infomation}";
     }
 
-    void IconRefresh()
+    public void IconRefresh()
     {
         for (int index = 0; index < slotGameObjects.Count; ++index)
         {

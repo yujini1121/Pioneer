@@ -29,7 +29,10 @@ public class CraftUiMain : MonoBehaviour
     public Vector3 startPos;
     public float xTerm;
     public float yTerm;
-
+    [SerializeField] GameObject pivot;
+    [SerializeField] DefaultFabrication ui;
+    [SerializeField] UnityEngine.UI.Button closeTab;
+    [SerializeField] Vector2 itemButtonSize;
 
     private SItemRecipeSO currentSelectedRecipe;
     private TextMeshProUGUI[] materialEachText;
@@ -57,7 +60,7 @@ public class CraftUiMain : MonoBehaviour
             material3iconImage,
         };
 
-        ItemRender(); // 외부 컴포넌트에 접근하므로 반드시 어웨이크가 아닌 스타드에 있어야 합니다.
+        ShowButton(); // 외부 컴포넌트에 접근하므로 반드시 어웨이크가 아닌 스타드에 있어야 합니다.
         ClearIcon();
     }
 
@@ -65,6 +68,26 @@ public class CraftUiMain : MonoBehaviour
     void Update()
     {
 
+    }
+
+    void ShowButton()
+    {
+        for (int index = 0; index < ItemRecipeManager.Instance.recipes.Count; index++)
+        {
+            //Debug.Assert(CommonUI.instance != null);
+            //Debug.Assert(pivot != null);
+            //Debug.Assert(ItemRecipeManager.Instance != null);
+            //Debug.Assert(ItemRecipeManager.Instance.recipes != null);
+            //Debug.Assert(ItemRecipeManager.Instance.recipes[index] != null);
+            //Debug.Assert(ui != null);
+            Button button = CommonUI.instance.ShowItemButton(pivot, ItemRecipeManager.Instance.recipes[index], ui,
+                index, 4, new Vector2(xTerm, yTerm), new Vector2(startPos.x, startPos.y), new Vector2(200, 200));
+
+            button.onClick.AddListener(() =>
+            {
+                ui.gameObject.SetActive(true);
+            });
+        }
     }
 
     void ItemRender()

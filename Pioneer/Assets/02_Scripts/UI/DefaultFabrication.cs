@@ -32,6 +32,10 @@ public class DefaultFabrication : MonoBehaviour
         material2eaText,
         material3eaText
     };
-
-    
+    public GameObject[] materialPivots => new GameObject[]
+    {
+        pivotMaterial1,
+        pivotMaterial2,
+        pivotMaterial3
+    };
 }

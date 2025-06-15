@@ -117,20 +117,56 @@ public class InventoryManager : MonoBehaviour
         // 만약 아이템이 없거나, 스텍 만기가 되면 새롭게 넣음
         if (item.amount < 1) return;
 
-        if (fastSearch.ContainsKey(item.id) == false)
+        int firstEmpty = -1;
+        for (int inventoryIndex = 0; inventoryIndex < itemLists.Count; ++inventoryIndex)
         {
-            itemLists.Add(item);
-            fastSearch.Add(item.id, item);
+            if (itemLists[inventoryIndex] == null)
+            {
+                if (firstEmpty == -1) firstEmpty = inventoryIndex;
+                continue;
+            }
+
+            if (itemLists[inventoryIndex].id == item.id)
+            {
+                itemLists[inventoryIndex].amount += item.amount;
+                InventoryUiMain.instance.IconRefresh();
+                return;
+            }
+        }
+        if (firstEmpty == -1)
+        {
+            ItemDropManager.instance.Drop(mouseInventory, positionDrop.transform.position);
             return;
         }
-        fastSearch[item.id].amount += item.amount;
+        else
+        {
+            itemLists[firstEmpty] = new SItemStack(item.id, item.amount);
+        }
+        InventoryUiMain.instance.IconRefresh();
     }
 
     public void Remove(params SItemStack[] removeTargets)
     {
-        for (int index = 0; index < removeTargets.Length; index++)
+        for (int targetIndex = 0; targetIndex < removeTargets.Length; targetIndex++)
         {
-            fastSearch[removeTargets[index].id].amount -= removeTargets[index].amount;
+            int targetAmount = removeTargets[targetIndex].amount;
+
+            for (int inventoryIndex = itemLists.Count - 1; inventoryIndex >= 0; --inventoryIndex)
+            {
+                if (itemLists[inventoryIndex] == null) continue;
+
+                if (removeTargets[targetIndex].id == itemLists[inventoryIndex].id)
+                {
+                    if (targetAmount > itemLists[inventoryIndex].amount)
+                    {
+                        targetAmount -= itemLists[inventoryIndex].amount;
+                        itemLists[inventoryIndex] = null;
+                        continue;
+                    }
+                    itemLists[inventoryIndex].amount -= targetAmount;
+                    break;
+                }
+            }
         }
         SafeClean();
     }
@@ -155,7 +191,7 @@ public class InventoryManager : MonoBehaviour
                 }
             }
         }
-
+        SafeClean();
         List<SItemStack> list = new List<SItemStack>();
         for (int index = 9; index < inventoryCount; index++)
         {
@@ -163,8 +199,10 @@ public class InventoryManager : MonoBehaviour
             list.Add(itemLists[index]);
             itemLists[index] = null;
         }
-        list.OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].typeName, StringComparer.Create(
-            new CultureInfo("ko-KR"), ignoreCase: false));
+        list = list
+            .OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].categories)
+            .ThenBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].typeName, StringComparer.Create(
+            new CultureInfo("ko-KR"), ignoreCase: false)).ToList();
         for (int index = 0; index < list.Count; index++)
         {
             itemLists[index + 9] = (list[index]);
@@ -204,17 +242,20 @@ public class InventoryManager : MonoBehaviour
             // Debug.Log($"awake : {itemLists[i].id}");
         }
         Demo();
+
+        mouseInventory = null;
     }
 
     private void Demo()
     {
-        Add(new SItemStack(30001, 100));
-        Add(new SItemStack(30002, 100));
+        Add(new SItemStack(30001, 10));
+        Add(new SItemStack(30002, 10));
 
         itemLists[0] = new SItemStack(30002, 100);
         itemLists[1] = new SItemStack(100, 100);
         itemLists[2] = new SItemStack(101, 100);
         itemLists[3] = new SItemStack(102, 100);
         itemLists[4] = new SItemStack(103, 100);
+        itemLists[4] = new SItemStack(30001, 200);
     }
 }

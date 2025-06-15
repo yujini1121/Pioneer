@@ -46,6 +46,13 @@ public class InGameUI : MonoBehaviour
         Show(defaultCraftUI);
     }
 
+    public void CloseDefaultCraftUI()
+    {
+        Clear();
+        Show(makeshiftCraftUI);
+        InventoryUiMain.instance.IconRefresh();
+    }
+
     public void Show(GameObject UiGo)
     {
         UiGo.SetActive(true);
@@ -62,6 +69,12 @@ public class InGameUI : MonoBehaviour
 
     public void UseESC()
     {
+        if (defaultCraftUI.activeInHierarchy)
+        {
+            CloseDefaultCraftUI();
+            return;
+        }
+
         if (ManuUI.activeInHierarchy)
         {
             ManuUI.SetActive(false);
