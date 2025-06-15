@@ -121,7 +121,7 @@ public class MinionAI : EnemyBase
         }
     }
 
-    #region 둥지
+    /*#region 둥지
     /// <summary>
     /// 둥지 배열 빈 인덱스 찾기
     /// </summary>
@@ -150,7 +150,7 @@ public class MinionAI : EnemyBase
             }
         }
     }    
-    #endregion
+    #endregion*/
 
     #region 감지
     /// <summary>
@@ -186,7 +186,7 @@ public class MinionAI : EnemyBase
     #endregion   
 
     #region 공격
-    private bool AttackTarget()
+    private bool　AttackTarget()
     {
         if (targetObject == null)
         {
@@ -224,6 +224,8 @@ public class MinionAI : EnemyBase
                     break;
                 case int layer when layer == LayerMask.NameToLayer("Mariner"):
                     // hitTarget = true;
+                    break;
+                case int layer when layer == LayerMask.NameToLayer("Engine"):
                     break;
                 default:
                     break;
@@ -335,7 +337,7 @@ public class MinionAI : EnemyBase
         return INode.ENodeState.Failure;
     }
 
-    /// <summary>
+    /*/// <summary>
     /// 둥지 소환
     /// </summary>
     /// <returns></returns>
@@ -365,7 +367,7 @@ public class MinionAI : EnemyBase
         nestSpawnTime = Time.time;
 
         return INode.ENodeState.Success;
-    }    
+    }   */ 
 
     /// <summary>
     /// 이동
@@ -457,8 +459,8 @@ public class MinionAI : EnemyBase
             // 2순위: 공격 범위에 타겟이 있으면 공격
             new ActionNode(() => Attack()),
             
-            // 3순위: 둥지 생성 (확률적)
-            new ActionNode(() => SpawnNest()),
+            /*// 3순위: 둥지 생성 (확률적)
+            new ActionNode(() => SpawnNest()),*/
             
             // 4순위: 이동 (기본 행동)
             new ActionNode(() => Movement())
