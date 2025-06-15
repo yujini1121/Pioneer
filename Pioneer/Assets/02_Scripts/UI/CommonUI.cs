@@ -11,6 +11,7 @@ public class CommonUI : MonoBehaviour
 
     [SerializeField] GameObject prefabItemButton;
     [SerializeField] Sprite imageEmpty;
+    Coroutine currentCraftCoroutine;
 
     public Button ShowItemButton(GameObject parent, SItemRecipeSO recipe, DefaultFabrication ui,
         int index, int rowCount, Vector2 delta, Vector2 start, Vector2 size)
@@ -34,7 +35,9 @@ public class CommonUI : MonoBehaviour
         Debug.Assert(itemButtonGameObject != null);
         Debug.Assert(itemButtonGameObject.GetComponent<Button>() != null);
         Button itemButton = itemButtonGameObject.GetComponent<Button>();
-        itemButton.onClick.AddListener(() =>
+
+
+        itemButton.onClick.AddListener(() => // 버튼 클릭 시
         {
             // 결과 보여주는 로직
             ui.craftName.text = recipeResultType.typeName;
@@ -42,11 +45,31 @@ public class CommonUI : MonoBehaviour
 
             for (int rIndex = 0; rIndex < 3; rIndex++)
             {
-                ui.materialEachText[rIndex].text = "";
-                ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
+                ui.materialPivots[rIndex].SetActive(false);
+                //ui.materialEachText[rIndex].text = "";
+                ui.materialEachText[rIndex].enabled = false;
+                //ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
+                ui.materialIconImage[rIndex].enabled = false;
             }
+
+            Vector3 mPositionPivot = Vector3.zero;
+            switch (recipe.input.Length)
+            {
+                case 1: mPositionPivot = new Vector3(0, 100, 0); break;
+                case 2: mPositionPivot = new Vector3(-112.5f, 100, 0); break;
+                case 3: mPositionPivot = new Vector3(-225f, 100, 0); break;
+                default: break;
+            }
+            Vector3 delta = new Vector3(225, 0, 0);
             for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
             {
+                ui.materialPivots[rIndex].SetActive(true);
+                ui.materialPivots[rIndex].GetComponent<RectTransform>().anchoredPosition
+                    = mPositionPivot + rIndex * delta;
+
+                ui.materialEachText[rIndex].enabled = true;
+                ui.materialIconImage[rIndex].enabled = true;
+
                 int need = recipe.input[rIndex].amount;
                 int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
 
@@ -56,25 +79,33 @@ public class CommonUI : MonoBehaviour
 
             mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
 
+            // 제작 시간 표시
+            ui.timeLeft.text = $"{recipe.time}s";
+
             // 크래프트 버튼 로직 배치
             ui.craftButton.onClick.RemoveAllListeners();
             ui.craftButton.onClick.AddListener(() =>
             {
                 if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
-
-                InventoryManager.Instance.Add(recipe.result);
-                InventoryManager.Instance.Remove(recipe.input);
-
-                for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+                if (currentCraftCoroutine != null)
                 {
-                    int need = recipe.input[rIndex].amount;
-                    int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
-
-                    ui.materialEachText[rIndex].text = $"{has}/{need}";
+                    StopCoroutine(currentCraftCoroutine);
                 }
+                //InventoryManager.Instance.Add(recipe.result);
+                //InventoryManager.Instance.Remove(recipe.input);
 
-                mSetButtonAvailable(itemButtonGameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
-                mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
+                //for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+                //{
+                //    int need = recipe.input[rIndex].amount;
+                //    int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
+
+                //    ui.materialEachText[rIndex].text = $"{has}/{need}";
+                //}
+
+                //mSetButtonAvailable(itemButtonGameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
+                //mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
+
+                currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, itemButtonGameObject, ui));
             });
         });
         return itemButton;
@@ -117,5 +148,40 @@ public class CommonUI : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private IEnumerator CraftCoroutine(SItemRecipeSO recipe, GameObject itemButtonGameObject, DefaultFabrication ui)
+    {
+        // 입력 시간만큼 진행
+        // 성공시 리턴
+
+        float leftTime = recipe.time;
+
+        while (leftTime > 0.0f)
+        {
+            ui.timeLeft.text = $"{leftTime}s";
+            leftTime -= Time.deltaTime;
+            yield return null;
+        }
+        Craft(recipe, itemButtonGameObject, ui);
+        ui.timeLeft.text = $"제작 완료";
+        InventoryUiMain.instance.IconRefresh();
+    }
+
+    public void Craft(SItemRecipeSO recipe, GameObject itemButtonGameObject, DefaultFabrication ui)
+    {
+        InventoryManager.Instance.Add(recipe.result);
+        InventoryManager.Instance.Remove(recipe.input);
+
+        for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+        {
+            int need = recipe.input[rIndex].amount;
+            int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
+
+            ui.materialEachText[rIndex].text = $"{has}/{need}";
+        }
+
+        mSetButtonAvailable(itemButtonGameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
+        mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
     }
 }

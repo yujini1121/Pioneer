@@ -9,4 +9,5 @@ public class SItemRecipeSO : ScriptableObject
     public SItemStack result;
     public SItemStack[] input;
     public bool isMakeshift;
+    public float time;
 }
