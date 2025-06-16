@@ -6,7 +6,7 @@ public class FollowCameraTarget : MonoBehaviour
     public Vector3 offset = new Vector3(0, 10, 0);
     public float followSpeed = 10f;
 
-    void LateUpdate()
+    void FixedUpdate()
     {
         if (player == null) return;
 
