@@ -10,7 +10,7 @@ public class InstallableChecker : MonoBehaviour
     public Transform worldSpaceParent;
     public LayerMask installableLayer;
     public LayerMask blockLayerMask;
-    public float maxPlaceDistance = 7f;
+    public float maxPlaceDistance = 5f;
     public GameObject warningText;
     public float warningDuration = 1.5f;
 
@@ -151,7 +151,6 @@ public class InstallableChecker : MonoBehaviour
     bool IsPlaceable(Vector3 localSnappedPos)
     {
         Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(localSnappedPos);
-        Quaternion worldRotation = worldSpaceParent.rotation;
         Vector3 halfSize = currentInstallableData.size * 0.5f;
 
         float dist = Vector3.Distance(player.position, worldSnappedPos);
@@ -161,10 +160,8 @@ public class InstallableChecker : MonoBehaviour
             return false;
         }
 
-        // 디버그 시각화 박스 추가
-        DebugExtension.DebugBox(worldSnappedPos, currentInstallableData.size, worldRotation, Color.yellow);
-
-        Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, halfSize, worldRotation, blockLayerMask);
+        // 오차범위 0.6f로 확장
+        Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, Vector3.one * 0.6f, Quaternion.identity, blockLayerMask);
         if (overlaps.Length > 0)
         {
             Debug.Log("[BLOCK] Overlap 감지됨");
@@ -174,10 +171,9 @@ public class InstallableChecker : MonoBehaviour
         Vector3[] baseDirs = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
         foreach (var dir in baseDirs)
         {
-            Vector3 rotatedDir = worldRotation * dir;
-            Vector3 checkPos = worldSnappedPos + rotatedDir;
+            Vector3 checkPos = worldSnappedPos + dir;
 
-            if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, worldRotation, blockLayerMask))
+            if (Physics.CheckBox(checkPos, Vector3.one * 0.6f, Quaternion.identity, blockLayerMask))
             {
                 Debug.Log("[PASS] 인접한 타일 존재함");
                 return true;
@@ -220,7 +216,6 @@ public class InstallableChecker : MonoBehaviour
         warningCoroutine = null;
     }
 }
-
 
 public static class DebugExtension
 {
