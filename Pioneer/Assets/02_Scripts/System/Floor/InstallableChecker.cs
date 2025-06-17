@@ -4,228 +4,254 @@ using System.Collections;
 
 public class InstallableChecker : MonoBehaviour
 {
-    [Header("필수 연결")]
+    [Header("기본 설정")]
     public Camera mainCamera;
     public Transform player;
     public Transform worldSpaceParent;
-    public NavMeshSurface navMeshSurface;
-
-    [Header("레이어 설정")]
     public LayerMask installableLayer;
     public LayerMask blockLayerMask;
+    public float maxPlaceDistance = 7f;
+    public GameObject warningText;
+    public float warningDuration = 1.5f;
 
-    [Header("설치 거리 설정")]
-    public float maxPlaceDistance = 5f;
+    [Header("네브메시 설정")]
+    public NavMeshSurface navMeshSurface;
+    public NavMeshAgent playerAgent;
     public float stopDistance = 1.5f;
 
-    [Header("프리뷰 유지 설정")]
-    public float rayMissTolerance = 0.2f; // 마우스가 약간 벗어나도 유지
-    private Vector3 lastValidHit = Vector3.zero;
+    [Header("설치 오브젝트 설정")]
+    public SInstallableObjectDataSO currentInstallableData;
 
-    private SInstallableObjectDataSO currentInstallableData;
-    private GameObject previewObject;
+    private GameObject currentPreview;
     private Renderer previewRenderer;
-    private Color originalColor;
+    private Vector3 targetPosition;
+    private Coroutine warningCoroutine;
 
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
 
+    void Start()
+    {
+        if (mainCamera == null) mainCamera = Camera.main;
+        if (worldSpaceParent == null) { Debug.LogError("WorldSpace 부모를 할당해주세요."); return; }
+        if (currentInstallableData == null) { Debug.LogError("설치할 오브젝트 데이터를 지정해주세요."); return; }
+
+        InitPreview();
+    }
+
     void Update()
     {
-        if (isMovingToInstallPoint)
-        {
-            CheckArrivalAndInstall();
-            if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
-                CancelInstall();
-            return;
-        }
+        HandlePreview();
+        CheckArrivalAndInstall();
 
-        if (previewObject != null && currentInstallableData != null)
-            HandlePreviewRaycast();
+        if (isMovingToInstallPoint && (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0))
+            CancelInstall();
     }
 
-    public void SetCurrentInstallableObject(SInstallableObjectDataSO data)
+    void InitPreview()
     {
-        if (previewObject != null)
-            Destroy(previewObject);
+        currentPreview = Instantiate(currentInstallableData.prefab, worldSpaceParent);
+        currentPreview.transform.localRotation = Quaternion.identity;
+        currentPreview.transform.localPosition = Vector3.zero;
 
-        currentInstallableData = data;
+        previewRenderer = currentPreview.GetComponent<Renderer>();
+        if (previewRenderer == null) Debug.LogError("프리뷰에 Renderer가 없습니다.");
 
-        previewObject = Instantiate(data.prefab, worldSpaceParent);
-        previewObject.transform.localRotation = Quaternion.identity;
-        previewObject.transform.localPosition = Vector3.zero;
-
-        previewRenderer = previewObject.GetComponent<Renderer>();
-        if (previewRenderer != null)
-        {
-            originalColor = previewRenderer.material.color;
-            previewRenderer.material = new Material(data.previewMaterial); // 인스턴싱
-        }
-
-        Collider col = previewObject.GetComponent<Collider>();
+        var col = currentPreview.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
-
-        previewObject.SetActive(false);
     }
 
-    void HandlePreviewRaycast()
+    void HandlePreview()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        Vector3 targetWorldPos;
+        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer))
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer, QueryTriggerInteraction.Collide))
         {
-            lastValidHit = hit.point;
-            targetWorldPos = hit.point;
-        }
-        else if (lastValidHit != Vector3.zero)
-        {
-            Vector3 projected = ray.origin + ray.direction * 10f;
-            if (Vector3.Distance(projected, lastValidHit) <= rayMissTolerance)
-            {
-                targetWorldPos = lastValidHit;
-            }
-            else
-            {
-                previewObject.SetActive(false);
-                return;
-            }
+            Vector3 localSnapped = SnapToGrid(hit.point) + new Vector3(0, currentInstallableData.yOffset, 0);
+            targetPosition = localSnapped;
+
+            currentPreview.transform.localPosition = targetPosition;
+            currentPreview.SetActive(true);
+
+            bool canPlace = IsPlaceable(localSnapped);
+
+            if (previewRenderer != null)
+                previewRenderer.material.color = canPlace ? Color.green : Color.red;
+
+            if (canPlace && Input.GetMouseButtonDown(0) && !isMovingToInstallPoint)
+                StartMovingToInstall(localSnapped);
+            else if (!canPlace && Input.GetMouseButtonDown(0))
+                ShowWarningText();
+
+            Debug.Log($"[PREVIEW] hit: {hit.point}, snapped(local): {localSnapped}");
         }
         else
         {
-            previewObject.SetActive(false);
-            return;
+            currentPreview.SetActive(false);
+            warningText.SetActive(false);
         }
-
-        Vector3 snappedLocalPos = SnapToGrid(targetWorldPos);
-        Vector3 finalWorldPos = worldSpaceParent.TransformPoint(snappedLocalPos + new Vector3(0, currentInstallableData.yOffset, 0));
-
-        previewObject.transform.localPosition = snappedLocalPos + new Vector3(0, currentInstallableData.yOffset, 0);
-        previewObject.SetActive(true);
-
-        bool canPlace = IsPlaceable(previewObject.transform.position, currentInstallableData.size);
-        ApplyPreviewColor(canPlace ? Color.green : Color.red);
-
-        if (canPlace && Input.GetMouseButtonDown(0))
-            MoveToInstall(snappedLocalPos);
     }
 
-    void MoveToInstall(Vector3 localInstallPos)
+    void StartMovingToInstall(Vector3 localSnapped)
     {
-        destinationQueued = localInstallPos;
+        if (playerAgent == null || !playerAgent.isOnNavMesh) return;
+
+        Vector3 worldTarget = worldSpaceParent.TransformPoint(localSnapped);
+        Vector3 dir = (worldTarget - player.position).normalized;
+        Vector3 stopPos = worldTarget - dir * stopDistance;
+
+        playerAgent.isStopped = false;
+        playerAgent.SetDestination(stopPos);
+
+        destinationQueued = localSnapped;
         isMovingToInstallPoint = true;
 
-        Vector3 worldTarget = worldSpaceParent.TransformPoint(localInstallPos);
-        Vector3 direction = (worldTarget - player.position).normalized;
-        Vector3 stopBeforeTarget = worldTarget - direction * stopDistance;
-
-        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.isStopped = false;
-            agent.SetDestination(stopBeforeTarget);
-        }
+        Debug.Log($"[MOVE] moving to install position: {worldTarget}");
     }
 
     void CheckArrivalAndInstall()
     {
-        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
-        {
-            if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
-            {
-                InstallObject(destinationQueued);
-                isMovingToInstallPoint = false;
-                destinationQueued = Vector3.zero;
+        if (!isMovingToInstallPoint) return;
 
-                agent.ResetPath();
-                agent.isStopped = true;
+        bool arrived = !playerAgent.pathPending && playerAgent.remainingDistance <= playerAgent.stoppingDistance;
+
+        if (arrived)
+        {
+            InstallObject(destinationQueued);
+            isMovingToInstallPoint = false;
+            destinationQueued = Vector3.zero;
+
+            playerAgent.ResetPath();
+            playerAgent.isStopped = false;
+        }
+    }
+
+    void InstallObject(Vector3 localPosition)
+    {
+        GameObject placed = Instantiate(currentInstallableData.prefab, worldSpaceParent);
+        placed.transform.localPosition = localPosition;
+        placed.transform.localRotation = Quaternion.identity;
+
+        var r = placed.GetComponent<Renderer>();
+        if (r != null && currentInstallableData.defaultMaterial != null)
+            r.material = currentInstallableData.defaultMaterial;
+
+        var c = placed.GetComponent<Collider>();
+        if (c != null) c.isTrigger = false;
+
+        placed.layer = LayerMask.NameToLayer(currentInstallableData.typeName.Contains("Floor") ? "Installable" : "Block");
+
+        if (navMeshSurface != null)
+            navMeshSurface.BuildNavMesh();
+
+        Debug.Log($"[INSTALL] placed at: {localPosition} (world: {worldSpaceParent.TransformPoint(localPosition)})");
+    }
+
+    bool IsPlaceable(Vector3 localSnappedPos)
+    {
+        Vector3 worldSnappedPos = worldSpaceParent.TransformPoint(localSnappedPos);
+        Quaternion worldRotation = worldSpaceParent.rotation;
+        Vector3 halfSize = currentInstallableData.size * 0.5f;
+
+        float dist = Vector3.Distance(player.position, worldSnappedPos);
+        if (dist > maxPlaceDistance)
+        {
+            Debug.Log("[BLOCK] 거리 초과");
+            return false;
+        }
+
+        // 디버그 시각화 박스 추가
+        DebugExtension.DebugBox(worldSnappedPos, currentInstallableData.size, worldRotation, Color.yellow);
+
+        Collider[] overlaps = Physics.OverlapBox(worldSnappedPos, halfSize, worldRotation, blockLayerMask);
+        if (overlaps.Length > 0)
+        {
+            Debug.Log("[BLOCK] Overlap 감지됨");
+            return false;
+        }
+
+        Vector3[] baseDirs = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
+        foreach (var dir in baseDirs)
+        {
+            Vector3 rotatedDir = worldRotation * dir;
+            Vector3 checkPos = worldSnappedPos + rotatedDir;
+
+            if (Physics.CheckBox(checkPos, Vector3.one * 0.45f, worldRotation, blockLayerMask))
+            {
+                Debug.Log("[PASS] 인접한 타일 존재함");
+                return true;
             }
         }
+
+        Debug.Log("[BLOCK] 인접 타일 없음");
+        return false;
     }
 
     void CancelInstall()
     {
+        playerAgent.isStopped = true;
+        playerAgent.ResetPath();
         isMovingToInstallPoint = false;
         destinationQueued = Vector3.zero;
-
-        NavMeshAgent agent = player.GetComponent<NavMeshAgent>();
-        if (agent != null)
-        {
-            agent.ResetPath();
-            agent.isStopped = true;
-        }
-
-        Debug.Log("설치 명령 취소됨");
-    }
-
-    void InstallObject(Vector3 localPos)
-    {
-        GameObject placed = Instantiate(currentInstallableData.prefab, worldSpaceParent);
-        placed.transform.localPosition = localPos + new Vector3(0, currentInstallableData.yOffset, 0);
-        placed.transform.localRotation = Quaternion.identity;
-
-        Renderer r = placed.GetComponent<Renderer>();
-        if (r != null)
-            r.material = currentInstallableData.defaultMaterial;
-
-        Collider c = placed.GetComponent<Collider>();
-        if (c != null)
-            c.isTrigger = false;
-
-        if (placed.GetComponent<NavMeshObstacle>() == null)
-        {
-            NavMeshObstacle obstacle = placed.AddComponent<NavMeshObstacle>();
-            obstacle.shape = NavMeshObstacleShape.Box;
-            obstacle.size = currentInstallableData.size;
-            obstacle.carving = true;
-        }
-
-        StartCoroutine(RebakeNavMesh());
-        Debug.Log("설치 완료: " + placed.name);
-    }
-
-    IEnumerator RebakeNavMesh()
-    {
-        yield return null;
-        navMeshSurface?.BuildNavMesh();
-    }
-
-    bool IsPlaceable(Vector3 worldPos, Vector3 size)
-    {
-        Vector3 halfExtents = size / 2f;
-        Collider[] hits = Physics.OverlapBox(worldPos, halfExtents * 0.95f, Quaternion.identity, blockLayerMask);
-        float distance = Vector3.Distance(player.position, worldPos);
-        return hits.Length == 0 && distance <= maxPlaceDistance;
+        Debug.Log("[CANCEL] 플레이어 조작에 의해 설치 취소");
     }
 
     Vector3 SnapToGrid(Vector3 worldPos)
     {
-        Vector3 localPos = worldSpaceParent.InverseTransformPoint(worldPos);
-        float cellX = Mathf.Max(currentInstallableData.size.x, 1f);
-        float cellZ = Mathf.Max(currentInstallableData.size.z, 1f);
-
-        int x = Mathf.FloorToInt(localPos.x / cellX);
-        int z = Mathf.FloorToInt(localPos.z / cellZ);
-
-        float offsetX = (currentInstallableData.size.x % 2 == 0) ? 0.5f : 0f;
-        float offsetZ = (currentInstallableData.size.z % 2 == 0) ? 0.5f : 0f;
-
-        float finalX = (x + offsetX) * cellX;
-        float finalZ = (z + offsetZ) * cellZ;
-
-        return new Vector3(finalX, 0f, finalZ);
+        float cellSize = 1f;
+        Vector3 local = worldSpaceParent.InverseTransformPoint(worldPos);
+        int x = Mathf.RoundToInt(local.x / cellSize);
+        int z = Mathf.RoundToInt(local.z / cellSize);
+        return new Vector3(x * cellSize, 0f, z * cellSize);
     }
 
-    void ApplyPreviewColor(Color color)
+    void ShowWarningText()
     {
-        if (previewRenderer != null)
-            previewRenderer.material.color = color;
+        if (warningCoroutine != null) StopCoroutine(warningCoroutine);
+        warningText.SetActive(true);
+        warningCoroutine = StartCoroutine(HideWarningTextAfterDelay());
     }
 
-    void ResetPreviewColor()
+    IEnumerator HideWarningTextAfterDelay()
     {
-        if (previewRenderer != null)
-            previewRenderer.material.color = originalColor;
+        yield return new WaitForSeconds(warningDuration);
+        warningText.SetActive(false);
+        warningCoroutine = null;
+    }
+}
+
+
+public static class DebugExtension
+{
+    public static void DebugBox(Vector3 center, Vector3 size, Quaternion rotation, Color color, float duration = 0f)
+    {
+        Vector3 halfSize = size * 0.5f;
+        Vector3[] points = new Vector3[8];
+
+        points[0] = center + rotation * new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
+        points[1] = center + rotation * new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
+        points[2] = center + rotation * new Vector3(halfSize.x, -halfSize.y, halfSize.z);
+        points[3] = center + rotation * new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
+
+        points[4] = center + rotation * new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
+        points[5] = center + rotation * new Vector3(halfSize.x, halfSize.y, -halfSize.z);
+        points[6] = center + rotation * new Vector3(halfSize.x, halfSize.y, halfSize.z);
+        points[7] = center + rotation * new Vector3(-halfSize.x, halfSize.y, halfSize.z);
+
+        Debug.DrawLine(points[0], points[1], color, duration);
+        Debug.DrawLine(points[1], points[2], color, duration);
+        Debug.DrawLine(points[2], points[3], color, duration);
+        Debug.DrawLine(points[3], points[0], color, duration);
+
+        Debug.DrawLine(points[4], points[5], color, duration);
+        Debug.DrawLine(points[5], points[6], color, duration);
+        Debug.DrawLine(points[6], points[7], color, duration);
+        Debug.DrawLine(points[7], points[4], color, duration);
+
+        Debug.DrawLine(points[0], points[4], color, duration);
+        Debug.DrawLine(points[1], points[5], color, duration);
+        Debug.DrawLine(points[2], points[6], color, duration);
+        Debug.DrawLine(points[3], points[7], color, duration);
     }
 }

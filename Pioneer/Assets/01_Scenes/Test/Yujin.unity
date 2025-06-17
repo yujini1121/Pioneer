@@ -340,7 +340,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 3050215204119900177}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 3050215204119900178}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99b8aa1f5a92d7e47a7b106b605d4da5, type: 3}
@@ -357,12 +357,12 @@ GameObject:
   - component: {fileID: 535503429}
   - component: {fileID: 535503430}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Day And Night
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &535503429
 Transform:
   m_ObjectHideFlags: 0
@@ -376,7 +376,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1213038216}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &535503430
 MonoBehaviour:
@@ -1365,7 +1365,6 @@ Transform:
   - {fileID: 930410173}
   - {fileID: 1122607448}
   - {fileID: 135913812}
-  - {fileID: 535503429}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
 --- !u!114 &1213038217
@@ -1386,7 +1385,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 144
+    m_Bits: 208
   m_UseGeometry: 0
   m_DefaultArea: 0
   m_IgnoreNavMeshAgent: 1
@@ -1550,7 +1549,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1762306022
 Transform:
   m_ObjectHideFlags: 0
@@ -1996,7 +1995,7 @@ GameObject:
   - component: {fileID: 2120476380}
   - component: {fileID: 2120476379}
   - component: {fileID: 2120476378}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: Zone - Plane (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2214,8 +2213,53 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7992493168594925400, guid: 3c044bd280aa80947a4d57395dd2c843,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3050215204119900179}
   m_SourcePrefab: {fileID: 100100000, guid: 3c044bd280aa80947a4d57395dd2c843, type: 3}
+--- !u!1 &3050215204119900178 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7992493168594925400, guid: 3c044bd280aa80947a4d57395dd2c843,
+    type: 3}
+  m_PrefabInstance: {fileID: 3050215204119900177}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3050215204119900179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3050215204119900178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0fa3ea3ba0f7a14e9a18ece4c2cdd7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 721405592}
+  player: {fileID: 522798510}
+  worldSpaceParent: {fileID: 1213038216}
+  installableLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  blockLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  maxPlaceDistance: 7
+  warningText: {fileID: 0}
+  warningDuration: 1.5
+  navMeshSurface: {fileID: 1213038217}
+  playerAgent: {fileID: 3050215204119900180}
+  stopDistance: 1.5
+  currentInstallableData: {fileID: 11400000, guid: 65c4e07933485dc4e9785585ca954081,
+    type: 2}
+--- !u!195 &3050215204119900180 stripped
+NavMeshAgent:
+  m_CorrespondingSourceObject: {fileID: 59119271923400306, guid: 3c044bd280aa80947a4d57395dd2c843,
+    type: 3}
+  m_PrefabInstance: {fileID: 3050215204119900177}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6350656820739109261
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2303,3 +2347,4 @@ SceneRoots:
   - {fileID: 1883911729}
   - {fileID: 958543877}
   - {fileID: 1199598969}
+  - {fileID: 535503429}
