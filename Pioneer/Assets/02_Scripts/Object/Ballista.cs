@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class Ballista : MonoBehaviour
 {
@@ -75,12 +78,10 @@ public class Ballista : MonoBehaviour
                 Destroy(gameObject);
             }
 
-            //사각형 범위 탐지
             if (detectType == DetectType.Rectangle)
             {
                 colliders = Physics.OverlapBox(centerVec, attackHalfBound, transform.rotation, enemyLayer, QueryTriggerInteraction.Ignore);
             }
-            //구 범위 탐지
             else if (detectType == DetectType.Circle)
             {
                 colliders = Physics.OverlapSphere(centerVec, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
@@ -95,7 +96,6 @@ public class Ballista : MonoBehaviour
         }
     }
 
-    //선원 코드에서 발리스타를 어떻게 판별하느냐에 따라 로직 변경 필요
     public void Use(GameObject _gunner)
     {
         if (isUsing) return;
@@ -142,7 +142,7 @@ public class Ballista : MonoBehaviour
             curCooldown = attackCooldown;
             StartCoroutine(FireBolt(boltPool.GetChild(poolIndex).gameObject, nearestTrans));
 
-            poolIndex ++;
+            poolIndex++;
             poolIndex %= boltPool.childCount;
         }
         else
@@ -166,12 +166,9 @@ public class Ballista : MonoBehaviour
             float moveStep = attackSpeed * Time.deltaTime;
             Vector3 nextPos = bolt.transform.position + dir * moveStep;
 
-            //현재 화살의 머리 부분만 충돌판정이 있음. 몸통이나 꼬리 충돌시에도 맞은 판정으로 하려면 수정 필요
             if (Physics.BoxCast(prevPos, boltHalfSize, dir, out RaycastHit hit, Quaternion.LookRotation(dir), moveStep, enemyLayer))
             {
                 Debug.Log("Hit: " + hit.collider.name);
-                //맞은 대상 처리
-                
                 break;
             }
 
@@ -192,14 +189,12 @@ public class Ballista : MonoBehaviour
     {
         if (drawGizmos && isUsing)
         {
-            //궤적
             Gizmos.color = Color.red;
             Gizmos.DrawLine(centerVec, centerVec + transform.forward * attackRange);
 
-            //발사한 화살
             foreach (GameObject bolt in bolts)
             {
-                if (bolt.activeSelf == false) continue;
+                if (!bolt.activeSelf) continue;
 
                 Gizmos.color = Color.green;
                 Gizmos.matrix = Matrix4x4.TRS(bolt.transform.position, bolt.transform.rotation, Vector3.one);
@@ -207,12 +202,10 @@ public class Ballista : MonoBehaviour
                 Gizmos.matrix = Matrix4x4.identity;
             }
 
-            //적
             foreach (var collider in colliders)
             {
                 Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
-                Vector3 center = collider.transform.position;
-                Gizmos.DrawSphere(center, 1.1f);
+                Gizmos.DrawSphere(collider.transform.position, 1.1f);
             }
 
             if (detectType == DetectType.Rectangle)
@@ -222,11 +215,13 @@ public class Ballista : MonoBehaviour
                 Gizmos.DrawWireCube(Vector3.zero, attackHalfBound * 2f);
                 Gizmos.matrix = Matrix4x4.identity;
             }
+#if UNITY_EDITOR
             else if (detectType == DetectType.Circle)
             {
                 Handles.color = Color.white;
                 Handles.DrawWireDisc(centerVec, Vector3.up, attackRange);
             }
+#endif
         }
     }
 }

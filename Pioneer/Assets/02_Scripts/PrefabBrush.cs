@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEditor;
 using UnityEditor.Tilemaps;
 using UnityEngine;
@@ -36,3 +38,5 @@ public class PrefabBrush : GameObjectBrush
         return null;
     }
 }
+
+#endif
