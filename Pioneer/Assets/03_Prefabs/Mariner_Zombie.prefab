@@ -12,11 +12,10 @@ GameObject:
   - component: {fileID: 4033483451914973570}
   - component: {fileID: 673969101270622176}
   - component: {fileID: 6858387954744580871}
-  - component: {fileID: 3748320267656925203}
-  - component: {fileID: 4221943485282760973}
   - component: {fileID: 3977742203532038024}
-  - component: {fileID: 672605361577625333}
   - component: {fileID: 7780788266483977292}
+  - component: {fileID: 3748320267656925203}
+  - component: {fileID: 672605361577625333}
   m_Layer: 8
   m_Name: Mariner_Zombie
   m_TagString: Untagged
@@ -111,35 +110,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3748320267656925203
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 396229151343040071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 642546b302594bf4a80b1839a349e6c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHP: 70
-  currentHP: 70
-  attackPower: 6
-  IsDead: 0
-  IsConfused: 0
---- !u!114 &4221943485282760973
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 396229151343040071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b86e4a6d9f81e7449b1d15a353cb25d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!195 &3977742203532038024
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -162,23 +132,6 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &672605361577625333
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 396229151343040071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 149159ad205327244892f65d58408f9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  detectionRange: 3
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 2048
-  attackRangeObject: {fileID: 2100451819134426290}
 --- !u!114 &7780788266483977292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,6 +154,40 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   visibleTargets: []
+--- !u!114 &3748320267656925203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396229151343040071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 642546b302594bf4a80b1839a349e6c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 70
+  currentHP: 70
+  attackPower: 6
+  IsDead: 0
+  IsConfused: 0
+--- !u!114 &672605361577625333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396229151343040071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149159ad205327244892f65d58408f9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRange: 3
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 2048
+  attackRangeObject: {fileID: 2100451819134426290}
 --- !u!1 &2100451819134426290
 GameObject:
   m_ObjectHideFlags: 0
