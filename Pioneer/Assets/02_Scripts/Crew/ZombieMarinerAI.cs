@@ -8,6 +8,7 @@ using UnityEngine;
 public class ZombieMarinerAI : MonoBehaviour
 {
     public enum ZombieState { Wandering, Idle, Attacking }
+    public int marinerId;
     private ZombieState currentState = ZombieState.Wandering;
 
     private float speed = 1f;

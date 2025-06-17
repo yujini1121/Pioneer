@@ -1,17 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
     [Header("시간 설정")]
-    public bool IsDaytime = true;
     public float currentGameTime = 0f;
-    public float nightStartTime = 50f; // 임시 값
+    public bool IsDaytime = true;
 
-    [Header("스포너 지점 임시 (0~1 index만 사용 중)")]
+    [Header("낮밤 순환 설정")]
+    public Volume postProcessVolume;
+    public Gradient dayToNightGradient;
+    public Gradient nightToDayGradient;
+    public AnimationCurve exposureCurve;
+    public float dayDuration = 120f;
+    public float nightDuration = 60f;
+
+    private ColorAdjustments colorAdjustments;
+    private float cycleTime = 0f;
+    private float fullCycleDuration;
+    private bool transitioningToNight = true;
+
+    [Header("스포너 지점")]
     public GameObject[] spawnPoints;
 
     private List<MarinerAI> allMariners = new List<MarinerAI>();
@@ -32,31 +46,59 @@ public class GameManager : MonoBehaviour
 
         UpdateRepairTargets();
 
+        postProcessVolume.profile.TryGet(out colorAdjustments);
+        fullCycleDuration = dayDuration + nightDuration;
     }
 
     private void Update()
     {
         currentGameTime += Time.deltaTime;
-
-        if (currentGameTime >= nightStartTime && IsDaytime)
-        {
-            IsDaytime = false;
-            Debug.Log("밤이 되었습니다.");
-        }
+        UpdateDayNightCycle();
 
         if (!infectionStarted && currentGameTime >= infectionStartTime)
         {
             infectionStarted = true;
             StartCoroutine(InfectMarinersOneByOne());
         }
+    }
 
+    private void UpdateDayNightCycle()
+    {
+        cycleTime += Time.deltaTime;
+        float t;
+
+        if (IsDaytime)
+        {
+            t = Mathf.Clamp01(cycleTime / dayDuration);
+            colorAdjustments.colorFilter.value = Color.Lerp(dayToNightGradient.Evaluate(0f), dayToNightGradient.Evaluate(1f), t);
+        }
+        else
+        {
+            t = Mathf.Clamp01(cycleTime / nightDuration);
+            colorAdjustments.colorFilter.value = Color.Lerp(nightToDayGradient.Evaluate(0f), nightToDayGradient.Evaluate(1f), t);
+        }
+
+        colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
+
+        if (IsDaytime && cycleTime >= dayDuration)
+        {
+            IsDaytime = false;
+            cycleTime = 0f;
+            Debug.Log("밤이 되었습니다.");
+        }
+        else if (!IsDaytime && cycleTime >= nightDuration)
+        {
+            IsDaytime = true;
+            cycleTime = 0f;
+            Debug.Log("아침이 되었습니다.");
+        }
     }
 
     private IEnumerator InfectMarinersOneByOne()
     {
         Debug.Log("감염 프로세스 시작됨");
 
-        var marinerQueue = new List<MarinerAI>(allMariners); // 사본 생성
+        var marinerQueue = new List<MarinerAI>(allMariners);
 
         foreach (var mariner in marinerQueue)
         {
@@ -79,8 +121,7 @@ public class GameManager : MonoBehaviour
         int id = mariner.marinerId;
         GameObject go = mariner.gameObject;
 
-        Destroy(mariner); // MarinerAI 제거
-
+        Destroy(mariner);
         InfectedMarinerAI infected = go.AddComponent<InfectedMarinerAI>();
         infected.marinerId = id;
     }
@@ -126,15 +167,19 @@ public class GameManager : MonoBehaviour
 
     public float TimeUntilNight()
     {
-        return Mathf.Max(0f, nightStartTime - currentGameTime);
+        if (IsDaytime)
+            return Mathf.Max(0f, dayDuration - cycleTime);
+        else
+            return 0f;
     }
 
     public void CollectResource(string type)
     {
-        Debug.Log($" 자원 획득: {type}"); // 임시
+        Debug.Log($"자원 획득: {type}");
     }
 
-    public void StoreItemsAndReturnToBase(MarinerAI mariner)
+    public void StoreItemsAndReturnToBase
+        (MarinerAI mariner)
     {
         Debug.Log($"승무원 [{mariner.marinerId}] 아이템 저장 후 숙소 복귀");
 
@@ -145,51 +190,30 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("보관함 없음 "); // 임시.
+            Debug.Log("보관함 없음 ");
             mariner.StartCoroutine(mariner.StartSecondPriorityAction());
         }
     }
 
-    private IEnumerator WaitUntilArrivalThenIdle(MarinerAI mariner)
-    {
-        while (!mariner.IsArrived())
-        {
-            yield return null;
-        }
-
-        Debug.Log($"승무원 [{mariner.marinerId}] 숙소 도착 후 대기 상태로 전환");
-        // 필요시 상태 초기화 등의 추가 로직 작성 가능
-    }
-
-
-    public bool HasStorage() // 보관함 임시로 항상 True 설정
+    public bool HasStorage()
     {
         return true;
     }
 
-    /// <summary>
-    /// 파밍 스포너 점유 여부
-    /// </summary>
-    public bool IsSpawnerOccupied(int index) // 점유중인지
+    public bool IsSpawnerOccupied(int index)
     {
-        return occupiedSpawners.Contains(index); // 점유시 true, 아니면 false
+        return occupiedSpawners.Contains(index);
     }
 
-    public void OccupySpawner(int index) // 점유 상태
+    public void OccupySpawner(int index)
     {
-        occupiedSpawners.Add(index); // 추가해서 다른 승무원 사용 불가
+        occupiedSpawners.Add(index);
     }
 
-    public void ReleaseSpawner(int index) // 끝날 시
+    public void ReleaseSpawner(int index)
     {
-        occupiedSpawners.Remove(index); // 삭제
+        occupiedSpawners.Remove(index);
     }
-
-
-    /// <summary>
-    /// 수리 오브젝트 점유 여부
-    /// </summary>
-    
 
     public bool IsRepairObjectOccupied(DefenseObject obj)
     {
