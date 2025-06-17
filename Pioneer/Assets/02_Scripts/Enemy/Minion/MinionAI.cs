@@ -77,7 +77,7 @@ public class MinionAI : EnemyBase
         hp = 20;
         attackPower = 1;
         speed = 2.0f;
-        detectionRange = 4;
+        detectionRange = 30;
         attackRange = 2;
         attackVisualTime = 1.0f;
         restTime = 2.0f;
