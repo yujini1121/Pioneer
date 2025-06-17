@@ -82,14 +82,14 @@ public class InstallableChecker : MonoBehaviour
             if (canPlace && Input.GetMouseButtonDown(0) && !isMovingToInstallPoint)
                 StartMovingToInstall(localSnapped);
             else if (!canPlace && Input.GetMouseButtonDown(0))
-                ShowWarningText();
+                //ShowWarningText();
 
             Debug.Log($"[PREVIEW] hit: {hit.point}, snapped(local): {localSnapped}");
         }
         else
         {
             currentPreview.SetActive(false);
-            warningText.SetActive(false);
+            //warningText.SetActive(false);
         }
     }
 
