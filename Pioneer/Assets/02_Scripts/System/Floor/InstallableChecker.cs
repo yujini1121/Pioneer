@@ -68,7 +68,7 @@ public class InstallableChecker : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, installableLayer, QueryTriggerInteraction.Collide))
         {
-            Vector3 localSnapped = SnapToGrid(hit.point) + new Vector3(0, currentInstallableData.yOffset, 0);
+            Vector3 localSnapped = SnapToGrid(hit.point) + new Vector3(0, 0, 0);
             targetPosition = localSnapped;
 
             currentPreview.transform.localPosition = targetPosition;
@@ -132,10 +132,6 @@ public class InstallableChecker : MonoBehaviour
         GameObject placed = Instantiate(currentInstallableData.prefab, worldSpaceParent);
         placed.transform.localPosition = localPosition;
         placed.transform.localRotation = Quaternion.identity;
-
-        var r = placed.GetComponent<Renderer>();
-        if (r != null && currentInstallableData.defaultMaterial != null)
-            r.material = currentInstallableData.defaultMaterial;
 
         var c = placed.GetComponent<Collider>();
         if (c != null) c.isTrigger = false;

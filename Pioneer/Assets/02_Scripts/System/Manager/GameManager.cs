@@ -33,6 +33,14 @@ public class GameManager : MonoBehaviour
     public float infectionStartTime = 180f;
     public float infectionInterval = 10f;
 
+    [Header("승무원 스프라이트 지정")]
+    public Sprite[] marinerSprites;
+
+    [Header("미니언 에너미")]
+    public GameObject minion;
+
+    private List<GameObject> spawnedMinions = new List<GameObject>();
+
     private List<DefenseObject> repairTargets = new List<DefenseObject>();
     private HashSet<int> occupiedSpawners = new HashSet<int>();
     private Dictionary<int, int> repairOccupancy = new Dictionary<int, int>();
@@ -85,13 +93,44 @@ public class GameManager : MonoBehaviour
             IsDaytime = false;
             cycleTime = 0f;
             Debug.Log("밤이 되었습니다.");
+            SpawnMinions(); // 밤에 미니언 생성
         }
         else if (!IsDaytime && cycleTime >= nightDuration)
         {
             IsDaytime = true;
             cycleTime = 0f;
             Debug.Log("아침이 되었습니다.");
+            DespawnMinions(); // 아침에 미니언 제거
         }
+    }
+
+    private void SpawnMinions()
+    {
+        if (spawnPoints.Length == 0 || minion == null) return;
+
+        int spawnIndex = Random.Range(0, spawnPoints.Length);   // 1~12까지 스폰포인트 탐색
+        Transform spawnTransform = spawnPoints[spawnIndex].transform;
+
+        int count = Random.Range(2, 8); // 2~7마리
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 offset = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f));
+            GameObject m = Instantiate(minion, spawnTransform.position + offset, Quaternion.identity);
+            spawnedMinions.Add(m);
+        }
+
+        Debug.Log($"{count}마리 미니언이 스폰되었습니다.");
+    }
+
+    private void DespawnMinions()
+    {
+        foreach (GameObject m in spawnedMinions)
+        {
+            if (m != null) Destroy(m);
+        }
+
+        spawnedMinions.Clear();
+        Debug.Log("아침이 되어 미니언이 제거되었습니다.");
     }
 
     private IEnumerator InfectMarinersOneByOne()
@@ -178,8 +217,7 @@ public class GameManager : MonoBehaviour
         Debug.Log($"자원 획득: {type}");
     }
 
-    public void StoreItemsAndReturnToBase
-        (MarinerAI mariner)
+    public void StoreItemsAndReturnToBase(MarinerAI mariner)
     {
         Debug.Log($"승무원 [{mariner.marinerId}] 아이템 저장 후 숙소 복귀");
 

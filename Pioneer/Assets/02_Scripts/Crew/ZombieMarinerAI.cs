@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -30,12 +31,24 @@ public class ZombieMarinerAI : MonoBehaviour
     private float attackVisualDuration = 1f;
     private Coroutine attackRoutine;
 
+    // 스프라이트 변경
+    public Transform spriteTransform;
+    public SpriteRenderer spriteRenderer;
 
     //ray
     private FOVController fovController;
     private void Awake()
     {
         fovController = GetComponent<FOVController>();
+
+        spriteTransform = transform.GetChild(0);
+        spriteRenderer = spriteTransform.GetComponent<SpriteRenderer>();
+        GameManager gm = FindObjectOfType<GameManager>();
+
+        spriteTransform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        spriteRenderer.sprite = gm.marinerSprites[1];
+        gameObject.layer = LayerMask.NameToLayer("Enemy");
+        targetLayer = LayerMask.NameToLayer("Mariner");
     }
 
     private bool IsTargetInFOV()

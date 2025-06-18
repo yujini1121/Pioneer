@@ -99,9 +99,9 @@ GameObject:
   - component: {fileID: 5048327565268617443}
   - component: {fileID: 5747369785763664687}
   - component: {fileID: 2380346995797919610}
-  - component: {fileID: 1011730577205090043}
+  - component: {fileID: -6135159178872479323}
   m_Layer: 11
-  m_Name: Mariner_Default
+  m_Name: Mariner_Mariner_Infect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -264,7 +264,7 @@ MonoBehaviour:
   attackPower: 6
   IsDead: 0
   IsConfused: 0
---- !u!114 &1011730577205090043
+--- !u!114 &-6135159178872479323
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -273,13 +273,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 8304306929198963357}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aff0571e6e3b3584e94c03ef2a170925, type: 3}
+  m_Script: {fileID: 11500000, guid: f3871f601739fc34fabfeca48f7825ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  detectionRange: 3
-  attackInterval: 0.5
-  marinerId: 10
+  marinerId: 11
   isRepairing: 0
