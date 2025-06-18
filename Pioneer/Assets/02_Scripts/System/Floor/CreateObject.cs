@@ -77,8 +77,15 @@ public class CreateObject : MonoBehaviour
         onHand.GetComponent<Collider>().isTrigger = true;
     }
 
+    private void Start()
+    {
+        ExitInstallMode(); // 게임 시작 시 설치 모드 OFF
+    }
+
     private void Update()
     {
+        if (onHand == null) return;
+
         CheckCreatable();
         Trim();
 
@@ -379,19 +386,17 @@ public class CreateObject : MonoBehaviour
     //생성 완료 절차
     private void Trim()
     {
-        bool arrived = !playerAgent.pathPending && playerAgent.remainingDistance <= playerAgent.stoppingDistance;
+        if (tempObj == null) return;
 
-        if (arrived)
+        float dist = Vector3.Distance(playerAgent.transform.position, tempObj.transform.position);
+        if (dist < 2.0f)
         {
-            if (tempObj == null)
-            {
-                return;
-            }
-
             tempObj.GetComponent<Collider>().isTrigger = false;
             tempObj.GetComponent<Renderer>().material.color = Color.white;
 
             navMeshSurface.BuildNavMesh();
+
+            Debug.Log($"[설치 완료됨] 거리: {dist}");
 
             playerAgent.ResetPath();
             playerAgent.isStopped = false;
@@ -400,6 +405,8 @@ public class CreateObject : MonoBehaviour
         }
     }
 
+
+
     //조작으로 인한 움직임 캔슬
     void CancelInstall()
     {
@@ -407,5 +414,47 @@ public class CreateObject : MonoBehaviour
         playerAgent.ResetPath();
         Destroy(tempObj);
         tempObj = null;
+    }
+
+    public void EnterInstallMode(SInstallableObjectDataSO installableSO)
+    {
+        if (onHand != null)
+        {
+            Destroy(onHand);
+            onHand = null;
+        }
+
+        if (!playerAgent.enabled)
+            playerAgent.enabled = true;
+
+        // 설치 타입 설정
+        creationType = (CreationType)(int)installableSO.installType;
+
+        Debug.Log($"[설치모드 진입] 선택된 오브젝트: {installableSO.name}");
+
+        Init(); // 새 프리뷰 오브젝트 생성
+    }
+
+    public void ExitInstallMode()
+    {
+        // 프리뷰 오브젝트 제거
+        if (onHand != null)
+        {
+            Destroy(onHand);
+            onHand = null;
+        }
+
+        // 임시 생성 오브젝트 제거 (이동 중 설치 예약된 오브젝트)
+        if (tempObj != null)
+        {
+            Destroy(tempObj);
+            tempObj = null;
+        }
+
+        // NavMeshAgent 상태 초기화
+        playerAgent.ResetPath();
+        playerAgent.isStopped = true;
+
+        Debug.Log("[설치 모드 종료됨]");
     }
 }

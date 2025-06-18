@@ -218,7 +218,7 @@ public class CraftUiMain : MonoBehaviour
                         CreateObject installer = FindObjectOfType<CreateObject>();
                         if (installer != null)
                         {
-                            installer.EnterInstallMode(installableData);
+                            //installer.EnterInstallMode(installableData);
                         }
                         else
                         {
