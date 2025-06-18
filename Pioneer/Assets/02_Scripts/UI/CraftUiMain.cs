@@ -208,26 +208,33 @@ public class CraftUiMain : MonoBehaviour
                 rightCraftButton.onClick.RemoveAllListeners();
                 rightCraftButton.onClick.AddListener(() =>
                 {
-                    if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
+                    if (!ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id)) return;
 
-                    InventoryManager.Instance.Add(recipe.result);
-                    InventoryManager.Instance.Remove(recipe.input);
+                    var resultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
+                    var installableData = resultType as SInstallableObjectDataSO;
 
-                    // 레시피 보여주기
+                    if (installableData != null)
+                    {
+                        CreateObject installer = FindObjectOfType<CreateObject>();
+                        if (installer != null)
+                        {
+                            installer.EnterInstallMode(installableData);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("CreateObject 설치 시스템이 씬에 존재하지 않습니다.");
+                        }
+                    }
+                    else
+                    {
+                        InventoryManager.Instance.Add(recipe.result);
+                        InventoryManager.Instance.Remove(recipe.input);
+                    }
+
                     mShowText();
                     mSetButtonTransparency();
                     mShowItemButton();
-
-
-                    // TODO : 유진씨 여기다 설치형 아이템인지 여부를 파악한뒤 / 설치형 아이템이면 설치 모드로 바뀌는 로직 넣어주시고
-                    // 아이템 배치 시 재료 아이템 차감하도록 하는 로직 넣어주세요오
-
-
-
                 });
-
-
-
             });
 
             // 아이템 조합 가능한지 판단

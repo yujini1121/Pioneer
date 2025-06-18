@@ -364,7 +364,7 @@ public class CreateObject : MonoBehaviour
 
         //생성 할 위치 표시
         tempObj = Instantiate(creationDict[creationType], worldSpaceParent);
-        tempObj.transform.localPosition = new Vector3(local.x, 0f, local.y);
+        tempObj.transform.localPosition = new Vector3(local.x, 0f, local.z);
         tempObj.transform.rotation = onHand.transform.rotation;
         tempObj.GetComponent<Collider>().isTrigger = true;
         tempObj.GetComponent<Renderer>().material.color = permitColor;
