@@ -52,7 +52,7 @@ public class Ballista : MonoBehaviour
             bolts.Add(boltPool.GetChild(i).gameObject);
         }
 
-        currentHP = objectData.maxHp;
+        //currentHP = objectData.maxHp;
     }
 
     private void Update()
