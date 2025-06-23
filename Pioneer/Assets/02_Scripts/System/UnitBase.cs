@@ -35,11 +35,10 @@ public class UnitBase : MonoBehaviour
 
     private void Update()
     {
-        // 1) 카메라 + 오프셋 바라보기 (Pitch + Yaw)
-        if (cameraTransform != null)
+        // 1) spritePivot만 카메라 정면을 바라보게
+        if (cameraTransform != null && spritePivot != null)
         {
-            Vector3 targetPos = cameraTransform.position + Vector3.up * lookOffset;
-            transform.LookAt(targetPos);
+            spritePivot.forward = cameraTransform.forward;
         }
 
         // 2) 이동 방향 계산
@@ -49,9 +48,10 @@ public class UnitBase : MonoBehaviour
         if (Mathf.Abs(moveDir.x) > flipThreshold)
         {
             Vector3 s = originalScale;
-            s.x = Mathf.Abs(originalScale.x) * (moveDir.x > 0 ? 1 : -1);
+            s.x = Mathf.Abs(originalScale.x) * (moveDir.x > 0 ? -1 : 1);
             spritePivot.localScale = s;
         }
+
 
         #region Bounce 설정 다시 하고 싶으면 키기~~~ 3
         /*
