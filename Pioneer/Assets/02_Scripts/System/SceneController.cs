@@ -58,7 +58,11 @@ public class SceneController : MonoBehaviour
         yield return Fade(1, 0);
 
         isLoading = false;
+
+        Destroy(gameObject); // 씬 이동 완료 후 자기 자신 제거
     }
+
+
 
     private IEnumerator Fade(float from, float to)
     {
