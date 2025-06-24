@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
+using UnityEngine.EventSystems;
 
 public class CreateObject : MonoBehaviour
 {
@@ -105,6 +105,18 @@ public class CreateObject : MonoBehaviour
     //설치 가능 유무 판별
     private void CheckCreatable()
     {
+        #region UI 위에선 설치가능 여부 프리뷰부터 보이지 않게 처리함 
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            onHand.SetActive(false);    // 프리뷰 숨김
+            return;                     // UI 클릭 중이면 설치/이동/회전 전부 무시
+        }
+        else
+        {
+            onHand.SetActive(true);     // UI에서 벗어나면 다시 보이게
+        }
+        #endregion
+
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
 
