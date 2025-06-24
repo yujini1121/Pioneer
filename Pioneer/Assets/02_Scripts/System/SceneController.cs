@@ -8,6 +8,11 @@ public class SceneController : MonoBehaviour
 
     [SerializeField] private CanvasGroup fadeCanvasGroup;
     [SerializeField] private float fadeDuration = 1f;
+    [SerializeField] private string sceneToLoad;
+    [SerializeField] private string allowedSceneName = "Title";
+
+    private bool isLoading = false;
+    private string currentSceneName;
 
     private void Awake()
     {
@@ -24,7 +29,18 @@ public class SceneController : MonoBehaviour
 
     private void Start()
     {
+        currentSceneName = SceneManager.GetActiveScene().name;
         StartCoroutine(Fade(1, 0));
+    }
+
+    private void Update()
+    {
+        if (!isLoading &&
+            SceneManager.GetActiveScene().name != sceneToLoad &&
+            Input.GetKeyDown(KeyCode.Space))
+        {
+            LoadScene(sceneToLoad);
+        }
     }
 
     public void LoadScene(string sceneName)
@@ -34,13 +50,14 @@ public class SceneController : MonoBehaviour
 
     private IEnumerator Transition(string sceneName)
     {
-        // 페이드 아웃
-        yield return Fade(0, 1);
+        isLoading = true;
 
-        //씬 전환 및 페이드인
+        yield return Fade(0, 1);
         yield return SceneManager.LoadSceneAsync(sceneName);
         yield return new WaitForSeconds(0.1f);
         yield return Fade(1, 0);
+
+        isLoading = false;
     }
 
     private IEnumerator Fade(float from, float to)
