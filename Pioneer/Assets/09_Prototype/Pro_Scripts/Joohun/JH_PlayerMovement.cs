@@ -61,7 +61,47 @@ public class JH_PlayerMovement : MonoBehaviour
                 ballista?.Use(gameObject);
             }
         }
+
+        if (Input.GetMouseButtonDown(0)) // 왼쪽 클릭
+        {
+            Attack();
+        }
     }
+
+    private void Attack()
+    {
+        Vector3 origin = transform.position + Vector3.up * 1f;
+        Vector3 direction = transform.forward;
+        float rayDistance = 5f;
+
+        // 디버그 Ray 표시
+        Debug.DrawRay(origin, direction * rayDistance, Color.red, 1f);
+
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, rayDistance))
+        {
+            Debug.LogError($"[공격] 적 감지됨: {hit.collider.name}");
+
+            if (hit.collider.TryGetComponent(out MinionAI minion))
+            {
+                Debug.LogError("[공격] MinionAI에게 데미지 10 부여");
+                minion.TakeDamage(10);
+            }
+            else if (hit.collider.TryGetComponent(out ZombieMarinerAI zombie))
+            {
+                Debug.LogError("[공격] ZombieMarinerAI에게 데미지 10 부여");
+                zombie.TakeDamage(10);
+            }
+            else
+            {
+                Debug.LogError("[공격] 타겟은 MinionAI나 ZombieMarinerAI가 아님");
+            }
+        }
+        else
+        {
+            Debug.LogError("[공격] 적 없음 - Ray에 아무것도 맞지 않음");
+        }
+    }
+
 
     void FixedUpdate()
     {

@@ -5179,7 +5179,6 @@ GameObject:
   - component: {fileID: 439075665}
   - component: {fileID: 439075662}
   - component: {fileID: 439075661}
-  - component: {fileID: 439075668}
   - component: {fileID: 439075663}
   - component: {fileID: 439075669}
   - component: {fileID: 439075670}
@@ -5325,21 +5324,6 @@ Transform:
   - {fileID: 361639221}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &439075668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 439075660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spritePivot: {fileID: 439075667}
-  flipThreshold: 2
-  lookOffset: -5
 --- !u!114 &439075669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24785,6 +24769,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7485795020884057407}
   - component: {fileID: 5391753610911529578}
+  - component: {fileID: 7791834170716743516}
   m_Layer: 0
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -24792,6 +24777,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7791834170716743516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7791834170716743515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spritePivot: {fileID: 439075667}
+  flipThreshold: 2
+  lookOffset: -5
 --- !u!1 &7926458614739391520
 GameObject:
   m_ObjectHideFlags: 0

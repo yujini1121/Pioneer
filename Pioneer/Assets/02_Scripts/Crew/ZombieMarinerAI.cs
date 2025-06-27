@@ -13,7 +13,7 @@ public class ZombieMarinerAI : MonoBehaviour
     private ZombieState currentState = ZombieState.Wandering;
 
     private float speed = 1f;
-    private float hp = 40f;
+    private float hp;
     private float moveDuration = 2f;
     private float idleDuration = 4f;
     private float stateTimer = 0f;
@@ -37,6 +37,7 @@ public class ZombieMarinerAI : MonoBehaviour
 
     //ray
     private FOVController fovController;
+
     private void Awake()
     {
         fovController = GetComponent<FOVController>();
@@ -57,7 +58,6 @@ public class ZombieMarinerAI : MonoBehaviour
             return false;
 
         return fovController.visibleTargets.Contains(target);
-
     }
 
     private void Start()
@@ -70,11 +70,7 @@ public class ZombieMarinerAI : MonoBehaviour
 
     private void InitZombieStats()
     {
-        if (hp > 40f)
-        {
-            Debug.Log("좀비 AI HP 자동 조정");
-            hp = 40f;
-        }
+        hp = 40f; // 항상 40으로 고정
     }
 
     private void Update()
@@ -87,7 +83,7 @@ public class ZombieMarinerAI : MonoBehaviour
             {
                 if (IsTargetInFOV())
                 {
-                    LookAtTarget(); 
+                    LookAtTarget();
 
                     if (attackRoutine == null)
                     {
@@ -195,7 +191,7 @@ public class ZombieMarinerAI : MonoBehaviour
     /// 빨간색 박스 공격 범위 생성
     /// </summary>
     /// <returns></returns>
-    public GameObject attackRangeObject; 
+    public GameObject attackRangeObject;
 
     private IEnumerator AttackSequence()
     {
@@ -213,14 +209,14 @@ public class ZombieMarinerAI : MonoBehaviour
 
         if (attackRangeObject != null)
         {
-            attackRangeObject.SetActive(true); 
+            attackRangeObject.SetActive(true);
         }
 
         yield return new WaitForSeconds(attackVisualDuration);
 
         if (attackRangeObject != null)
         {
-            attackRangeObject.SetActive(false); 
+            attackRangeObject.SetActive(false);
         }
 
         // 공격 판정 
@@ -244,6 +240,20 @@ public class ZombieMarinerAI : MonoBehaviour
         attackRoutine = null;
     }
 
+    public void TakeDamage(float damage)
+    {
+        hp -= damage;
+        if (hp <= 0f)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        Debug.Log("좀비 마리너 사망");
+        Destroy(gameObject);
+    }
 
     private void OnDrawGizmos()
     {

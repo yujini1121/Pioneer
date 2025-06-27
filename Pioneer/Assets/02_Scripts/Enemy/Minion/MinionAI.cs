@@ -445,8 +445,25 @@ public class MinionAI : EnemyBase
             UnityEngine.Debug.Log("[공격] 실패 - 타겟을 찾을 수 없음");
             return INode.ENodeState.Failure;
         }
-    }   
+    }
     #endregion
+
+    public void TakeDamage(int damage)
+    {
+        OnDamageReaction(damage, GameObject.FindWithTag("Player")); // 또는 공격자 전달
+        hp -= damage;
+        if (hp <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        UnityEngine.Debug.Log("미니언 사망");
+        Destroy(gameObject);
+    }
+
 
     #region 행동 트리 설정
     INode SettingBt()
