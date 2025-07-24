@@ -13,6 +13,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public TextMeshProUGUI count;
     public bool isSlot;
 
+
     public void Show(SItemStack item)
     {
         if (item == null || item.id == 0)
@@ -36,7 +37,6 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     }
     public void Clear()
     {
-        Debug.Log("AAA");
         image.enabled = false;
         count.text = "";
     }

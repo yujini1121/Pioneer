@@ -169,8 +169,6 @@ public class CraftUiMain : MonoBehaviour
                     }
                 }
                 mShowText();
-
-#warning 아이템 레시피 재료 이미지 보여주는 기능
                 void mShowRecipeIcon()
                 {
                     ClearIcon();

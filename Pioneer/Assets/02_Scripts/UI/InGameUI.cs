@@ -5,6 +5,8 @@ using UnityEngine.Rendering;
 
 public class InGameUI : MonoBehaviour
 {
+    static public InGameUI instance;
+
     public GameObject defaultCraftUI;
     public GameObject makeshiftCraftUI;
     public GameObject ManuUI;
@@ -15,6 +17,11 @@ public class InGameUI : MonoBehaviour
     //Coroutine coroutineDenyESC = null;
     float denyUiEndTime = 0.0f;
     float denyUiLifeTime = 2.0f;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +50,7 @@ public class InGameUI : MonoBehaviour
     public void ShowDefaultCraftUI()
     {
         Clear();
+    
         Show(defaultCraftUI);
     }
 
@@ -71,6 +79,7 @@ public class InGameUI : MonoBehaviour
     {
         if (defaultCraftUI.activeInHierarchy)
         {
+        
             CloseDefaultCraftUI();
             return;
         }

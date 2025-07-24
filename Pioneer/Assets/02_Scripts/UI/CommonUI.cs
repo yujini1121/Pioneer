@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,6 +10,7 @@ public class CommonUI : MonoBehaviour
     public static CommonUI instance;
 
     [SerializeField] GameObject prefabItemButton;
+    [SerializeField] GameObject prefabItemCategoryButton;
     [SerializeField] Sprite imageEmpty;
     Coroutine currentCraftCoroutine;
 
@@ -108,6 +110,16 @@ public class CommonUI : MonoBehaviour
             });
         });
         return itemButton;
+    }
+
+    public Button ShowCategoryButton(GameObject patent, DefaultFabrication ui, 
+        int index, Vector2 delta, Vector2 buttonSize)
+    {
+        // 레시피는 스텐다드매니저 뜯어봐서 해당 항목의 모든 카테고리속 레시피를 가져옴
+
+        // 버튼을 누르면, ShowItemButton와 프리펩 호출함
+
+        throw new NotImplementedException();
     }
 
     private static void mSetButtonAvailable(Image buttonImage, SItemRecipeSO pRecipe)
