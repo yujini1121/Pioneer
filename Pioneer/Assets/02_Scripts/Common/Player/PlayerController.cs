@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviour, IBegin
 
         if(Input.GetMouseButtonDown(0) && !isAttack)
         {            
-            StartCoroutine(AttackRoutine());
+            //StartCoroutine(AttackRoutine());
         }
     }
 
@@ -72,29 +72,29 @@ public class PlayerController : MonoBehaviour, IBegin
         playerDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
     }
 
-    private IEnumerator AttackRoutine()
-    {
-        isAttack = true;
-        StartCoroutine(playerAttack.AttackRange());
-        yield return new WaitForSeconds(attackCoolTime);
-        isAttack = false;
-    }
+    //private IEnumerator AttackRoutine()
+    //{
+    //    isAttack = true;
+    //    StartCoroutine(playerAttack.AttackRange());
+    //    yield return new WaitForSeconds(attackCoolTime);
+    //    isAttack = false;
+    //}
 
-    public void TakeDamage(float damage)
-    {
-        playerHP -= damage;
+    //public void TakeDamage(float damage)
+    //{
+    //    playerHP -= damage;
 
-        UnityEngine.Debug.Log($"[데미지] 받은 데미지: {damage} 현재 HP: {playerHP}");
+    //    UnityEngine.Debug.Log($"[데미지] 받은 데미지: {damage} 현재 HP: {playerHP}");
 
-        if (playerHP <= 0)
-        {
-            playerHP = 0;
-            Die();
-        }
-    }
+    //    if (playerHP <= 0)
+    //    {
+    //        playerHP = 0;
+    //        Die();
+    //    }
+    //}
 
-    public void Die()
-    {
-        UnityEngine.Debug.Log($"[사망] 플레이어 HP가 0 이하가 되었습니다! 현재 HP: {playerHP}");
-    }
+    //public void Die()
+    //{
+    //    UnityEngine.Debug.Log($"[사망] 플레이어 HP가 0 이하가 되었습니다! 현재 HP: {playerHP}");
+    //}
 }

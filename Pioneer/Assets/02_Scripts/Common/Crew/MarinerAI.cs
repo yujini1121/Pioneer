@@ -50,7 +50,7 @@ public class MarinerAI : MonoBehaviour, IBegin
         return fovController.visibleTargets.Contains(target);
 
     }
-    private void Init()
+    public void Init()
     {
         SetRandomDirection();
         stateTimer = moveDuration;

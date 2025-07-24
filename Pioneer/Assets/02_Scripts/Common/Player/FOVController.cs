@@ -6,11 +6,11 @@ using UnityEngine;
 public class FOVController : MonoBehaviour, IBegin
 {
     [Header("시야 범위(원)")]
-    [SerializeField] private float viewRadius = 10f;
+    public float viewRadius = 10f;
 
     [Header("시야 각")]
     [Range(0, 360)]
-    [SerializeField] private float viewAngle = 45f;
+    public float viewAngle = 45f;
 
     [Header("시야 감지 간격")]
     [SerializeField] private float detectionInterval = 0.2f;

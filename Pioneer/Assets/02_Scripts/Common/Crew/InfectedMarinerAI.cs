@@ -19,7 +19,7 @@ public class InfectedMarinerAI : MonoBehaviour, IBegin
 
     private NavMeshAgent agent;
 
-    private void Init()
+    public void Init()
     {
         agent = GetComponent<NavMeshAgent>();
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour, IBegin
 {
     public static GameManager Instance;
 
@@ -56,6 +56,27 @@ public class GameManager : MonoBehaviour
 
         postProcessVolume.profile.TryGet(out colorAdjustments);
         fullCycleDuration = dayDuration + nightDuration;
+    }
+
+    private void Start()
+    {
+        // InfectedMarinerAI가 붙어 있는 모든 오브젝트 초기화
+        foreach (var infected in FindObjectsOfType<InfectedMarinerAI>())
+        {
+            infected.Init();
+        }
+
+        // MarinerAI가 붙어 있는 모든 오브젝트 초기화
+        foreach (var mariner in FindObjectsOfType<MarinerAI>())
+        {
+            mariner.Init();
+        }
+
+        // UnitBase가 붙어 있는 모든 오브젝트 초기화
+        foreach (var unit in FindObjectsOfType<UnitBase>())
+        {
+            unit.Init();
+        }    
     }
 
     private void Update()

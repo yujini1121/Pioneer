@@ -9,28 +9,18 @@ public class UnitBase : MonoBehaviour, IBegin
     [Header("카메라 바라보기 설정")]
     [SerializeField] private float lookOffset = -7f;   // 카메라 위치에서 얼마나 위를 바라볼지
 
-    #region Bounce 설정 다시 하고 싶으면 키기~~~ 1
-    // [Header("Bounce 설정")]
-    // [SerializeField] private float bounceHeight = 0.25f;
-    // [SerializeField] private float bounceSpeed  = 5f;
-    // private float baseY;
-    #endregion
-
     private Transform cameraTransform;
     private Vector3 lastPosition;
     private Vector3 originalScale;
 
-    private void Init()
+    public void Init()
     {
         cameraTransform = Camera.main.transform;
         lastPosition = transform.position;
 
         // SpritePivot의 원래 스케일 저장
+        Debug.Log($">> localScale = {spritePivot.localScale}");
         originalScale = spritePivot.localScale;
-
-        #region Bounce 설정 다시 하고 싶으면 키기~~~ 2
-        // baseY = spritePivot.localPosition.y;
-        #endregion
     }
 
     private void Update()
@@ -48,27 +38,12 @@ public class UnitBase : MonoBehaviour, IBegin
         if (Mathf.Abs(moveDir.x) > flipThreshold)
         {
             Vector3 s = originalScale;
+            Debug.Log($">> s = {s}");
             s.x = Mathf.Abs(originalScale.x) * (moveDir.x > 0 ? -1 : 1);
+            Debug.Log($">> s.x = {s.x}");
             spritePivot.localScale = s;
+            Debug.Log($">> localScale = {spritePivot.localScale}");
         }
-
-
-        #region Bounce 설정 다시 하고 싶으면 키기~~~ 3
-        /*
-        // 이동 중일 때만 위아래로 통통 튀는 효과
-        Vector3 spritePos = spritePivot.localPosition;
-        if (Mathf.Abs(moveDir.x) > flipThreshold)
-        {
-            float jump = Mathf.Abs(Mathf.Sin(Time.time * bounceSpeed));
-            spritePos.y = baseY + jump * bounceHeight;
-        }
-        else
-        {
-            spritePos.y = baseY;
-        }
-        spritePivot.localPosition = spritePos;
-        */
-        #endregion
 
         // 4) 현재 위치 저장
         lastPosition = transform.position;
