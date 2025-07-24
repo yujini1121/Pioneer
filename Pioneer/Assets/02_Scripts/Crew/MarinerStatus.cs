@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MarinerStatus : MonoBehaviour
+public class MarinerStatus : MonoBehaviour, IBegin
 {
     public int maxHP = 70;
     public int currentHP;
@@ -12,7 +12,7 @@ public class MarinerStatus : MonoBehaviour
     public bool IsDead = false;
     public bool IsConfused = false;
 
-    private void Start()
+    private void Init()
     {
         currentHP = maxHP;
     }

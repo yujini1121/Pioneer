@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class FOVController : MonoBehaviour
+public class FOVController : MonoBehaviour, IBegin
 {
     [Header("시야 범위(원)")]
     [SerializeField] private float viewRadius = 10f;
@@ -21,7 +21,7 @@ public class FOVController : MonoBehaviour
 
     public List<Transform> visibleTargets = new List<Transform>();
 
-    private void Start()
+    private void Init()
     {
         StartCoroutine(DetectRatgets());
     }

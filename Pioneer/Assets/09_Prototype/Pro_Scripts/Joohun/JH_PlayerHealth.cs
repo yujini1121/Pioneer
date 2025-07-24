@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JH_PlayerHealth : MonoBehaviour
+public class JH_PlayerHealth : MonoBehaviour, IBegin
 {
     [Header("Health Settings")]
     public int maxHP = 100;
@@ -16,7 +16,7 @@ public class JH_PlayerHealth : MonoBehaviour
     private bool isDead = false;
     private bool isInvincible = false;
 
-    void Start()
+    void Init()
     {
         currentHP = maxHP;
     }

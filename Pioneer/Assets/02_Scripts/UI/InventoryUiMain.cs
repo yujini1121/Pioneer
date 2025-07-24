@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InventoryUiMain : MonoBehaviour
+public class InventoryUiMain : MonoBehaviour, IBegin
 {
     static public InventoryUiMain instance;
     
@@ -116,7 +116,7 @@ public class InventoryUiMain : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         followUiRect1 = imageMouseHoldingItem.GetComponent<RectTransform>();
         followUiRect2 = windowMouse.GetComponent<RectTransform>();

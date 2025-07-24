@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MarinerAI : MonoBehaviour
+public class MarinerAI : MonoBehaviour, IBegin
 {
     public enum MarinerState { Wandering, Idle, Attacking }
 
@@ -50,7 +50,7 @@ public class MarinerAI : MonoBehaviour
         return fovController.visibleTargets.Contains(target);
 
     }
-    private void Start()
+    private void Init()
     {
         SetRandomDirection();
         stateTimer = moveDuration;

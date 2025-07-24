@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class GuiltySystem : MonoBehaviour
+public class GuiltySystem : MonoBehaviour, IBegin
 {
     public static GuiltySystem instance;
 
@@ -74,7 +74,7 @@ public class GuiltySystem : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         
     }

@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CraftUiMain : MonoBehaviour
+public class CraftUiMain : MonoBehaviour, IBegin
 {
     public static CraftUiMain instance;
 
@@ -44,7 +44,7 @@ public class CraftUiMain : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         //textMeshProUGUI.tex
         materialEachText = new TextMeshProUGUI[3]

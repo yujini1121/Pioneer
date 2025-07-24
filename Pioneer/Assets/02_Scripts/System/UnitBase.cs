@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class UnitBase : MonoBehaviour
+public class UnitBase : MonoBehaviour, IBegin
 {
     [Header("Sprite 설정")]
     [SerializeField] private Transform spritePivot;    // SpriteRenderer가 달린 자식
@@ -20,7 +20,7 @@ public class UnitBase : MonoBehaviour
     private Vector3 lastPosition;
     private Vector3 originalScale;
 
-    private void Start()
+    private void Init()
     {
         cameraTransform = Camera.main.transform;
         lastPosition = transform.position;

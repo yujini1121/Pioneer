@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MakeshiftCraftUiMain : MonoBehaviour
+public class MakeshiftCraftUiMain : MonoBehaviour, IBegin
 {
     [Header("UI")]
     [SerializeField] GameObject pivot;
@@ -12,7 +12,7 @@ public class MakeshiftCraftUiMain : MonoBehaviour
     [SerializeField] Vector2 itemButtonSize;
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         closeTab.onClick.AddListener(() =>
         {

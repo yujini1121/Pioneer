@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// 좀비 AI - 타겟이 시야에 들어오면 접근 후 공격 시각화 및 판정
 /// </summary>
-public class ZombieMarinerAI : MonoBehaviour
+public class ZombieMarinerAI : MonoBehaviour, IBegin
 {
     public enum ZombieState { Wandering, Idle, Attacking }
     public int marinerId;
@@ -60,7 +60,7 @@ public class ZombieMarinerAI : MonoBehaviour
         return fovController.visibleTargets.Contains(target);
     }
 
-    private void Start()
+    private void Init()
     {
         InitZombieStats();
         SetRandomDirection();

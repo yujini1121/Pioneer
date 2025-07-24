@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TY_PrefabHolder : MonoBehaviour
+public class TY_PrefabHolder : MonoBehaviour, IBegin
 {
     public static TY_PrefabHolder instance;
 
@@ -10,7 +10,7 @@ public class TY_PrefabHolder : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         instance = this;
     }

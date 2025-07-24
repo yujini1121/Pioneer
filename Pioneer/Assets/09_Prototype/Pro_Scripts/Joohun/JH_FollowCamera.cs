@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JH_FollowCamera : MonoBehaviour
+public class JH_FollowCamera : MonoBehaviour, IBegin
 {
     public GameObject attackObject;             
     public float attackCooldown = 0.5f;
@@ -11,7 +11,7 @@ public class JH_FollowCamera : MonoBehaviour
     private bool canAttack = true;
     private Camera mainCamera;
 
-    void Start()
+    void Init()
     {
         mainCamera = Camera.main;
     }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Audio;
 
-public class Option : MonoBehaviour
+public class Option : MonoBehaviour, IBegin
 {
     [Header("Vol Slider")]
     [SerializeField] private Slider masterVolSlider;
@@ -22,7 +22,7 @@ public class Option : MonoBehaviour
     [SerializeField] private Button xButton;
     [SerializeField] private GameObject optionUI;
 
-    private void Start()
+    private void Init()
     {
         if (optionButton != null && xButton != null)
         {

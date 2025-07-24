@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class DayAndNight : MonoBehaviour
+public class DayAndNight : MonoBehaviour, IBegin
 {
     public Volume volume;
     private ColorAdjustments colorAdjustments;
@@ -14,7 +14,7 @@ public class DayAndNight : MonoBehaviour
 
     private float timer;
 
-    void Start()
+    void Init()
     {
         volume.profile.TryGet(out colorAdjustments);
     }

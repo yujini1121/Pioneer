@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-public class SceneController : MonoBehaviour
+public class SceneController : MonoBehaviour, IBegin
 {
     public static SceneController Instance;
 
@@ -27,7 +27,7 @@ public class SceneController : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Init()
     {
         currentSceneName = SceneManager.GetActiveScene().name;
         StartCoroutine(Fade(1, 0));

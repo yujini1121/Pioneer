@@ -5,7 +5,7 @@ using TMPro;
 
 public enum ResourceType { Wood, Energy, Hammer }
 
-public class ResourceManager : MonoBehaviour
+public class ResourceManager : MonoBehaviour, IBegin
 {
     public static ResourceManager Instance;
 
@@ -35,7 +35,7 @@ public class ResourceManager : MonoBehaviour
         resourceTexts[ResourceType.Hammer] = hammerText;
     }
 
-    private void Start()
+    private void Init()
     {
         UpdateAllTexts();
         StartCoroutine(EnergyAutoGain());

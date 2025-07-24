@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 
-public class CheckBottom : MonoBehaviour
+public class CheckBottom : MonoBehaviour, IBegin
 {
     public int playerHp = 100;
     public int maxHp = 100;
@@ -23,7 +23,7 @@ public class CheckBottom : MonoBehaviour
 
     private NavMeshAgent agent;
 
-    void Start()
+    void Init()
     {
         if (hpBar != null)
         {

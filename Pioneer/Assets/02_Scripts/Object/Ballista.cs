@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class Ballista : MonoBehaviour
+public class Ballista : MonoBehaviour, IBegin
 {
     private enum DetectType { Circle, Rectangle }
 
@@ -43,7 +43,7 @@ public class Ballista : MonoBehaviour
     private int poolIndex = 0;
     private float curCooldown;
 
-    private void Start()
+    private void Init()
     {
         centerVecY = GetComponent<SphereCollider>().center.y;
 

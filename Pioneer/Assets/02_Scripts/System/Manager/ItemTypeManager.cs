@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemTypeManager : MonoBehaviour
+public class ItemTypeManager : MonoBehaviour, IBegin
 {
     public static ItemTypeManager Instance;
 
@@ -27,7 +27,7 @@ public class ItemTypeManager : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    private void Start()
+    private void Init()
     {
     }
 

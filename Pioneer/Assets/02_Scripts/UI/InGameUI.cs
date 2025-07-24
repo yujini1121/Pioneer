@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class InGameUI : MonoBehaviour
+public class InGameUI : MonoBehaviour, IBegin
 {
     static public InGameUI instance;
 
@@ -24,7 +24,7 @@ public class InGameUI : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         Show(makeshiftCraftUI);
     }

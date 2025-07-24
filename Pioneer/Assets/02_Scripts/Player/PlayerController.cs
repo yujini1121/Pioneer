@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IBegin
 {
     public static PlayerController Instance;
 
@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Start()
+    void Init()
     {
         playerRb = GetComponent<Rigidbody>();
         playerAttack.playerTransform = transform;

@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CommonUI : MonoBehaviour
+public class CommonUI : MonoBehaviour, IBegin
 {
     public static CommonUI instance;
 
@@ -150,7 +150,7 @@ public class CommonUI : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         
     }

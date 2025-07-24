@@ -4,7 +4,7 @@ using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class TY_UiManager : MonoBehaviour
+public class TY_UiManager : MonoBehaviour, IBegin
 {
     static public TY_UiManager instance;
 
@@ -18,7 +18,7 @@ public class TY_UiManager : MonoBehaviour
 
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         
     }

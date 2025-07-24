@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemCategoryManager : MonoBehaviour
+public class ItemCategoryManager : MonoBehaviour, IBegin
 {
     public static ItemCategoryManager Instance;
 
@@ -31,7 +31,7 @@ public class ItemCategoryManager : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    private void Start()
+    private void Init()
     {
     }
 

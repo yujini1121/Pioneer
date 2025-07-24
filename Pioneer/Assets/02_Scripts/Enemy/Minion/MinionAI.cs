@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MinionAI : EnemyBase
+public class MinionAI : EnemyBase, IBegin
 {
     [Header("감지 가능한 레이어 설정")]
     [SerializeField] LayerMask detectMask;
@@ -20,7 +20,7 @@ public class MinionAI : EnemyBase
     private NavMeshAgent agent;
     private GameObject fallback;
 
-    void Start()
+    void Init()
     {
         SetAttribute();
 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemRecipeManager : MonoBehaviour
+public class ItemRecipeManager : MonoBehaviour, IBegin
 {
     public static ItemRecipeManager Instance;
 
@@ -36,7 +36,7 @@ public class ItemRecipeManager : MonoBehaviour
         InspectorRegister();
     }
 
-    private void Start()
+    private void Init()
     {
         
     }

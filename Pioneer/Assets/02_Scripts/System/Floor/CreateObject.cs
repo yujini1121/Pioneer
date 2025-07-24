@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
-public class CreateObject : MonoBehaviour
+public class CreateObject : MonoBehaviour, IBegin
 {
     public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable , Ballista, Trap, Lantern }
 
@@ -60,11 +60,11 @@ public class CreateObject : MonoBehaviour
         creationDict.Add(CreationType.Trap,             creationList.trap);
         creationDict.Add(CreationType.Lantern,          creationList.lantern);
 
-        Init();
+        CreateObjectInit();
     }
 
     //외부에서 'creationType' 수정 후 'Init'메서드 호출하여 초기화
-    public void Init()
+    public void CreateObjectInit()
     {
         rotateN = 0;
 
@@ -77,7 +77,8 @@ public class CreateObject : MonoBehaviour
         onHand.GetComponent<Collider>().isTrigger = true;
     }
 
-    private void Start()
+    // 원래 Start() 였던 메서드
+    private void Init()
     {
         ExitInstallMode(); // 게임 시작 시 설치 모드 OFF
     }
@@ -444,7 +445,7 @@ public class CreateObject : MonoBehaviour
 
         Debug.Log($"[설치모드 진입] 선택된 오브젝트: {installableSO.name}");
 
-        Init(); // 새 프리뷰 오브젝트 생성
+        CreateObjectInit(); // 새 프리뷰 오브젝트 생성
     }
 
     public void ExitInstallMode()

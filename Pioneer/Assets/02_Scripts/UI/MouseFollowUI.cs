@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MouseFollowUI : MonoBehaviour
+public class MouseFollowUI : MonoBehaviour, IBegin
 {
     RectTransform rectTransform;
 
-    void Start()
+    void Init()
     {
         rectTransform = GetComponent<RectTransform>();
     }

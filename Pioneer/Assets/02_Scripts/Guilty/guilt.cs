@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-public class guilt : MonoBehaviour
+public class guilt : MonoBehaviour, IBegin
 {
     public GameObject shadow_crew;
     int guilt_level;
@@ -33,7 +33,7 @@ public class guilt : MonoBehaviour
         Destroy(shadow_crew);
     }
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         guilt_level = 0;
     }

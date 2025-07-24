@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
-public class InstallableChecker : MonoBehaviour
+public class InstallableChecker : MonoBehaviour, IBegin
 {
     [Header("기본 설정")]
     public Camera mainCamera;
@@ -30,7 +30,7 @@ public class InstallableChecker : MonoBehaviour
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
 
-    void Start()
+    void Init()
     {
         if (mainCamera == null) mainCamera = Camera.main;
         if (worldSpaceParent == null) { Debug.LogError("WorldSpace 부모를 할당해주세요."); return; }

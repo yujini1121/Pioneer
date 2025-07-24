@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class InfectedMarinerAI : MonoBehaviour
+public class InfectedMarinerAI : MonoBehaviour, IBegin
 {
     public int marinerId;
     public bool isRepairing = false;
@@ -19,7 +19,7 @@ public class InfectedMarinerAI : MonoBehaviour
 
     private NavMeshAgent agent;
 
-    private void Start()
+    private void Init()
     {
         agent = GetComponent<NavMeshAgent>();
 

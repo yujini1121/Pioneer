@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerEvent : MonoBehaviour
+public class PlayerEvent : MonoBehaviour, IBegin
 {
     public static PlayerEvent instance;
 
@@ -28,7 +28,7 @@ public class PlayerEvent : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         
     }

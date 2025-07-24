@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class crew : MonoBehaviour
+public class crew : MonoBehaviour, IBegin
 {
     public Transform player;
     // Start is called before the first frame update
-    void Start()
+    void Init()
     {
         
     }
