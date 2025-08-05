@@ -14,6 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 0
   mirrorShader: {fileID: 4800000, guid: bc199d0ac4eaefd4e9a6d8c1b6986b90, type: 3}
+--- !u!114 &-4846257232947912544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e6ad570ef868f408942d5de4eab689, type: 3}
+  m_Name: GrayOverlayFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  material: {fileID: 2100000, guid: 64be001f6d86cef4ba146f2bacba4a57, type: 2}
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,7 +82,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
   - {fileID: -5847548050074442680}
-  m_RendererFeatureMap: adc0de57c6d2eee548e448b40756d9ae
+  - {fileID: -4846257232947912544}
+  m_RendererFeatureMap: adc0de57c6d2eee548e448b40756d9aea0e0f823b9a2bebc
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

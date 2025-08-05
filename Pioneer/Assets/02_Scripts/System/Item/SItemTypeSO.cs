@@ -7,6 +7,7 @@ using UnityEngine;
 public class SItemTypeSO : ScriptableObject
 {
     public int id;
+    public int maxStack;
     public string typeName;
     public EDataType categories;
     public string infomation;
