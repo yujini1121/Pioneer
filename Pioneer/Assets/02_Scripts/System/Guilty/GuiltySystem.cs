@@ -26,21 +26,21 @@ public class GuiltySystem : MonoBehaviour, IBegin
     private Vector3 mRightVector;
     private Vector2 mSize;
     private int deadCount = 0;
+    private int maxAttackWeight = 20; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
+    private int currentAttackWeight = 0; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
     private int level = 0;
 
-
-
-
-    public void CrewDead()
+    public void ChangeWeight(int value)
     {
-        deadCount++;
+        currentAttackWeight += value;
+        currentAttackWeight = Mathf.Clamp(currentAttackWeight, 0, maxAttackWeight);
 
-        switch (deadCount)
+        switch (currentAttackWeight)
         {
-            case >= 11: level = 4; break;
-            case >= 8: level = 3; break;
-            case >= 4: level = 2; break;
-            case >= 1: level = 1; break;
+            case >= 16: level = 4; break;
+            case >= 12: level = 3; break;
+            case >= 8: level = 2; break;
+            case >= 4: level = 1; break;
             default: level = 0; break;
         }
 
@@ -54,6 +54,14 @@ public class GuiltySystem : MonoBehaviour, IBegin
             darkObjectCoroutine = StartCoroutine(CoroutineDarkObject());
         }
     }
+
+    public void CrewDead()
+    {
+        deadCount++;
+        ChangeWeight(2);
+    }
+    public void TimeReachedToDayTime() => ChangeWeight(-1);
+    public void Drink() => ChangeWeight(-2);
 
     private void Awake()
     {

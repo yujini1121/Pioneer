@@ -116,7 +116,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     }
 
     // Start is called before the first frame update
-    void Init()
+    public void Init()
     {
         followUiRect1 = imageMouseHoldingItem.GetComponent<RectTransform>();
         followUiRect2 = windowMouse.GetComponent<RectTransform>();

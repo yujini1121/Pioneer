@@ -60,6 +60,8 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void Start()
     {
+        Debug.Log($">> GameManager.Start()");
+
         // InfectedMarinerAI가 붙어 있는 모든 오브젝트 초기화
         foreach (var infected in FindObjectsOfType<InfectedMarinerAI>())
         {
@@ -76,7 +78,9 @@ public class GameManager : MonoBehaviour, IBegin
         foreach (var unit in FindObjectsOfType<UnitBase>())
         {
             unit.Init();
-        }    
+        }
+
+        InventoryUiMain.instance.Init();
     }
 
     private void Update()
