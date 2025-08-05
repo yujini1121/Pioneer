@@ -59,7 +59,7 @@ public class ZombieMarinerAI : CreatureBase, IBegin
         return fovController.visibleTargets.Contains(target);
     }
 
-    private void Init()
+    public override void Init()
     {
         InitZombieStats();
         SetRandomDirection();
