@@ -1,4 +1,4 @@
-using System.Collections;
+/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -31,4 +31,4 @@ public class MarinerStatus : MonoBehaviour, IBegin
         Debug.Log("½Â¹«¿ø »ç¸Á");
         Destroy(gameObject);
     }
-}
+}*/

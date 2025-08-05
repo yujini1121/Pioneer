@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MarinerAI : MonoBehaviour, IBegin
+public class MarinerAI : CreatureBase, IBegin
 {
     public enum MarinerState { Wandering, Idle, Attacking }
 
@@ -50,11 +50,13 @@ public class MarinerAI : MonoBehaviour, IBegin
         return fovController.visibleTargets.Contains(target);
 
     }
-    public void Init()
+    public override void Init()
     {
         SetRandomDirection();
         stateTimer = moveDuration;
         agent = GetComponent<NavMeshAgent>();
+
+        base.Init();
     }
 
     private void Update()
@@ -392,14 +394,12 @@ public class MarinerAI : MonoBehaviour, IBegin
         {
             Debug.Log($"{hit.name} 공격 범위 내");
 
-            MarinerStatus marinerStatus = hit.GetComponent<MarinerStatus>();
-            if (marinerStatus != null)
+            CommonBase targetBase = hit.GetComponent<CommonBase>();
+            if (targetBase != null)
             {
-                int damage = marinerStatus.attackPower;
-                marinerStatus.currentHP -= damage;
+                int damage = 6;
+                targetBase.TakeDamage(damage);
                 Debug.Log($"{hit.name}에게 {damage}의 데미지를 입혔습니다.");
-
-                marinerStatus.UpdateStatus();
             }
         }
 
@@ -427,7 +427,7 @@ public class MarinerAI : MonoBehaviour, IBegin
     }
     
     
-    //목적지 초기화 코드
+    //목적지 초기화 코드q
     public IEnumerator MoveToThenReset(Vector3 destination)
     {
         MoveTo(destination);

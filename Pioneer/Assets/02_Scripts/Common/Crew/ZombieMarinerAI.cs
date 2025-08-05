@@ -6,14 +6,13 @@ using UnityEngine;
 /// <summary>
 /// 좀비 AI - 타겟이 시야에 들어오면 접근 후 공격 시각화 및 판정
 /// </summary>
-public class ZombieMarinerAI : MonoBehaviour, IBegin
+public class ZombieMarinerAI : CreatureBase, IBegin
 {
     public enum ZombieState { Wandering, Idle, Attacking }
     public int marinerId;
     private ZombieState currentState = ZombieState.Wandering;
 
     private float speed = 1f;
-    private float hp;
     private float moveDuration = 2f;
     private float idleDuration = 4f;
     private float stateTimer = 0f;
@@ -66,11 +65,13 @@ public class ZombieMarinerAI : MonoBehaviour, IBegin
         SetRandomDirection();
         stateTimer = moveDuration;
         Debug.Log("좀비 승무원 작동 중");
+
+        base.Init();
     }
 
     private void InitZombieStats()
     {
-        hp = 40f; // 항상 40으로 고정
+        maxHp = 40; // 항상 40으로 고정
     }
 
     private void Update()
@@ -224,12 +225,11 @@ public class ZombieMarinerAI : MonoBehaviour, IBegin
 
         foreach (var hit in hits)
         {
-            MarinerStatus marinerStatus = hit.GetComponent<MarinerStatus>();
-            if (marinerStatus != null)
+            CommonBase targetBase = hit.GetComponent<CommonBase>();
+            if (targetBase != null)
             {
-                int damage = marinerStatus.attackPower;
-                marinerStatus.currentHP -= damage;
-                marinerStatus.UpdateStatus();
+                int damage = 6;
+                targetBase.TakeDamage(damage);
                 Debug.Log($"{hit.name}에게 {damage}의 데미지를 입혔습니다.");
             }
         }
@@ -238,21 +238,6 @@ public class ZombieMarinerAI : MonoBehaviour, IBegin
         stateTimer = moveDuration;
         SetRandomDirection();
         attackRoutine = null;
-    }
-
-    public void TakeDamage(float damage)
-    {
-        hp -= damage;
-        if (hp <= 0f)
-        {
-            Die();
-        }
-    }
-
-    private void Die()
-    {
-        Debug.Log("좀비 마리너 사망");
-        Destroy(gameObject);
     }
 
     private void OnDrawGizmos()

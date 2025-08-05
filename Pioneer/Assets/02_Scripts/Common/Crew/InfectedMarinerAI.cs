@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class InfectedMarinerAI : MonoBehaviour, IBegin
+public class InfectedMarinerAI : CreatureBase, IBegin
 {
     public int marinerId;
     public bool isRepairing = false;
