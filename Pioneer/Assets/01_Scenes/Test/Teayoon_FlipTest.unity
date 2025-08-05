@@ -241,6 +241,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultCraftUI: {fileID: 1735160145}
   makeshiftCraftUI: {fileID: 1589021413}
+  ManuUI: {fileID: 0}
+  ManuDenyUI: {fileID: 0}
   currentOpenedUI: []
 --- !u!1 &133236376
 GameObject:
@@ -996,7 +998,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b70a8ed39e99fb449ee7410028c741d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mouseInventory:
+    id: 0
+    amount: 0
   itemLists: []
+  inventoryCount: 0
+  positionDrop: {fileID: 0}
 --- !u!114 &499136286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1011,6 +1018,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabItemButton: {fileID: 590576477171757539, guid: 9ac639694a13adc4989714d1fde1171a,
     type: 3}
+  prefabItemCategoryButton: {fileID: 0}
   imageEmpty: {fileID: 21300000, guid: 344168bb29e09c04e8a7437d60165d4e, type: 3}
 --- !u!1 &516078181
 GameObject:
@@ -1267,7 +1275,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 64be001f6d86cef4ba146f2bacba4a57, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
