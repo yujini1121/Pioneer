@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
-public class PlayerAttack : MonoBehaviour
+public class PlayerAttack : CreatureBase, IBegin
 {
     [HideInInspector]public Transform playerTransform;
 
@@ -44,14 +44,14 @@ public class PlayerAttack : MonoBehaviour
     {
         if(other.CompareTag("Enemy"))
         {
-            EnemyBase enemy = other.GetComponent<EnemyBase>();
+            CommonBase enemy = other.GetComponent<CommonBase>();
             if (enemy != null)
             {
                 int damage = 10; // 예시로 데미지 값을 설정
-                enemy.TakeDamage(damage, gameObject); // 적에게 데미지 전달
+                enemy.TakeDamage(damage); // 적에게 데미지 전달
 
-                if (enemy.hp <= 0)
-                    enemy.Die();
+                //if (enemy.hp <= 0)
+                //    enemy.Die();
             }            
         }
     }

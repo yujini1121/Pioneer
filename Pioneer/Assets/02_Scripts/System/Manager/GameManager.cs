@@ -80,7 +80,14 @@ public class GameManager : MonoBehaviour, IBegin
             unit.Init();
         }
 
-        InventoryUiMain.instance.Init();
+        if (InventoryUiMain.instance != null)
+        {
+            InventoryUiMain.instance.Init();
+        }
+        else
+        {
+            Debug.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
+        }
     }
 
     private void Update()

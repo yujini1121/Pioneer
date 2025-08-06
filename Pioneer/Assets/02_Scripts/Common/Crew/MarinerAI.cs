@@ -22,7 +22,6 @@ public class MarinerAI : CreatureBase, IBegin
     private bool isSecondPriorityStarted = false;
 
     // 공격관련
-    private float speed = 1f;
     private float moveDuration = 2f;
     private float idleDuration = 4f;
     private float stateTimer = 0f;
@@ -40,6 +39,7 @@ public class MarinerAI : CreatureBase, IBegin
     private void Awake()
     {
         fovController = GetComponent<FOVController>();
+        speed = 1f;
     }
 
     private bool IsTargetInFOV()
