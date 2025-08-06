@@ -10,9 +10,8 @@ public class MarinerAI : CreatureBase, IBegin
     private MarinerState currentState = MarinerState.Wandering;
 
     public LayerMask targetLayer;
-    public float detectionRange = 3f;
-    public float attackInterval = 0.5f;
     private float attackCooldown = 0f;
+    private float attackInterval = 0.5f;
     private Transform target;
 
     public int marinerId;
@@ -28,33 +27,49 @@ public class MarinerAI : CreatureBase, IBegin
     private Vector3 moveDirection;
 
     private bool isShowingAttackBox = false;
-    private float attackVisualDuration = 1f;
     private Coroutine attackRoutine;
 
     private NavMeshAgent agent;
 
-    //ray
-    private FOVController fovController;
-
     private void Awake()
     {
-        fovController = GetComponent<FOVController>();
+        // 상위 클래스 변수들에 값 할당 (Inspector에 표시되도록)
+        maxHp = 100;  // Mariner HP
         speed = 1f;
+        attackDamage = 6;
+        attackRange = 3f;
+        attackDelayTime = 1f;
+
+        // CreatureBase의 fov 변수 사용
+        fov = GetComponent<FOVController>();
+
+        gameObject.layer = LayerMask.NameToLayer("Mariner");
+        targetLayer = LayerMask.GetMask("Enemy");
     }
 
     private bool IsTargetInFOV()
     {
-        if (target == null || fovController == null)
+        if (target == null || fov == null)
             return false;
 
-        return fovController.visibleTargets.Contains(target);
-
+        // FOV에서 타겟 감지 수행
+        fov.DetectTargets(targetLayer);
+        return fov.visibleTargets.Contains(target);
     }
+
     public override void Init()
     {
         SetRandomDirection();
         stateTimer = moveDuration;
         agent = GetComponent<NavMeshAgent>();
+
+        // FOVController 초기화
+        if (fov != null)
+        {
+            fov.Init();
+        }
+
+        Debug.Log($"Mariner {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}, 공격범위: {attackRange}");
 
         base.Init();
     }
@@ -81,6 +96,8 @@ public class MarinerAI : CreatureBase, IBegin
         else
         {
             // 밤: Mariner AI
+            if (IsDead) return;
+
             attackCooldown -= Time.deltaTime;
 
             if (attackCooldown <= 0f)
@@ -89,7 +106,7 @@ public class MarinerAI : CreatureBase, IBegin
                 {
                     if (IsTargetInFOV())
                     {
-                        LookAtTarget();  
+                        LookAtTarget();
 
                         if (attackRoutine == null)
                         {
@@ -191,7 +208,6 @@ public class MarinerAI : CreatureBase, IBegin
         GameManager.Instance.ReleaseRepairObject(targetRepairObject); // 수리 완료 후 점유 해제
 
     }
-
 
     public IEnumerator StartSecondPriorityAction()
     {
@@ -336,9 +352,10 @@ public class MarinerAI : CreatureBase, IBegin
 
     private bool DetectTarget()
     {
+        // attackRange 변수 사용
         Collider[] hits = Physics.OverlapBox(
             transform.position,
-            new Vector3(1.5f, 0.5f, 1.5f),
+            new Vector3(attackRange / 2f, 0.5f, attackRange / 2f),
             Quaternion.identity,
             targetLayer
         );
@@ -384,7 +401,8 @@ public class MarinerAI : CreatureBase, IBegin
         }
 
         isShowingAttackBox = true;
-        yield return new WaitForSeconds(attackVisualDuration);
+        // CreatureBase의 attackDelayTime 변수 사용
+        yield return new WaitForSeconds(attackDelayTime);
         isShowingAttackBox = false;
 
         Vector3 boxCenter = transform.position + transform.forward * 1f;
@@ -397,9 +415,9 @@ public class MarinerAI : CreatureBase, IBegin
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
-                int damage = 6;
-                targetBase.TakeDamage(damage);
-                Debug.Log($"{hit.name}에게 {damage}의 데미지를 입혔습니다.");
+                // CreatureBase의 attackDamage 변수 사용
+                targetBase.TakeDamage(attackDamage);
+                Debug.Log($"{hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
             }
         }
 
@@ -423,11 +441,11 @@ public class MarinerAI : CreatureBase, IBegin
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(transform.position, new Vector3(3f, 1f, 3f));
+        // CreatureBase의 attackRange 변수 사용
+        Gizmos.DrawWireCube(transform.position, new Vector3(attackRange, 1f, attackRange));
     }
-    
-    
-    //목적지 초기화 코드q
+
+    //목적지 초기화 코드
     public IEnumerator MoveToThenReset(Vector3 destination)
     {
         MoveTo(destination);
@@ -440,5 +458,4 @@ public class MarinerAI : CreatureBase, IBegin
         agent.ResetPath();
         Debug.Log(" ResetPath 호출");
     }
-
 }

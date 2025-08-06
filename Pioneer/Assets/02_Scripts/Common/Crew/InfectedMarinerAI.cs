@@ -19,16 +19,41 @@ public class InfectedMarinerAI : CreatureBase, IBegin
 
     private NavMeshAgent agent;
 
-    public void Init()
+    private void Awake()
+    {
+        maxHp = 100;
+        speed = 1f;
+        attackDamage = 6;
+        attackRange = 2.5f;
+        attackDelayTime = 1.2f;
+
+        // CreatureBase의 fov 변수 사용
+        fov = GetComponent<FOVController>();
+
+        gameObject.layer = LayerMask.NameToLayer("Player");
+    }
+
+    public override void Init()
     {
         agent = GetComponent<NavMeshAgent>();
 
+        // FOVController 초기화
+        if (fov != null)
+        {
+            fov.Init();
+        }
+
         nightConfusionTime = Random.Range(0f, 30f);
+        Debug.Log($"감염된 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}");
         Debug.Log($"{marinerId} 밤 혼란 시드값 생성: {nightConfusionTime:F2}초");
+
+        base.Init();
     }
 
     private void Update()
     {
+        if (IsDead) return;
+
         if (GameManager.Instance.IsDaytime && !isNightBehaviorStarted)
         {
             isNight = false;
@@ -81,7 +106,6 @@ public class InfectedMarinerAI : CreatureBase, IBegin
             StartCoroutine(StartSecondPriorityAction());
         }
     }
-
 
     private IEnumerator MoveToRepairObject(Vector3 targetPosition)
     {
@@ -237,8 +261,8 @@ public class InfectedMarinerAI : CreatureBase, IBegin
         isConfused = true;
         Debug.Log("혼란 상태 시작");
 
-
-        float confusedSpeed = 3f;
+        // speed 변수 사용 (혼란 상태에서는 더 빠르게)
+        float confusedSpeed = speed * 3f; // CreatureBase의 speed * 3
         float escapedTime = 0;
 
         float angle = Random.Range(0f, 360f);
@@ -261,16 +285,24 @@ public class InfectedMarinerAI : CreatureBase, IBegin
 
     private void ChangeToZombieAI()
     {
-
-        
-
         Debug.Log("좀비 AI전환");
+
+        // ZombieMarinerAI 컴포넌트 추가
         if (GetComponent<ZombieMarinerAI>() == null)
         {
-            gameObject.AddComponent<ZombieMarinerAI>();
+            ZombieMarinerAI zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
+            zombieAI.marinerId = this.marinerId;
         }
-        // zombieAI.marinerId = this.marinerId;
 
+        // 현재 InfectedMarinerAI 컴포넌트 제거
         Destroy(this);
+    }
+
+    // 사망 시 특별한 처리가 필요한 경우 오버라이드
+    public override void WhenDestroy()
+    {
+        Debug.Log($"감염된 승무원 {marinerId} 사망!");
+        // 감염된 승무원 사망 시 특별한 로직 추가 가능
+        base.WhenDestroy();
     }
 }

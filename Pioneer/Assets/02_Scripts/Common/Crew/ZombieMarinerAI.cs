@@ -36,6 +36,12 @@ public class ZombieMarinerAI : CreatureBase, IBegin
 
     private void Awake()
     {
+        maxHp = 40;
+        speed = 1f;
+        attackDamage = 6;
+        attackRange = 3f;
+        attackDelayTime = 1f;
+
         // CreatureBase의 fov 변수 사용
         fov = GetComponent<FOVController>();
 
@@ -50,7 +56,8 @@ public class ZombieMarinerAI : CreatureBase, IBegin
         }
 
         gameObject.layer = LayerMask.NameToLayer("Enemy");
-        targetLayer = LayerMask.NameToLayer("Mariner");
+        
+        targetLayer = LayerMask.GetMask("Mariner");// fovController스크립트 이제 레이어 매개변수로 등록해야함.
     }
 
     private bool IsTargetInFOV()
@@ -58,6 +65,8 @@ public class ZombieMarinerAI : CreatureBase, IBegin
         if (target == null || fov == null)
             return false;
 
+        // FOV에서 타겟 감지 수행
+        fov.DetectTargets(targetLayer);
         return fov.visibleTargets.Contains(target);
     }
 
@@ -66,6 +75,13 @@ public class ZombieMarinerAI : CreatureBase, IBegin
         InitZombieStats();
         SetRandomDirection();
         stateTimer = moveDuration;
+
+        // FOVController 초기화
+        if (fov != null)
+        {
+            fov.Init();
+        }
+
         Debug.Log("좀비 승무원 작동 중");
 
         base.Init();
@@ -163,9 +179,10 @@ public class ZombieMarinerAI : CreatureBase, IBegin
 
     private bool DetectTarget()
     {
+        // attackRange 변수 사용
         Collider[] hits = Physics.OverlapBox(
             transform.position,
-            new Vector3(3.0f, 1.5f, 3.0f),
+            new Vector3(attackRange / 2f, 0.5f, attackRange / 2f),
             Quaternion.identity,
             targetLayer
         );
@@ -225,9 +242,9 @@ public class ZombieMarinerAI : CreatureBase, IBegin
 
         // 공격 판정 
         Collider[] hits = Physics.OverlapBox(
-            attackRangeObject.transform.position, 
-            attackRangeObject.transform.localScale / 2, 
-            transform.rotation, 
+            attackRangeObject.transform.position,
+            attackRangeObject.transform.localScale / 2,
+            transform.rotation,
             targetLayer
         );
 
@@ -236,7 +253,6 @@ public class ZombieMarinerAI : CreatureBase, IBegin
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
-                // CreatureBase의 attackDamage 변수 사용
                 targetBase.TakeDamage(attackDamage);
                 Debug.Log($"{hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
             }
@@ -258,7 +274,6 @@ public class ZombieMarinerAI : CreatureBase, IBegin
             Gizmos.DrawWireCube(Vector3.zero, new Vector3(2f, 1f, 2f));
         }
     }
-
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.blue;
