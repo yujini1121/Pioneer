@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
+// 250805 : 시야 감지가 필요한 각 스크립트에서 DetectTargets 함수에 감지할 레이어를 매개변수로 전달하여 호출하여 사용하도록 수정
+
 public class FOVController : MonoBehaviour, IBegin
 {
     [Header("시야 범위(원)")]
@@ -10,39 +12,31 @@ public class FOVController : MonoBehaviour, IBegin
 
     [Header("시야 각")]
     [Range(0, 360)]
-    public float viewAngle = 45f;
+    public float viewAngle = 360f;
 
     [Header("시야 감지 간격")]
-    [SerializeField] private float detectionInterval = 0.2f;
+    private float detectionInterval = 0.2f;
 
-    [Header("레이어 설정")]
-    [SerializeField] private LayerMask enemyMask;
-    [SerializeField] private LayerMask obstacleMask;
+    [Header("장애물 레이어 설정")]
+    private LayerMask obstacleMask;
 
     public List<Transform> visibleTargets = new List<Transform>();
 
-    private void Init()
+    public virtual void Init()
     {
-        StartCoroutine(DetectRatgets());
+        obstacleMask = LayerMask.GetMask("Obstacle"); // 레이어 이름 수정 필요
     }
 
-    IEnumerator DetectRatgets()
-    {
-        while(true)
-        {
-            yield return new WaitForSeconds(detectionInterval);
-
-            DetectTargets();
-        }
-    }
-
-    // 원형 범위 안에서 대상 찾기
-    // 시야각 내에 있는지 확인
-    // 장애물 있는지 레이캐스트 검사
-    private void DetectTargets()
+    /// <summary>
+    /// 1.원형 범위 안에서 대상 찾기
+    /// 2. 시야각 내에 있는지 확인
+    /// 3. 장애물 있는지 레이캐스트 검사
+    /// </summary>
+    /// <param name="targetLayer">탐지할 오브젝트의 레이어</param>
+    private void DetectTargets(LayerMask targetLayer)
     {
         visibleTargets.Clear();
-        Collider[] targetsInRange = Physics.OverlapSphere(transform.position, viewRadius, enemyMask);
+        Collider[] targetsInRange = Physics.OverlapSphere(transform.position, viewRadius, targetLayer);
 
         for (int i = 0; i < targetsInRange.Length; i++)
         {
