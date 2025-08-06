@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -12,14 +11,12 @@ public class ZombieMarinerAI : CreatureBase, IBegin
     public int marinerId;
     private ZombieState currentState = ZombieState.Wandering;
 
-    private float speed = 1f;
     private float moveDuration = 2f;
     private float idleDuration = 4f;
     private float stateTimer = 0f;
     private Vector3 moveDirection;
 
     // 타겟 탐지 및 공격
-    public float detectionRange = 3f;
     public LayerMask targetLayer;
     private float attackCooldown = 0f;
     private float attackInterval = 0.5f;
@@ -27,36 +24,41 @@ public class ZombieMarinerAI : CreatureBase, IBegin
 
     // 공격 시각화
     private bool isShowingAttackBox = false;
-    private float attackVisualDuration = 1f;
-    private Coroutine attackRoutine;
 
     // 스프라이트 변경
     public Transform spriteTransform;
     public SpriteRenderer spriteRenderer;
 
-    //ray
-    private FOVController fovController;
+    // 공격 범위 오브젝트
+    public GameObject attackRangeObject;
+
+    private Coroutine attackRoutine;
 
     private void Awake()
     {
-        fovController = GetComponent<FOVController>();
+        // CreatureBase의 fov 변수 사용
+        fov = GetComponent<FOVController>();
 
         spriteTransform = transform.GetChild(0);
         spriteRenderer = spriteTransform.GetComponent<SpriteRenderer>();
         GameManager gm = FindObjectOfType<GameManager>();
 
-        spriteTransform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-        spriteRenderer.sprite = gm.marinerSprites[1];
+        if (gm != null && gm.marinerSprites != null && gm.marinerSprites.Length > 1)
+        {
+            spriteTransform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            spriteRenderer.sprite = gm.marinerSprites[1];
+        }
+
         gameObject.layer = LayerMask.NameToLayer("Enemy");
         targetLayer = LayerMask.NameToLayer("Mariner");
     }
 
     private bool IsTargetInFOV()
     {
-        if (target == null || fovController == null)
+        if (target == null || fov == null)
             return false;
 
-        return fovController.visibleTargets.Contains(target);
+        return fov.visibleTargets.Contains(target);
     }
 
     public override void Init()
@@ -72,10 +74,16 @@ public class ZombieMarinerAI : CreatureBase, IBegin
     private void InitZombieStats()
     {
         maxHp = 40; // 항상 40으로 고정
+        speed = 1f; // CreatureBase의 변수 사용
+        attackDamage = 6; // CreatureBase의 변수 사용
+        attackRange = 3f; // CreatureBase의 변수 사용
+        attackDelayTime = 1f; // CreatureBase의 변수 사용
     }
 
     private void Update()
     {
+        if (IsDead) return;
+
         attackCooldown -= Time.deltaTime;
 
         if (attackCooldown <= 0f)
@@ -157,7 +165,7 @@ public class ZombieMarinerAI : CreatureBase, IBegin
     {
         Collider[] hits = Physics.OverlapBox(
             transform.position,
-            new Vector3(1.5f, 0.5f, 1.5f),
+            new Vector3(3.0f, 1.5f, 3.0f),
             Quaternion.identity,
             targetLayer
         );
@@ -188,12 +196,6 @@ public class ZombieMarinerAI : CreatureBase, IBegin
             transform.forward = dir;
     }
 
-    /// <summary>
-    /// 빨간색 박스 공격 범위 생성
-    /// </summary>
-    /// <returns></returns>
-    public GameObject attackRangeObject;
-
     private IEnumerator AttackSequence()
     {
         currentState = ZombieState.Attacking;
@@ -213,7 +215,8 @@ public class ZombieMarinerAI : CreatureBase, IBegin
             attackRangeObject.SetActive(true);
         }
 
-        yield return new WaitForSeconds(attackVisualDuration);
+        // CreatureBase의 attackDelayTime 변수 사용
+        yield return new WaitForSeconds(attackDelayTime);
 
         if (attackRangeObject != null)
         {
@@ -221,16 +224,21 @@ public class ZombieMarinerAI : CreatureBase, IBegin
         }
 
         // 공격 판정 
-        Collider[] hits = Physics.OverlapBox(attackRangeObject.transform.position, attackRangeObject.transform.localScale / 2, transform.rotation, targetLayer);
+        Collider[] hits = Physics.OverlapBox(
+            attackRangeObject.transform.position, 
+            attackRangeObject.transform.localScale / 2, 
+            transform.rotation, 
+            targetLayer
+        );
 
         foreach (var hit in hits)
         {
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
-                int damage = 6;
-                targetBase.TakeDamage(damage);
-                Debug.Log($"{hit.name}에게 {damage}의 데미지를 입혔습니다.");
+                // CreatureBase의 attackDamage 변수 사용
+                targetBase.TakeDamage(attackDamage);
+                Debug.Log($"{hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
             }
         }
 
@@ -254,6 +262,7 @@ public class ZombieMarinerAI : CreatureBase, IBegin
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(transform.position, new Vector3(3f, 1f, 3f));
+        // CreatureBase의 attackRange 변수 사용
+        Gizmos.DrawWireCube(transform.position, new Vector3(attackRange, 1f, attackRange));
     }
 }
