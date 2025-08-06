@@ -4,46 +4,47 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
+/*
+[탐색]
+- 타겟 오브젝트 돛대 설정 및 감지
+- 살아있는 생성한 둥지가 2개 미만 => 둥지 생성 (15초 대기 => 배회? 이동?)
+
+*/
 public class MinionAI : EnemyBase, IBegin
 {
-    [Header("감지 가능한 레이어 설정")]
-    [SerializeField] LayerMask detectMask;
+    [Header("감지 가능한 레이어")]
+    [SerializeField] private LayerMask detectLayer;
 
-    [Header("공격 범위 오브젝트")]
-    [SerializeField] GameObject attackBox;
+    [Header("둥지 프리팹")]
+    [SerializeField] private GameObject nestPrefab;
 
-    public int nestCount = 0;
-    public GameObject nestPrefab;
-
-    private float nestCoolTime = 15f;
-    private float nextNestCool;
     private NavMeshAgent agent;
-    private GameObject fallback;
 
-    void Init()
+    private int nestCount = 0;
+    private float nestCool = 15f;
+
+    public override void Init()
     {
-        //SetAttribute();
-
+        base.Init();
+        SetAttribute();
         agent = GetComponent<NavMeshAgent>();
-
-        fallback = GameObject.FindGameObjectWithTag("Engine");
     }
 
     void Update()
-    {
-        DetectTarget();
+    {       
+        fov.DetectTargets(detectLayer);
 
         if (CanCreateNest())
         {
             CreateNest();
         }
-        else if (CanAttack())
-        {
-            Attack();
-        }
-        else if (CanMove())
+        else if(CanMove())
         {
             Move();
+        }
+        else if(CanAttack())
+        {
+            Attack();
         }
         else
         {
@@ -51,113 +52,79 @@ public class MinionAI : EnemyBase, IBegin
         }
     }
 
-    //protected override void SetAttribute()
-    //{
-    //    hp = 20;
-    //    attackPower = 1;
-    //    speed = 2.0f;
-    //    detectionRange = 4;
-    //    attackRange = 2;
-    //    attackVisualTime = 1.0f;
-    //    restTime = 2.0f;
-    //    targetObject = GameObject.FindGameObjectWithTag("Engine");
-    //}
+    protected override void SetAttribute()
+    {
+        hp = 20;
+        attackDamage = 1;
+        speed = 2f;
+        detectionRange = 4f;
+        attackRange = 2f;
+        attackDelayTime = 2f;
+        idleTime = 2f;
 
+        SetMastTarget();
+
+        fov.viewRadius = attackRange;
+    }
+
+    #region 행동 조건 검사
     private bool CanCreateNest()
     {
-        return nestCount < 2 && Time.time > nextNestCool;
+        // 갑판 위인지 확인도 해야함
+        return nestCount < 2 && Time.time > nestCool;
     }
 
     private bool CanAttack()
     {
-        if (targetObject == null)
-            return false;
 
-        Vector3 boxCenter = transform.position + transform.forward * (attackRange / 2f);
-        Vector3 boxSize = new Vector3(attackRange / 2f, 1f, attackRange / 2f);
-        Collider[] targets = Physics.OverlapBox(boxCenter, boxSize, transform.rotation, detectMask);
-
-        foreach (Collider target in targets)
-        {
-            if (target.gameObject == targetObject)
-                return true;
-        }
-
-        return false;
+        return fov.visibleTargets.Count > 0;
     }
 
     private bool CanMove()
     {
-        if (targetObject != null)
-        {
+        if(targetObject != null)
             return true;
-        }
+
         return false;
     }
+    #endregion
 
-    private void CreateNest()
+    // 둥지 생성
+    void CreateNest()
     {
-        Instantiate(nestPrefab, transform.position, Quaternion.identity);
-        nestCount++;
-        nextNestCool = Time.time + nestCoolTime;
+
     }
 
-    private void DetectTarget()
+    // 공격
+    void Attack()
     {
-        Vector3 boxSize = new Vector3(detectionRange / 2f, 1f, detectionRange / 2f);
-        float closeDistance = float.MaxValue;
-        GameObject closeTarget = null;
+        Transform closesTarget = null;
+        float closesDis = float.MaxValue;
 
-        Collider[] targets = Physics.OverlapBox(transform.position, boxSize, Quaternion.identity, detectMask);
-
-        foreach (Collider target in targets)
+        foreach(var target in fov.visibleTargets)
         {
-            float targetDistance = Vector3.Distance(transform.position, target.transform.position);
-
-            if (targetDistance < closeDistance)
+            float dis = Vector3.Distance(transform.position, target.position);
+            if(dis < closesDis)
             {
-                closeDistance = targetDistance;
-                closeTarget = target.gameObject;
+                closesDis = dis;
+                closesTarget = target;
             }
         }
 
-        if (closeTarget != null)
+        if(closesTarget != null)
         {
-            targetObject = closeTarget;
-            agent.SetDestination(targetObject.transform.position);
-        }
-        else
-        {
-            if (fallback != null)
-            {
-                targetObject = fallback;
-            }
+            Vector3 dir = closesTarget.position - transform.position;
+            dir.y = 0f;
+
+            if(dir != Vector3.zero)
+                transform.rotation = Quaternion.LookRotation(dir);
+
+            // 공격
         }
     }
 
-    IEnumerator AttackVisualRoutine()
-    {
-        Vector3 attackBoxPos = transform.position + transform.forward * (attackRange / 2f);
-        attackBox.transform.position = attackBoxPos;
-        attackBox.SetActive(true);
-
-        yield return new WaitForSeconds(1f);
-
-        attackBox.SetActive(false);
-    }
-
-    private void Attack()
-    {
-        Vector3 dir = targetObject.transform.position - transform.position;
-        dir.y = 0f;
-        if (dir != Vector3.zero)
-            transform.rotation = Quaternion.LookRotation(dir);
-
-        StartCoroutine(AttackVisualRoutine());
-        // 데미지 처리
-    }
-
-    private void Move()
+    // 이동
+    void Move()
     {
         if (targetObject != null && agent.destination != targetObject.transform.position)
         {
@@ -165,7 +132,8 @@ public class MinionAI : EnemyBase, IBegin
         }
     }
 
-    private void Idle()
+    // 대기
+    void Idle()
     {
 
     }
