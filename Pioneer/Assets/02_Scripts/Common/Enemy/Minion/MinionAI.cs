@@ -8,6 +8,8 @@ using UnityEngine.AI;
 [탐색]
 - 타겟 오브젝트 돛대 설정 및 감지
 - 살아있는 생성한 둥지가 2개 미만 => 둥지 생성 (15초 대기 => 배회? 이동?)
+==========================================
+
 
 */
 public class MinionAI : EnemyBase, IBegin
@@ -22,6 +24,8 @@ public class MinionAI : EnemyBase, IBegin
 
     private int nestCount = 0;
     private float nestCool = 15f;
+
+    private bool isOnGround = false;
 
     public override void Init()
     {
@@ -70,8 +74,7 @@ public class MinionAI : EnemyBase, IBegin
     #region 행동 조건 검사
     private bool CanCreateNest()
     {
-        // 갑판 위인지 확인도 해야함
-        return nestCount < 2 && Time.time > nestCool;
+        return  isOnGround == true && nestCount < 2 && Time.time > nestCool;
     }
 
     private bool CanAttack()
@@ -132,9 +135,30 @@ public class MinionAI : EnemyBase, IBegin
         }
     }
 
+   void StopMoving()
+    {
+
+    }
+
     // 대기
     void Idle()
     {
 
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Ground"))
+        {
+            isOnGround = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isOnGround = false;
+        }
     }
 }
