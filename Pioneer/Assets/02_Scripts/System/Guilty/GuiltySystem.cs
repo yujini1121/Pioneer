@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class GuiltySystem : MonoBehaviour, IBegin
 {
@@ -14,13 +15,18 @@ public class GuiltySystem : MonoBehaviour, IBegin
     [Header("Dark Object")]
     public Vector3 forwardVector; // 카메라가 사선으로 배치된 경우, 이는 중요합니다.
     public Vector3 rightVector;
+    [SerializeField] AudioSource AudioSourceScream;
     [SerializeField] GameObject prefab;
     [SerializeField] GameObject player;
     [SerializeField] Transform pivot;
     [SerializeField] Vector2 size;
     [SerializeField] float darkObjectLifeTime;
     [SerializeField] float darkObjectTerm;
+    [SerializeField] float screamSoundChance;
+    [SerializeField] float screamSoundTerm;
+    [SerializeField] Volume volumeScreenTransformation;
     private Coroutine darkObjectCoroutine;
+    private Coroutine screamCoroutine;
     private Vector3[] mEdgePoints;
     private Vector3 mForwardVector;
     private Vector3 mRightVector;
@@ -32,6 +38,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
     public void ChangeWeight(int value)
     {
+
         currentAttackWeight += value;
         currentAttackWeight = Mathf.Clamp(currentAttackWeight, 0, maxAttackWeight);
 
@@ -43,15 +50,49 @@ public class GuiltySystem : MonoBehaviour, IBegin
             case >= 4: level = 1; break;
             default: level = 0; break;
         }
+        Debug.Log($">> GuiltySystem.ChangeWeight({value}) / level = {level}");
 
+
+        
         if (level >= 4)
         {
             canUseESC = false;
         }
-
-        if (level >= 1 && darkObjectCoroutine == null)
+        else
         {
-            darkObjectCoroutine = StartCoroutine(CoroutineDarkObject());
+            canUseESC = true;
+        }
+        if (level >= 2)
+        {
+            volumeScreenTransformation.enabled = true;
+
+            if (screamCoroutine == null)
+            {
+                screamCoroutine = StartCoroutine(CoroutineScreamSound());
+            }
+        }
+        else
+        {
+            if (screamCoroutine != null)
+            {
+                StopCoroutine(screamCoroutine);
+            }
+                
+            volumeScreenTransformation.enabled = false;
+        }
+        if (level >= 1)
+        {
+            if (darkObjectCoroutine == null)
+            {
+                darkObjectCoroutine = StartCoroutine(CoroutineDarkObject());
+            }
+        }
+        else
+        {
+            if (darkObjectCoroutine != null)
+            {
+                StopCoroutine(darkObjectCoroutine);
+            }
         }
     }
 
@@ -94,6 +135,14 @@ public class GuiltySystem : MonoBehaviour, IBegin
         {
             CrewDead();
         }
+        if (Input.GetKey(KeyCode.X) && Input.GetKeyDown(KeyCode.L))
+        {
+            TimeReachedToDayTime();
+        }
+        if (Input.GetKey(KeyCode.X) && Input.GetKeyDown(KeyCode.Semicolon))
+        {
+            Drink();
+        }
     }
 
     private void SpawnDarkObject()
@@ -132,6 +181,21 @@ public class GuiltySystem : MonoBehaviour, IBegin
             }
 
             if (Random.Range(0.0f, 1.0f) < mProbability)
+            {
+                SpawnDarkObject();
+            }
+
+        }
+    }
+
+    IEnumerator CoroutineScreamSound()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(screamSoundTerm);
+
+
+            if (Random.Range(0.0f, 1.0f) < screamSoundChance)
             {
                 SpawnDarkObject();
             }

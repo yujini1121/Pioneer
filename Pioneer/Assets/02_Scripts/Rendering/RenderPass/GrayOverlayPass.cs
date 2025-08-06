@@ -31,6 +31,8 @@ public class GrayOverlayPass : ScriptableRenderPass
         // 소스 텍스처를 임시 텍스처로 복사
         Blit(cmd, source, tempTexture.Identifier(), material);
 
+
+
         // 임시 텍스처를 다시 카메라 타겟으로 복사
         Blit(cmd, tempTexture.Identifier(), source);
 
