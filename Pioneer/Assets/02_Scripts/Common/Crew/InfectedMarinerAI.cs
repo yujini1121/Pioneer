@@ -11,6 +11,7 @@ public class InfectedMarinerAI : CreatureBase, IBegin
     private int repairAmount = 30;
 
     private bool isSecondPriorityStarted = false;
+
     private float nightConfusionTime; // 랜덤 혼란 시간
 
     private bool isNight = false;
@@ -24,13 +25,13 @@ public class InfectedMarinerAI : CreatureBase, IBegin
         maxHp = 100;
         speed = 1f;
         attackDamage = 6;
-        attackRange = 2.5f;
-        attackDelayTime = 1.2f;
+        attackRange = 3f;
+        attackDelayTime = 1f;
 
         // CreatureBase의 fov 변수 사용
         fov = GetComponent<FOVController>();
 
-        gameObject.layer = LayerMask.NameToLayer("Player");
+        gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
     public override void Init()
@@ -124,7 +125,7 @@ public class InfectedMarinerAI : CreatureBase, IBegin
 
     private IEnumerator RepairProcess()
     {
-        float repairDuration = 3f;
+        float repairDuration = 10f;
         float elapsedTime = 0f;
 
         while (elapsedTime < repairDuration)
@@ -142,7 +143,8 @@ public class InfectedMarinerAI : CreatureBase, IBegin
         }
         else
         {
-            Debug.Log("수리실패 , 로직 추가 필요");
+            Debug.Log($"Infected Mariner {marinerId} 수리 성공: {targetRepairObject.name}/ 수리량: {repairAmount}");
+            targetRepairObject.Repair(0);
         }
 
         isRepairing = false;
@@ -166,7 +168,6 @@ public class InfectedMarinerAI : CreatureBase, IBegin
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
         List<int> triedIndexes = new List<int>();
         int fallbackIndex = (marinerId % 2 == 0) ? 0 : 1; // 임시 홀짝 fallback
-
         int chosenIndex = -1;
 
         while (triedIndexes.Count < spawnPoints.Length)
@@ -215,6 +216,7 @@ public class InfectedMarinerAI : CreatureBase, IBegin
 
         Debug.Log("감염된 승무원 가짜 파밍 10초");
         yield return new WaitForSeconds(10f);
+
         GameManager.Instance.ReleaseSpawner(chosenIndex);
 
         var needRepairList = GameManager.Instance.GetNeedsRepair();

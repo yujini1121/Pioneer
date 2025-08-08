@@ -5,6 +5,13 @@ using UnityEngine.AI;
 
 public class MarinerAI : CreatureBase, IBegin
 {
+    public int marinerId;
+    public bool isRepairing = false;
+    private DefenseObject targetRepairObject;
+    private int repairAmount = 30;
+
+    private bool isSecondPriorityStarted = false;
+
     public enum MarinerState { Wandering, Idle, Attacking }
 
     private MarinerState currentState = MarinerState.Wandering;
@@ -14,14 +21,8 @@ public class MarinerAI : CreatureBase, IBegin
     private float attackInterval = 0.5f;
     private Transform target;
 
-    public int marinerId;
-    public bool isRepairing = false;
-    private DefenseObject targetRepairObject;
-    private int repairAmount = 30;
-    private bool isSecondPriorityStarted = false;
-
     // 공격관련
-    private float moveDuration = 2f;
+    private float moveDuration = 2f;    
     private float idleDuration = 4f;
     private float stateTimer = 0f;
     private Vector3 moveDirection;

@@ -56,7 +56,6 @@ public class ZombieMarinerAI : CreatureBase, IBegin
         }
 
         gameObject.layer = LayerMask.NameToLayer("Enemy");
-        
         targetLayer = LayerMask.GetMask("Mariner");// fovController스크립트 이제 레이어 매개변수로 등록해야함.
     }
 
