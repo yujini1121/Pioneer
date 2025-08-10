@@ -13,6 +13,12 @@ public class CreatureBase : CommonBase
 
     void Init()
     {
+        fov = GetComponent<FOVController>();
+    }
 
+    // 임시 스타트
+    void Start()
+    {
+        // fov = GetComponent<FOVController>();
     }
 }

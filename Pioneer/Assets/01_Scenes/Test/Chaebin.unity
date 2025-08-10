@@ -936,6 +936,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d40adedd46c17934aab8eab48e356701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsDead: 0
+  fov: {fileID: 0}
+  speed: 0
+  attackDamage: 0
+  attackRange: 0
+  attackDelayTime: 0
   playerTransform: {fileID: 0}
   attackHeight: 1
   attackDuration: 0.2
@@ -1656,6 +1662,21 @@ PrefabInstance:
       objectReference: {fileID: 657293969}
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: -17.44
       objectReference: {fileID: 0}
@@ -1704,11 +1725,41 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: speed
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
       propertyPath: nestPrefab
       value: 
       objectReference: {fileID: 1076792362}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: attackRange
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: attackDamage
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: attackDelayTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: detectLayer.m_Bits
+      value: 3072
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

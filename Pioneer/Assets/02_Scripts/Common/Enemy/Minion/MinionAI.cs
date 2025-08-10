@@ -32,9 +32,15 @@ public class MinionAI : EnemyBase, IBegin
 
     private bool isOnGround = false;
 
-    public override void Init()
+    /*public override void Init()
     {
         base.Init();
+        SetAttribute();
+        agent = GetComponent<NavMeshAgent>();
+    }*/
+
+    void Start()
+    {
         SetAttribute();
         agent = GetComponent<NavMeshAgent>();
     }
@@ -43,18 +49,25 @@ public class MinionAI : EnemyBase, IBegin
     {       
         fov.DetectTargets(detectLayer);
 
+        //// 수정 해야함
+        if (targetObject != null)
+        {
+            // NavMeshAgent 목적지 계속 갱신
+            agent.SetDestination(targetObject.transform.position);
+        }
+
         if (CanCreateNest())
         {
             CreateNest();
         }
-        else if(CanMove())
-        {
-            Move();
-        }
-        else if(CanAttack())
+        else if (CanAttack())
         {
             Attack();
         }
+        else if(CanMove())
+        {
+            Move();
+        }        
         else
         {
             Idle();
@@ -79,7 +92,7 @@ public class MinionAI : EnemyBase, IBegin
     #region 행동 조건 검사
     private bool CanCreateNest()
     {
-        return  isOnGround && !isNestCreated && Time.time > nestCool && nestCreationTime != -1f;
+        return  isOnGround && !isNestCreated && Time.time >= nestCreationTime && nestCreationTime != -1f;
     }
 
     private bool CanAttack()
@@ -106,22 +119,22 @@ public class MinionAI : EnemyBase, IBegin
     // 공격
     void Attack()
     {
-        Transform closesTarget = null;
-        float closesDis = float.MaxValue;
+        Transform closestTarget = null;
+        float closestDis = float.MaxValue;
 
         foreach(var target in fov.visibleTargets)
         {
             float dis = Vector3.Distance(transform.position, target.position);
-            if(dis < closesDis)
+            if(dis < closestDis)
             {
-                closesDis = dis;
-                closesTarget = target;
+                closestDis = dis;
+                closestTarget = target;
             }
         }
 
-        if(closesTarget != null)
+        if(closestTarget != null)
         {
-            Vector3 dir = closesTarget.position - transform.position;
+            Vector3 dir = closestTarget.position - transform.position;
             dir.y = 0f;
 
             if(dir != Vector3.zero)
@@ -148,7 +161,7 @@ public class MinionAI : EnemyBase, IBegin
     // 대기
     void Idle()
     {
-        // 가만히? 배회?
+        // 가만히? 배회? ????????????
     }
 
     private void OnCollisionEnter(Collision collision)
