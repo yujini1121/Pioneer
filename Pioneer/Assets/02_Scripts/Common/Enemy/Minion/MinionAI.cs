@@ -10,8 +10,12 @@ using UnityEngine.AI;
 - 살아있는 생성한 둥지가 2개 미만 => 둥지 생성 (15초 대기 => 배회? 이동?)
 ==========================================
 
+1. 둥지 생성 로직 작성
+- 생성 가능한 둥지 수가 미니언 한 마리당 하나
+- 생성된 둥지에서 생성되는 미니언 두마리, 두마리 생성후 파괴
+- 둥지에서 생성된 미니언과 스포너에서 생성된 미니언 상관없이 무조건 둥지 생성
+ */
 
-*/
 public class MinionAI : EnemyBase, IBegin
 {
     [Header("감지 가능한 레이어")]
@@ -22,8 +26,9 @@ public class MinionAI : EnemyBase, IBegin
 
     private NavMeshAgent agent;
 
-    private int nestCount = 0;
+    private bool isNestCreated = false;
     private float nestCool = 15f;
+    private float nestCreationTime = -1f;
 
     private bool isOnGround = false;
 
@@ -74,12 +79,11 @@ public class MinionAI : EnemyBase, IBegin
     #region 행동 조건 검사
     private bool CanCreateNest()
     {
-        return  isOnGround == true && nestCount < 2 && Time.time > nestCool;
+        return  isOnGround && !isNestCreated && Time.time > nestCool && nestCreationTime != -1f;
     }
 
     private bool CanAttack()
     {
-
         return fov.visibleTargets.Count > 0;
     }
 
@@ -95,7 +99,8 @@ public class MinionAI : EnemyBase, IBegin
     // 둥지 생성
     void CreateNest()
     {
-
+        Instantiate(nestPrefab, transform.position, Quaternion.identity);
+        isNestCreated = true;
     }
 
     // 공격
@@ -143,7 +148,7 @@ public class MinionAI : EnemyBase, IBegin
     // 대기
     void Idle()
     {
-
+        // 가만히? 배회?
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -151,6 +156,11 @@ public class MinionAI : EnemyBase, IBegin
         if(collision.gameObject.CompareTag("Ground"))
         {
             isOnGround = true;
+
+            if(nestCreationTime == -1f)
+            {
+                nestCreationTime = Time.time + nestCool;
+            }
         }
     }
 
