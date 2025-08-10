@@ -11,7 +11,7 @@ public class CreatureBase : CommonBase
     public float attackRange;
     public float attackDelayTime;
 
-    void Init()
+    public virtual void Init()
     {
         fov = GetComponent<FOVController>();
     }
