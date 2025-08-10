@@ -9,13 +9,15 @@ public class TBallista : StructureBase
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private Collider[] enemyColliders;
     [SerializeField] private float attackRange;
+    [SerializeField] private float attackSpeed;
+    [SerializeField] private float attackCooltime;
 
 
-    // TODO: 추후, ScriptableObject의 hp와 연동 필요함~~~
+    // TODO: 추후, ScriptableObject의 변수들과 연동 필요함~~~
     private int currentHP = 80;
+    private float attackDamage = 25f;
 
-
-    #region 기본
+    #region
     public override void Init()
     {
         
@@ -25,7 +27,7 @@ public class TBallista : StructureBase
     {
         
     }
-    #endregion 
+    #endregion
 
     void Use()
     {
@@ -47,5 +49,18 @@ public class TBallista : StructureBase
     void Fire()
     {
 
+    }
+
+
+    void OnDrawGizmos()
+    {
+        foreach (var collider in enemyColliders)
+        {
+            if (collider == null) continue;
+
+            Gizmos.color = Color.green;
+            Vector3 center = collider.transform.position;
+            Gizmos.DrawSphere(center, 0.5f);
+        }
     }
 }
