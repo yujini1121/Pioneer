@@ -162,17 +162,17 @@ public class MarinerBase : CreatureBase
     /// </summary>
     protected virtual void StartRepair()
     {
-        List<DefenseObject> needRepairList = GameManager.Instance.GetNeedsRepair();
+        List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
 
         for (int i = 0; i < needRepairList.Count; i++)
         {
             DefenseObject obj = needRepairList[i];
 
-            if (GameManager.Instance.TryOccupyRepairObject(obj, GetMarinerId()))
+            if (MarinerManager.Instance.TryOccupyRepairObject(obj, GetMarinerId()))
             {
                 targetRepairObject = obj;
 
-                if (GameManager.Instance.CanMarinerRepair(GetMarinerId(), targetRepairObject))
+                if (MarinerManager.Instance.CanMarinerRepair(GetMarinerId(), targetRepairObject))
                 {
                     Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 시작: {targetRepairObject.name}");
                     isRepairing = true;
@@ -181,7 +181,7 @@ public class MarinerBase : CreatureBase
                 }
                 else
                 {
-                    GameManager.Instance.ReleaseRepairObject(obj); // 점유 해제
+                    MarinerManager.Instance.ReleaseRepairObject(obj); // 점유 해제
                 }
             }
         }
@@ -232,7 +232,7 @@ public class MarinerBase : CreatureBase
         targetRepairObject.Repair(actualRepairAmount);
 
         isRepairing = false;
-        GameManager.Instance.UpdateRepairTargets();
+        MarinerManager.Instance.UpdateRepairTargets();
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
@@ -242,7 +242,7 @@ public class MarinerBase : CreatureBase
         }
 
         StartRepair();
-        GameManager.Instance.ReleaseRepairObject(targetRepairObject);
+        MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
     }
 
     /// <summary>

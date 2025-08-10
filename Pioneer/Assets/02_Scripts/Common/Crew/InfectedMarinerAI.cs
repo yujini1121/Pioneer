@@ -38,7 +38,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         Debug.Log($"감염된 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}");
         Debug.Log($"{marinerId} 밤 혼란 시드값 생성: {nightConfusionTime:F2}초");
 
-        base.Init(); 
+        base.Init();
     }
 
     private void Update()
@@ -51,7 +51,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
             if (!isRepairing)
             {
-                StartRepair(); 
+                StartRepair();
             }
         }
         else if (!isNight)
@@ -79,9 +79,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
             if (triedIndexes.Contains(index)) continue;
 
-            if (!GameManager.Instance.IsSpawnerOccupied(index))
+            if (!MarinerManager.Instance.IsSpawnerOccupied(index))
             {
-                GameManager.Instance.OccupySpawner(index);
+                MarinerManager.Instance.OccupySpawner(index);
                 chosenIndex = index;
                 Debug.Log("현재 다른 승무원이 사용중 인 스포너");
                 break;
@@ -102,9 +102,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
 
         UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
-        MoveTo(targetSpawn.position); 
+        MoveTo(targetSpawn.position);
 
-        while (!IsArrived()) 
+        while (!IsArrived())
         {
             yield return null;
         }
@@ -112,7 +112,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
             Debug.Log("감염된 승무원 밤 행동 시작");
-            GameManager.Instance.ReleaseSpawner(chosenIndex);
+            MarinerManager.Instance.ReleaseSpawner(chosenIndex);
             StoreItemsAndReturnToBase(); // 감염된 승무원 전용 처리
             yield break;
         }
@@ -120,9 +120,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         Debug.Log("감염된 승무원 가짜 파밍 10초");
         yield return new WaitForSeconds(10f);
 
-        GameManager.Instance.ReleaseSpawner(chosenIndex);
+        MarinerManager.Instance.ReleaseSpawner(chosenIndex);
 
-        var needRepairList = GameManager.Instance.GetNeedsRepair();
+        var needRepairList = MarinerManager.Instance.GetNeedsRepair();
         if (needRepairList.Count > 0)// 수리대상 확인
         {
             Debug.Log("감염된 승무원 수리 대상 발견으로 1순위 행동 실행");
@@ -170,7 +170,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         isConfused = false;
         Debug.Log("혼란 종료 후 좀비 AI로 변경");
 
-        agent.ResetPath(); 
+        agent.ResetPath();
         ChangeToZombieAI();
     }
 
@@ -199,11 +199,26 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     }
 
     /// <summary>
+    /// 승무원 ID 반환
+    /// </summary>
+    protected override int GetMarinerId()
+    {
+        return marinerId;
+    }
+
+    /// <summary>
+    /// 승무원 타입 이름 반환
+    /// </summary>
+    protected override string GetCrewTypeName()
+    {
+        return "감염승무원";
+    }
+
+    /// <summary>
     /// 밤이 다가올 때 처리 (감염된 승무원 전용)
     /// </summary>
     protected override void OnNightApproaching()
     {
         StoreItemsAndReturnToBase();
     }
-
 }

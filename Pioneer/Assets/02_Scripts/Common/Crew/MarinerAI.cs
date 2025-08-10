@@ -38,14 +38,14 @@ public class MarinerAI : MarinerBase, IBegin
 
         Debug.Log($"Mariner {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}, 공격범위: {attackRange}");
 
-        base.Init(); 
+        base.Init();
     }
 
     private void Update()
     {
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 
-        GameManager.Instance.RegisterMariner(this);
+        MarinerManager.Instance.RegisterMariner(this);
 
         if (GameManager.Instance.IsDaytime)
         {
@@ -117,9 +117,9 @@ public class MarinerAI : MarinerBase, IBegin
 
             if (triedIndexes.Contains(index)) continue; // 이미 시도한 스포너는 건뛰
 
-            if (!GameManager.Instance.IsSpawnerOccupied(index)) // 비 점유 중
+            if (!MarinerManager.Instance.IsSpawnerOccupied(index)) // 비 점유 중
             {
-                GameManager.Instance.OccupySpawner(index);
+                MarinerManager.Instance.OccupySpawner(index);
                 chosenIndex = index;
                 Debug.Log("현재 다른 승무원이 사용중 인 스포너");
                 break;
@@ -143,7 +143,7 @@ public class MarinerAI : MarinerBase, IBegin
         MoveTo(targetSpawn.position);
 
         // 도착 대기
-        while (!IsArrived()) 
+        while (!IsArrived())
         {
             yield return null;
         }
@@ -153,8 +153,8 @@ public class MarinerAI : MarinerBase, IBegin
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
             Debug.Log("승무원 밤 행동 시작");
-            GameManager.Instance.ReleaseSpawner(chosenIndex);
-            GameManager.Instance.StoreItemsAndReturnToBase(this);
+            MarinerManager.Instance.ReleaseSpawner(chosenIndex);
+            MarinerManager.Instance.StoreItemsAndReturnToBase(this);
             yield break;
         }
 
@@ -162,9 +162,9 @@ public class MarinerAI : MarinerBase, IBegin
         yield return new WaitForSeconds(10f);
 
         GameManager.Instance.CollectResource("wood"); // 출력만
-        GameManager.Instance.ReleaseSpawner(chosenIndex);
+        MarinerManager.Instance.ReleaseSpawner(chosenIndex);
 
-        var needRepairList = GameManager.Instance.GetNeedsRepair();
+        var needRepairList = MarinerManager.Instance.GetNeedsRepair();
         if (needRepairList.Count > 0)// 수리대상 확인
         {
             Debug.Log("승무원 수리 대상 발견으로 1순위 행동 실행");
@@ -233,6 +233,6 @@ public class MarinerAI : MarinerBase, IBegin
     /// </summary>
     protected override void OnNightApproaching()
     {
-        GameManager.Instance.StoreItemsAndReturnToBase(this);
+        MarinerManager.Instance.StoreItemsAndReturnToBase(this);
     }
 }
