@@ -15,6 +15,7 @@ public class InventoryManager : MonoBehaviour
     public Dictionary<int, SItemStack> fastSearch;
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
+    [SerializeField] Vector3 dropOffset = new Vector3(1, -0.8f, -1);
 
     public int Get(int id)
     {
@@ -69,7 +70,8 @@ public class InventoryManager : MonoBehaviour
 
     public void MouseDrop()
     {
-        ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
+        // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
+        ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
 
         mouseInventory = null;
     }

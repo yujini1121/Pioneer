@@ -11,7 +11,8 @@ public class ItemDropManager : MonoBehaviour
 
     public void Drop(SItemStack target, Vector3 worldPosition)
     {
-        Instantiate(prefabDroppedItemDefault, worldPosition, quaternion.identity);
+        GameObject droppedItem = Instantiate(prefabDroppedItemDefault, worldPosition, quaternion.identity);
+        droppedItem.GetComponent<DroppedItem>().SetItem(target);
     }
 
     private void Awake()

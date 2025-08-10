@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,9 +14,13 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public TextMeshProUGUI count;
     public bool isSlot;
 
-
-    public void Show(SItemStack item)
+    public void Show(SItemStack item,
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0,
+        [CallerMemberName] string member = "")
     {
+        Debug.Log($">> ItemSlotUI.Show(SItemStack item) : È£ÃâµÊ");
+
         if (item == null || item.id == 0)
         {
             Clear();
@@ -28,6 +33,8 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         Debug.Assert(ItemTypeManager.Instance != null);
         Debug.Assert(ItemTypeManager.Instance.itemTypeSearch != null);
         Debug.Assert(ItemTypeManager.Instance.itemTypeSearch[item.id] != null);
+        Debug.Log($">> ItemSlotUI.Show(SItemStack item) : {item.id} / {item.amount}");
+        
         if (ItemTypeManager.Instance.itemTypeSearch[item.id].image != null)
         {
             image.enabled = true;
