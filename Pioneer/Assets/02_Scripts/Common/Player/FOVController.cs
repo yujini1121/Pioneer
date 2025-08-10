@@ -33,7 +33,7 @@ public class FOVController : MonoBehaviour, IBegin
     /// 3. 장애물 있는지 레이캐스트 검사
     /// </summary>
     /// <param name="targetLayer">탐지할 오브젝트의 레이어</param>
-    private void DetectTargets(LayerMask targetLayer)
+    public void DetectTargets(LayerMask targetLayer)
     {
         visibleTargets.Clear();
         Collider[] targetsInRange = Physics.OverlapSphere(transform.position, viewRadius, targetLayer);
