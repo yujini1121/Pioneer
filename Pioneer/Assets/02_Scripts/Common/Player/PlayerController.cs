@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour, IBegin
         }
     }
 
-    void Init()
+    void Start()
     {
         playerRb = GetComponent<Rigidbody>();
         playerAttack.playerTransform = transform;

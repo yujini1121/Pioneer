@@ -43,7 +43,7 @@ public class Ballista : MonoBehaviour, IBegin
     private int poolIndex = 0;
     private float curCooldown;
 
-    private void Init()
+    private void Start()
     {
         centerVecY = GetComponent<SphereCollider>().center.y;
 

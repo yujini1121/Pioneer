@@ -44,7 +44,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
     }
 
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         //textMeshProUGUI.tex
         materialEachText = new TextMeshProUGUI[3]

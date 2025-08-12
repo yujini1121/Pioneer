@@ -8,7 +8,7 @@ public class CommonBase : MonoBehaviour, IBegin
     protected int hp;
     protected int maxHp;
     public bool IsDead = false;
-    /*public virtual void Init()
+    /*public virtual void Start()
     {
         hp = maxHp;
     }*/

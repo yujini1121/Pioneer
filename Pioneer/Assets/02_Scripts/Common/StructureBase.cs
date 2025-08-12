@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public class StructureBase : CommonBase
 {
-    void Init()
+    void Start()
     {
         
     }

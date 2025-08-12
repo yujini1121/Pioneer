@@ -33,7 +33,7 @@ public class guilt : MonoBehaviour, IBegin
         Destroy(shadow_crew);
     }
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         guilt_level = 0;
     }

@@ -16,7 +16,7 @@ public class JH_PlayerHealth : MonoBehaviour, IBegin
     private bool isDead = false;
     private bool isInvincible = false;
 
-    void Init()
+    void Start()
     {
         currentHP = maxHP;
     }

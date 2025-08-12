@@ -35,7 +35,7 @@ public class ResourceManager : MonoBehaviour, IBegin
         resourceTexts[ResourceType.Hammer] = hammerText;
     }
 
-    private void Init()
+    private void Start()
     {
         UpdateAllTexts();
         StartCoroutine(EnergyAutoGain());

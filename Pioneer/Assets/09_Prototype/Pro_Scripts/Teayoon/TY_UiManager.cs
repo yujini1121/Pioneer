@@ -18,7 +18,7 @@ public class TY_UiManager : MonoBehaviour, IBegin
 
 
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         
     }

@@ -26,19 +26,19 @@ public class MarinerAI : MarinerBase, IBegin
         targetLayer = LayerMask.GetMask("Enemy");
     }
 
-    public override void Init()
+    public override void Start()
     {
         SetRandomDirection();
         stateTimer = moveDuration;
 
         if (fov != null)
         {
-            fov.Init();
+            fov.Start();
         }
 
         Debug.Log($"Mariner {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}, 공격범위: {attackRange}");
 
-        base.Init();
+        base.Start();
     }
 
     private void Update()

@@ -27,7 +27,7 @@ public class SceneController : MonoBehaviour, IBegin
         }
     }
 
-    private void Init()
+    private void Start()
     {
         currentSceneName = SceneManager.GetActiveScene().name;
         StartCoroutine(Fade(1, 0));

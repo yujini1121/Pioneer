@@ -12,7 +12,7 @@ public class MarinerStatus : MonoBehaviour, IBegin
     public bool IsDead = false;
     public bool IsConfused = false;
 
-    private void Init()
+    private void Start()
     {
         currentHP = maxHP;
     }

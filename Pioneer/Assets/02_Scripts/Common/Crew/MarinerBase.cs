@@ -36,10 +36,10 @@ public class MarinerBase : CreatureBase
     /// <summary>
     /// 승무원 공통 초기화
     /// </summary>
-    public override void Init()
+    public override void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        base.Init();
+        base.Start();
     }
 
     /// <summary>

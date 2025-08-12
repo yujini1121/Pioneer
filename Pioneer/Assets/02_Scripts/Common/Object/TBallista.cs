@@ -18,7 +18,7 @@ public class TBallista : StructureBase
     private float attackDamage = 25f;
 
     #region
-    //public override void Init()
+    //public override void Start()
     //{
         
     //}

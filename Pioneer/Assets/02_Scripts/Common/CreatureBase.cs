@@ -4,21 +4,15 @@ using UnityEngine;
 
 public class CreatureBase : CommonBase
 {
-    public FOVController fov;   // ½Ã¾ß ¹üÀ§ = °¨Áö ¹üÀ§
+    public FOVController fov;   // ï¿½Ã¾ï¿½ ï¿½ï¿½ï¿½ï¿½ = ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     public float speed;
     public int attackDamage;
     public float attackRange;
     public float attackDelayTime;
 
-    public virtual void Init()
+    public virtual void Start()
     {
         fov = GetComponent<FOVController>();
-    }
-
-    // ÀÓ½Ã ½ºÅ¸Æ®
-    void Start()
-    {
-        // fov = GetComponent<FOVController>();
     }
 }

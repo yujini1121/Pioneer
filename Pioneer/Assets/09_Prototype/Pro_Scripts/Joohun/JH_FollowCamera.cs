@@ -11,7 +11,7 @@ public class JH_FollowCamera : MonoBehaviour, IBegin
     private bool canAttack = true;
     private Camera mainCamera;
 
-    void Init()
+    void Start()
     {
         mainCamera = Camera.main;
     }

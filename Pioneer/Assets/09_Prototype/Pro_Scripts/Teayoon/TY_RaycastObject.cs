@@ -7,7 +7,7 @@ public class TY_RaycastObject : MonoBehaviour, IBegin
     public string info = "";
 
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         
     }

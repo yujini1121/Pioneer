@@ -22,7 +22,7 @@ public class FOVController : MonoBehaviour, IBegin
 
     public List<Transform> visibleTargets = new List<Transform>();
 
-    public virtual void Init()
+    public virtual void Start()
     {
         obstacleMask = LayerMask.GetMask("Obstacle"); // 레이어 이름 수정 필요
     }

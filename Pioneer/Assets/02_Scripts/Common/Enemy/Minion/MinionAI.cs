@@ -46,7 +46,7 @@ public class MinionAI : EnemyBase, IBegin
     private Transform currentAttackTarget = null;
     private Vector3 origialDestination;
 
-    /*public override void Init()
+    /*public override void Start()
     {
         base.Init();
         SetAttribute();

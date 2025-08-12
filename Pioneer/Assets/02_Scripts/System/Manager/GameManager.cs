@@ -51,27 +51,9 @@ public class GameManager : MonoBehaviour, IBegin
     {
         Debug.Log($">> GameManager.Start()");
 
-        // InfectedMarinerAI가 붙어 있는 모든 오브젝트 초기화
-        foreach (var infected in FindObjectsOfType<InfectedMarinerAI>())
-        {
-            infected.Init();
-        }
-
-        // MarinerAI가 붙어 있는 모든 오브젝트 초기화
-        foreach (var mariner in FindObjectsOfType<MarinerAI>())
-        {
-            mariner.Init();
-        }
-
-        // UnitBase가 붙어 있는 모든 오브젝트 초기화
-        foreach (var unit in FindObjectsOfType<UnitBase>())
-        {
-            //unit.Init();
-        }
-
         if (InventoryUiMain.instance != null)
         {
-            InventoryUiMain.instance.Init();
+            InventoryUiMain.instance.Start();
         }
         else
         {

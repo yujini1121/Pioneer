@@ -14,7 +14,7 @@ public class DayAndNight : MonoBehaviour, IBegin
 
     private float timer;
 
-    void Init()
+    void Start()
     {
         volume.profile.TryGet(out colorAdjustments);
     }

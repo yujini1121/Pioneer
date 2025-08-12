@@ -23,7 +23,7 @@ public class CheckBottom : MonoBehaviour, IBegin
 
     private NavMeshAgent agent;
 
-    void Init()
+    void Start()
     {
         if (hpBar != null)
         {

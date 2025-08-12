@@ -12,7 +12,7 @@ public class MakeshiftCraftUiMain : MonoBehaviour, IBegin
     [SerializeField] Vector2 itemButtonSize;
 
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         closeTab.onClick.AddListener(() =>
         {

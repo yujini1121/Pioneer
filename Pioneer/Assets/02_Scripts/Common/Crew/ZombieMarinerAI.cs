@@ -61,18 +61,18 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         targetLayer = LayerMask.GetMask("Mariner");
     }
 
-    public override void Init()
+    public override void Start()
     {
         SetRandomDirection(); 
         stateTimer = moveDuration;
 
         if (fov != null)
         {
-            fov.Init();
+            fov.Start();
         }
 
         Debug.Log($"좀비 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}");
-        base.Init();
+        base.Start();
     }
 
     private void Update()

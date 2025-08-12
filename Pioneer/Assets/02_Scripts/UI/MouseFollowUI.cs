@@ -6,7 +6,7 @@ public class MouseFollowUI : MonoBehaviour, IBegin
 {
     RectTransform rectTransform;
 
-    void Init()
+    void Start()
     {
         rectTransform = GetComponent<RectTransform>();
     }

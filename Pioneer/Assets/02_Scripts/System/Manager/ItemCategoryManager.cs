@@ -31,7 +31,7 @@ public class ItemCategoryManager : MonoBehaviour, IBegin
     }
 
     // Start is called before the first frame update
-    private void Init()
+    private void Start()
     {
     }
 

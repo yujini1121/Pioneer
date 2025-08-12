@@ -27,18 +27,18 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
-    public override void Init()
+    public override void Start()
     {
         if (fov != null)
         {
-            fov.Init();
+            fov.Start();
         }
 
         nightConfusionTime = Random.Range(0f, 30f);
         Debug.Log($"감염된 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}");
         Debug.Log($"{marinerId} 밤 혼란 시드값 생성: {nightConfusionTime:F2}초");
 
-        base.Init();
+        base.Start();
     }
 
     private void Update()

@@ -78,7 +78,7 @@ public class CreateObject : MonoBehaviour, IBegin
     }
 
     // 원래 Start() 였던 메서드
-    private void Init()
+    private void Start()
     {
         ExitInstallMode(); // 게임 시작 시 설치 모드 OFF
     }

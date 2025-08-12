@@ -37,7 +37,7 @@ public class TY_PlayerStatus : MonoBehaviour, IBegin
     }
 
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         StartCoroutine(GetEnergy());
     }

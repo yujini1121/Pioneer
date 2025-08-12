@@ -24,7 +24,7 @@ public class InGameUI : MonoBehaviour, IBegin
     }
 
     // Start is called before the first frame update
-    void Init()
+    void Start()
     {
         Show(makeshiftCraftUI);
     }

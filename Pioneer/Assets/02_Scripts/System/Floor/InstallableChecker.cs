@@ -30,7 +30,7 @@ public class InstallableChecker : MonoBehaviour, IBegin
     private bool isMovingToInstallPoint = false;
     private Vector3 destinationQueued;
 
-    void Init()
+    void Start()
     {
         if (mainCamera == null) mainCamera = Camera.main;
         if (worldSpaceParent == null) { Debug.LogError("WorldSpace 부모를 할당해주세요."); return; }

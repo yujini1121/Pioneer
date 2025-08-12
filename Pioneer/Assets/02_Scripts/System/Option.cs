@@ -22,7 +22,7 @@ public class Option : MonoBehaviour, IBegin
     [SerializeField] private Button xButton;
     [SerializeField] private GameObject optionUI;
 
-    private void Init()
+    private void Start()
     {
         if (optionButton != null && xButton != null)
         {

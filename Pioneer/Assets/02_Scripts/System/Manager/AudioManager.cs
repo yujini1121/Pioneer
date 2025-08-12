@@ -60,7 +60,7 @@ public class AudioManager : MonoBehaviour, IBegin
             Destroy(gameObject);
         }
 
-        Init();
+        Start();
     }
 
     void OnEnable()
@@ -110,7 +110,7 @@ public class AudioManager : MonoBehaviour, IBegin
     /// <summary>
     /// BGM 및 SFX 사운드 플레이어 초기화
     /// </summary>
-    void Init()
+    void Start()
     {
         GameObject bgmObject = new GameObject("BgmPlayer");
         bgmObject.transform.parent = transform;

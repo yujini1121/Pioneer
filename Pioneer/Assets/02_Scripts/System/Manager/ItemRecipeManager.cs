@@ -36,7 +36,7 @@ public class ItemRecipeManager : MonoBehaviour, IBegin
         InspectorRegister();
     }
 
-    private void Init()
+    private void Start()
     {
         
     }
