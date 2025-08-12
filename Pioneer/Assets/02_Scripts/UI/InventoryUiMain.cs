@@ -82,15 +82,18 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory))
         {
+            Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
             return;
         }
 
-        Debug.Log($">> 아이템 드롭 : {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
-        Debug.Log($">> InventoryUiMain.ClickOut() : 아이템 드롭1");
+        Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭 {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
+        Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭1");
         InventoryManager.Instance.MouseDrop();
-        Debug.Log($">> InventoryUiMain.ClickOut() : 아이템 드롭2");
+        Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭2");
         mouseUI.Clear();
-        Debug.Log($">> InventoryUiMain.ClickOut() : 아이템 드롭3");
+        Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭3");
+
+        IconRefresh();
     }
 
     public void Sort()
@@ -118,6 +121,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     // Start is called before the first frame update
     public void Init()
+    //void Start()
     {
         followUiRect1 = imageMouseHoldingItem.GetComponent<RectTransform>();
         followUiRect2 = windowMouse.GetComponent<RectTransform>();

@@ -70,6 +70,8 @@ public class InventoryManager : MonoBehaviour
 
     public void MouseDrop()
     {
+        Debug.Log($">> InventoryManager.MouseDrop() : »£√‚µ ");
+
         // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
         ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
 
