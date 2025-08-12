@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour, IBegin
         // UnitBase가 붙어 있는 모든 오브젝트 초기화
         foreach (var unit in FindObjectsOfType<UnitBase>())
         {
-            unit.Init();
+            //unit.Init();
         }
 
         if (InventoryUiMain.instance != null)
