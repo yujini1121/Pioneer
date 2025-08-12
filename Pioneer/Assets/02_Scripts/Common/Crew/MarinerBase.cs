@@ -16,7 +16,7 @@ public class MarinerBase : CreatureBase
     protected float moveDuration = 2f;
     protected float idleDuration = 4f;
     protected float stateTimer = 0f;
-    protected Vector3 moveDirection;
+    private Vector3 moveDirection;
 
     // 공격 관리
     protected UnityEngine.Transform target;
@@ -33,18 +33,12 @@ public class MarinerBase : CreatureBase
     // NavMeshAgent 공통 사용
     protected NavMeshAgent agent;
 
-    /// <summary>
-    /// 승무원 공통 초기화
-    /// </summary>
     public override void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         base.Start();
     }
 
-    /// <summary>
-    /// FOV를 사용해 타겟이 시야 내에 있는지 확인
-    /// </summary>
     protected bool IsTargetInFOV()
     {
         if (target == null || fov == null)
@@ -55,10 +49,7 @@ public class MarinerBase : CreatureBase
         return fov.visibleTargets.Contains(target);
     }
 
-    /// <summary>
-    /// 무작위 방향으로 배회
-    /// </summary>
-    protected virtual void Wander()
+    protected virtual void Wander() // 배회
     {
         transform.position += moveDirection * speed * Time.deltaTime;
         stateTimer -= Time.deltaTime;
@@ -69,9 +60,6 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    /// <summary>
-    /// 대기 상태
-    /// </summary>
     protected virtual void Idle()
     {
         stateTimer -= Time.deltaTime;
@@ -82,9 +70,6 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    /// <summary>
-    /// 배회 상태로 전환
-    /// </summary>
     protected virtual void EnterWanderingState()
     {
         SetRandomDirection();
@@ -93,9 +78,6 @@ public class MarinerBase : CreatureBase
         Debug.Log($"{gameObject.name} - 랜덤 방향으로 이동 시작");
     }
 
-    /// <summary>
-    /// 대기 상태로 전환
-    /// </summary>
     protected virtual void EnterIdleState()
     {
         currentState = CrewState.Idle;
@@ -103,18 +85,12 @@ public class MarinerBase : CreatureBase
         Debug.Log($"{gameObject.name} - 대기 상태로 전환");
     }
 
-    /// <summary>
-    /// 무작위 방향 설정
-    /// </summary>
     protected void SetRandomDirection()
     {
         float angle = Random.Range(0f, 360f);
         moveDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
     }
 
-    /// <summary>
-    /// 공격 범위 내 타겟 감지
-    /// </summary>
     protected bool DetectTarget()
     {
         // attackRange 변수 사용
@@ -141,9 +117,6 @@ public class MarinerBase : CreatureBase
         return target != null;
     }
 
-    /// <summary>
-    /// 타겟을 바라보도록 회전
-    /// </summary>
     protected void LookAtTarget()
     {
         if (target == null) return;
@@ -155,11 +128,6 @@ public class MarinerBase : CreatureBase
             transform.forward = dir;
     }
 
-    // ===== 수리 관련 공통 함수들 =====
-
-    /// <summary>
-    /// 수리 작업 시작
-    /// </summary>
     protected virtual void StartRepair()
     {
         List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
@@ -195,9 +163,6 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    /// <summary>
-    /// 수리할 오브젝트로 이동
-    /// </summary>
     protected IEnumerator MoveToRepairObject(Vector3 targetPosition)
     {
         agent.SetDestination(targetPosition);
@@ -210,9 +175,7 @@ public class MarinerBase : CreatureBase
         StartCoroutine(RepairProcess());
     }
 
-    /// <summary>
-    /// 수리 프로세스 (하위 클래스에서 오버라이드 가능)
-    /// </summary>
+
     protected virtual IEnumerator RepairProcess()
     {
         float repairDuration = 10f;
@@ -245,9 +208,6 @@ public class MarinerBase : CreatureBase
         MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
     }
 
-    /// <summary>
-    /// 2순위 행동 (하위 클래스에서 구현)
-    /// </summary>
     public virtual IEnumerator StartSecondPriorityAction()
     {
         Debug.Log($"{GetCrewTypeName()} 2순위 행동 - 기본 구현");
@@ -255,10 +215,6 @@ public class MarinerBase : CreatureBase
     }
 
     // ===== NavMeshAgent 관련 공통 함수들 =====
-
-    /// <summary>
-    /// 지정된 위치로 이동
-    /// </summary>
     public void MoveTo(Vector3 destination)
     {
         if (agent != null && agent.isOnNavMesh)
@@ -267,17 +223,11 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    /// <summary>
-    /// 목적지에 도착했는지 확인
-    /// </summary>
     public bool IsArrived()
     {
         return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
     }
 
-    /// <summary>
-    /// 목적지로 이동 후 경로 초기화
-    /// </summary>
     public IEnumerator MoveToThenReset(Vector3 destination)
     {
         MoveTo(destination);
@@ -291,41 +241,26 @@ public class MarinerBase : CreatureBase
         Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
     }
 
-    /// <summary>
-    /// 수리 성공률 반환 (하위 클래스에서 오버라이드)
-    /// </summary>
     protected virtual float GetRepairSuccessRate()
     {
         return 1.0f; // 기본 100% 성공률 (일반 승무원)
     }
 
-    /// <summary>
-    /// 승무원 ID 반환 (하위 클래스에서 오버라이드)
-    /// </summary>
     protected virtual int GetMarinerId()
     {
         return 0; // 기본값
     }
 
-    /// <summary>
-    /// 승무원 타입 이름 반환 (하위 클래스에서 오버라이드)
-    /// </summary>
     protected virtual string GetCrewTypeName()
     {
         return "승무원"; // 기본값
     }
 
-    /// <summary>
-    /// 밤이 다가올 때 처리 (하위 클래스에서 오버라이드)
-    /// </summary>
     protected virtual void OnNightApproaching()
     {
         Debug.Log($"{GetCrewTypeName()} 기본 밤 처리");
     }
 
-    /// <summary>
-    /// 공격 박스 기즈모 표시
-    /// </summary>
     protected virtual void OnDrawGizmos()
     {
         if (isShowingAttackBox)
@@ -337,9 +272,6 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    /// <summary>
-    /// 공격 범위 기즈모 표시 (선택 시)
-    /// </summary>
     protected virtual void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.blue;

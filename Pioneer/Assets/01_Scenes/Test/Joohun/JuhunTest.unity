@@ -2805,7 +2805,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8304306929198963357, guid: 88945ca2cefef934da60c2c05ac3143c,
         type: 3}
-      insertIndex: 6
+      insertIndex: -1
       addedObject: {fileID: 2042479612}
   m_SourcePrefab: {fileID: 100100000, guid: 88945ca2cefef934da60c2c05ac3143c, type: 3}
 --- !u!4 &246816495 stripped
@@ -22359,7 +22359,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 1, z: 3}
+  m_LocalScale: {x: 5, y: 2, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 246816495}
@@ -25051,9 +25051,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spritePivot: {fileID: 439075667}
-  flipThreshold: 2
-  lookOffset: -5
 --- !u!1 &7926458614739391520
 GameObject:
   m_ObjectHideFlags: 0
