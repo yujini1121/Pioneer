@@ -35,8 +35,12 @@ public class MinionAI : EnemyBase, IBegin
     [Header("둥지 프리팹")]
     [SerializeField] private GameObject nestPrefab;
 
+    [Header("공격 콜라이더")]
+    [SerializeField] private GameObject attackCollider;
+
     private NavMeshAgent agent;
 
+    // 
     private bool isNestCreated = false;
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
@@ -44,19 +48,16 @@ public class MinionAI : EnemyBase, IBegin
     private bool isOnGround = false;
 
     private Transform currentAttackTarget = null;
-    private Vector3 origialDestination;
-
-    /*public override void Start()
-    {
-        base.Init();
-        SetAttribute();
-        agent = GetComponent<NavMeshAgent>();
-    }*/
+    private Vector3 originalDestination;
 
     void Start()
     {
         SetAttribute();
         agent = GetComponent<NavMeshAgent>();
+        if(agent != null)
+        {
+            agent.speed = speed;
+        }
     }
 
     void Update()
@@ -132,55 +133,40 @@ public class MinionAI : EnemyBase, IBegin
 
     // 공격
     void Attack()
+    {  
+        // 감지 범위 내에 감지 가능한 적들이 존재하는지?
+        if(fov.visibleTargets.Count > 0)
+        {
+            // 공격 범위 안에 있는 콜라이더들 가지고 오기
+            Collider[] detectColliders = DetectAttackRange(attackRange);
+
+            if(detectColliders.Length > 0)
+            {
+                currentAttackTarget = FindClosestTarget(detectColliders);
+            }            
+        }
+    }
+
+    /// <summary>
+    /// 공격 범위 내에서 가장 가까운 적 찾기
+    /// </summary>
+    /// <returns></returns>
+    private Transform FindClosestTarget(Collider[] detectColliders)
     {
         Transform closestTarget = null;
         float closestDis = float.MaxValue;
 
-        foreach(var target in fov.visibleTargets)
+        foreach (var target in detectColliders) // FOV 리스트가 아니라 DetectAttackRange에서 반환된 콜라이더 배열에서 찾기
         {
-            float dis = Vector3.Distance(transform.position, target.position);
-            if(dis < closestDis)
+            float dis = Vector3.Distance(transform.position, target.transform.position);
+            if (dis < closestDis)
             {
                 closestDis = dis;
-                closestTarget = target;
+                closestTarget = target.transform;
             }
         }
 
-        if(closestTarget != null)
-        {
-            if(currentAttackTarget == null)
-            {
-                if(targetObject != null && agent.hasPath) 
-                {
-                    origialDestination = agent.destination;
-                }
-            }
-
-            currentAttackTarget = closestTarget;
-
-            float distanceToTarget = Vector3.Distance(transform.position, currentAttackTarget.position);
-
-            if(distanceToTarget <= attackRange)
-            {
-                Vector3 dir = closestTarget.position - transform.position;
-                dir.y = 0f;
-
-                if (dir != Vector3.zero)
-                    transform.rotation = Quaternion.LookRotation(dir);
-
-                agent.isStopped = true;
-
-                
-            }
-
-            /*Vector3 dir = closestTarget.position - transform.position;
-            dir.y = 0f;
-
-            if(dir != Vector3.zero)
-                transform.rotation = Quaternion.LookRotation(dir);
-
-            // 공격*/
-        }
+        return closestTarget;
     }
 
     // 이동
@@ -190,11 +176,6 @@ public class MinionAI : EnemyBase, IBegin
         {
             agent.SetDestination(targetObject.transform.position);
         }
-    }
-
-   void StopMoving()
-    {
-
     }
 
     // 대기
