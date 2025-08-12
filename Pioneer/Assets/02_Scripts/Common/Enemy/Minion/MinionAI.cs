@@ -14,6 +14,17 @@ using UnityEngine.AI;
 - 생성 가능한 둥지 수가 미니언 한 마리당 하나
 - 생성된 둥지에서 생성되는 미니언 두마리, 두마리 생성후 파괴
 - 둥지에서 생성된 미니언과 스포너에서 생성된 미니언 상관없이 무조건 둥지 생성
+ 
+ ==========================================
+250812
+- 새로운 목표물이 감지된 경우 이전 이동 목적지를 저장하고
+- 새로운 목표물이 공격 범위 안에 있다면 이동을 멈추고 공격
+- 감지 범위 안인데 공격 범위 밖이면 공격할 새로운 목표물 위치로 이동
+- 공격할 목표물이 없어졌으면 원래 행동(원래 목적지로 복귀)
+
++ Idle 배회할건지? 아니면 그 자리 정지할건지 (배회가 나을지도)
++ 함수 뗄 수 있으면 분리해서 작성
++ 둥지 생성 제대로 하는지 확인도 해야함
  */
 
 public class MinionAI : EnemyBase, IBegin
@@ -31,6 +42,9 @@ public class MinionAI : EnemyBase, IBegin
     private float nestCreationTime = -1f;
 
     private bool isOnGround = false;
+
+    private Transform currentAttackTarget = null;
+    private Vector3 origialDestination;
 
     /*public override void Init()
     {
@@ -134,13 +148,21 @@ public class MinionAI : EnemyBase, IBegin
 
         if(closestTarget != null)
         {
-            Vector3 dir = closestTarget.position - transform.position;
+            if(currentAttackTarget == null)
+            {
+                if(targetObject != null && agent.hasPath) 
+                {
+                    origialDestination = agent.destination;
+                }
+            }
+
+            /*Vector3 dir = closestTarget.position - transform.position;
             dir.y = 0f;
 
             if(dir != Vector3.zero)
                 transform.rotation = Quaternion.LookRotation(dir);
 
-            // 공격
+            // 공격*/
         }
     }
 
