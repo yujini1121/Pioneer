@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 7816276827154102402}
   - component: {fileID: 4740013870524598687}
   - component: {fileID: 341168776122737353}
-  - component: {fileID: 1711245936784421722}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Enemy
@@ -32,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -17.44, y: 1, z: 7.26}
-  m_LocalScale: {x: 1, y: 2, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1861869128927730163}
@@ -60,26 +59,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 374411dd8b130fc448a35aa02daf4043, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 20
-  maxHp: 20
-  attackPower: 0
+  IsDead: 0
+  fov: {fileID: 0}
   speed: 0
-  detectionRange: 0
+  attackDamage: 0
   attackRange: 0
-  attackVisualTime: 0
-  restTime: 0
-  targetObject: {fileID: 0}
-  currentState: 0
-  destroyOnDeath: 1
-  deathDelay: 1
-  deathEffect: {fileID: 0}
-  targetLayers:
+  attackDelayTime: 0
+  detectLayer:
     serializedVersion: 2
-    m_Bits: 3072
-  attackCooldown: 1
-  attackRangeObject: {fileID: 9008489998265568714}
+    m_Bits: 0
   nestPrefab: {fileID: 0}
-  spawnNestList: []
 --- !u!54 &7816276827154102402
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -152,21 +141,6 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1711245936784421722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2151327579876242845}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spritePivot: {fileID: 5496079050750236138}
-  flipThreshold: 2
-  lookOffset: -5
 --- !u!1 &5488358784700040979
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,6 +204,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1861869128927730163}
   - component: {fileID: 7371890974766490600}
+  - component: {fileID: 5638469867211237131}
   m_Layer: 8
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -304,6 +279,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &5638469867211237131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5718991084611296420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spritePivot: {fileID: 5496079050750236138}
+  flipThreshold: 2
+  lookOffset: -5
 --- !u!1 &9008489998265568714
 GameObject:
   m_ObjectHideFlags: 0

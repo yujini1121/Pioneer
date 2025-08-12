@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2881796722800299050}
   - component: {fileID: 1490492602853574401}
+  - component: {fileID: 9992999561467091}
   m_Layer: 11
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -84,6 +85,21 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &9992999561467091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5362240007840984320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spritePivot: {fileID: 4617018351153343786}
+  flipThreshold: 2
+  lookOffset: -5
 --- !u!1 &8304306929198963357
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,9 +112,7 @@ GameObject:
   - component: {fileID: 819120994430331720}
   - component: {fileID: 7506255316715637146}
   - component: {fileID: 5712341012824661671}
-  - component: {fileID: 5048327565268617443}
   - component: {fileID: 5747369785763664687}
-  - component: {fileID: 2380346995797919610}
   - component: {fileID: 1011730577205090043}
   m_Layer: 11
   m_Name: Mariner_Default
@@ -210,21 +224,6 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &5048327565268617443
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8304306929198963357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spritePivot: {fileID: 4617018351153343786}
-  flipThreshold: 2
-  lookOffset: -5
 --- !u!114 &5747369785763664687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -239,31 +238,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewRadius: 2
   viewAngle: 360
-  detectionInterval: 0.2
-  enemyMask:
-    serializedVersion: 2
-    m_Bits: 256
-  obstacleMask:
-    serializedVersion: 2
-    m_Bits: 512
   visibleTargets: []
---- !u!114 &2380346995797919610
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8304306929198963357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 642546b302594bf4a80b1839a349e6c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHP: 70
-  currentHP: 70
-  attackPower: 6
-  IsDead: 0
-  IsConfused: 0
 --- !u!114 &1011730577205090043
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,10 +251,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aff0571e6e3b3584e94c03ef2a170925, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsDead: 0
+  fov: {fileID: 0}
+  speed: 0
+  attackDamage: 0
+  attackRange: 0
+  attackDelayTime: 0
   targetLayer:
     serializedVersion: 2
     m_Bits: 256
-  detectionRange: 3
-  attackInterval: 0.5
-  marinerId: 10
   isRepairing: 0
+  marinerId: 10
