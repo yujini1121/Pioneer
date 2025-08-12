@@ -156,6 +156,23 @@ public class MinionAI : EnemyBase, IBegin
                 }
             }
 
+            currentAttackTarget = closestTarget;
+
+            float distanceToTarget = Vector3.Distance(transform.position, currentAttackTarget.position);
+
+            if(distanceToTarget <= attackRange)
+            {
+                Vector3 dir = closestTarget.position - transform.position;
+                dir.y = 0f;
+
+                if (dir != Vector3.zero)
+                    transform.rotation = Quaternion.LookRotation(dir);
+
+                agent.isStopped = true;
+
+                
+            }
+
             /*Vector3 dir = closestTarget.position - transform.position;
             dir.y = 0f;
 
