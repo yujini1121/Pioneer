@@ -12,17 +12,29 @@ public class Ballista : MonoBehaviour, IBegin
 
     [SerializeField] private SInstallableObjectDataSO objectData;
 
+    [Header("부드러운 회전")]
+    [Tooltip("체크 시 부드럽게 회전")] [SerializeField] private bool smoothRotate;
+    [Tooltip("회전 속도")] [SerializeField] private float rotationSpeed;
 
     [Header("발리스타 옵션")]
-    [Tooltip("공격 범위(½)")][SerializeField] private Vector3 attackHalfBound;
-    [Tooltip("적 레이어")][SerializeField] private LayerMask enemyLayer;
-    [Tooltip("사수 위치")][SerializeField] private Transform gunnerPos;
-    [Tooltip("화살 풀")][SerializeField] private Transform boltPool;
+    [Tooltip("탐지 방식")] [SerializeField] private DetectType detectType;
+    [Tooltip("현재 체력")] [SerializeField] private float currentHP;
+    [Tooltip("공격력")] [SerializeField] private float attackPower;
+    [Tooltip("공격 사거리")] [SerializeField] private float attackRange;
+    [Tooltip("공격 범위(½)")] [SerializeField] private Vector3 attackHalfBound;
+    [Tooltip("공격 쿨타임")] [SerializeField] private float attackCooldown;
+    [Tooltip("발사 속도")] [SerializeField] private float attackSpeed;
+    [Tooltip("화살 크기(½)")] [SerializeField] private Vector3 boltHalfSize;
+    [Tooltip("적 레이어")] [SerializeField] private LayerMask enemyLayer;
+    [Tooltip("사수 위치")] [SerializeField] private Transform gunnerPos;
+    [Tooltip("화살 풀")] [SerializeField] private Transform boltPool;
 
     [Header("디버그")]
-    [Tooltip("체크 시 기즈모 출력")][SerializeField] private bool drawGizmos;
-    [Tooltip("적 감지")][SerializeField] private bool enemyDetect;
-    [Tooltip("가장 가까운 적")][SerializeField] private Transform nearestTrans;
+    [Tooltip("체크 시 기즈모 출력")] [SerializeField] private bool drawGizmos;
+    [Tooltip("사용 중")] [SerializeField] private bool isUsing;
+    [Tooltip("적 감지")] [SerializeField] private bool enemyDetect;
+    [Tooltip("감지한 적 목록")] [SerializeField] private Collider[] colliders;
+    [Tooltip("가장 가까운 적")] [SerializeField] private Transform nearestTrans;
 
     private List<GameObject> bolts = new List<GameObject>();
     private Vector3 centerVec;
