@@ -186,7 +186,17 @@ public class MinionAI : EnemyBase, IBegin
     {
         if (targetObject != null && agent.destination != targetObject.transform.position)
         {
-            agent.SetDestination(targetObject.transform.position);
+            Collider col = targetObject.GetComponent<BoxCollider>();
+            Vector3 closestPoint = col.ClosestPoint(transform.position);
+            if (Vector3.Distance(agent.destination, closestPoint) > 1.0f) // 1미터 이상 바뀌었을 때만
+            {
+                agent.SetDestination(closestPoint);
+            }
+
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+            {
+                agent.isStopped = true;
+            }
         }
     }
 
