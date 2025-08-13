@@ -29,9 +29,6 @@ using UnityEngine.AI;
 
 public class MinionAI : EnemyBase, IBegin
 {
-    [Header("감지 가능한 레이어")]
-    [SerializeField] private LayerMask detectLayer;
-
     [Header("둥지 프리팹")]
     [SerializeField] private GameObject nestPrefab;
 
@@ -40,7 +37,6 @@ public class MinionAI : EnemyBase, IBegin
 
     private NavMeshAgent agent;
 
-    // 
     private bool isNestCreated = false;
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
@@ -61,15 +57,16 @@ public class MinionAI : EnemyBase, IBegin
     }
 
     void Update()
-    {       
-        fov.DetectTargets(detectLayer);
+    {      
+        // 레이어 변수 수정
+        fov.DetectTargets(detectMask);
 
-        //// 수정 해야함
+        /*//// 수정 해야함
         if (targetObject != null)
         {
             // NavMeshAgent 목적지 계속 갱신
             agent.SetDestination(targetObject.transform.position);
-        }
+        }*/
 
         if (CanCreateNest())
         {
@@ -95,7 +92,7 @@ public class MinionAI : EnemyBase, IBegin
         attackDamage = 1;
         speed = 2f;
         detectionRange = 4f;
-        attackRange = 2f;
+        // attackRange = 2f;
         attackDelayTime = 2f;
         idleTime = 2f;
 
@@ -107,7 +104,8 @@ public class MinionAI : EnemyBase, IBegin
     #region 행동 조건 검사
     private bool CanCreateNest()
     {
-        return  isOnGround && !isNestCreated && Time.time >= nestCreationTime && nestCreationTime != -1f;
+        // isOnGround && 
+        return !isNestCreated && Time.time >= nestCreationTime && nestCreationTime != -1f;
     }
 
     private bool CanAttack()
@@ -137,12 +135,26 @@ public class MinionAI : EnemyBase, IBegin
         // 감지 범위 내에 감지 가능한 적들이 존재하는지?
         if(fov.visibleTargets.Count > 0)
         {
+            Debug.Log("감지 범위 내에 감지 가능한 적들이 존재");
             // 공격 범위 안에 있는 콜라이더들 가지고 오기
-            Collider[] detectColliders = DetectAttackRange(attackRange);
+            Collider[] detectColliders = DetectAttackRange();
+            Debug.Log($"DetectAttackRange에서 {detectColliders.Length}개의 콜라이더 감지됨");
 
-            if(detectColliders.Length > 0)
+            for (int i = 0; i < detectColliders.Length; i++)
+            {
+                Debug.Log($"[{i}] 이름: {detectColliders[i].gameObject.name}, 태그: {detectColliders[i].gameObject.tag}");
+            }
+
+            if (detectColliders.Length > 0)
             {
                 currentAttackTarget = FindClosestTarget(detectColliders);
+                Debug.Log($"가까운 타겟 : {currentAttackTarget}");
+
+                if (currentAttackTarget != null)
+                {
+                    Debug.Log("가장 가까운 애 찾음");
+                    agent.isStopped = true;
+                }
             }            
         }
     }
