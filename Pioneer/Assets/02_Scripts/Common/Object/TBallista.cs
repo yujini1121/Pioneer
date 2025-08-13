@@ -4,50 +4,57 @@ using UnityEngine;
 
 public class TBallista : StructureBase
 {
-    [SerializeField] private bool isUsing = false;
-
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private Collider[] enemyColliders;
     [SerializeField] private float attackRange;
     [SerializeField] private float attackSpeed;
     [SerializeField] private float attackCooltime;
 
-    [SerializeField] private float rotationSpeed;
+    [SerializeField] private float turnSpeed;
 
 
-    // TODO: ÃßÈÄ, ScriptableObjectÀÇ º¯¼öµé°ú ¿¬µ¿ ÇÊ¿äÇÔ~~~
+    // TODO: ì¶”í›„, ScriptableObjectì˜ ë³€ìˆ˜ë“¤ê³¼ ì—°ë™ í•„ìš”í•¨~~~
     private int currentHP = 80;
     private float attackDamage = 25f;
 
 
-    // ¸Ş¼­µå ½ÃÀÛ
+    // ë©”ì„œë“œ ì‹œì‘
     void Update()
     {
-        
+        if (currentHP <= 0)
+        {
+            WhenDestroy();
+            return;
+        }
+
+        if (isUsing)    
+        { 
+            Use();
+            DetectEnemy(); 
+            LookAt(); 
+            Fire(); 
+        }
+        else            
+        { 
+            UnUse(); 
+        }
     }
 
-    void Use()
-    {
-        if (isUsing) return;
-        isUsing = true;
-    }
-
-    bool Detect()
+    private bool DetectEnemy()
     {
         enemyColliders = Physics.OverlapSphere(transform.position, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
         return true;
     }
 
-    void LookAt()
+    private void LookAt()
     {
-        // ¹Ù¶óº¸°Ô ÇÏ´Â ·ÎÁ÷
+        // ë°”ë¼ë³´ê²Œ í•˜ëŠ” ë¡œì§
     }
     
-    void Fire()
+    private void Fire()
     {
-        // È­»ì ¿ÀºêÁ§Æ® »ı¼º ¹× ¹ß»çÇÏ´Â ·ÎÁ÷
+        // í™”ì‚´ ì˜¤ë¸Œì íŠ¸ ìƒì„± ë° ë°œì‚¬í•˜ëŠ” ë¡œì§
     }
-
 
     void OnDrawGizmos()
     {

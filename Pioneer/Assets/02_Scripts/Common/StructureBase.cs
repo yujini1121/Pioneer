@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class StructureBase : CommonBase
 {
+    public bool isUsing { get; private set; }
+
     void Start()
     {
         
@@ -17,8 +19,26 @@ public class StructureBase : CommonBase
         // 힐링
     }
 
+
+
+    #region 상호작용 가능한 오브젝트만 사용할 것
     public virtual void Interactive()
     {
             
     }
+
+    public virtual void Use()
+    {
+        // 사용했을 때 로직
+        
+        isUsing = true;
+    }
+
+    public virtual void UnUse()
+    {
+        // 사용 해제했을 때 로직
+
+        isUsing = false;
+    }
+    #endregion
 }
