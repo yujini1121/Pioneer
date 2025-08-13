@@ -23,6 +23,10 @@ public class MarinerBase : CreatureBase
     protected bool isShowingAttackBox = false;
     protected Coroutine attackRoutine;
 
+    // 추격 시스템 관련 변수
+    protected float chaseRange = 8f;  // 추격 시작 범위
+    protected bool isChasing = false; // 추격 중인지 확인
+
     // 수리 관련 공통 변수
     [Header("수리 설정")]
     public bool isRepairing = false;
@@ -44,7 +48,6 @@ public class MarinerBase : CreatureBase
         if (target == null || fov == null)
             return false;
 
-        // FOV에서 타겟 감지 수행
         fov.DetectTargets(targetLayer);
         return fov.visibleTargets.Contains(target);
     }
@@ -93,7 +96,6 @@ public class MarinerBase : CreatureBase
 
     protected bool DetectTarget()
     {
-        // attackRange 변수 사용
         Collider[] hits = Physics.OverlapBox(
             transform.position,
             new Vector3(attackRange / 2f, 0.5f, attackRange / 2f),
@@ -127,7 +129,117 @@ public class MarinerBase : CreatureBase
         if (dir != Vector3.zero)
             transform.forward = dir;
     }
+    protected virtual void ValidateCurrentTarget()
+    {
+        if (target != null)
+        {
+            CommonBase targetBase = target.GetComponent<CommonBase>();
+            if (targetBase != null && targetBase.IsDead)
+            {
+                Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 타겟 {target.name}이 죽었습니다. 새로운 타겟을 찾습니다.");
+                target = null;
+                isChasing = false;
+                EnterWanderingState();
+            }
+        }
+    }
 
+    protected virtual void TryFindNewTarget()
+    {
+        Collider[] hits = Physics.OverlapBox(
+            transform.position,
+            new Vector3(chaseRange / 2f, 0.5f, chaseRange / 2f),
+            Quaternion.identity,
+            targetLayer
+        );
+
+        float minDist = float.MaxValue;
+        UnityEngine.Transform nearestTarget = null;
+
+        foreach (var hit in hits)
+        {
+            CommonBase targetBase = hit.GetComponent<CommonBase>();
+            if (targetBase != null && targetBase.IsDead)
+                continue;
+
+            float dist = Vector3.Distance(transform.position, hit.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearestTarget = hit.transform;
+            }
+        }
+
+        if (nearestTarget != null)
+        {
+            target = nearestTarget;
+            isChasing = true;
+            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: {target.name} 추격 시작!");
+        }
+    }
+
+    protected virtual void HandleChasing()
+    {
+        if (target == null)
+        {
+            isChasing = false;
+            EnterWanderingState();
+            return;
+        }
+
+        LookAtTarget();
+
+        float distanceToTarget = Vector3.Distance(transform.position, target.position);
+
+        if (distanceToTarget <= attackRange && GetAttackCooldown() <= 0f)
+        {
+            if (IsTargetInFOV() && attackRoutine == null)
+            {
+                attackRoutine = StartCoroutine(GetAttackSequence());
+            }
+        }
+        else
+        {
+            ChaseTarget();
+        }
+    }
+
+    protected virtual void ChaseTarget()
+    {
+        if (target == null) return;
+
+        Vector3 direction = (target.position - transform.position).normalized;
+        direction.y = 0f;
+
+        transform.position += direction * speed * Time.deltaTime;
+    }
+
+    protected virtual void HandleNormalBehavior()
+    {
+        switch (currentState)
+        {
+            case CrewState.Wandering:
+                Wander();
+                break;
+            case CrewState.Idle:
+                Idle();
+                break;
+            case CrewState.Attacking:
+                break;
+        }
+    }
+
+    protected virtual float GetAttackCooldown()
+    {
+        return 0f; 
+    }
+
+    protected virtual IEnumerator GetAttackSequence()
+    {
+        yield return null; 
+    }
+
+    // ===== 기존 수리 관련 함수들 =====
     protected virtual void StartRepair()
     {
         List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
@@ -154,7 +266,6 @@ public class MarinerBase : CreatureBase
             }
         }
 
-        // 점유할 수 있는 수리 대상이 없는 경우
         if (!isSecondPriorityStarted)
         {
             Debug.Log($"{GetCrewTypeName()} 수리 대상 없음 -> 2순위 행동 시작");
@@ -174,7 +285,6 @@ public class MarinerBase : CreatureBase
 
         StartCoroutine(RepairProcess());
     }
-
 
     protected virtual IEnumerator RepairProcess()
     {

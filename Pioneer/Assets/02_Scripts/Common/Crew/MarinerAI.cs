@@ -5,19 +5,17 @@ using UnityEngine.AI;
 
 public class MarinerAI : MarinerBase, IBegin
 {
-    // 승무원 고유 설정
     public int marinerId;
 
-    // 공격 설정
     private float attackCooldown = 0f;
     private float attackInterval = 0.5f;
 
     private void Awake()
     {
         maxHp = 100;  // Mariner HP
-        speed = 1f;
+        speed = 2f;
         attackDamage = 6;
-        attackRange = 3f;
+        attackRange = 4f;
         attackDelayTime = 1f;
 
         fov = GetComponent<FOVController>();
@@ -49,7 +47,6 @@ public class MarinerAI : MarinerBase, IBegin
 
         if (GameManager.Instance.IsDaytime)
         {
-            // 낮: 수리 및 2순위 행동
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
@@ -57,51 +54,115 @@ public class MarinerAI : MarinerBase, IBegin
                 isShowingAttackBox = false;
             }
 
+            isChasing = false;
+            target = null;
+
             if (!isRepairing)
                 StartRepair();
         }
         else
         {
-            // 밤: Mariner AI
-            if (IsDead) return;
-
-            attackCooldown -= Time.deltaTime;
-
-            if (attackCooldown <= 0f)
-            {
-                if (DetectTarget())
-                {
-                    if (IsTargetInFOV())
-                    {
-                        LookAtTarget();
-
-                        if (attackRoutine == null)
-                        {
-                            attackRoutine = StartCoroutine(AttackSequence());
-                        }
-                    }
-                }
-
-                attackCooldown = attackInterval;
-            }
-
-            switch (currentState)
-            {
-                case CrewState.Wandering:
-                    Wander();
-                    break;
-                case CrewState.Idle:
-                    Idle();
-                    break;
-                case CrewState.Attacking:
-                    break;
-            }
+            HandleNightCombat();
         }
     }
 
-    /// <summary>
-    /// 2순위 행동 구현 (자원 수집)
-    /// </summary>
+    private void HandleNightCombat()
+    {
+        if (IsDead) return;
+
+        attackCooldown -= Time.deltaTime;
+
+        ValidateCurrentTarget();
+
+        if (target == null && !isChasing)
+        {
+            TryFindNewTarget();
+        }
+
+        if (target != null && isChasing)
+        {
+            HandleChasing(); 
+        }
+        else
+        {
+            HandleNormalBehavior(); 
+        }
+    }
+
+    protected override float GetAttackCooldown()
+    {
+        return attackCooldown;
+    }
+
+    protected override IEnumerator GetAttackSequence()
+    {
+        return MarinerAttackSequence();
+    }
+
+    private IEnumerator MarinerAttackSequence()
+    {
+        currentState = CrewState.Attacking;
+
+        if (target == null)
+        {
+            attackRoutine = null;
+            isChasing = false;
+            EnterWanderingState();
+            yield break;
+        }
+
+        LookAtTarget();
+
+        isShowingAttackBox = true;
+
+        yield return new WaitForSeconds(attackDelayTime);
+
+        isShowingAttackBox = false;
+
+        PerformMarinerAttack();
+
+        attackCooldown = attackInterval;
+
+        if (target != null)
+        {
+            CommonBase targetBase = target.GetComponent<CommonBase>();
+            if (targetBase != null && !targetBase.IsDead)
+            {
+                Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
+                currentState = CrewState.Wandering; // 추격을 위해 상태 변경
+            }
+            else
+            {
+                target = null;
+                isChasing = false;
+                EnterWanderingState();
+            }
+        }
+        else
+        {
+            isChasing = false;
+            EnterWanderingState();
+        }
+
+        attackRoutine = null;
+    }
+    private void PerformMarinerAttack()
+    {
+        Vector3 boxCenter = transform.position + transform.forward * 1f;
+        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
+
+        foreach (var hit in hits)
+        {
+            Debug.Log($"승무원이 {hit.name} 공격 범위 내 감지");
+
+            CommonBase targetBase = hit.GetComponent<CommonBase>();
+            if (targetBase != null)
+            {
+                targetBase.TakeDamage(attackDamage);
+                Debug.Log($"승무원이 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
+            }
+        }
+    }
     public override IEnumerator StartSecondPriorityAction()
     {
         Debug.Log("일반 승무원 2순위 낮 행동 시작");
@@ -142,7 +203,6 @@ public class MarinerAI : MarinerBase, IBegin
         UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
         MoveTo(targetSpawn.position);
 
-        // 도착 대기
         while (!IsArrived())
         {
             yield return null;
@@ -178,59 +238,11 @@ public class MarinerAI : MarinerBase, IBegin
         }
     }
 
-    /// <summary>
-    /// 공격 시퀀스 
-    /// </summary>
-    private IEnumerator AttackSequence()
-    {
-        currentState = CrewState.Attacking;
-
-        Vector3 targetOffset = (target.position - transform.position).normalized;
-        Vector3 attackPosition = target.position - targetOffset;
-        attackPosition.y = transform.position.y;
-
-        while (Vector3.Distance(transform.position, attackPosition) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, attackPosition, speed * Time.deltaTime);
-            yield return null;
-        }
-
-        isShowingAttackBox = true;
-        yield return new WaitForSeconds(attackDelayTime);
-        isShowingAttackBox = false;
-
-        Vector3 boxCenter = transform.position + transform.forward * 1f;
-        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
-
-        foreach (var hit in hits)
-        {
-            Debug.Log($"{hit.name} 공격 범위 내");
-
-            CommonBase targetBase = hit.GetComponent<CommonBase>();
-            if (targetBase != null)
-            {
-                targetBase.TakeDamage(attackDamage);
-                Debug.Log($"{hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
-            }
-        }
-
-        currentState = CrewState.Wandering;
-        stateTimer = moveDuration;
-        SetRandomDirection();
-        attackRoutine = null;
-    }
-
-    /// <summary>
-    /// 일반 승무원은 100% 수리 성공
-    /// </summary>
     protected override float GetRepairSuccessRate()
     {
         return 1.0f; // 100% 성공률
     }
 
-    /// <summary>
-    /// 밤이 다가올 때 처리
-    /// </summary>
     protected override void OnNightApproaching()
     {
         MarinerManager.Instance.StoreItemsAndReturnToBase(this);
