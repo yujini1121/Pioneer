@@ -14,8 +14,8 @@ public class TBallista : StructureBase
     [SerializeField] private float attackCooltime;
 
     // TODO: 추후, ScriptableObject의 변수들과 연동 필요함~~~
-    private int currentHP = 80;
-    private float attackDamage = 25f;
+    [SerializeField] private int currentHP = 80;
+    [SerializeField] private float attackDamage = 25f;
 
 
     // 메서드 시작
@@ -52,7 +52,7 @@ public class TBallista : StructureBase
         // 현재는 0번이 가장 가까운 에너미라고 가정 (추후 수정)
         closestTarget = enemyColliders[0].transform;
         float minDistance = Mathf.Infinity;
-        foreach (var col in colliders)
+        //foreach (var col in colliders)
     }
     
     private void Fire()
