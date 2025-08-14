@@ -303,6 +303,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
       propertyPath: attackBoxCenterOffset.z
       value: 1
       objectReference: {fileID: 0}
@@ -735,6 +740,11 @@ PrefabInstance:
         type: 3}
       propertyPath: detectLayer.m_Bits
       value: 3072
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -1316,6 +1326,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
       propertyPath: attackBoxCenterOffset.z
       value: 1
       objectReference: {fileID: 0}
@@ -1377,13 +1392,13 @@ GameObject:
   - component: {fileID: 1076792365}
   - component: {fileID: 1076792364}
   - component: {fileID: 1076792363}
-  m_Layer: 11
+  m_Layer: 8
   m_Name: nest
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!135 &1076792363
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1736,6 +1751,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
       propertyPath: attackBoxCenterOffset.z
       value: 1
       objectReference: {fileID: 0}
@@ -2081,7 +2101,7 @@ Transform:
   m_GameObject: {fileID: 1425578422}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.73, y: 2, z: 0}
+  m_LocalPosition: {x: 9.73, y: 1.5, z: 0}
   m_LocalScale: {x: 5, y: 3, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2290,7 +2310,7 @@ PrefabInstance:
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 9.1
+      value: 35.1
       objectReference: {fileID: 0}
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -2371,6 +2391,11 @@ PrefabInstance:
         type: 3}
       propertyPath: detectLayer.m_Bits
       value: 3072
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -2577,7 +2602,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!54 &1952887060
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2737,13 +2762,13 @@ GameObject:
   - component: {fileID: 1959203349}
   - component: {fileID: 1959203348}
   - component: {fileID: 1959203347}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1959203347
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2988,6 +3013,11 @@ PrefabInstance:
         type: 3}
       propertyPath: detectLayer.m_Bits
       value: 3072
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -3278,6 +3308,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
       propertyPath: attackBoxCenterOffset.z
       value: 1
       objectReference: {fileID: 0}
@@ -3366,7 +3401,7 @@ PrefabInstance:
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.67
+      value: -37.4
       objectReference: {fileID: 0}
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -3376,7 +3411,7 @@ PrefabInstance:
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.37
+      value: 8.1
       objectReference: {fileID: 0}
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -3457,6 +3492,11 @@ PrefabInstance:
         type: 3}
       propertyPath: detectLayer.m_Bits
       value: 3072
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
+        type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 5965073873695641737, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}

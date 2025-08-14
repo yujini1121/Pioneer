@@ -38,7 +38,7 @@ public class EnemyBase : CreatureBase, IBegin
             + transform.up * attackBoxCenterOffset.y;
         Vector3 halfBoxSize = new Vector3(0.5f, 0.5f, attackRange / 2f);
 
-        Debug.Log($"DetectMask: {detectMask}, BoxCenter: {boxCenter}, HalfSize: {halfBoxSize}");
+        // Debug.Log($"DetectMask: {detectMask}, BoxCenter: {boxCenter}, HalfSize: {halfBoxSize}");
 
         return Physics.OverlapBox(boxCenter, halfBoxSize, transform.rotation, detectMask);
     }

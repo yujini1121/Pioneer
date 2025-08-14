@@ -1,50 +1,38 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
 /*
-[탐색]
-- 타겟 오브젝트 돛대 설정 및 감지
-- 살아있는 생성한 둥지가 2개 미만 => 둥지 생성 (15초 대기 => 배회? 이동?)
-==========================================
+250814
+- 문제 1 : 공격을 한 번 하면 애가 동작이 다 멈추는거 같음
+- 문제 2 : 제대로 공격이 안 들어감 => 현재 테스트 씬의 플레이어가 CommonBase를 상속 받지않아 정확한 확인 불가
+- 문제 3 : 둥지 로직 구현 안 함
+- 문제 4 : 바다에 있을때 네브메시를 끄고 배 위에 올라왔을때 네브메시를 키기
+- 문제 5 : 배 위인지 확인하는 코드 모든 에너미가 써야할 것 같아서 EnemyBase로 옮기기
 
-1. 둥지 생성 로직 작성
-- 생성 가능한 둥지 수가 미니언 한 마리당 하나
-- 생성된 둥지에서 생성되는 미니언 두마리, 두마리 생성후 파괴
-- 둥지에서 생성된 미니언과 스포너에서 생성된 미니언 상관없이 무조건 둥지 생성
- 
- ==========================================
-250812
-- 새로운 목표물이 감지된 경우 이전 이동 목적지를 저장하고
-- 새로운 목표물이 공격 범위 안에 있다면 이동을 멈추고 공격
-- 감지 범위 안인데 공격 범위 밖이면 공격할 새로운 목표물 위치로 이동
-- 공격할 목표물이 없어졌으면 원래 행동(원래 목적지로 복귀)
-
-+ Idle 배회할건지? 아니면 그 자리 정지할건지 (배회가 나을지도)
-+ 함수 뗄 수 있으면 분리해서 작성
-+ 둥지 생성 제대로 하는지 확인도 해야함
- */
-
++ 코드가 너무 더러움 다시 깔끔하게 구현해보기
+*/
 public class MinionAI : EnemyBase, IBegin
 {
     [Header("둥지 프리팹")]
     [SerializeField] private GameObject nestPrefab;
 
-    [Header("공격 콜라이더")]
-    [SerializeField] private GameObject attackCollider;
+    [Header("배 바닥 레이어")]
+    [SerializeField] private LayerMask groundLayer;
 
+    // 네브 메시 
     private NavMeshAgent agent;
 
+    // 둥지 관련 변수
     private bool isNestCreated = false;
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
 
-    private bool isOnGround = false;
-
+    // 현재 타겟 관련 변수
     private Transform currentAttackTarget = null;
-    private Vector3 originalDestination;
+
+    // 바닥 확인 변수
+    private bool isOnGround = false;
 
     void Start()
     {
@@ -60,13 +48,7 @@ public class MinionAI : EnemyBase, IBegin
     {      
         // 레이어 변수 수정
         fov.DetectTargets(detectMask);
-
-        /*//// 수정 해야함
-        if (targetObject != null)
-        {
-            // NavMeshAgent 목적지 계속 갱신
-            agent.SetDestination(targetObject.transform.position);
-        }*/
+        CheckOnGround();
 
         if (CanCreateNest())
         {
@@ -79,10 +61,6 @@ public class MinionAI : EnemyBase, IBegin
         else if(CanMove())
         {
             Move();
-        }        
-        else
-        {
-            Idle();
         }
     }
 
@@ -92,35 +70,21 @@ public class MinionAI : EnemyBase, IBegin
         attackDamage = 1;
         speed = 2f;
         detectionRange = 4f;
-        // attackRange = 2f;
         attackDelayTime = 2f;
         idleTime = 2f;
-
         SetMastTarget();
-
         fov.viewRadius = attackRange;
     }
 
-    #region 행동 조건 검사
+    #region 둥지 생성
     private bool CanCreateNest()
     {
-        // isOnGround && 
-        return !isNestCreated && Time.time >= nestCreationTime && nestCreationTime != -1f;
+        return isOnGround 
+            && !isNestCreated 
+            && Time.time >= nestCreationTime 
+            && nestCreationTime != -1f
+            && !CanAttack();
     }
-
-    private bool CanAttack()
-    {
-        return fov.visibleTargets.Count > 0;
-    }
-
-    private bool CanMove()
-    {
-        if(targetObject != null)
-            return true;
-
-        return false;
-    }
-    #endregion
 
     // 둥지 생성
     void CreateNest()
@@ -128,22 +92,28 @@ public class MinionAI : EnemyBase, IBegin
         Instantiate(nestPrefab, transform.position, Quaternion.identity);
         isNestCreated = true;
     }
+    #endregion
 
-    // 공격
+    #region 공격
+    private bool CanAttack()
+    {
+        return DetectAttackRange().Length > 0;
+    }
+
     void Attack()
     {  
-        // 감지 범위 내에 감지 가능한 적들이 존재하는지?
         if(fov.visibleTargets.Count > 0)
         {
-            Debug.Log("감지 범위 내에 감지 가능한 적들이 존재");
             // 공격 범위 안에 있는 콜라이더들 가지고 오기
             Collider[] detectColliders = DetectAttackRange();
-            Debug.Log($"DetectAttackRange에서 {detectColliders.Length}개의 콜라이더 감지됨");
 
+            // 디버깅용 코드
+            Debug.Log($"DetectAttackRange에서 {detectColliders.Length}개의 콜라이더 감지됨");
             for (int i = 0; i < detectColliders.Length; i++)
             {
                 Debug.Log($"[{i}] 이름: {detectColliders[i].gameObject.name}, 태그: {detectColliders[i].gameObject.tag}");
             }
+            // 여기까지
 
             if (detectColliders.Length > 0)
             {
@@ -154,8 +124,22 @@ public class MinionAI : EnemyBase, IBegin
                 {
                     Debug.Log("가장 가까운 애 찾음");
                     agent.isStopped = true;
+                    Debug.Log("가장 가까운 애 찾음2");
+                    CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
+                    Debug.Log($"currentAttackTarget : {currentAttackTarget.gameObject.name}");
+                    if (targetBase != null)
+                    {
+                        Debug.Log("가장 가까운 애 찾음4");
+                        targetBase.TakeDamage(attackDamage);
+                        Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
+                    }
                 }
-            }            
+                else
+                {
+                    Debug.Log("가장 가까운 애 찾음88");
+                    agent.isStopped = false;
+                }
+            }
         }
     }
 
@@ -168,7 +152,7 @@ public class MinionAI : EnemyBase, IBegin
         Transform closestTarget = null;
         float closestDis = float.MaxValue;
 
-        foreach (var target in detectColliders) // FOV 리스트가 아니라 DetectAttackRange에서 반환된 콜라이더 배열에서 찾기
+        foreach (var target in detectColliders)
         {
             float dis = Vector3.Distance(transform.position, target.transform.position);
             if (dis < closestDis)
@@ -180,50 +164,75 @@ public class MinionAI : EnemyBase, IBegin
 
         return closestTarget;
     }
+    #endregion
 
-    // 이동
+    #region 이동
+    private bool CanMove()
+    {
+        return targetObject != null || fov.visibleTargets.Count > 0;
+    }
+
     void Move()
     {
-        if (targetObject != null && agent.destination != targetObject.transform.position)
-        {
-            Collider col = targetObject.GetComponent<BoxCollider>();
-            Vector3 closestPoint = col.ClosestPoint(transform.position);
-            if (Vector3.Distance(agent.destination, closestPoint) > 1.0f) // 1미터 이상 바뀌었을 때만
-            {
-                agent.SetDestination(closestPoint);
-            }
+        if (agent.isStopped) return;
 
-            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        Transform moveTarget = targetObject != null ? targetObject.transform : null;
+        if (fov.visibleTargets.Count > 0)
+        {
+            moveTarget = FindClosestTargetFromList(fov.visibleTargets);
+        }
+
+        if (moveTarget != null && agent != null)
+        {
+            Collider col = moveTarget.GetComponent<Collider>();
+            Vector3 destination = col != null ? col.ClosestPoint(transform.position) : moveTarget.position;
+
+            if (Vector3.Distance(agent.destination, destination) > 0.5f)
             {
-                agent.isStopped = true;
+                agent.isStopped = false;
+                agent.SetDestination(destination);
             }
         }
     }
 
-    // 대기
-    void Idle()
+    private Transform FindClosestTargetFromList(List<Transform> targets)
     {
-        // 가만히? 배회? ????????????
-    }
+        Transform closest = null;
+        float closestDistance = float.MaxValue;
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if(collision.gameObject.CompareTag("Ground"))
+        foreach (var t in targets)
         {
-            isOnGround = true;
-
-            if(nestCreationTime == -1f)
+            float dist = Vector3.Distance(transform.position, t.position);
+            if (dist < closestDistance)
             {
+                closestDistance = dist;
+                closest = t;
+            }
+        }
+        return closest;
+    }
+    #endregion
+
+    // 배 플렛폼 위인지 검사
+    private bool CheckOnGround()
+    {
+        // RaycastHit hit;
+        if(Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
+        {
+            if(!isOnGround)
+            {
+                nestCool = Random.Range(5f, 15f);
                 nestCreationTime = Time.time + nestCool;
+                isOnGround = true;
             }
+            Debug.Log("배 위다");
         }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
+        else
         {
             isOnGround = false;
+            Debug.Log("배 위 아님");
         }
+
+        return isOnGround;
     }
 }
