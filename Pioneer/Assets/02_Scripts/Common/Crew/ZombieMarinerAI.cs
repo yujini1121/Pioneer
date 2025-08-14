@@ -32,6 +32,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         attackRange = 4f;
         attackDelayTime = 1f;
 
+        chaseRange = 10f;  // 더 넓은 추격 범위
+
         fov = GetComponent<FOVController>();
     }
 
@@ -70,12 +72,12 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
         ValidateCurrentTarget();
 
-        if (target == null && !isChasing)
+        if (target == null)
         {
             TryFindNewTarget();
         }
 
-        if (target != null && isChasing)
+        if (isChasing && target != null)
         {
             HandleChasing();
         }
@@ -107,6 +109,11 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             yield break;
         }
 
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
         LookAtTarget();
 
         if (attackRangeObject != null)
@@ -133,7 +140,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             if (targetBase != null && !targetBase.IsDead)
             {
                 Debug.Log($"좀비 {marinerId}: 공격 완료, 추격 재개");
-                currentState = CrewState.Wandering; 
+                // 추격 상태로 복귀
+                EnterChasingState();
             }
             else
             {
@@ -180,4 +188,77 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             }
         }
     }
+
+    protected override void TryFindNewTarget()
+    {
+        Collider[] hits = Physics.OverlapBox(
+            transform.position,
+            new Vector3(chaseRange / 2f, 0.5f, chaseRange / 2f),
+            Quaternion.identity,
+            targetLayer
+        );
+
+        float minDist = float.MaxValue;
+        UnityEngine.Transform nearestTarget = null;
+
+        foreach (var hit in hits)
+        {
+            CommonBase targetBase = hit.GetComponent<CommonBase>();
+            if (targetBase != null && targetBase.IsDead)
+                continue;
+
+            float dist = Vector3.Distance(transform.position, hit.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearestTarget = hit.transform;
+            }
+        }
+
+        if (nearestTarget != null)
+        {
+            target = nearestTarget;
+            EnterChasingState();
+            Debug.Log($"좀비 {marinerId}: {target.name} 추격 시작! (거리: {minDist:F1}m)");
+        }
+    }
+
+    protected override void ValidateCurrentTarget()
+    {
+        if (target != null)
+        {
+            CommonBase targetBase = target.GetComponent<CommonBase>();
+            if (targetBase != null && targetBase.IsDead)
+            {
+                Debug.Log($"좀비 {marinerId}: 타겟 {target.name}이 죽었습니다. 새로운 타겟을 찾습니다.");
+                target = null;
+                isChasing = false;
+                EnterWanderingState();
+            }
+        }
+    }
+
+    protected override void ChaseTarget()
+    {
+        if (target == null || agent == null || !agent.isOnNavMesh) return;
+
+        float zombieChaseUpdateInterval = 0.1f;
+
+        if (Time.time - lastChaseUpdate >= zombieChaseUpdateInterval)
+        {
+            agent.SetDestination(target.position);
+            lastChaseUpdate = Time.time;
+        }
+
+        LookAtTarget();
+    }
+
+    public override IEnumerator StartSecondPriorityAction()
+    {
+        Debug.Log($"좀비 {marinerId}: 배회 계속");
+        yield return new WaitForSeconds(1f);
+        EnterWanderingState();
+    }
+
+
 }

@@ -47,6 +47,7 @@ public class MarinerAI : MarinerBase, IBegin
 
         if (GameManager.Instance.IsDaytime)
         {
+            // 낮에는 전투 중단하고 수리 작업 시작
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
@@ -54,8 +55,17 @@ public class MarinerAI : MarinerBase, IBegin
                 isShowingAttackBox = false;
             }
 
-            isChasing = false;
-            target = null;
+            // 추격 상태 초기화
+            if (isChasing)
+            {
+                isChasing = false;
+                target = null;
+                if (agent != null && agent.isOnNavMesh)
+                {
+                    agent.ResetPath();
+                }
+                EnterWanderingState();
+            }
 
             if (!isRepairing)
                 StartRepair();
@@ -72,21 +82,34 @@ public class MarinerAI : MarinerBase, IBegin
 
         attackCooldown -= Time.deltaTime;
 
+        // 현재 타겟 유효성 검사
         ValidateCurrentTarget();
 
-        if (target == null && !isChasing)
+        // 타겟이 없을 때만 새로운 타겟 찾기
+        if (target == null)
         {
             TryFindNewTarget();
         }
 
-        if (target != null && isChasing)
+        // 상태별 행동 처리
+        if (isChasing && target != null)
         {
-            HandleChasing(); 
+            HandleChasing();
         }
         else
         {
-            HandleNormalBehavior(); 
+            HandleNormalBehavior();
         }
+    }
+
+    protected override int GetMarinerId()
+    {
+        return marinerId;
+    }
+
+    protected override string GetCrewTypeName()
+    {
+        return "승무원";
     }
 
     protected override float GetAttackCooldown()
@@ -111,6 +134,12 @@ public class MarinerAI : MarinerBase, IBegin
             yield break;
         }
 
+        // 공격 준비: NavMesh 정지하고 타겟을 바라보기
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
         LookAtTarget();
 
         isShowingAttackBox = true;
@@ -123,13 +152,15 @@ public class MarinerAI : MarinerBase, IBegin
 
         attackCooldown = attackInterval;
 
+        // 공격 후 상태 처리
         if (target != null)
         {
             CommonBase targetBase = target.GetComponent<CommonBase>();
             if (targetBase != null && !targetBase.IsDead)
             {
                 Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
-                currentState = CrewState.Wandering; // 추격을 위해 상태 변경
+                // 추격 상태로 복귀
+                EnterChasingState();
             }
             else
             {
@@ -146,6 +177,7 @@ public class MarinerAI : MarinerBase, IBegin
 
         attackRoutine = null;
     }
+
     private void PerformMarinerAttack()
     {
         Vector3 boxCenter = transform.position + transform.forward * 1f;
@@ -163,6 +195,7 @@ public class MarinerAI : MarinerBase, IBegin
             }
         }
     }
+
     public override IEnumerator StartSecondPriorityAction()
     {
         Debug.Log("일반 승무원 2순위 낮 행동 시작");
@@ -182,21 +215,21 @@ public class MarinerAI : MarinerBase, IBegin
             {
                 MarinerManager.Instance.OccupySpawner(index);
                 chosenIndex = index;
-                Debug.Log("현재 다른 승무원이 사용중 인 스포너");
+                Debug.Log($"승무원 {marinerId}: 스포너 {index} 점유 성공");
                 break;
             }
             else // 점유중
             {
                 triedIndexes.Add(index);
                 float waitTime = Random.Range(0f, 1f);
-                Debug.Log("다른 승무원이 점유 중이라 랜덤 시간 후 다시 탐색");
+                Debug.Log($"승무원 {marinerId}: 스포너 {index}가 점유 중이라 랜덤 시간 후 다시 탐색");
                 yield return new WaitForSeconds(waitTime);
             }
         }
 
         if (chosenIndex == -1) // 예외 처리
         {
-            Debug.LogWarning("모든 승무원이 사용중 임으로 처음 위치로 이동함.");
+            Debug.LogWarning($"승무원 {marinerId}: 모든 스포너가 사용중임으로 기본 위치로 이동");
             chosenIndex = fallbackIndex; // 첫 위치로 이동
         }
 
@@ -208,32 +241,36 @@ public class MarinerAI : MarinerBase, IBegin
             yield return null;
         }
 
-        agent.ResetPath(); // 초기화 코드
+        // NavMesh 경로 초기화
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log("승무원 밤 행동 시작");
+            Debug.Log($"승무원 {marinerId}: 밤이 가까워 수집 작업 중단");
             MarinerManager.Instance.ReleaseSpawner(chosenIndex);
             MarinerManager.Instance.StoreItemsAndReturnToBase(this);
             yield break;
         }
 
-        Debug.Log("승무원 10초 동안 파밍");
+        Debug.Log($"승무원 {marinerId}: 10초 동안 자원 수집");
         yield return new WaitForSeconds(10f);
 
-        GameManager.Instance.CollectResource("wood"); // 출력만
+        GameManager.Instance.CollectResource("wood"); // 자원 수집
         MarinerManager.Instance.ReleaseSpawner(chosenIndex);
 
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
         if (needRepairList.Count > 0)// 수리대상 확인
         {
-            Debug.Log("승무원 수리 대상 발견으로 1순위 행동 실행");
+            Debug.Log($"승무원 {marinerId}: 수리 대상 발견으로 1순위 행동 실행");
             isSecondPriorityStarted = false;
             StartRepair();
         }
         else
         {
-            Debug.Log("승무원 수리 대상 미발견으로 2순위 행동 실행");
+            Debug.Log($"승무원 {marinerId}: 수리 대상 미발견으로 2순위 행동 계속");
             StartCoroutine(StartSecondPriorityAction());
         }
     }

@@ -9,7 +9,7 @@ public class MarinerBase : CreatureBase
     public LayerMask targetLayer;
 
     // 상태 관리
-    public enum CrewState { Wandering, Idle, Attacking }
+    public enum CrewState { Wandering, Idle, Attacking, Chasing }
     protected CrewState currentState = CrewState.Wandering;
 
     // 이동 및 대기 시간
@@ -26,6 +26,8 @@ public class MarinerBase : CreatureBase
     // 추격 시스템 관련 변수
     protected float chaseRange = 8f;  // 추격 시작 범위
     protected bool isChasing = false; // 추격 중인지 확인
+    protected float chaseUpdateInterval = 0.2f; // 추격 목표 업데이트 간격
+    protected float lastChaseUpdate = 0f;
 
     // 수리 관련 공통 변수
     [Header("수리 설정")]
@@ -40,6 +42,13 @@ public class MarinerBase : CreatureBase
     public override void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        if (agent != null)
+        {
+            agent.speed = speed;
+            agent.acceleration = 12f;
+            agent.angularSpeed = 360f;
+            agent.stoppingDistance = 0.5f;
+        }
         base.Start();
     }
 
@@ -54,7 +63,20 @@ public class MarinerBase : CreatureBase
 
     protected virtual void Wander() // 배회
     {
-        transform.position += moveDirection * speed * Time.deltaTime;
+        // NavMesh를 사용한 배회
+        if (agent != null && agent.isOnNavMesh)
+        {
+            if (!agent.hasPath || agent.remainingDistance < 0.5f)
+            {
+                SetRandomDestination();
+            }
+        }
+        else
+        {
+            // 기존 방식 (NavMesh 없을 때 fallback)
+            transform.position += moveDirection * speed * Time.deltaTime;
+        }
+
         stateTimer -= Time.deltaTime;
 
         if (stateTimer <= 0f)
@@ -65,6 +87,12 @@ public class MarinerBase : CreatureBase
 
     protected virtual void Idle()
     {
+        // Idle 상태에서는 NavMesh 정지
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
         stateTimer -= Time.deltaTime;
 
         if (stateTimer <= 0f)
@@ -85,13 +113,39 @@ public class MarinerBase : CreatureBase
     {
         currentState = CrewState.Idle;
         stateTimer = idleDuration;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
         Debug.Log($"{gameObject.name} - 대기 상태로 전환");
+    }
+
+    protected virtual void EnterChasingState()
+    {
+        currentState = CrewState.Chasing;
+        isChasing = true;
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 추격 상태로 전환");
     }
 
     protected void SetRandomDirection()
     {
         float angle = Random.Range(0f, 360f);
         moveDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
+    }
+
+    protected void SetRandomDestination()
+    {
+        if (agent == null || !agent.isOnNavMesh) return;
+
+        Vector3 randomDirection = Random.insideUnitSphere * 5f;
+        randomDirection += transform.position;
+        randomDirection.y = transform.position.y;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomDirection, out hit, 5f, NavMesh.AllAreas))
+        {
+            agent.SetDestination(hit.position);
+        }
     }
 
     protected bool DetectTarget()
@@ -129,6 +183,7 @@ public class MarinerBase : CreatureBase
         if (dir != Vector3.zero)
             transform.forward = dir;
     }
+
     protected virtual void ValidateCurrentTarget()
     {
         if (target != null)
@@ -173,7 +228,7 @@ public class MarinerBase : CreatureBase
         if (nearestTarget != null)
         {
             target = nearestTarget;
-            isChasing = true;
+            EnterChasingState();
             Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: {target.name} 추격 시작!");
         }
     }
@@ -187,10 +242,9 @@ public class MarinerBase : CreatureBase
             return;
         }
 
-        LookAtTarget();
-
         float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
+        // 공격 범위 내에 있고 쿨다운이 끝났으면 공격
         if (distanceToTarget <= attackRange && GetAttackCooldown() <= 0f)
         {
             if (IsTargetInFOV() && attackRoutine == null)
@@ -200,18 +254,24 @@ public class MarinerBase : CreatureBase
         }
         else
         {
+            // NavMesh를 사용한 추격
             ChaseTarget();
         }
     }
 
     protected virtual void ChaseTarget()
     {
-        if (target == null) return;
+        if (target == null || agent == null || !agent.isOnNavMesh) return;
 
-        Vector3 direction = (target.position - transform.position).normalized;
-        direction.y = 0f;
+        // 일정 간격으로 목표 위치 업데이트 (성능 최적화)
+        if (Time.time - lastChaseUpdate >= chaseUpdateInterval)
+        {
+            agent.SetDestination(target.position);
+            lastChaseUpdate = Time.time;
+        }
 
-        transform.position += direction * speed * Time.deltaTime;
+        // 타겟을 바라보기
+        LookAtTarget();
     }
 
     protected virtual void HandleNormalBehavior()
@@ -224,6 +284,9 @@ public class MarinerBase : CreatureBase
             case CrewState.Idle:
                 Idle();
                 break;
+            case CrewState.Chasing:
+                HandleChasing();
+                break;
             case CrewState.Attacking:
                 break;
         }
@@ -231,12 +294,12 @@ public class MarinerBase : CreatureBase
 
     protected virtual float GetAttackCooldown()
     {
-        return 0f; 
+        return 0f;
     }
 
     protected virtual IEnumerator GetAttackSequence()
     {
-        yield return null; 
+        yield return null;
     }
 
     // ===== 기존 수리 관련 함수들 =====
@@ -276,11 +339,14 @@ public class MarinerBase : CreatureBase
 
     protected IEnumerator MoveToRepairObject(Vector3 targetPosition)
     {
-        agent.SetDestination(targetPosition);
-
-        while (!IsArrived())
+        if (agent != null && agent.isOnNavMesh)
         {
-            yield return null;
+            agent.SetDestination(targetPosition);
+
+            while (!IsArrived())
+            {
+                yield return null;
+            }
         }
 
         StartCoroutine(RepairProcess());
@@ -335,6 +401,7 @@ public class MarinerBase : CreatureBase
 
     public bool IsArrived()
     {
+        if (agent == null || !agent.isOnNavMesh) return true;
         return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
     }
 
@@ -347,7 +414,10 @@ public class MarinerBase : CreatureBase
             yield return null;
         }
 
-        agent.ResetPath();
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
         Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
     }
 
@@ -382,9 +452,4 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    protected virtual void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(transform.position, new Vector3(attackRange, 1f, attackRange));
-    }
 }
