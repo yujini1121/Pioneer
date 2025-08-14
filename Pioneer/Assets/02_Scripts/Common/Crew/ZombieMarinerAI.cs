@@ -140,7 +140,6 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             if (targetBase != null && !targetBase.IsDead)
             {
                 Debug.Log($"좀비 {marinerId}: 공격 완료, 추격 재개");
-                // 추격 상태로 복귀
                 EnterChasingState();
             }
             else
@@ -185,55 +184,6 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             {
                 targetBase.TakeDamage(attackDamage);
                 Debug.Log($"좀비가 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
-            }
-        }
-    }
-
-    protected override void TryFindNewTarget()
-    {
-        Collider[] hits = Physics.OverlapBox(
-            transform.position,
-            new Vector3(chaseRange / 2f, 0.5f, chaseRange / 2f),
-            Quaternion.identity,
-            targetLayer
-        );
-
-        float minDist = float.MaxValue;
-        UnityEngine.Transform nearestTarget = null;
-
-        foreach (var hit in hits)
-        {
-            CommonBase targetBase = hit.GetComponent<CommonBase>();
-            if (targetBase != null && targetBase.IsDead)
-                continue;
-
-            float dist = Vector3.Distance(transform.position, hit.transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                nearestTarget = hit.transform;
-            }
-        }
-
-        if (nearestTarget != null)
-        {
-            target = nearestTarget;
-            EnterChasingState();
-            Debug.Log($"좀비 {marinerId}: {target.name} 추격 시작! (거리: {minDist:F1}m)");
-        }
-    }
-
-    protected override void ValidateCurrentTarget()
-    {
-        if (target != null)
-        {
-            CommonBase targetBase = target.GetComponent<CommonBase>();
-            if (targetBase != null && targetBase.IsDead)
-            {
-                Debug.Log($"좀비 {marinerId}: 타겟 {target.name}이 죽었습니다. 새로운 타겟을 찾습니다.");
-                target = null;
-                isChasing = false;
-                EnterWanderingState();
             }
         }
     }

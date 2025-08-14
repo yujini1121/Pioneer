@@ -263,14 +263,12 @@ public class MarinerBase : CreatureBase
     {
         if (target == null || agent == null || !agent.isOnNavMesh) return;
 
-        // 일정 간격으로 목표 위치 업데이트 (성능 최적화)
         if (Time.time - lastChaseUpdate >= chaseUpdateInterval)
         {
             agent.SetDestination(target.position);
             lastChaseUpdate = Time.time;
         }
 
-        // 타겟을 바라보기
         LookAtTarget();
     }
 

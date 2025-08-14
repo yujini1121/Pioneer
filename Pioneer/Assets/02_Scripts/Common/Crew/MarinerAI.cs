@@ -47,7 +47,6 @@ public class MarinerAI : MarinerBase, IBegin
 
         if (GameManager.Instance.IsDaytime)
         {
-            // 낮에는 전투 중단하고 수리 작업 시작
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
@@ -55,7 +54,6 @@ public class MarinerAI : MarinerBase, IBegin
                 isShowingAttackBox = false;
             }
 
-            // 추격 상태 초기화
             if (isChasing)
             {
                 isChasing = false;
@@ -82,16 +80,13 @@ public class MarinerAI : MarinerBase, IBegin
 
         attackCooldown -= Time.deltaTime;
 
-        // 현재 타겟 유효성 검사
         ValidateCurrentTarget();
 
-        // 타겟이 없을 때만 새로운 타겟 찾기
         if (target == null)
         {
             TryFindNewTarget();
         }
 
-        // 상태별 행동 처리
         if (isChasing && target != null)
         {
             HandleChasing();
@@ -134,7 +129,6 @@ public class MarinerAI : MarinerBase, IBegin
             yield break;
         }
 
-        // 공격 준비: NavMesh 정지하고 타겟을 바라보기
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
@@ -152,14 +146,12 @@ public class MarinerAI : MarinerBase, IBegin
 
         attackCooldown = attackInterval;
 
-        // 공격 후 상태 처리
         if (target != null)
         {
             CommonBase targetBase = target.GetComponent<CommonBase>();
             if (targetBase != null && !targetBase.IsDead)
             {
                 Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
-                // 추격 상태로 복귀
                 EnterChasingState();
             }
             else
