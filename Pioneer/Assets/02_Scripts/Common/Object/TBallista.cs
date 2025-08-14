@@ -6,12 +6,12 @@ public class TBallista : StructureBase
 {
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private Collider[] enemyColliders;
+    [SerializeField] private Transform closestTarget;
+    [SerializeField] private float turnSpeed;
+
     [SerializeField] private float attackRange;
     [SerializeField] private float attackSpeed;
     [SerializeField] private float attackCooltime;
-
-    [SerializeField] private float turnSpeed;
-
 
     // TODO: 추후, ScriptableObject의 변수들과 연동 필요함~~~
     private int currentHP = 80;
@@ -48,7 +48,11 @@ public class TBallista : StructureBase
 
     private void LookAt()
     {
-        // 바라보게 하는 로직
+        // 바라보게 하는 로직 
+        // 현재는 0번이 가장 가까운 에너미라고 가정 (추후 수정)
+        closestTarget = enemyColliders[0].transform;
+        float minDistance = Mathf.Infinity;
+        foreach (var col in colliders)
     }
     
     private void Fire()

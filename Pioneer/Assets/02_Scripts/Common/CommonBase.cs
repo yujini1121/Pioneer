@@ -43,7 +43,7 @@ public class CommonBase : MonoBehaviour, IBegin
     // 사라졌을때 호출하는 변수 (생명체인 경우 사망했을 때)
     public virtual void WhenDestroy()
     {
-        Debug.Log("오브젝트 파괴");
+        Debug.Log($"{gameObject.name} 오브젝트 파괴");
         Destroy(gameObject);
     }
 }
