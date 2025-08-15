@@ -4,7 +4,8 @@ public class EnemyBase : CreatureBase, IBegin
 {
     [Header("기본 속성")]
     protected float idleTime;
-    protected GameObject targetObject;
+    // public GameObject targetObject;
+    public GameObject currentAttackTarget;
     protected float detectionRange;
     [SerializeField] protected LayerMask detectMask;
 
@@ -24,7 +25,7 @@ public class EnemyBase : CreatureBase, IBegin
     /// </summary>
     protected void SetMastTarget()
     {
-        targetObject = GameObject.FindGameObjectWithTag("Engine");
+        currentAttackTarget = GameObject.FindGameObjectWithTag("Engine");
     }
 
     /// <summary>
