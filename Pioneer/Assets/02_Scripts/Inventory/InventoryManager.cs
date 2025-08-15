@@ -6,31 +6,18 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class InventoryManager : MonoBehaviour
+public class InventoryManager : InventoryBase
 {
     public static InventoryManager Instance;
 
     public SItemStack mouseInventory;
-    public List<SItemStack> itemLists;
-    public Dictionary<int, SItemStack> fastSearch;
+    //public List<SItemStack> itemLists;
+    //public Dictionary<int, SItemStack> fastSearch;
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
     [SerializeField] Vector3 dropOffset = new Vector3(1, -0.8f, -1);
 
-    public int Get(int id)
-    {
-        int sum = 0;
-        for (int index = 0; index < itemLists.Count; ++index)
-        {
-            if (itemLists[index] != null &&
-                itemLists[index].id == id)
-            {
-                sum += itemLists[index].amount;
-            }
-        }
 
-        return sum;
-    }
 
     public void MouseSwitch(int index)
     {
@@ -117,62 +104,12 @@ public class InventoryManager : MonoBehaviour
 
     public void Add(SItemStack item)
     {
-        // 만약 아이템이 있으면 해당 공간에 넣음
-        // 만약 아이템이 없거나, 스텍 만기가 되면 새롭게 넣음
-        if (item.amount < 1) return;
-
-        int firstEmpty = -1;
-        for (int inventoryIndex = 0; inventoryIndex < itemLists.Count; ++inventoryIndex)
+        if (TryAdd(item) == false)
         {
-            if (itemLists[inventoryIndex] == null)
-            {
-                if (firstEmpty == -1) firstEmpty = inventoryIndex;
-                continue;
-            }
-
-            if (itemLists[inventoryIndex].id == item.id)
-            {
-                itemLists[inventoryIndex].amount += item.amount;
-                InventoryUiMain.instance.IconRefresh();
-                return;
-            }
+            ItemDropManager.instance.Drop(item, positionDrop.transform.position);
         }
-        if (firstEmpty == -1)
-        {
-            ItemDropManager.instance.Drop(mouseInventory, positionDrop.transform.position);
-            return;
-        }
-        else
-        {
-            itemLists[firstEmpty] = new SItemStack(item.id, item.amount);
-        }
+        
         InventoryUiMain.instance.IconRefresh();
-    }
-
-    public void Remove(params SItemStack[] removeTargets)
-    {
-        for (int targetIndex = 0; targetIndex < removeTargets.Length; targetIndex++)
-        {
-            int targetAmount = removeTargets[targetIndex].amount;
-
-            for (int inventoryIndex = itemLists.Count - 1; inventoryIndex >= 0; --inventoryIndex)
-            {
-                if (itemLists[inventoryIndex] == null) continue;
-
-                if (removeTargets[targetIndex].id == itemLists[inventoryIndex].id)
-                {
-                    if (targetAmount > itemLists[inventoryIndex].amount)
-                    {
-                        targetAmount -= itemLists[inventoryIndex].amount;
-                        itemLists[inventoryIndex] = null;
-                        continue;
-                    }
-                    itemLists[inventoryIndex].amount -= targetAmount;
-                    break;
-                }
-            }
-        }
-        SafeClean();
     }
 
     public void SortSelf()
@@ -214,19 +151,10 @@ public class InventoryManager : MonoBehaviour
         SafeClean();
     }
 
-    private void SafeClean()
+    protected override void SafeClean()
     {
-        for (int index = 0; index < inventoryCount; ++index)
-        {
-            if (itemLists[index] == null)
-            {
-                continue;
-            }
-            if (itemLists[index].amount < 1)
-            {
-                itemLists[index] = null;
-            }
-        }
+        base.SafeClean();
+
         if (mouseInventory != null && mouseInventory.amount < 1)
         {
             mouseInventory = null;
@@ -238,7 +166,7 @@ public class InventoryManager : MonoBehaviour
         Instance = this;
 
         itemLists = new List<SItemStack>();
-        fastSearch = new Dictionary<int, SItemStack>();
+        //fastSearch = new Dictionary<int, SItemStack>();
 
         for (int i = 0; i < inventoryCount; ++i)
         {
