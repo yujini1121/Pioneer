@@ -8,13 +8,16 @@ public class CommonBase : MonoBehaviour, IBegin
     protected int hp;
     protected int maxHp;
     public bool IsDead = false;
+
+    public int CurrentHp => hp;
+
     /*public virtual void Start()
     {
         hp = maxHp;
     }*/
 
     // ===============
-   void Start()
+    void Start()
     {
         hp = maxHp;
     }
