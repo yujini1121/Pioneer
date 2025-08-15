@@ -19,26 +19,24 @@ public class ZombieMarinerAI : MarinerBase, IBegin
     {
         InitZombieStats();
         InitZombieVisuals();
-        InitZombieLayers();
+
+        gameObject.layer = LayerMask.NameToLayer("Enemy");
+        targetLayer = LayerMask.GetMask("Mariner", "Player");
     }
 
-    /// <summary>
-    /// 좀비 스탯 초기화
-    /// </summary>
     private void InitZombieStats()
     {
         maxHp = 40;  // 좀비 HP
-        speed = 1f;
+        speed = 2f;
         attackDamage = 6;
-        attackRange = 3f;
+        attackRange = 4f;
         attackDelayTime = 1f;
+
+        chaseRange = 10f;  // 더 넓은 추격 범위
 
         fov = GetComponent<FOVController>();
     }
 
-    /// <summary>
-    /// 좀비 시각적 요소 초기화
-    /// </summary>
     private void InitZombieVisuals()
     {
         spriteTransform = transform.GetChild(0);
@@ -52,18 +50,9 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
     }
 
-    /// <summary>
-    /// 좀비 레이어 및 타겟 설정
-    /// </summary>
-    private void InitZombieLayers()
-    {
-        gameObject.layer = LayerMask.NameToLayer("Enemy");
-        targetLayer = LayerMask.GetMask("Mariner");
-    }
-
     public override void Start()
     {
-        SetRandomDirection(); 
+        SetRandomDirection();
         stateTimer = moveDuration;
 
         if (fov != null)
@@ -81,85 +70,94 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
         attackCooldown -= Time.deltaTime;
 
-        if (attackCooldown <= 0f)
+        ValidateCurrentTarget();
+
+        if (target == null)
         {
-            if (DetectTarget()) 
-            {
-                if (IsTargetInFOV()) 
-                {
-                    LookAtTarget(); 
-
-                    if (attackRoutine == null)
-                    {
-                        attackRoutine = StartCoroutine(ZombieAttackSequence());
-                    }
-                }
-            }
-
-            attackCooldown = attackInterval;
+            TryFindNewTarget();
         }
 
-        switch (currentState)
+        if (isChasing && target != null)
         {
-            case CrewState.Wandering:
-                Wander(); 
-                break;
-            case CrewState.Idle:
-                Idle(); 
-                break;
-            case CrewState.Attacking:
-                break;
+            HandleChasing();
+        }
+        else
+        {
+            HandleNormalBehavior();
         }
     }
 
-    /// <summary>
-    /// 좀비만의 공격 시퀀스 
-    /// </summary>
+    protected override float GetAttackCooldown()
+    {
+        return attackCooldown;
+    }
+
+    protected override IEnumerator GetAttackSequence()
+    {
+        return ZombieAttackSequence();
+    }
+
     private IEnumerator ZombieAttackSequence()
     {
         currentState = CrewState.Attacking;
 
-        Vector3 targetOffset = (target.position - transform.position).normalized;
-        Vector3 attackPosition = target.position - targetOffset;
-        attackPosition.y = transform.position.y;
-
-        // 타겟에게 접근
-        while (Vector3.Distance(transform.position, attackPosition) > 0.1f)
+        if (target == null)
         {
-            transform.position = Vector3.MoveTowards(transform.position, attackPosition, speed * Time.deltaTime);
-            yield return null;
+            attackRoutine = null;
+            isChasing = false;
+            EnterWanderingState();
+            yield break;
         }
 
-        // 공격 범위 오브젝트 활성화
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
+        LookAtTarget();
+
         if (attackRangeObject != null)
         {
             attackRangeObject.SetActive(true);
             isShowingAttackBox = true;
         }
 
-        // 공격 딜레이
         yield return new WaitForSeconds(attackDelayTime);
 
-        // 공격 범위 오브젝트 비활성화
         if (attackRangeObject != null)
         {
             attackRangeObject.SetActive(false);
             isShowingAttackBox = false;
         }
 
-        // 좀비 공격 판정 
         PerformZombieAttack();
 
-        // 공격 후 배회 상태로 복귀
-        currentState = CrewState.Wandering;
-        stateTimer = moveDuration;
-        SetRandomDirection(); 
+        attackCooldown = attackInterval;
+
+        if (target != null)
+        {
+            CommonBase targetBase = target.GetComponent<CommonBase>();
+            if (targetBase != null && !targetBase.IsDead)
+            {
+                Debug.Log($"좀비 {marinerId}: 공격 완료, 추격 재개");
+                EnterChasingState();
+            }
+            else
+            {
+                target = null;
+                isChasing = false;
+                EnterWanderingState();
+            }
+        }
+        else
+        {
+            isChasing = false;
+            EnterWanderingState();
+        }
+
         attackRoutine = null;
     }
 
-    /// <summary>
-    /// 좀비 공격 판정 수행
-    /// </summary>
     private void PerformZombieAttack()
     {
         Vector3 attackCenter = attackRangeObject != null ?
@@ -189,4 +187,28 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             }
         }
     }
+
+    protected override void ChaseTarget()
+    {
+        if (target == null || agent == null || !agent.isOnNavMesh) return;
+
+        float zombieChaseUpdateInterval = 0.1f;
+
+        if (Time.time - lastChaseUpdate >= zombieChaseUpdateInterval)
+        {
+            agent.SetDestination(target.position);
+            lastChaseUpdate = Time.time;
+        }
+
+        LookAtTarget();
+    }
+
+    public override IEnumerator StartSecondPriorityAction()
+    {
+        Debug.Log($"좀비 {marinerId}: 배회 계속");
+        yield return new WaitForSeconds(1f);
+        EnterWanderingState();
+    }
+
+
 }
