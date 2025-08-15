@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +12,13 @@ public class CommonUI : MonoBehaviour, IBegin
     public static CommonUI instance;
 
     [SerializeField] GameObject prefabItemButton;
+    [SerializeField] GameObject prefabCraftSelectTopButton;
+    [SerializeField] GameObject prefabCraftSelectItemButton;
     [SerializeField] GameObject prefabItemCategoryButton;
     [SerializeField] Sprite imageEmpty;
     Coroutine currentCraftCoroutine;
+
+    // 아이템 버튼
 
     public Button ShowItemButton(GameObject parent, SItemRecipeSO recipe, DefaultFabrication ui,
         int index, int rowCount, Vector2 delta, Vector2 start, Vector2 size)
@@ -112,19 +118,64 @@ public class CommonUI : MonoBehaviour, IBegin
         return itemButton;
     }
 
-    public Button ShowCategoryButton(GameObject patent, DefaultFabrication ui, 
-        int index, Vector2 delta, Vector2 buttonSize)
+    public Button ShowCategoryButton(GameObject parent, SItemCategorySO category, DefaultFabrication ui, 
+        int index, Vector2 delta, Vector2 start, Vector2 buttonSize, Vector2 selectPosition)
     {
         // 레시피는 스텐다드매니저 뜯어봐서 해당 항목의 모든 카테고리속 레시피를 가져옴
-
         // 버튼을 누르면, ShowItemButton와 프리펩 호출함
+
+        // 버튼 배치
+        GameObject categoryButtonObject = Instantiate(prefabItemCategoryButton, parent.transform);
+        RectTransform rectTransform = categoryButtonObject.GetComponent<RectTransform>();
+        //rectTransform.sizeDelta = size;
+        SetPosition(categoryButtonObject, parent, index, 1, delta, start);
+
+        // 버튼 이미지 배치
+        categoryButtonObject.GetComponent<UnityEngine.UI.Image>().sprite = category.categorySprite;
+
+        // 버튼 로직 배치
+        Button categoryButton = categoryButtonObject.GetComponent<Button>();
+        categoryButton.onClick.AddListener(() =>
+        {
+            // 해당 버튼을 누르면 제작 선택 UI가 뜸
+
+            // 소환
+            GameObject craftSelectTopButton = Instantiate(prefabCraftSelectTopButton, parent.transform);
+
+            // 배치
+            //craftSelectTopButton.GetComponent<RectTransform>().position
+            craftSelectTopButton.transform.position = selectPosition;
+
+            // 버튼 소환
+            List<GameObject> craftSelectItemButtons = new List<GameObject>();
+            for (int index = 0; index < category.recipes.Count; index++)
+            {
+                GameObject m_one = Instantiate(prefabCraftSelectItemButton, parent.transform);
+
+                craftSelectItemButtons.Add(m_one);
+
+                // 버튼 배치
+                SetPosition(m_one, parent, index, 1, new Vector2(0, m_one.GetComponent<RectTransform>().sizeDelta.y), selectPosition);
+
+                // 버튼 로직 배치
+
+            }
+
+        });
+
+
 
         throw new NotImplementedException();
     }
 
+    public Button ShowSelectButton()
+    {
+        return null;
+    }
+
     private static void mSetButtonAvailable(Image buttonImage, SItemRecipeSO pRecipe)
     {
-        Color buttonColor = buttonImage.color;
+        UnityEngine.Color buttonColor = buttonImage.color;
         if (ItemRecipeManager.Instance.CanCraftInInventory(pRecipe.result.id))
         {
             buttonColor.a = 1.0f;

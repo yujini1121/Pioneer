@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 243658779019331039}
   - component: {fileID: 5798745416438985849}
   - component: {fileID: 2541944548528271577}
+  - component: {fileID: 5076829104292828889}
   m_Layer: 0
   m_Name: ItemManager
   m_TagString: Untagged
@@ -48,12 +49,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b70a8ed39e99fb449ee7410028c741d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemLists: []
   mouseInventory:
     id: 0
     amount: 0
-  itemLists: []
   inventoryCount: 27
   positionDrop: {fileID: 0}
+  dropOffset: {x: 1, y: -0.8, z: -1}
 --- !u!114 &4614276965258894182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,6 +118,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabItemButton: {fileID: 590576477171757539, guid: 9ac639694a13adc4989714d1fde1171a,
     type: 3}
+  prefabCraftSelectTopButton: {fileID: 0}
+  prefabCraftSelectMenuButton: {fileID: 0}
+  prefabItemCategoryButton: {fileID: 0}
   imageEmpty: {fileID: 21300000, guid: 344168bb29e09c04e8a7437d60165d4e, type: 3}
 --- !u!114 &2541944548528271577
 MonoBehaviour:
@@ -131,3 +136,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabDroppedItemDefault: {fileID: 9124047445571303844, guid: 1f4bfc559047dc84d97a9168fac2875f,
     type: 3}
+--- !u!114 &5076829104292828889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4348757150131922292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73a6d9cc51852b447a508a445319d6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  categories:
+  - {fileID: 11400000, guid: 27f2d3d323c70034ab68ed3585f4f66e, type: 2}
+  - {fileID: 11400000, guid: b1461c74b9b973b4c9d9389c8e064da0, type: 2}
+  - {fileID: 11400000, guid: 755f19cff0254f94f9af9407b4f7f380, type: 2}
+  - {fileID: 11400000, guid: 06b0dd948b9e0334ba5895e598a27433, type: 2}
