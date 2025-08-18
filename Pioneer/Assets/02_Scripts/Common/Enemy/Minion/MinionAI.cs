@@ -13,10 +13,13 @@ using UnityEngine.AI;
 + 코드가 너무 더러움 다시 깔끔하게 구현해보기
 =========================================================================================================
 250815
-- 공격도중 에너미가 죽었을때 돛대로 타겟 변경이 안됨 + 돛대로 이동도 안 함
+* 공격도중 에너미가 죽었을때 돛대로 타겟 변경이 안됨 + 돛대로 이동도 안 함
 - 공격 딜레이 적용 안됨
-- 감지 범위 내에 여러 타겟이 있어도 하나가 죽으면 다른 범위 내 타겟을 인식하는게 아니라 바로 돛대로 향하는 문제가 있음
-*/
+* 감지 범위 내에 여러 타겟이 있어도 하나가 죽으면 다른 범위 내 타겟을 인식하는게 아니라 바로 돛대로 향하는 문제가 있음
+==========================================================================================================
+250818
+ - 이동 완료가 안되서 현재 공격이나 감지가 안 됨
+ */
 public class MinionAI : EnemyBase, IBegin
 {
     [Header("둥지 프리팹")]
@@ -29,12 +32,9 @@ public class MinionAI : EnemyBase, IBegin
     private NavMeshAgent agent;
 
     // 둥지 관련 변수
-    private bool isNestCreated = false;
+    public bool isNestCreated = false;
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
-
-    // 현재 타겟 관련 변수
-    // private Transform currentAttackTarget = null;
 
     // 바닥 확인 변수
     private bool isOnGround = false;
@@ -51,7 +51,6 @@ public class MinionAI : EnemyBase, IBegin
 
     void Update()
     {      
-        // 레이어 변수 수정
         fov.DetectTargets(detectMask);
         CheckOnGround();
 
@@ -78,7 +77,7 @@ public class MinionAI : EnemyBase, IBegin
         attackDelayTime = 2f;
         idleTime = 2f;
         SetMastTarget();
-        fov.viewRadius = attackRange;
+        fov.viewRadius = 2;
     }
 
     #region 둥지 생성
@@ -130,6 +129,7 @@ public class MinionAI : EnemyBase, IBegin
                     Debug.Log("가장 가까운 애 찾음");
                     agent.isStopped = true;
                     Debug.Log("가장 가까운 애 찾음2");
+                    transform.LookAt(currentAttackTarget.transform);
                     CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
                     Debug.Log($"currentAttackTarget : {currentAttackTarget.gameObject.name}");
                     if (targetBase != null)
@@ -144,11 +144,6 @@ public class MinionAI : EnemyBase, IBegin
                         }
                         Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
                     }
-                }
-                else
-                {
-                    Debug.Log("가장 가까운 애 찾음88");
-                    agent.isStopped = false;
                 }
             }
         }
@@ -203,6 +198,9 @@ public class MinionAI : EnemyBase, IBegin
                 agent.isStopped = false;
                 agent.SetDestination(destination);
             }
+
+            /*agent.stoppingDistance = attackRange * 0.9f;
+            agent.SetDestination(moveTarget.position);*/
         }
     }
 

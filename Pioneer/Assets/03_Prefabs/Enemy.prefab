@@ -79,15 +79,17 @@ MonoBehaviour:
   attackDamage: 1
   attackRange: 2
   attackDelayTime: 1
-  targetObject: {fileID: 0}
+  currentAttackTarget: {fileID: 0}
   detectMask:
     serializedVersion: 2
     m_Bits: 3072
   attackBoxCenterOffset: {x: 0, y: 0, z: 1}
-  nestPrefab: {fileID: 0}
+  nestPrefab: {fileID: 4559625706022055490, guid: 8e12099d905c83949b7b250dfa9cb1a5,
+    type: 3}
   groundLayer:
     serializedVersion: 2
     m_Bits: 8192
+  isNestCreated: 0
 --- !u!54 &7816276827154102402
 Rigidbody:
   m_ObjectHideFlags: 0
