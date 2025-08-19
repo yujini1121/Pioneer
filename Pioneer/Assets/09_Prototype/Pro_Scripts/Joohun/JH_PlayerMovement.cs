@@ -55,9 +55,9 @@ public class JH_PlayerMovement : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            isUsing = !isUsing;
-            if (isUsing) OnUse?.Invoke();
-            else OnUnuse?.Invoke();
+            //isUsing = !isUsing;
+            //if (isUsing) OnUse?.Invoke();
+            //else OnUnuse?.Invoke();
         }
     }
 
