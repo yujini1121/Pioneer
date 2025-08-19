@@ -303,7 +303,11 @@ public class MarinerBase : CreatureBase
     // ===== 기존 수리 관련 함수들 =====
     protected virtual void StartRepair()
     {
-        List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
+        List<DefenseObject> needRepairList = null;
+        if (MarinerManager.Instance == null)
+            return;
+            
+        needRepairList = MarinerManager.Instance.GetNeedsRepair();
 
         for (int i = 0; i < needRepairList.Count; i++)
         {

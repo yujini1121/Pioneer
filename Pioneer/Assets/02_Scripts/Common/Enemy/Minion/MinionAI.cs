@@ -47,7 +47,8 @@ public class MinionAI : EnemyBase, IBegin
     void Update()
     {      
         // 레이어 변수 수정
-        fov.DetectTargets(detectMask);
+        if (fov != null && detectMask != null)
+            fov.DetectTargets(detectMask);
         CheckOnGround();
 
         if (CanCreateNest())
@@ -169,6 +170,7 @@ public class MinionAI : EnemyBase, IBegin
     #region 이동
     private bool CanMove()
     {
+        if (targetObject == null || fov == null) return false;
         return targetObject != null || fov.visibleTargets.Count > 0;
     }
 

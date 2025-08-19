@@ -30,7 +30,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
     public float xTerm;
     public float yTerm;
     [SerializeField] GameObject pivot;
-    [SerializeField] DefaultFabrication ui;
+    public DefaultFabrication ui;
     [SerializeField] UnityEngine.UI.Button closeTab;
     [SerializeField] Vector2 itemButtonSize;
 
@@ -240,6 +240,19 @@ public class CraftUiMain : MonoBehaviour, IBegin
 
         }
     }
+
+    // 간이 조합대
+    public void ShowSmallCraft()
+    {
+
+    }
+    // 메인 조합대
+    public void ShowLargeCraft()
+    {
+
+    }
+
+
 
     void ClearIcon()
     {
