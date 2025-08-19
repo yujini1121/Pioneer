@@ -43,16 +43,14 @@ public class TBallista : StructureBase
 
     private void DetectEnemy()
     {
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
         enemyColliders = Physics.OverlapSphere(transform.position, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
 
     }
 
     private void LookAt()
     {
-        // 바라보게 하는 로직 
+        // 가장 가까운 적을 바라보게 하는 로직 
         // 현재는 0번이 가장 가까운 에너미라고 가정 (추후 수정)
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
         closestTarget = enemyColliders[0].transform;
         float minDistance = Mathf.Infinity;
     }
@@ -60,7 +58,6 @@ public class TBallista : StructureBase
     private void Fire()
     {
         // 화살 오브젝트 생성 및 발사하는 로직
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
     }
 
     void OnDrawGizmos()

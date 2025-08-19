@@ -18,7 +18,6 @@ public class StructureBase : CommonBase
     public void Repair()
     {
         // 힐링
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
     }
 
 
@@ -26,13 +25,12 @@ public class StructureBase : CommonBase
     #region 상호작용 가능한 오브젝트만 사용할 것
     public virtual void Interactive()
     {
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
+
     }
 
     public virtual void Use()
     {
         // 사용했을 때 로직
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
 
 
         isUsing = true;
@@ -41,8 +39,6 @@ public class StructureBase : CommonBase
     public virtual void UnUse()
     {
         // 사용 해제했을 때 로직
-        Debug.Log(MethodBase.GetCurrentMethod().Name);
-
         isUsing = false;
     }
     #endregion
