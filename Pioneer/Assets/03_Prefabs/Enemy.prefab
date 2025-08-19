@@ -53,12 +53,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2151327579876242845}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b206fcdc475c5d40a9d51ce88671b29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 10
+  viewRadius: 3
   viewAngle: 360
   visibleTargets: []
 --- !u!114 &5965073873695641737
@@ -73,11 +73,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 374411dd8b130fc448a35aa02daf4043, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
   IsDead: 0
   fov: {fileID: 3304250986882224902}
   speed: 2
   attackDamage: 1
-  attackRange: 2
+  attackRange: 1
   attackDelayTime: 1
   currentAttackTarget: {fileID: 0}
   detectMask:

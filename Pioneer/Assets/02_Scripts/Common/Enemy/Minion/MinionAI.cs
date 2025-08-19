@@ -39,6 +39,8 @@ public class MinionAI : EnemyBase, IBegin
     // 바닥 확인 변수
     private bool isOnGround = false;
 
+    private float lastAttackTime = 0f;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -101,7 +103,7 @@ public class MinionAI : EnemyBase, IBegin
     #region 공격
     private bool CanAttack()
     {
-        return DetectAttackRange().Length > 0;
+        return DetectAttackRange().Length > 0 && Time.time >= lastAttackTime + attackDelayTime; ;
     }
 
     void Attack()
@@ -136,13 +138,15 @@ public class MinionAI : EnemyBase, IBegin
                     {
                         Debug.Log("가장 가까운 애 찾음4");
                         targetBase.TakeDamage(attackDamage);
-                        if(targetBase.IsDead == true)
+                        lastAttackTime = Time.time;
+                        Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
+                        if (targetBase.IsDead == true)
                         {
                             SetMastTarget();
                             agent.SetDestination(currentAttackTarget.transform.position);
                             agent.isStopped = false;
                         }
-                        Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
+                        
                     }
                 }
             }
@@ -180,8 +184,6 @@ public class MinionAI : EnemyBase, IBegin
 
     void Move()
     {
-        if (agent.isStopped) return;
-
         Transform moveTarget = currentAttackTarget != null ? currentAttackTarget.transform : null;
         if (fov.visibleTargets.Count > 0)
         {
@@ -198,9 +200,6 @@ public class MinionAI : EnemyBase, IBegin
                 agent.isStopped = false;
                 agent.SetDestination(destination);
             }
-
-            /*agent.stoppingDistance = attackRange * 0.9f;
-            agent.SetDestination(moveTarget.position);*/
         }
     }
 
@@ -225,7 +224,6 @@ public class MinionAI : EnemyBase, IBegin
     // 배 플렛폼 위인지 검사
     private bool CheckOnGround()
     {
-        // RaycastHit hit;
         if(Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
         {
             if(!isOnGround)
@@ -234,12 +232,10 @@ public class MinionAI : EnemyBase, IBegin
                 nestCreationTime = Time.time + nestCool;
                 isOnGround = true;
             }
-            Debug.Log("배 위다");
         }
         else
         {
             isOnGround = false;
-            Debug.Log("배 위 아님");
         }
 
         return isOnGround;

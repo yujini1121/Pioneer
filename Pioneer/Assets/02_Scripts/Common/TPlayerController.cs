@@ -17,9 +17,14 @@ public class TPlayerController : CreatureBase
     private float centerVecY = 1f;
     private RigidbodyConstraints rbConstraints;
 
+    void Awake()
+    {
+        hp = 100;
+    }
+
     void Start()
     {
-
+        
     }
 
     /// <summary>
