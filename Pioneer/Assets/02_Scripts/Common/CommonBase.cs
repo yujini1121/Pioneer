@@ -5,8 +5,8 @@ using UnityEngine;
 // 최상위 부모 스크립트
 public class CommonBase : MonoBehaviour, IBegin
 {
-    protected int hp;
-    protected int maxHp;
+    public int hp;
+    public int maxHp;
     public bool IsDead = false;
 
     public int CurrentHp => hp;

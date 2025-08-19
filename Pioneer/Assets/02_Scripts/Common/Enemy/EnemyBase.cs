@@ -4,7 +4,8 @@ public class EnemyBase : CreatureBase, IBegin
 {
     [Header("기본 속성")]
     protected float idleTime;
-    protected GameObject targetObject;
+    // public GameObject targetObject;
+    public GameObject currentAttackTarget;
     protected float detectionRange;
     [SerializeField] protected LayerMask detectMask;
 
@@ -24,7 +25,7 @@ public class EnemyBase : CreatureBase, IBegin
     /// </summary>
     protected void SetMastTarget()
     {
-        targetObject = GameObject.FindGameObjectWithTag("Engine");
+        currentAttackTarget = GameObject.FindGameObjectWithTag("Engine");
     }
 
     /// <summary>
@@ -36,7 +37,7 @@ public class EnemyBase : CreatureBase, IBegin
             + transform.right * attackBoxCenterOffset.x
             + transform.forward * attackBoxCenterOffset.z
             + transform.up * attackBoxCenterOffset.y;
-        Vector3 halfBoxSize = new Vector3(0.5f, 0.5f, attackRange / 2f);
+        Vector3 halfBoxSize = new Vector3(0.25f, 0.25f, attackRange / 2f);
 
         // Debug.Log($"DetectMask: {detectMask}, BoxCenter: {boxCenter}, HalfSize: {halfBoxSize}");
 
@@ -56,7 +57,7 @@ public class EnemyBase : CreatureBase, IBegin
             + transform.forward * attackBoxCenterOffset.z
             + transform.up * attackBoxCenterOffset.y;
 
-        Vector3 halfBoxSize = new Vector3(0.5f, 0.5f, attackRange / 2f);
+        Vector3 halfBoxSize = new Vector3(0.25f, 0.25f, attackRange / 2f);
 
         // 회전 적용
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(boxCenter, transform.rotation, Vector3.one);

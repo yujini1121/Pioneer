@@ -4,10 +4,8 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour, IBegin
+public class PlayerController : CreatureBase, IBegin
 {
-    public static PlayerController Instance;
-
     [Header("Player Move Speed Setting")]
     [SerializeField]private float moveSpeed = 5f;
 
@@ -25,19 +23,6 @@ public class PlayerController : MonoBehaviour, IBegin
     private Vector3 playerDir;
 
     public float playerHP = 100;
-
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     void Start()
     {
