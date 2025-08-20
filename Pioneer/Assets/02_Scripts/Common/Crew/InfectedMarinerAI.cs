@@ -70,7 +70,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
 
-        // ✅ 단순하게 승무원 ID에 맞는 스포너 선택
         int chosenIndex = marinerId % spawnPoints.Length;
 
         Debug.Log($"감염된 승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
