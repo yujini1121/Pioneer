@@ -1,15 +1,15 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class InfectedMarinerAI : MarinerBase, IBegin
 {
-    // °¨¿°µÈ ½Â¹«¿ø °íÀ¯ ¼³Á¤
+    // ê°ì—¼ëœ ìŠ¹ë¬´ì› ê³ ìœ  ì„¤ì •
     public int marinerId;
 
-    // ¹ã È¥¶õ °ü·Ã
-    private float nightConfusionTime; // ·£´ı È¥¶õ ½Ã°£
+    // ë°¤ í˜¼ë€ ê´€ë ¨
+    private float nightConfusionTime; // ëœë¤ í˜¼ë€ ì‹œê°„
     private bool isNight = false;
     private bool isConfused = false;
     private bool isNightBehaviorStarted = false;
@@ -35,8 +35,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
 
         nightConfusionTime = Random.Range(0f, 30f);
-        Debug.Log($"°¨¿°µÈ ½Â¹«¿ø {marinerId} ÃÊ±âÈ­ - HP: {maxHp}, °ø°İ·Â: {attackDamage}, ¼Óµµ: {speed}");
-        Debug.Log($"{marinerId} ¹ã È¥¶õ ½Ãµå°ª »ı¼º: {nightConfusionTime:F2}ÃÊ");
+        Debug.Log($"ê°ì—¼ëœ ìŠ¹ë¬´ì› {marinerId} ì´ˆê¸°í™” - HP: {maxHp}, ê³µê²©ë ¥: {attackDamage}, ì†ë„: {speed}");
+        Debug.Log($"{marinerId} ë°¤ í˜¼ë€ ì‹œë“œê°’ ìƒì„±: {nightConfusionTime:F2}ì´ˆ");
 
         base.Start();
     }
@@ -62,44 +62,18 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     }
 
     /// <summary>
-    /// °¨¿°µÈ ½Â¹«¿øÀÇ 2¼øÀ§ Çàµ¿ (°¡Â¥ ÆÄ¹Ö)
+    /// ê°ì—¼ëœ ìŠ¹ë¬´ì›ì˜ 2ìˆœìœ„ í–‰ë™ (ê°€ì§œ íŒŒë°)
     /// </summary>
     public override IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log("°¨¿°µÈ AI ½ºÆÄÀÌ È°µ¿ ÁøÇà Áß, ¾²·¹±â ÆÄ¹Ö ¾ÈÇÔ.");
+        Debug.Log("ê°ì—¼ëœ AI ìŠ¤íŒŒì´ í™œë™ ì§„í–‰ ì¤‘, ì“°ë ˆê¸° íŒŒë° ì•ˆí•¨.");
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
-        List<int> triedIndexes = new List<int>();
-        int fallbackIndex = (marinerId % 2 == 0) ? 0 : 1; // ÀÓ½Ã È¦Â¦ fallback
-        int chosenIndex = -1;
 
-        while (triedIndexes.Count < spawnPoints.Length)
-        {
-            int index = triedIndexes.Count == 0 ? fallbackIndex : Random.Range(0, spawnPoints.Length);
+        // âœ… ë‹¨ìˆœí•˜ê²Œ ìŠ¹ë¬´ì› IDì— ë§ëŠ” ìŠ¤í¬ë„ˆ ì„ íƒ
+        int chosenIndex = marinerId % spawnPoints.Length;
 
-            if (triedIndexes.Contains(index)) continue;
-
-            if (!MarinerManager.Instance.IsSpawnerOccupied(index))
-            {
-                MarinerManager.Instance.OccupySpawner(index);
-                chosenIndex = index;
-                Debug.Log("ÇöÀç ´Ù¸¥ ½Â¹«¿øÀÌ »ç¿ëÁß ÀÎ ½ºÆ÷³Ê");
-                break;
-            }
-            else
-            {
-                triedIndexes.Add(index);
-                float waitTime = Random.Range(0f, 1f);
-                Debug.Log("´Ù¸¥ ½Â¹«¿øÀÌ Á¡À¯ ÁßÀÌ¶ó ·£´ı ½Ã°£ ÈÄ ´Ù½Ã Å½»ö");
-                yield return new WaitForSeconds(waitTime);
-            }
-        }
-
-        if (chosenIndex == -1)
-        {
-            Debug.LogWarning("¸ğµç ½Â¹«¿øÀÌ »ç¿ëÁß ÀÓÀ¸·Î Ã³À½ À§Ä¡·Î ÀÌµ¿ÇÔ.");
-            chosenIndex = fallbackIndex;
-        }
+        Debug.Log($"ê°ì—¼ëœ ìŠ¹ë¬´ì› {marinerId}: í• ë‹¹ëœ ìŠ¤í¬ë„ˆ {chosenIndex}ë¡œ ì´ë™");
 
         UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
         MoveTo(targetSpawn.position);
@@ -109,50 +83,53 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             yield return null;
         }
 
+        // NavMesh ê²½ë¡œ ì´ˆê¸°í™”
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log("°¨¿°µÈ ½Â¹«¿ø ¹ã Çàµ¿ ½ÃÀÛ");
-            MarinerManager.Instance.ReleaseSpawner(chosenIndex);
-            StoreItemsAndReturnToBase(); // °¨¿°µÈ ½Â¹«¿ø Àü¿ë Ã³¸®
+            Debug.Log("ê°ì—¼ëœ ìŠ¹ë¬´ì› ë°¤ í–‰ë™ ì‹œì‘");
+            StoreItemsAndReturnToBase(); // ê°ì—¼ëœ ìŠ¹ë¬´ì› ì „ìš© ì²˜ë¦¬
             yield break;
         }
 
-        Debug.Log("°¨¿°µÈ ½Â¹«¿ø °¡Â¥ ÆÄ¹Ö 10ÃÊ");
+        Debug.Log("ê°ì—¼ëœ ìŠ¹ë¬´ì› ê°€ì§œ íŒŒë° 10ì´ˆ");
         yield return new WaitForSeconds(10f);
 
-        MarinerManager.Instance.ReleaseSpawner(chosenIndex);
-
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
-        if (needRepairList.Count > 0)// ¼ö¸®´ë»ó È®ÀÎ
+        if (needRepairList.Count > 0)// ìˆ˜ë¦¬ëŒ€ìƒ í™•ì¸
         {
-            Debug.Log("°¨¿°µÈ ½Â¹«¿ø ¼ö¸® ´ë»ó ¹ß°ßÀ¸·Î 1¼øÀ§ Çàµ¿ ½ÇÇà");
+            Debug.Log("ê°ì—¼ëœ ìŠ¹ë¬´ì› ìˆ˜ë¦¬ ëŒ€ìƒ ë°œê²¬ìœ¼ë¡œ 1ìˆœìœ„ í–‰ë™ ì‹¤í–‰");
             isSecondPriorityStarted = false;
             StartRepair();
         }
         else
         {
-            Debug.Log("°¨¿°µÈ ½Â¹«¿ø ¼ö¸® ´ë»ó ¹Ì¹ß°ßÀ¸·Î 2¼øÀ§ Çàµ¿ ½ÇÇà");
+            Debug.Log("ê°ì—¼ëœ ìŠ¹ë¬´ì› ìˆ˜ë¦¬ ëŒ€ìƒ ë¯¸ë°œê²¬ìœ¼ë¡œ 2ìˆœìœ„ í–‰ë™ ì‹¤í–‰");
             StartCoroutine(StartSecondPriorityAction());
         }
     }
 
     /// <summary>
-    /// °¨¿°µÈ ½Â¹«¿ø ¾ÆÀÌÅÛ Ã³¸® (¾ÆÀÌÅÛ ¹ö¸²)
+    /// ê°ì—¼ëœ ìŠ¹ë¬´ì› ì•„ì´í…œ ì²˜ë¦¬ (ì•„ì´í…œ ë²„ë¦¼)
     /// </summary>
     private void StoreItemsAndReturnToBase()
     {
-        Debug.Log("½Â¹«¿øÀÌ °¨¿°µÊÀ¸·Î ¾ÆÀÌÅÛ ¾øÀ½, ¹ö¸²?");
-        // TODO: °¨¿°µÈ ½Â¹«¿ø ¾ÆÀÌÅÛ ¹ö¸®´Â Çàµ¿ Ãß°¡ °¡´É
+        Debug.Log("ìŠ¹ë¬´ì›ì´ ê°ì—¼ë¨ìœ¼ë¡œ ì•„ì´í…œ ì—†ìŒ, ë²„ë¦¼?");
+        // TODO: ê°ì—¼ëœ ìŠ¹ë¬´ì› ì•„ì´í…œ ë²„ë¦¬ëŠ” í–‰ë™ ì¶”ê°€ ê°€ëŠ¥
     }
 
     /// <summary>
-    /// ¹ã È¥¶õ Çàµ¿
+    /// ë°¤ í˜¼ë€ í–‰ë™
     /// </summary>
     private IEnumerator NightBehaviorRoutine()
     {
         isNightBehaviorStarted = true;
         isConfused = true;
-        Debug.Log("È¥¶õ »óÅÂ ½ÃÀÛ");
+        Debug.Log("í˜¼ë€ ìƒíƒœ ì‹œì‘");
 
         float escapedTime = 0;
 
@@ -168,18 +145,18 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
 
         isConfused = false;
-        Debug.Log("È¥¶õ Á¾·á ÈÄ Á»ºñ AI·Î º¯°æ");
+        Debug.Log("í˜¼ë€ ì¢…ë£Œ í›„ ì¢€ë¹„ AIë¡œ ë³€ê²½");
 
         agent.ResetPath();
         ChangeToZombieAI();
     }
 
     /// <summary>
-    /// Á»ºñ AI·Î ÀüÈ¯
+    /// ì¢€ë¹„ AIë¡œ ì „í™˜
     /// </summary>
     private void ChangeToZombieAI()
     {
-        Debug.Log("Á»ºñ AIÀüÈ¯");
+        Debug.Log("ì¢€ë¹„ AIì „í™˜");
 
         if (GetComponent<ZombieMarinerAI>() == null)
         {
@@ -191,15 +168,15 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     }
 
     /// <summary>
-    /// °¨¿°µÈ ½Â¹«¿øÀº 30% ¼ö¸® ¼º°ø·ü (70% ½ÇÆĞ)
+    /// ê°ì—¼ëœ ìŠ¹ë¬´ì›ì€ 30% ìˆ˜ë¦¬ ì„±ê³µë¥  (70% ì‹¤íŒ¨)
     /// </summary>
     protected override float GetRepairSuccessRate()
     {
-        return 0.3f; // 30% ¼º°ø·ü
+        return 0.3f; // 30% ì„±ê³µë¥ 
     }
 
     /// <summary>
-    /// ½Â¹«¿ø ID ¹İÈ¯
+    /// ìŠ¹ë¬´ì› ID ë°˜í™˜
     /// </summary>
     protected override int GetMarinerId()
     {
@@ -207,15 +184,15 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     }
 
     /// <summary>
-    /// ½Â¹«¿ø Å¸ÀÔ ÀÌ¸§ ¹İÈ¯
+    /// ìŠ¹ë¬´ì› íƒ€ì… ì´ë¦„ ë°˜í™˜
     /// </summary>
     protected override string GetCrewTypeName()
     {
-        return "°¨¿°½Â¹«¿ø";
+        return "ê°ì—¼ìŠ¹ë¬´ì›";
     }
 
     /// <summary>
-    /// ¹ãÀÌ ´Ù°¡¿Ã ¶§ Ã³¸® (°¨¿°µÈ ½Â¹«¿ø Àü¿ë)
+    /// ë°¤ì´ ë‹¤ê°€ì˜¬ ë•Œ ì²˜ë¦¬ (ê°ì—¼ëœ ìŠ¹ë¬´ì› ì „ìš©)
     /// </summary>
     protected override void OnNightApproaching()
     {

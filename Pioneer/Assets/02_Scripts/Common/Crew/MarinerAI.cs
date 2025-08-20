@@ -47,26 +47,42 @@ public class MarinerAI : MarinerBase, IBegin
 
         if (GameManager.Instance.IsDaytime)
         {
+            // 밤 전투 상태 정리
             if (attackRoutine != null)
             {
                 StopCoroutine(attackRoutine);
                 attackRoutine = null;
                 isShowingAttackBox = false;
+                Debug.Log($"승무원 {marinerId}: 낮 전환으로 공격 루틴 중단");
             }
 
             if (isChasing)
             {
+                Debug.Log($"승무원 {marinerId}: 낮 전환으로 추격 모드 해제");
                 isChasing = false;
                 target = null;
+
                 if (agent != null && agent.isOnNavMesh)
                 {
                     agent.ResetPath();
                 }
-                EnterWanderingState();
-            }
 
-            if (!isRepairing)
+                // ✅ 개별 상태만 초기화
+                isSecondPriorityStarted = false;
+                isRepairing = false;
+
+                Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 즉시 전환");
                 StartRepair();
+            }
+            else if (!isRepairing)
+            {
+                if (isSecondPriorityStarted)
+                {
+                    Debug.Log($"승무원 {marinerId}: 2순위 상태 리셋 후 수리 시작");
+                    isSecondPriorityStarted = false;
+                }
+                StartRepair();
+            }
         }
         else
         {
@@ -193,37 +209,10 @@ public class MarinerAI : MarinerBase, IBegin
         Debug.Log("일반 승무원 2순위 낮 행동 시작");
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
-        List<int> triedIndexes = new List<int>();
-        int fallbackIndex = (marinerId % 2 == 0) ? 0 : spawnPoints.Length - 1; // 짝수는 0, 홀수는 마지막 인덱스
-        int chosenIndex = -1;
 
-        while (triedIndexes.Count < spawnPoints.Length)
-        {
-            int index = triedIndexes.Count == 0 ? (marinerId % 2 == 0 ? fallbackIndex + marinerId : spawnPoints.Length - 1 - marinerId) : Random.Range(0, spawnPoints.Length);
+        int chosenIndex = (marinerId - 1) % spawnPoints.Length; // 스포너 개수보다 승무원이 많을 경우 대비
 
-            if (triedIndexes.Contains(index)) continue; // 이미 시도한 스포너는 건뛰
-
-            if (!MarinerManager.Instance.IsSpawnerOccupied(index)) // 비 점유 중
-            {
-                MarinerManager.Instance.OccupySpawner(index);
-                chosenIndex = index;
-                Debug.Log($"승무원 {marinerId}: 스포너 {index} 점유 성공");
-                break;
-            }
-            else // 점유중
-            {
-                triedIndexes.Add(index);
-                float waitTime = Random.Range(0f, 1f);
-                Debug.Log($"승무원 {marinerId}: 스포너 {index}가 점유 중이라 랜덤 시간 후 다시 탐색");
-                yield return new WaitForSeconds(waitTime);
-            }
-        }
-
-        if (chosenIndex == -1) // 예외 처리
-        {
-            Debug.LogWarning($"승무원 {marinerId}: 모든 스포너가 사용중임으로 기본 위치로 이동");
-            chosenIndex = fallbackIndex; // 첫 위치로 이동
-        }
+        Debug.Log($"승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
 
         UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
         MoveTo(targetSpawn.position);
@@ -242,7 +231,6 @@ public class MarinerAI : MarinerBase, IBegin
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
             Debug.Log($"승무원 {marinerId}: 밤이 가까워 수집 작업 중단");
-            MarinerManager.Instance.ReleaseSpawner(chosenIndex);
             MarinerManager.Instance.StoreItemsAndReturnToBase(this);
             yield break;
         }
@@ -251,7 +239,6 @@ public class MarinerAI : MarinerBase, IBegin
         yield return new WaitForSeconds(10f);
 
         GameManager.Instance.CollectResource("wood"); // 자원 수집
-        MarinerManager.Instance.ReleaseSpawner(chosenIndex);
 
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
         if (needRepairList.Count > 0)// 수리대상 확인
