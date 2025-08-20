@@ -35,6 +35,7 @@ public class MarinerManager : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// 승무원들을 하나씩 감염시키는 코루틴
     /// </summary>
@@ -151,7 +152,7 @@ public class MarinerManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>
+   /* /// <summary>
     /// 스포너가 점유되어 있는지 확인하는 함수
     /// </summary>
     public bool IsSpawnerOccupied(int index)
@@ -173,7 +174,7 @@ public class MarinerManager : MonoBehaviour
     public void ReleaseSpawner(int index)
     {
         occupiedSpawners.Remove(index);
-    }
+    }*/
 
     /// <summary>
     /// 수리 오브젝트가 점유되어 있는지 확인하는 함수

@@ -1,42 +1,42 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class MarinerBase : CreatureBase
 {
-    // ½Â¹«¿ø °øÅë ¼³Á¤
+    // ìŠ¹ë¬´ì› ê³µí†µ ì„¤ì •
     public LayerMask targetLayer;
 
-    // »óÅÂ °ü¸®
+    // ìƒíƒœ ê´€ë¦¬
     public enum CrewState { Wandering, Idle, Attacking, Chasing }
     protected CrewState currentState = CrewState.Wandering;
 
-    // ÀÌµ¿ ¹× ´ë±â ½Ã°£
+    // ì´ë™ ë° ëŒ€ê¸° ì‹œê°„
     protected float moveDuration = 2f;
     protected float idleDuration = 4f;
     protected float stateTimer = 0f;
     private Vector3 moveDirection;
 
-    // °ø°İ °ü¸®
+    // ê³µê²© ê´€ë¦¬
     protected UnityEngine.Transform target;
     protected bool isShowingAttackBox = false;
     protected Coroutine attackRoutine;
 
-    // Ãß°İ ½Ã½ºÅÛ °ü·Ã º¯¼ö
-    protected float chaseRange = 8f;  // Ãß°İ ½ÃÀÛ ¹üÀ§
-    protected bool isChasing = false; // Ãß°İ ÁßÀÎÁö È®ÀÎ
-    protected float chaseUpdateInterval = 0.2f; // Ãß°İ ¸ñÇ¥ ¾÷µ¥ÀÌÆ® °£°İ
+    // ì¶”ê²© ì‹œìŠ¤í…œ ê´€ë ¨ ë³€ìˆ˜
+    protected float chaseRange = 8f;  // ì¶”ê²© ì‹œì‘ ë²”ìœ„
+    protected bool isChasing = false; // ì¶”ê²© ì¤‘ì¸ì§€ í™•ì¸
+    protected float chaseUpdateInterval = 0.2f; // ì¶”ê²© ëª©í‘œ ì—…ë°ì´íŠ¸ ê°„ê²©
     protected float lastChaseUpdate = 0f;
 
-    // ¼ö¸® °ü·Ã °øÅë º¯¼ö
-    [Header("¼ö¸® ¼³Á¤")]
+    // ìˆ˜ë¦¬ ê´€ë ¨ ê³µí†µ ë³€ìˆ˜
+    [Header("ìˆ˜ë¦¬ ì„¤ì •")]
     public bool isRepairing = false;
     protected DefenseObject targetRepairObject;
     protected int repairAmount = 30;
     protected bool isSecondPriorityStarted = false;
 
-    // NavMeshAgent °øÅë »ç¿ë
+    // NavMeshAgent ê³µí†µ ì‚¬ìš©
     protected NavMeshAgent agent;
 
     public override void Start()
@@ -61,9 +61,9 @@ public class MarinerBase : CreatureBase
         return fov.visibleTargets.Contains(target);
     }
 
-    protected virtual void Wander() // ¹èÈ¸
+    protected virtual void Wander() // ë°°íšŒ
     {
-        // NavMesh¸¦ »ç¿ëÇÑ ¹èÈ¸
+        // NavMeshë¥¼ ì‚¬ìš©í•œ ë°°íšŒ
         if (agent != null && agent.isOnNavMesh)
         {
             if (!agent.hasPath || agent.remainingDistance < 0.5f)
@@ -73,7 +73,7 @@ public class MarinerBase : CreatureBase
         }
         else
         {
-            // ±âÁ¸ ¹æ½Ä (NavMesh ¾øÀ» ¶§ fallback)
+            // ê¸°ì¡´ ë°©ì‹ (NavMesh ì—†ì„ ë•Œ fallback)
             transform.position += moveDirection * speed * Time.deltaTime;
         }
 
@@ -87,7 +87,7 @@ public class MarinerBase : CreatureBase
 
     protected virtual void Idle()
     {
-        // Idle »óÅÂ¿¡¼­´Â NavMesh Á¤Áö
+        // Idle ìƒíƒœì—ì„œëŠ” NavMesh ì •ì§€
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
@@ -106,7 +106,7 @@ public class MarinerBase : CreatureBase
         SetRandomDirection();
         currentState = CrewState.Wandering;
         stateTimer = moveDuration;
-        Debug.Log($"{gameObject.name} - ·£´ı ¹æÇâÀ¸·Î ÀÌµ¿ ½ÃÀÛ");
+        Debug.Log($"{gameObject.name} - ëœë¤ ë°©í–¥ìœ¼ë¡œ ì´ë™ ì‹œì‘");
     }
 
     protected virtual void EnterIdleState()
@@ -117,14 +117,14 @@ public class MarinerBase : CreatureBase
         {
             agent.ResetPath();
         }
-        Debug.Log($"{gameObject.name} - ´ë±â »óÅÂ·Î ÀüÈ¯");
+        Debug.Log($"{gameObject.name} - ëŒ€ê¸° ìƒíƒœë¡œ ì „í™˜");
     }
 
     protected virtual void EnterChasingState()
     {
         currentState = CrewState.Chasing;
         isChasing = true;
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: Ãß°İ »óÅÂ·Î ÀüÈ¯");
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: ì¶”ê²© ìƒíƒœë¡œ ì „í™˜");
     }
 
     protected void SetRandomDirection()
@@ -191,7 +191,7 @@ public class MarinerBase : CreatureBase
             CommonBase targetBase = target.GetComponent<CommonBase>();
             if (targetBase != null && targetBase.IsDead)
             {
-                Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: Å¸°Ù {target.name}ÀÌ Á×¾ú½À´Ï´Ù. »õ·Î¿î Å¸°ÙÀ» Ã£½À´Ï´Ù.");
+                Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: íƒ€ê²Ÿ {target.name}ì´ ì£½ì—ˆìŠµë‹ˆë‹¤. ìƒˆë¡œìš´ íƒ€ê²Ÿì„ ì°¾ìŠµë‹ˆë‹¤.");
                 target = null;
                 isChasing = false;
                 EnterWanderingState();
@@ -229,7 +229,7 @@ public class MarinerBase : CreatureBase
         {
             target = nearestTarget;
             EnterChasingState();
-            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: {target.name} Ãß°İ ½ÃÀÛ!");
+            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: {target.name} ì¶”ê²© ì‹œì‘!");
         }
     }
 
@@ -244,7 +244,7 @@ public class MarinerBase : CreatureBase
 
         float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
-        // °ø°İ ¹üÀ§ ³»¿¡ ÀÖ°í Äğ´Ù¿îÀÌ ³¡³µÀ¸¸é °ø°İ
+        // ê³µê²© ë²”ìœ„ ë‚´ì— ìˆê³  ì¿¨ë‹¤ìš´ì´ ëë‚¬ìœ¼ë©´ ê³µê²©
         if (distanceToTarget <= attackRange && GetAttackCooldown() <= 0f)
         {
             if (IsTargetInFOV() && attackRoutine == null)
@@ -254,7 +254,7 @@ public class MarinerBase : CreatureBase
         }
         else
         {
-            // NavMesh¸¦ »ç¿ëÇÑ Ãß°İ
+            // NavMeshë¥¼ ì‚¬ìš©í•œ ì¶”ê²©
             ChaseTarget();
         }
     }
@@ -300,10 +300,15 @@ public class MarinerBase : CreatureBase
         yield return null;
     }
 
-    // ===== ±âÁ¸ ¼ö¸® °ü·Ã ÇÔ¼öµé =====
+    // ===== ê¸°ì¡´ ìˆ˜ë¦¬ ê´€ë ¨ í•¨ìˆ˜ë“¤ =====
     protected virtual void StartRepair()
     {
+        Debug.Log($"ìŠ¹ë¬´ì› {GetMarinerId()}: StartRepair() í˜¸ì¶œë¨");
+
+        MarinerManager.Instance.UpdateRepairTargets();
+
         List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
+        Debug.Log($"ìŠ¹ë¬´ì› {GetMarinerId()}: ìˆ˜ë¦¬ ëŒ€ìƒ ê°œìˆ˜: {needRepairList.Count}");
 
         for (int i = 0; i < needRepairList.Count; i++)
         {
@@ -315,21 +320,21 @@ public class MarinerBase : CreatureBase
 
                 if (MarinerManager.Instance.CanMarinerRepair(GetMarinerId(), targetRepairObject))
                 {
-                    Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} ¼ö¸® ½ÃÀÛ: {targetRepairObject.name}");
+                    Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} ìˆ˜ë¦¬ ì‹œì‘: {targetRepairObject.name}");
                     isRepairing = true;
                     StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
                     return;
                 }
                 else
                 {
-                    MarinerManager.Instance.ReleaseRepairObject(obj); // Á¡À¯ ÇØÁ¦
+                    MarinerManager.Instance.ReleaseRepairObject(obj); // ì ìœ  í•´ì œ
                 }
             }
         }
 
         if (!isSecondPriorityStarted)
         {
-            Debug.Log($"{GetCrewTypeName()} ¼ö¸® ´ë»ó ¾øÀ½ -> 2¼øÀ§ Çàµ¿ ½ÃÀÛ");
+            Debug.Log($"{GetCrewTypeName()} ìˆ˜ë¦¬ ëŒ€ìƒ ì—†ìŒ -> 2ìˆœìœ„ í–‰ë™ ì‹œì‘");
             isSecondPriorityStarted = true;
             StartCoroutine(StartSecondPriorityAction());
         }
@@ -361,11 +366,11 @@ public class MarinerBase : CreatureBase
             yield return null;
         }
 
-        // ±âº» ¼ö¸® ¼º°ø·ü 100% (ÀÏ¹İ ½Â¹«¿ø¿ë)
+        // ê¸°ë³¸ ìˆ˜ë¦¬ ì„±ê³µë¥  100% (ì¼ë°˜ ìŠ¹ë¬´ì›ìš©)
         bool repairSuccess = GetRepairSuccessRate() > Random.value;
         int actualRepairAmount = repairSuccess ? repairAmount : 0;
 
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} ¼ö¸® {(repairSuccess ? "¼º°ø" : "½ÇÆĞ")}: {targetRepairObject.name}/ ¼ö¸®·®: {actualRepairAmount}");
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} ìˆ˜ë¦¬ {(repairSuccess ? "ì„±ê³µ" : "ì‹¤íŒ¨")}: {targetRepairObject.name}/ ìˆ˜ë¦¬ëŸ‰: {actualRepairAmount}");
         targetRepairObject.Repair(actualRepairAmount);
 
         isRepairing = false;
@@ -373,7 +378,7 @@ public class MarinerBase : CreatureBase
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log($"{GetCrewTypeName()} ¹ã µµ´Ş ¿¹¿ÜÇàµ¿ ½ÃÀÛ");
+            Debug.Log($"{GetCrewTypeName()} ë°¤ ë„ë‹¬ ì˜ˆì™¸í–‰ë™ ì‹œì‘");
             OnNightApproaching();
             yield break;
         }
@@ -384,11 +389,11 @@ public class MarinerBase : CreatureBase
 
     public virtual IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log($"{GetCrewTypeName()} 2¼øÀ§ Çàµ¿ - ±âº» ±¸Çö");
+        Debug.Log($"{GetCrewTypeName()} 2ìˆœìœ„ í–‰ë™ - ê¸°ë³¸ êµ¬í˜„");
         yield return new WaitForSeconds(1f);
     }
 
-    // ===== NavMeshAgent °ü·Ã °øÅë ÇÔ¼öµé =====
+    // ===== NavMeshAgent ê´€ë ¨ ê³µí†µ í•¨ìˆ˜ë“¤ =====
     public void MoveTo(Vector3 destination)
     {
         if (agent != null && agent.isOnNavMesh)
@@ -400,7 +405,19 @@ public class MarinerBase : CreatureBase
     public bool IsArrived()
     {
         if (agent == null || !agent.isOnNavMesh) return true;
-        return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
+
+        bool navMeshCondition = !agent.pathPending &&
+                              agent.remainingDistance <= (agent.stoppingDistance + 1f);
+
+        if (agent.destination != Vector3.zero)
+        {
+            float directDistance = Vector3.Distance(transform.position, agent.destination);
+            bool directCondition = directDistance <= 1.0f;
+
+            return navMeshCondition || directCondition;
+        }
+
+        return navMeshCondition;
     }
 
     public IEnumerator MoveToThenReset(Vector3 destination)
@@ -416,27 +433,27 @@ public class MarinerBase : CreatureBase
         {
             agent.ResetPath();
         }
-        Debug.Log($"{GetCrewTypeName()} ResetPath È£Ãâ");
+        Debug.Log($"{GetCrewTypeName()} ResetPath í˜¸ì¶œ");
     }
 
     protected virtual float GetRepairSuccessRate()
     {
-        return 1.0f; // ±âº» 100% ¼º°ø·ü (ÀÏ¹İ ½Â¹«¿ø)
+        return 1.0f; // ê¸°ë³¸ 100% ì„±ê³µë¥  (ì¼ë°˜ ìŠ¹ë¬´ì›)
     }
 
     protected virtual int GetMarinerId()
     {
-        return 0; // ±âº»°ª
+        return 0; // ê¸°ë³¸ê°’
     }
 
     protected virtual string GetCrewTypeName()
     {
-        return "½Â¹«¿ø"; // ±âº»°ª
+        return "ìŠ¹ë¬´ì›"; // ê¸°ë³¸ê°’
     }
 
     protected virtual void OnNightApproaching()
     {
-        Debug.Log($"{GetCrewTypeName()} ±âº» ¹ã Ã³¸®");
+        Debug.Log($"{GetCrewTypeName()} ê¸°ë³¸ ë°¤ ì²˜ë¦¬");
     }
 
     protected virtual void OnDrawGizmos()
