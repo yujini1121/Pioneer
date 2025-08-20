@@ -104,6 +104,7 @@ public class InventoryManager : InventoryBase
 
     public void Add(SItemStack item)
     {
+        Debug.Assert(InventoryUiMain.instance != null);
         if (TryAdd(item) == false)
         {
             ItemDropManager.instance.Drop(item, positionDrop.transform.position);
@@ -173,9 +174,13 @@ public class InventoryManager : InventoryBase
             itemLists.Add(null);
             // Debug.Log($"awake : {itemLists[i].id}");
         }
-        Demo();
 
         mouseInventory = null;
+    }
+
+    private void Start()
+    {
+        Demo();
     }
 
     private void Demo()

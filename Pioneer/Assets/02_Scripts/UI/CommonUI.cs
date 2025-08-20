@@ -108,13 +108,20 @@ public class CommonUI : MonoBehaviour, IBegin
         });
     }
 
-#warning TODO : 카테고리 배치
-#warning TODO : 제작 선택 배치
-#warning TODO : 아이템 조합
 #warning TODO : 구조물 배치 로직
     // 카테고리 UI
+    // GameObject parent : 버튼들의 부모 게임오브젝트입니다
+    // SItemCategorySO category : 카테고리 스크립터블 오브젝트입니다
+    // DefaultFabrication ui : 제작 창 게임오브젝트의 컴포넌트 입니다.
+    // ArgumentGeometry geometryCategoryButton : 카테고리 버튼의 기하학적 배치 기능을 위한 매개변수입니다
+    // ArgumentGeometry geometryCraftSelectCategory, : 제작 선택의 카테고리 항목의 기하학적 배치 기능을 위한 매개변수입니다
+    // ArgumentGeometry geometryCraftSelectButton : 제작 선택 버튼의 기하학적 배치 기능을 위한 매개변수입니다
+    // List<GameObject> prevCraftSelectButton : 이전 제작 선택 UI을 지우기 위한 매개변수입니다. 해당 참조로 새롭게 만들어진 제작 선택 게임오브젝트들이 원소로 들어옵니다
     public Button ShowCategoryButton(GameObject parent, SItemCategorySO category, DefaultFabrication ui,
-        ArgumentGeometry geometryCategoryButton, ArgumentGeometry geometryItemSelectButton)
+        ArgumentGeometry geometryCategoryButton,
+        ArgumentGeometry geometryCraftSelectCategory,
+        ArgumentGeometry geometryCraftSelectButton,
+        List<GameObject> prevCraftSelectButton)
     {
         // 1. 카테고리 이미지 버튼
 
@@ -138,41 +145,55 @@ public class CommonUI : MonoBehaviour, IBegin
 
         // 버튼 로직 배치
         Button categoryButton = categoryButtonObject.GetComponent<Button>();
-        //categoryButton.onClick.AddListener(() =>
-        //{
-        //    // 2. 제작 선택 버튼들
-        //    // 해당 버튼을 누르면 제작 선택 UI가 뜸
+        categoryButton.onClick.AddListener(() =>
+        {
+            // 2. 제작 선택 버튼들
+            // 해당 버튼을 누르면 제작 선택 UI가 뜸
+            // 기존 제작 선택을 싹 제거함
+            foreach (GameObject prevUi in prevCraftSelectButton) Destroy(prevUi);
+            ui.gameObject.SetActive(false);
 
-        //    // 소환
-        //    GameObject craftSelectTopButton = Instantiate(prefabCraftSelectTopButton, parent.transform);
+            // 제작 선택 카테고리 항목
+            GameObject craftSelectCategory = Instantiate(prefabCraftSelectTopButton, parent.transform);
+            craftSelectCategory.transform.parent = geometryCraftSelectCategory.parent.transform;
+            craftSelectCategory.transform.localPosition = geometryCraftSelectCategory.start2D;
+            prevCraftSelectButton.Add(craftSelectCategory);
+            CraftItemSelectTop craftSelectCategoryUi = craftSelectCategory.GetComponent<CraftItemSelectTop>();
+            craftSelectCategoryUi.categoryImage.sprite = category.categorySprite;
+            craftSelectCategoryUi.categoryName.text = category.categoryName;
 
-        //    // 배치
-        //    //craftSelectTopButton.GetComponent<RectTransform>().position
-        //    craftSelectTopButton.transform.position = geometryItemSelectButton.start2D;
+            // 제작 선택 버튼 소환
+            for (int index = 0; index < category.recipes.Count; index++)
+            {
+                GameObject m_one = Instantiate(prefabCraftSelectItemButton, parent.transform);
 
-        //    // 버튼 소환
-        //    List<GameObject> craftSelectItemButtonsObject = new List<GameObject>();
-        //    for (int index = 0; index < category.recipes.Count; index++)
-        //    {
-        //        GameObject m_one = Instantiate(prefabCraftSelectItemButton, parent.transform);
+                prevCraftSelectButton.Add(m_one);
+                // 레시피 가져오기
+                SItemRecipeSO recipe = category.recipes[index];
+                SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
+                // 버튼 배치
+                SetPosition(
+                    m_one,
+                    geometryCraftSelectButton.parent,
+                    index,
+                    1,
+                    -new Vector2(0, m_one.GetComponent<RectTransform>().sizeDelta.y),
+                    geometryCraftSelectButton.start2D);
+                CraftItemSelectSingle m_oneUi = m_one.GetComponent<CraftItemSelectSingle>();
 
-        //        craftSelectItemButtonsObject.Add(m_one);
+                m_oneUi.image.sprite = ItemTypeManager.Instance.itemTypeSearch[category.recipes[index].result.id].image;
+                m_oneUi.itemName.text = ItemTypeManager.Instance.itemTypeSearch[category.recipes[index].result.id].typeName;
 
-        //        // 레시피 가져오기
-        //        SItemRecipeSO recipe = category.recipes[index];
-        //        SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
-        //        // 버튼 배치
-        //        SetPosition(m_one, parent, index, 1, new Vector2(0, m_one.GetComponent<RectTransform>().sizeDelta.y), selectPosition);
+                // 버튼 로직 배치
+                //Button craftSelectItemButtons = categoryButtonObject.GetComponent<Button>();
+                m_oneUi.button.onClick.AddListener(() =>
+                {
+                    ui.gameObject.SetActive(true);
+                    UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { categoryButtonObject });
+                });
+            }
 
-        //        // 버튼 로직 배치
-        //        Button craftSelectItemButtons = categoryButtonObject.GetComponent<Button>();
-        //        craftSelectItemButtons.onClick.AddListener(() =>
-        //        {
-        //            UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { categoryButtonObject });
-        //        });
-        //    }
-
-        //});
+        });
         return categoryButton;
     }
 
