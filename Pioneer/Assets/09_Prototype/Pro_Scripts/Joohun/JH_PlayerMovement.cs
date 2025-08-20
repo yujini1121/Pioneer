@@ -32,12 +32,38 @@ public class JH_PlayerMovement : MonoBehaviour
         lastPosition = transform.position;
     }
 
+    void FixedUpdate()
+    {
+        if (rb == null) return;
+
+        Vector3 velocity = new Vector3(moveInput.x * moveSpeed, rb.velocity.y, moveInput.z * moveSpeed);
+        rb.velocity = velocity;
+    }
+
     void Update()
     {
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
         moveInput = new Vector3(moveX, 0f, moveZ).normalized;
 
+
+        DetectedEnemy();
+        Attack();
+    }
+
+    void ToggleInteraction()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            //isUsing = !isUsing;
+            //if (isUsing) OnUse?.Invoke();
+            //else OnUnuse?.Invoke();
+        }
+    }
+
+    // TODO: 발리스타 스크립트로 가져가기
+    void DetectedEnemy()
+    {
         centerVec = transform.position;
         centerVec.y += centerVecY;
         colliders = Physics.OverlapSphere(centerVec, interactableRadius, interactableLayer, QueryTriggerInteraction.Ignore);
@@ -48,7 +74,7 @@ public class JH_PlayerMovement : MonoBehaviour
             {
                 colliders[0].TryGetComponent<Ballista>(out var ballista);
                 rbConstraints = rb.constraints;
-                Destroy(rb);
+                Destroy(rb);        // 플레이어 rb
 
                 foreach (Behaviour component in GetComponents<Behaviour>())
                 {
@@ -61,15 +87,12 @@ public class JH_PlayerMovement : MonoBehaviour
                 ballista?.Use(gameObject);
             }
         }
-
-        if (Input.GetMouseButtonDown(0)) // 왼쪽 클릭
-        {
-            Attack();
-        }
     }
 
     private void Attack()
     {
+        if (!(Input.GetMouseButtonDown(0))) return;
+
         Vector3 origin = transform.position + Vector3.up * 1f;
         Vector3 direction = transform.forward;
         float rayDistance = 5f;
@@ -100,15 +123,6 @@ public class JH_PlayerMovement : MonoBehaviour
         {
             Debug.LogError("[공격] 적 없음 - Ray에 아무것도 맞지 않음");
         }
-    }
-
-
-    void FixedUpdate()
-    {
-        if (rb == null) return;
-
-        Vector3 velocity = new Vector3(moveInput.x * moveSpeed, rb.velocity.y, moveInput.z * moveSpeed);
-        rb.velocity = velocity;
     }
 
     public bool HasMoved()
