@@ -10,6 +10,10 @@ public class MarinerAI : MarinerBase, IBegin
     private float attackCooldown = 0f;
     private float attackInterval = 0.5f;
 
+    private bool isRegistered = false;
+    private bool lastDaytimeState = false;
+    private bool hasInitializedDaytimeState = false;
+
     private void Awake()
     {
         maxHp = 100;  // Mariner HP
@@ -43,50 +47,103 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 
-        MarinerManager.Instance.RegisterMariner(this);
-
-        if (GameManager.Instance.IsDaytime)
+        if (!isRegistered)
         {
-            // 밤 전투 상태 정리
-            if (attackRoutine != null)
-            {
-                StopCoroutine(attackRoutine);
-                attackRoutine = null;
-                isShowingAttackBox = false;
-                Debug.Log($"승무원 {marinerId}: 낮 전환으로 공격 루틴 중단");
-            }
+            MarinerManager.Instance.RegisterMariner(this);
+            isRegistered = true;
+        }
 
-            if (isChasing)
-            {
-                Debug.Log($"승무원 {marinerId}: 낮 전환으로 추격 모드 해제");
-                isChasing = false;
-                target = null;
+        bool currentDaytimeState = GameManager.Instance.IsDaytime;
+        
+        if (!hasInitializedDaytimeState)
+        {
+            lastDaytimeState = currentDaytimeState;
+            hasInitializedDaytimeState = true;
+        }
+        
+        if (currentDaytimeState != lastDaytimeState)
+        {
+            OnTimeStateChanged(currentDaytimeState);
+            lastDaytimeState = currentDaytimeState;
+        }
 
-                if (agent != null && agent.isOnNavMesh)
-                {
-                    agent.ResetPath();
-                }
-
-                // ✅ 개별 상태만 초기화
-                isSecondPriorityStarted = false;
-                isRepairing = false;
-
-                Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 즉시 전환");
-                StartRepair();
-            }
-            else if (!isRepairing)
-            {
-                if (isSecondPriorityStarted)
-                {
-                    Debug.Log($"승무원 {marinerId}: 2순위 상태 리셋 후 수리 시작");
-                    isSecondPriorityStarted = false;
-                }
-                StartRepair();
-            }
+        if (currentDaytimeState)
+        {
+            HandleDaytimeBehavior();
         }
         else
         {
             HandleNightCombat();
+        }
+    }
+
+    // 시간대 변화 처리 (새로운 메서드)
+    private void OnTimeStateChanged(bool isDaytime)
+    {
+        if (isDaytime)
+        {
+            Debug.Log($"승무원 {marinerId}: 낮으로 전환");
+            CleanupNightCombat();
+            TransitionToDaytime();
+        }
+        else
+        {
+            Debug.Log($"승무원 {marinerId}: 밤으로 전환");
+            TransitionToNight();
+        }
+    }
+
+    private void CleanupNightCombat()
+    {
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+            isShowingAttackBox = false;
+            Debug.Log($"승무원 {marinerId}: 낮 전환으로 공격 루틴 중단");
+        }
+
+        if (isChasing)
+        {
+            Debug.Log($"승무원 {marinerId}: 낮 전환으로 추격 모드 해제");
+            isChasing = false;
+            target = null;
+
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
+        }
+    }
+
+    private void TransitionToDaytime()
+    {
+        isSecondPriorityStarted = false;
+        isRepairing = false;
+        
+        Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 전환");
+        StartRepair();
+    }
+
+    private void TransitionToNight()
+    {
+        if (isRepairing || isSecondPriorityStarted)
+        {
+            isRepairing = false;
+            isSecondPriorityStarted = false;
+            
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
+        }
+    }
+
+    private void HandleDaytimeBehavior()
+    {
+        if (!isRepairing && !isSecondPriorityStarted)
+        {
+            StartRepair(); 
         }
     }
 
@@ -210,7 +267,7 @@ public class MarinerAI : MarinerBase, IBegin
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
 
-        int chosenIndex = (marinerId - 1) % spawnPoints.Length; // 스포너 개수보다 승무원이 많을 경우 대비
+        int chosenIndex = (marinerId - 1) % spawnPoints.Length; //(임시) 스포너 개수보다 승무원이 많을 경우 대비
 
         Debug.Log($"승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
 

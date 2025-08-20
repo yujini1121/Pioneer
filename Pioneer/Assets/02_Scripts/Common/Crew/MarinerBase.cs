@@ -305,7 +305,6 @@ public class MarinerBase : CreatureBase
     {
         Debug.Log($"승무원 {GetMarinerId()}: StartRepair() 호출됨");
 
-        // ✅ 수리 시작할 때마다 목록 갱신
         MarinerManager.Instance.UpdateRepairTargets();
 
         List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
@@ -406,7 +405,19 @@ public class MarinerBase : CreatureBase
     public bool IsArrived()
     {
         if (agent == null || !agent.isOnNavMesh) return true;
-        return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
+
+        bool navMeshCondition = !agent.pathPending &&
+                              agent.remainingDistance <= (agent.stoppingDistance + 1f);
+
+        if (agent.destination != Vector3.zero)
+        {
+            float directDistance = Vector3.Distance(transform.position, agent.destination);
+            bool directCondition = directDistance <= 1.0f;
+
+            return navMeshCondition || directCondition;
+        }
+
+        return navMeshCondition;
     }
 
     public IEnumerator MoveToThenReset(Vector3 destination)
