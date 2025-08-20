@@ -74,7 +74,7 @@ public class JH_PlayerMovement : MonoBehaviour
             {
                 colliders[0].TryGetComponent<Ballista>(out var ballista);
                 rbConstraints = rb.constraints;
-                Destroy(rb);
+                Destroy(rb);        // 플레이어 rb
 
                 foreach (Behaviour component in GetComponents<Behaviour>())
                 {

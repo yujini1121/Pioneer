@@ -8,7 +8,9 @@ using System.Reflection;
 /// </summary>
 public class StructureBase : CommonBase
 {
+    [field: SerializeField]
     public bool isUsing { get; private set; }
+
 
     void Start()
     {

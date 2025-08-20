@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
-using System.Reflection;
 
 public class TBallista : StructureBase
 {
@@ -13,6 +11,8 @@ public class TBallista : StructureBase
     [SerializeField] private float attackRange;
     [SerializeField] private float attackSpeed;
     [SerializeField] private float attackCooltime;
+
+    [SerializeField] private Transform nearest;
 
     // TODO: 추후, ScriptableObject의 변수들과 연동 필요함~~~
     [SerializeField] private int currentHP = 80;
@@ -31,7 +31,7 @@ public class TBallista : StructureBase
         if (isUsing)    
         { 
             Use();
-            DetectEnemy(); 
+            Select(); 
             LookAt(); 
             Fire(); 
         }
@@ -41,18 +41,34 @@ public class TBallista : StructureBase
         }
     }
 
-    private void DetectEnemy()
+    private void Select()
     {
         enemyColliders = Physics.OverlapSphere(transform.position, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
+        //foreach (var col in enemyColliders) { Debug.Log(col.name); }
 
+        if (enemyColliders.Length == 0) { nearest = null; return; }
+  
+        float minDistance = Mathf.Infinity;
+        foreach (var col in enemyColliders)
+        {
+            float distance = Vector3.SqrMagnitude(transform.position - col.transform.position);
+
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearest = col.transform;
+            }
+        }
+
+        //Debug.Log(nearest.gameObject.name);
     }
 
     private void LookAt()
     {
         // 가장 가까운 적을 바라보게 하는 로직 
-        // 현재는 0번이 가장 가까운 에너미라고 가정 (추후 수정)
-        closestTarget = enemyColliders[0].transform;
-        float minDistance = Mathf.Infinity;
+
+        if (nearest == null) return;
+        Debug.Log(nearest.name);
     }
     
     private void Fire()
@@ -62,6 +78,9 @@ public class TBallista : StructureBase
 
     void OnDrawGizmos()
     {
+        Handles.color = Color.white;
+        Handles.DrawWireDisc(transform.position, Vector3.up, attackRange);
+
         foreach (var collider in enemyColliders)
         {
             if (collider == null) continue;
@@ -70,5 +89,6 @@ public class TBallista : StructureBase
             Vector3 center = collider.transform.position;
             Gizmos.DrawSphere(center, 0.5f);
         }
+
     }
 }
