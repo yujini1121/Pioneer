@@ -2,24 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-/*
-250814
-* 문제 1 : 공격을 한 번 하면 애가 동작이 다 멈추는거 같음
-- 문제 2 : 제대로 공격이 안 들어감 => 현재 테스트 씬의 플레이어가 CommonBase를 상속 받지않아 정확한 확인 불가
-- 문제 3 : 둥지 로직 구현 안 함
-- 문제 4 : 바다에 있을때 네브메시를 끄고 배 위에 올라왔을때 네브메시를 키기
-- 문제 5 : 배 위인지 확인하는 코드 모든 에너미가 써야할 것 같아서 EnemyBase로 옮기기
-
-+ 코드가 너무 더러움 다시 깔끔하게 구현해보기
-=========================================================================================================
-250815
-* 공격도중 에너미가 죽었을때 돛대로 타겟 변경이 안됨 + 돛대로 이동도 안 함
-- 공격 딜레이 적용 안됨
-* 감지 범위 내에 여러 타겟이 있어도 하나가 죽으면 다른 범위 내 타겟을 인식하는게 아니라 바로 돛대로 향하는 문제가 있음
-==========================================================================================================
-250818
- - 이동 완료가 안되서 현재 공격이나 감지가 안 됨
- */
 public class MinionAI : EnemyBase, IBegin
 {
     [Header("둥지 프리팹")]
@@ -39,20 +21,21 @@ public class MinionAI : EnemyBase, IBegin
     // 바닥 확인 변수
     private bool isOnGround = false;
 
+    // 공격 관련 변수
     private float lastAttackTime = 0f;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
-        if(agent != null)
+        if (agent != null)
         {
             agent.speed = speed;
         }
     }
 
     void Update()
-    {      
+    {
         fov.DetectTargets(detectMask);
         CheckOnGround();
 
@@ -64,7 +47,7 @@ public class MinionAI : EnemyBase, IBegin
         {
             Attack();
         }
-        else if(CanMove())
+        else if (CanMove())
         {
             Move();
         }
@@ -82,71 +65,59 @@ public class MinionAI : EnemyBase, IBegin
         fov.viewRadius = 2;
     }
 
-    #region 둥지 생성
+    // =============================================================
+    // 둥지
+    // =============================================================
     private bool CanCreateNest()
     {
-        return isOnGround 
-            && !isNestCreated 
-            && Time.time >= nestCreationTime 
+        return isOnGround
+            && !isNestCreated
+            && Time.time >= nestCreationTime
             && nestCreationTime != -1f
             && !CanAttack();
     }
 
-    // 둥지 생성
     void CreateNest()
     {
         Instantiate(nestPrefab, transform.position, Quaternion.identity);
         isNestCreated = true;
     }
-    #endregion
 
-    #region 공격
+    // =============================================================
+    // 공격
+    // =============================================================
     private bool CanAttack()
     {
         return DetectAttackRange().Length > 0 && Time.time >= lastAttackTime + attackDelayTime; ;
     }
 
     void Attack()
-    {  
-        if(fov.visibleTargets.Count > 0)
+    {
+        if (fov.visibleTargets.Count > 0)
         {
-            // 공격 범위 안에 있는 콜라이더들 가지고 오기
             Collider[] detectColliders = DetectAttackRange();
-
-            // 디버깅용 코드
-            Debug.Log($"DetectAttackRange에서 {detectColliders.Length}개의 콜라이더 감지됨");
-            for (int i = 0; i < detectColliders.Length; i++)
-            {
-                Debug.Log($"[{i}] 이름: {detectColliders[i].gameObject.name}, 태그: {detectColliders[i].gameObject.tag}");
-            }
-            // 여기까지
 
             if (detectColliders.Length > 0)
             {
-                currentAttackTarget = FindClosestTarget(detectColliders);
+                currentAttackTarget = FindClosestTargetInAttackRange(detectColliders);
                 Debug.Log($"가까운 타겟 : {currentAttackTarget}");
 
                 if (currentAttackTarget != null)
                 {
-                    Debug.Log("가장 가까운 애 찾음");
                     agent.isStopped = true;
-                    Debug.Log("가장 가까운 애 찾음2");
                     transform.LookAt(currentAttackTarget.transform);
                     CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
                     Debug.Log($"currentAttackTarget : {currentAttackTarget.gameObject.name}");
                     if (targetBase != null)
                     {
-                        Debug.Log("가장 가까운 애 찾음4");
                         targetBase.TakeDamage(attackDamage);
                         lastAttackTime = Time.time;
                         Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
                         if (targetBase.IsDead == true)
                         {
                             SetMastTarget();
-                            agent.SetDestination(currentAttackTarget.transform.position);
-                            agent.isStopped = false;
                         }
-                        
+
                     }
                 }
             }
@@ -157,7 +128,7 @@ public class MinionAI : EnemyBase, IBegin
     /// 공격 범위 내에서 가장 가까운 적 찾기
     /// </summary>
     /// <returns></returns>
-    private GameObject FindClosestTarget(Collider[] detectColliders)
+    private GameObject FindClosestTargetInAttackRange(Collider[] detectColliders)
     {
         GameObject closestTarget = null;
         float closestDis = float.MaxValue;
@@ -174,9 +145,10 @@ public class MinionAI : EnemyBase, IBegin
 
         return closestTarget;
     }
-    #endregion
 
-    #region 이동
+    // =============================================================
+    // 이동
+    // =============================================================
     private bool CanMove()
     {
         return currentAttackTarget != null || fov.visibleTargets.Count > 0;
@@ -187,7 +159,7 @@ public class MinionAI : EnemyBase, IBegin
         Transform moveTarget = currentAttackTarget != null ? currentAttackTarget.transform : null;
         if (fov.visibleTargets.Count > 0)
         {
-            moveTarget = FindClosestTargetFromList(fov.visibleTargets);
+            moveTarget = FindClosestTargetInDetect(fov.visibleTargets);
         }
 
         if (moveTarget != null && agent != null)
@@ -203,7 +175,12 @@ public class MinionAI : EnemyBase, IBegin
         }
     }
 
-    private Transform FindClosestTargetFromList(List<Transform> targets)
+    /// <summary>
+    /// 가장 가까운 타겟을 찾음
+    /// </summary>
+    /// <param name="targets"></param>
+    /// <returns></returns>
+    private Transform FindClosestTargetInDetect(List<Transform> targets)
     {
         Transform closest = null;
         float closestDistance = float.MaxValue;
@@ -219,14 +196,16 @@ public class MinionAI : EnemyBase, IBegin
         }
         return closest;
     }
-    #endregion
 
-    // 배 플렛폼 위인지 검사
+    /// <summary>
+    /// 배 플렛폼 위인지 검사
+    /// </summary>
+    /// <returns></returns>
     private bool CheckOnGround()
     {
-        if(Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
+        if (Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
         {
-            if(!isOnGround)
+            if (!isOnGround)
             {
                 nestCool = Random.Range(5f, 15f);
                 nestCreationTime = Time.time + nestCool;
