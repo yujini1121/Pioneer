@@ -4293,14 +4293,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d40adedd46c17934aab8eab48e356701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 0
-  IsDead: 0
-  fov: {fileID: 0}
-  speed: 0
-  attackDamage: 0
-  attackRange: 0
-  attackDelayTime: 0
   playerTransform: {fileID: 0}
   attackHeight: 1
   attackDuration: 0.2
@@ -5389,14 +5381,12 @@ GameObject:
   - component: {fileID: 439075662}
   - component: {fileID: 439075661}
   - component: {fileID: 439075671}
-  - component: {fileID: 439075663}
   - component: {fileID: 439075669}
   - component: {fileID: 439075670}
   - component: {fileID: 439075673}
-  - component: {fileID: 439075672}
   m_Layer: 10
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5424,9 +5414,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 84
+  m_Constraints: 116
   m_CollisionDetection: 0
 --- !u!136 &439075662
 CapsuleCollider:
@@ -5451,30 +5441,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &439075663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 439075660}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15ec610ffeb4e9342913cd92c7cd6191, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 100
-  IsDead: 0
-  fov: {fileID: 0}
-  speed: 0
-  attackDamage: 0
-  attackRange: 0
-  attackDelayTime: 0
-  moveSpeed: 5
-  playerAttack: {fileID: 361639216}
-  playerAttackPower: 3
-  playerHP: 100
 --- !u!23 &439075665
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5534,7 +5500,7 @@ Transform:
   m_GameObject: {fileID: 439075660}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.9, y: 1, z: 11.36}
+  m_LocalPosition: {x: 8.01, y: 1, z: 11.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5594,7 +5560,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   viewRadius: 10
-  viewAngle: 45
+  viewAngle: 360
   visibleTargets: []
 --- !u!195 &439075671
 NavMeshAgent:
@@ -5605,7 +5571,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 439075660}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.2
+  m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -5618,25 +5584,6 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &439075672
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 439075660}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99b8aa1f5a92d7e47a7b106b605d4da5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 2
-  moveThreshold: 0.01
-  interactableRadius: 0
-  interactableLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  colliders: []
 --- !u!114 &439075673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12094,7 +12041,7 @@ PrefabInstance:
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 12.72
+      value: 9.72
       objectReference: {fileID: 0}
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
@@ -12104,7 +12051,7 @@ PrefabInstance:
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 12.06
+      value: 11.34
       objectReference: {fileID: 0}
     - target: {fileID: 5496079050750236138, guid: 2abf6462fd066914b84aed162c8e2dee,
         type: 3}

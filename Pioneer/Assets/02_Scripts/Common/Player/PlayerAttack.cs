@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
-public class PlayerAttack : CreatureBase, IBegin
+public class PlayerAttack : MonoBehaviour, IBegin
 {
     [HideInInspector]public Transform playerTransform;
 
