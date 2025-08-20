@@ -4,6 +4,11 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
+
+#warning TODO : CreateObject 수정이 필요
+// 현재 : 마우스 스냅 -> 건설 가능 여부 -> 이동 -> 배치
+// 필요 : 레시피에서 제작 여부 가능 -> 제작 버튼 눌림 -> 제작 UI 끄기 -> 건설 UI 전환 -> 마우스 스냅 -> 건설 가능 여부 -> 이동 -> 시간 소모 및 방해받지 않는지 항상 체크 -> 아이템 소모 -> 배치
+
 public class CreateObject : MonoBehaviour, IBegin
 {
     public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable , Ballista, Trap, Lantern }

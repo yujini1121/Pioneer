@@ -1,26 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+// 모든 게임 Ui는 여기서 해결합니다.
+// 세부적 조작은 해당 컴포넌트를 경유해서 세팅합니다.
 public class InGameUI : MonoBehaviour, IBegin
 {
     static public InGameUI instance;
 
+    [Header("서브 UI 게임오브젝트")]
+    public GameObject gameObjectBarChart;
+    public GameObject gameObjectGuiltyBarChart;
+    public GameObject gameObjectBuffEffect;
+    public GameObject gameObjectItemGet;
+    public GameObject gameObjectClock;
+    public GameObject gameObjectRepair;
     public GameObject defaultCraftUI;
+    public GameObject defaultCraftUiSubPivot;
     public GameObject makeshiftCraftUI;
+    public GameObject gameObjectStatus;
+    public GameObject gameObjectInventory;
     public GameObject ManuUI;
     public GameObject ManuDenyUI;
+    [Header("서브 UI 로직 클래스")]
+    public CraftUiMain mainCraft;
+    public MakeshiftCraftUiMain makeshiftCraft;
 
     public List<GameObject> currentOpenedUI = new List<GameObject>();
+    private List<GameObject> mainCraftSelectUi;
 
     //Coroutine coroutineDenyESC = null;
     float denyUiEndTime = 0.0f;
     float denyUiLifeTime = 2.0f;
+    bool isCraftButtonExist = false;
 
     private void Awake()
     {
         instance = this;
+        mainCraftSelectUi = new List<GameObject>();
+
     }
 
     // Start is called before the first frame update
@@ -50,7 +70,64 @@ public class InGameUI : MonoBehaviour, IBegin
     public void ShowDefaultCraftUI()
     {
         Clear();
-    
+        // 여기서 세팅
+        
+        if (isCraftButtonExist == false)
+        {
+            isCraftButtonExist = true;
+            for (int index = 0; index < ItemCategoryManager.Instance.categories.Count; ++index)
+            {
+                ArgumentGeometry geometryCategoryButton = new ArgumentGeometry()
+                {
+                    parent = defaultCraftUiSubPivot,
+                    index = index,
+                    rowCount = 1,
+                    delta2D = new Vector2(0, -100),
+                    start2D = new Vector2(0, 0),
+                    size = new Vector2(100, 100)
+                };
+                ArgumentGeometry geometryCraftSelectCategory = new ArgumentGeometry()
+                {
+                    parent = defaultCraftUI,
+                    index = 0,
+                    rowCount = 1,
+                    delta2D = new Vector2(0, 100),
+                    start2D = new Vector2(-600, 300)
+                };
+                ArgumentGeometry geometryItemSelectButton = new ArgumentGeometry()
+                {
+                    parent = defaultCraftUI,
+                    index = -1,
+                    rowCount = 1,
+                    delta2D = new Vector2(0, -100),
+                    start2D = new Vector2(-600, 225),
+                };
+
+                Debug.Assert(defaultCraftUiSubPivot != null);
+                Debug.Assert(ItemCategoryManager.Instance != null);
+                Debug.Assert(ItemCategoryManager.Instance.categories != null);
+                Debug.Assert(ItemCategoryManager.Instance.categories[index] != null);
+                Debug.Assert(mainCraft != null);
+                Debug.Assert(mainCraft.ui != null);
+                Debug.Assert(geometryCategoryButton != null);
+                Debug.Assert(geometryItemSelectButton != null);
+                CommonUI.instance.ShowCategoryButton(
+                    defaultCraftUiSubPivot,
+                    ItemCategoryManager.Instance.categories[index],
+                    mainCraft.ui,
+                    geometryCategoryButton,
+                    geometryCraftSelectCategory,
+                    geometryItemSelectButton,
+                    mainCraftSelectUi);
+            }
+
+
+
+
+            //CommonUI.instance.ShowCategoryButton(defaultCraftUI, );
+
+        }
+
         Show(defaultCraftUI);
     }
 
