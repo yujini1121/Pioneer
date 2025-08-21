@@ -41,6 +41,7 @@ public class StructureBase : CommonBase
     public virtual void UnUse()
     {
         // 사용 해제했을 때 로직
+
         isUsing = false;
     }
     #endregion

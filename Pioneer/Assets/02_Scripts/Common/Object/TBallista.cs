@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class TBallista : StructureBase
 {
@@ -7,10 +8,14 @@ public class TBallista : StructureBase
     [SerializeField] private Collider[] enemyColliders;
     [SerializeField] private Transform closestTarget;
     [SerializeField] private float turnSpeed;
+    [SerializeField] private GameObject bolt;
+    [SerializeField] private GameObject boltFirePoint;
+    [SerializeField] private GameObject controlPoint;
 
     [SerializeField] private float attackRange;
     [SerializeField] private float attackSpeed;
-    [SerializeField] private float attackCooltime;
+    [SerializeField] private float attackCooldown;
+    [SerializeField] private float curCooldown = 0f;
 
     [SerializeField] private Transform nearest;
 
@@ -60,7 +65,7 @@ public class TBallista : StructureBase
             }
         }
 
-        //Debug.Log(nearest.gameObject.name);
+        //Debug.Log(nearest.name);
     }
 
     private void LookAt()
@@ -68,19 +73,34 @@ public class TBallista : StructureBase
         // 가장 가까운 적을 바라보게 하는 로직 
 
         if (nearest == null) return;
-        Debug.Log(nearest.name);
+
+        Vector3 dir = (nearest.position - transform.position).normalized;
+        Quaternion targetDir = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetDir, turnSpeed * Time.deltaTime);
     }
     
     private void Fire()
     {
         // 화살 오브젝트 생성 및 발사하는 로직
+
+        if (nearest == null) return;
+
+        if (curCooldown > 0f) { curCooldown -= Time.deltaTime; return; }
+
+        curCooldown = attackCooldown;
+
+        //bolt = GetArrowFromPool();
+        //bolt.transform.position = firePoint.position;
+
     }
 
     void OnDrawGizmos()
     {
+        // 감지 범위 및 공격 범위 표시
         Handles.color = Color.white;
         Handles.DrawWireDisc(transform.position, Vector3.up, attackRange);
 
+        // 감지된 적 표시
         foreach (var collider in enemyColliders)
         {
             if (collider == null) continue;
@@ -89,6 +109,5 @@ public class TBallista : StructureBase
             Vector3 center = collider.transform.position;
             Gizmos.DrawSphere(center, 0.5f);
         }
-
     }
 }
