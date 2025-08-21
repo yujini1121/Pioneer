@@ -2,13 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+/* ================================================
+0821 수정하면 좋은 사항
+- 물리 연산 최적화 => DetectAttackRange() 같은 물리 연산을 Update 초반에 한 번 호출하고 변수에 저장하여 재활용
+- 타겟팅 로직 수정 => 공격을 받을 시 공격한 적을 타겟으로 삼아도 현재 시야에 더 가까운 적으로 타겟을 바꿔버리는 문제가 있음,
+                    현재 currentAttackTarget이 살아있는지 확인 후 살아있으면 유지 없거나 죽었을 때 시야 내에서 새로운 타겟을 찾도록 로직 변경
+                    -> 그러나 이렇게 변경하면 돛대가 타겟일때가 이상해짐 
+- 매직 넘버 최대한 제거
+- CreateNest에 CanAttack  말고 공격할 적이 있는지 여부만 확인, 있으면 공격 중인거고 아니면 공격중이 아니니까
+================================================ */
+
 public class MinionAI : EnemyBase, IBegin
 {
     [Header("둥지 프리팹")]
     [SerializeField] private GameObject nestPrefab;
 
-    [Header("배 바닥 레이어")]
-    [SerializeField] private LayerMask groundLayer;
+
 
     // 네브 메시 
     private NavMeshAgent agent;
@@ -18,8 +27,7 @@ public class MinionAI : EnemyBase, IBegin
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
 
-    // 바닥 확인 변수
-    private bool isOnGround = false;
+
 
     // 공격 관련 변수
     private float lastAttackTime = 0f;
@@ -31,13 +39,16 @@ public class MinionAI : EnemyBase, IBegin
         if (agent != null)
         {
             agent.speed = speed;
+            agent.stoppingDistance = 0.8f;
         }
     }
 
     void Update()
     {
         fov.DetectTargets(detectMask);
-        CheckOnGround();
+
+        if (!CheckOnGround())
+            return;
 
         if (CanCreateNest())
         {
@@ -51,6 +62,7 @@ public class MinionAI : EnemyBase, IBegin
         {
             Move();
         }
+
     }
 
     protected override void SetAttribute()
@@ -110,7 +122,7 @@ public class MinionAI : EnemyBase, IBegin
                     Debug.Log($"currentAttackTarget : {currentAttackTarget.gameObject.name}");
                     if (targetBase != null)
                     {
-                        targetBase.TakeDamage(attackDamage);
+                        targetBase.TakeDamage(attackDamage, this.gameObject);
                         lastAttackTime = Time.time;
                         Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
                         if (targetBase.IsDead == true)
@@ -160,6 +172,11 @@ public class MinionAI : EnemyBase, IBegin
         if (fov.visibleTargets.Count > 0)
         {
             moveTarget = FindClosestTargetInDetect(fov.visibleTargets);
+            currentAttackTarget = moveTarget.gameObject;
+        }
+        else
+        {
+            SetMastTarget();
         }
 
         if (moveTarget != null && agent != null)
@@ -201,7 +218,7 @@ public class MinionAI : EnemyBase, IBegin
     /// 배 플렛폼 위인지 검사
     /// </summary>
     /// <returns></returns>
-    private bool CheckOnGround()
+    protected override bool CheckOnGround()
     {
         if (Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
         {
@@ -218,5 +235,16 @@ public class MinionAI : EnemyBase, IBegin
         }
 
         return isOnGround;
+    }
+
+    public override void TakeDamage(int damage, GameObject attacker)
+    {
+        base.TakeDamage(damage, attacker);
+
+        if (attacker != null && !IsDead)
+        {
+            currentAttackTarget = attacker;
+            Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
+        }
     }
 }

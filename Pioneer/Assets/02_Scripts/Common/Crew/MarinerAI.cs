@@ -255,7 +255,7 @@ public class MarinerAI : MarinerBase, IBegin
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
-                targetBase.TakeDamage(attackDamage);
+                targetBase.TakeDamage(attackDamage, this.gameObject);
                 Debug.Log($"승무원이 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
             }
         }

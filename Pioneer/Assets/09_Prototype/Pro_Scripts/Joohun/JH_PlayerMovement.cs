@@ -107,12 +107,12 @@ public class JH_PlayerMovement : MonoBehaviour
             if (hit.collider.TryGetComponent(out MinionAI minion))
             {
                 Debug.LogError("[공격] MinionAI에게 데미지 10 부여");
-                minion.TakeDamage(10);
+                minion.TakeDamage(10, this.gameObject);
             }
             else if (hit.collider.TryGetComponent(out ZombieMarinerAI zombie))
             {
                 Debug.LogError("[공격] ZombieMarinerAI에게 데미지 10 부여");
-                zombie.TakeDamage(10);
+                zombie.TakeDamage(10, this.gameObject);
             }
             else
             {

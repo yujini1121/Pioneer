@@ -7,7 +7,15 @@ public class EnemyBase : CreatureBase, IBegin
     // public GameObject targetObject;
     public GameObject currentAttackTarget;
     protected float detectionRange;
+
+    [Header("감지할 적 레이어")]
     [SerializeField] protected LayerMask detectMask;
+
+    [Header("배 바닥 레이어")]
+    [SerializeField] protected LayerMask groundLayer;
+
+    // 바닥 확인 변수
+    protected bool isOnGround = false;
 
     // 공격 박스 중심 오프셋 조정
     [SerializeField] private Vector3 attackBoxCenterOffset;
@@ -44,6 +52,26 @@ public class EnemyBase : CreatureBase, IBegin
         return Physics.OverlapBox(boxCenter, halfBoxSize, transform.rotation, detectMask);
     }
 
+    /// <summary>
+    /// 배 플렛폼 위인지 검사
+    /// </summary>
+    /// <returns></returns>
+    protected virtual bool CheckOnGround()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
+        {
+            if (!isOnGround)
+            {
+                isOnGround = true;
+            }
+        }
+        else
+        {
+            isOnGround = false;
+        }
+
+        return isOnGround;
+    }
 
     //================
     private void OnDrawGizmosSelected()
