@@ -26,13 +26,13 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void InitZombieStats()
     {
-        maxHp = 40;  // 좀비 HP
+        maxHp = 40; 
         speed = 2f;
         attackDamage = 6;
         attackRange = 4f;
         attackDelayTime = 1f;
 
-        chaseRange = 10f;  // 더 넓은 추격 범위
+        chaseRange = 10f; 
 
         fov = GetComponent<FOVController>();
     }
