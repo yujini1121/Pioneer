@@ -33,13 +33,7 @@ public class MarinerAI : MarinerBase, IBegin
         SetRandomDirection();
         stateTimer = moveDuration;
 
-        if (fov != null)
-        {
-            fov.Start();
-        }
-
-        Debug.Log($"Mariner {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}, 공격범위: {attackRange}");
-
+        fov.Start();
         base.Start();
     }
 
@@ -54,13 +48,13 @@ public class MarinerAI : MarinerBase, IBegin
         }
 
         bool currentDaytimeState = GameManager.Instance.IsDaytime;
-        
+
         if (!hasInitializedDaytimeState)
         {
             lastDaytimeState = currentDaytimeState;
             hasInitializedDaytimeState = true;
         }
-        
+
         if (currentDaytimeState != lastDaytimeState)
         {
             OnTimeStateChanged(currentDaytimeState);
@@ -77,18 +71,15 @@ public class MarinerAI : MarinerBase, IBegin
         }
     }
 
-    // 시간대 변화 처리 (새로운 메서드)
     private void OnTimeStateChanged(bool isDaytime)
     {
         if (isDaytime)
         {
-            Debug.Log($"승무원 {marinerId}: 낮으로 전환");
             CleanupNightCombat();
             TransitionToDaytime();
         }
         else
         {
-            Debug.Log($"승무원 {marinerId}: 밤으로 전환");
             TransitionToNight();
         }
     }
@@ -100,12 +91,10 @@ public class MarinerAI : MarinerBase, IBegin
             StopCoroutine(attackRoutine);
             attackRoutine = null;
             isShowingAttackBox = false;
-            Debug.Log($"승무원 {marinerId}: 낮 전환으로 공격 루틴 중단");
         }
 
         if (isChasing)
         {
-            Debug.Log($"승무원 {marinerId}: 낮 전환으로 추격 모드 해제");
             isChasing = false;
             target = null;
 
@@ -119,8 +108,9 @@ public class MarinerAI : MarinerBase, IBegin
     private void TransitionToDaytime()
     {
         isSecondPriorityStarted = false;
-        isRepairing = false;
-        
+
+        CancelCurrentRepair();
+
         Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 전환");
         StartRepair();
     }
@@ -129,9 +119,10 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (isRepairing || isSecondPriorityStarted)
         {
-            isRepairing = false;
+            CancelCurrentRepair();
+
             isSecondPriorityStarted = false;
-            
+
             if (agent != null && agent.isOnNavMesh)
             {
                 agent.ResetPath();
@@ -141,9 +132,81 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void HandleDaytimeBehavior()
     {
-        if (!isRepairing && !isSecondPriorityStarted)
+        if (IsDead) return;
+
+        ValidateCurrentTarget();
+
+        if (target == null)
         {
-            StartRepair(); 
+            TryFindNewTarget();
+        }
+
+        if (target != null)
+        {
+            if (isRepairing)
+            {
+                Debug.Log($"승무원 {marinerId}: 적 발견으로 수리 완전 취소");
+                CancelCurrentRepair();
+            }
+
+            if (isSecondPriorityStarted)
+            {
+                Debug.Log($"승무원 {marinerId}: 적 발견으로 2순위 작업 중단");
+                CancelSecondPriorityAction();
+            }
+
+            attackCooldown -= Time.deltaTime;
+
+            if (isChasing && target != null)
+            {
+                HandleChasing();
+            }
+            else if (target != null)
+            {
+                EnterChasingState();
+            }
+        }
+        else
+        {
+            if (!isRepairing && !isSecondPriorityStarted)
+            {
+                StartRepair();
+            }
+        }
+    }
+
+    private void CancelCurrentRepair()
+    {
+        if (isRepairing)
+        {
+            isRepairing = false;
+            StopAllCoroutines();
+
+            if (targetRepairObject != null)
+            {
+                MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
+                targetRepairObject = null;
+            }
+
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
+            Debug.Log($"승무원 {marinerId}: 수리 취소");
+        }
+    }
+
+    private void CancelSecondPriorityAction()
+    {
+        if (isSecondPriorityStarted)
+        {
+            isSecondPriorityStarted = false;
+
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
+            Debug.Log($"승무원 {marinerId}: 2순위 작업 취소");
         }
     }
 
@@ -198,7 +261,16 @@ public class MarinerAI : MarinerBase, IBegin
         {
             attackRoutine = null;
             isChasing = false;
-            EnterWanderingState();
+
+            if (GameManager.Instance.IsDaytime)
+            {
+                Debug.Log($"승무원 {marinerId}: 타겟 없음, 수리 재개");
+                StartRepair();
+            }
+            else
+            {
+                EnterWanderingState();
+            }
             yield break;
         }
 
@@ -231,13 +303,31 @@ public class MarinerAI : MarinerBase, IBegin
             {
                 target = null;
                 isChasing = false;
-                EnterWanderingState();
+
+                if (GameManager.Instance.IsDaytime)
+                {
+                    Debug.Log($"승무원 {marinerId}: 적 제거 완료, 수리 재개");
+                    StartRepair();
+                }
+                else
+                {
+                    EnterWanderingState();
+                }
             }
         }
         else
         {
             isChasing = false;
-            EnterWanderingState();
+
+            if (GameManager.Instance.IsDaytime)
+            {
+                Debug.Log($"승무원 {marinerId}: 전투 종료, 수리 재개");
+                StartRepair();
+            }
+            else
+            {
+                EnterWanderingState();
+            }
         }
 
         attackRoutine = null;
@@ -266,8 +356,7 @@ public class MarinerAI : MarinerBase, IBegin
         Debug.Log("일반 승무원 2순위 낮 행동 시작");
 
         GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
-
-        int chosenIndex = (marinerId - 1) % spawnPoints.Length; //(임시) 스포너 개수보다 승무원이 많을 경우 대비
+        int chosenIndex = (marinerId - 1) % spawnPoints.Length;
 
         Debug.Log($"승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
 
@@ -276,13 +365,23 @@ public class MarinerAI : MarinerBase, IBegin
 
         while (!IsArrived())
         {
+            if (!isSecondPriorityStarted)
+            {
+                Debug.Log($"승무원 {marinerId}: 이동 중 작업 취소로 2순위 행동 중단");
+                yield break;
+            }
             yield return null;
         }
 
-        // NavMesh 경로 초기화
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
+        }
+
+        if (!isSecondPriorityStarted)
+        {
+            Debug.Log($"승무원 {marinerId}: 작업 취소로 2순위 행동 중단");
+            yield break;
         }
 
         if (GameManager.Instance.TimeUntilNight() <= 30f)
@@ -292,13 +391,34 @@ public class MarinerAI : MarinerBase, IBegin
             yield break;
         }
 
-        Debug.Log($"승무원 {marinerId}: 10초 동안 자원 수집");
-        yield return new WaitForSeconds(10f);
+        Debug.Log($"승무원 {marinerId}: 10초 동안 자원 수집 시작");
+
+        float collectTime = 0f;
+        float totalCollectTime = 10f;
+
+        while (collectTime < totalCollectTime)
+        {
+            if (!isSecondPriorityStarted)
+            {
+                Debug.Log($"승무원 {marinerId}: 자원 수집 중 작업 취소로 2순위 행동 중단");
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1f); 
+            collectTime += 1f;
+        }
+
+        if (!isSecondPriorityStarted)
+        {
+            Debug.Log($"승무원 {marinerId}: 자원 수집 완료 후 작업 취소로 2순위 행동 중단");
+            yield break;
+        }
 
         GameManager.Instance.CollectResource("wood"); // 자원 수집
+        Debug.Log($"승무원 {marinerId}: 자원 수집 완료");
 
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
-        if (needRepairList.Count > 0)// 수리대상 확인
+        if (needRepairList.Count > 0)
         {
             Debug.Log($"승무원 {marinerId}: 수리 대상 발견으로 1순위 행동 실행");
             isSecondPriorityStarted = false;
