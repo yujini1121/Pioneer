@@ -303,7 +303,7 @@ public class MarinerBase : CreatureBase
     // ===== 기존 수리 관련 함수들 =====
     protected virtual void StartRepair()
     {
-        //Debug.Log($"승무원 {GetMarinerId()}: StartRepair() 호출됨");
+        Debug.Log($"승무원 {GetMarinerId()}: StartRepair() 호출됨");
 
         MarinerManager.Instance.UpdateRepairTargets();
 
