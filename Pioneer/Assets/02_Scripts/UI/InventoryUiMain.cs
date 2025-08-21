@@ -62,6 +62,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void ClickSlot(int index)
     {
+        if (CommonUI.instance.IsCurrentCrafting)
+        {
+            CommonUI.instance.StopCraft(InGameUI.instance.currentFabricationUi);
+        }
+
+
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
             InventoryManager.Instance.MouseSplit(index);

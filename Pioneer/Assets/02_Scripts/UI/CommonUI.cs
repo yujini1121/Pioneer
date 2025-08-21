@@ -20,7 +20,26 @@ public class CommonUI : MonoBehaviour, IBegin
     [SerializeField] GameObject prefabCraftSelectItemButton;
     [SerializeField] GameObject prefabItemCategoryButton;
     [SerializeField] Sprite imageEmpty;
+    [SerializeField] bool isDebugging;
     Coroutine currentCraftCoroutine;
+    SItemRecipeSO currentRecipe;
+
+    bool m_sCurrentCrafting = false;
+    public bool IsCurrentCrafting
+    {
+        get
+        {
+            return m_sCurrentCrafting;
+        }
+        private set
+        {
+            if (isDebugging)
+            {
+                Debug.Log($">> CommonUI.IsCurrentCrafting.set : m_sCurrentCrafting : {m_sCurrentCrafting} -> {value}");
+            }
+            m_sCurrentCrafting = value;
+        }
+    }
 
     // 솔직히 말하면 아이템을 선택했을때 조합할 수 있는지 아닌지를 가져오는것은 똑같다고 봄
     // - 제작할 수 있는가? -> 아이템 레시피 매니저
@@ -33,6 +52,7 @@ public class CommonUI : MonoBehaviour, IBegin
     // GameObject[] outsideGameObjectCraftButtonsWithImage : 이미지를 가지고 있는 게임오브젝트의 목록이며, 해당 게임오브젝트는 아이템을 만들 수 있는지 아닌지 여부를 보여주기 위함입니다. 못 만들면 반투명하게 해야 하거든요
     public void UpdateCraftWindowUi(DefaultFabrication ui, SItemRecipeSO recipe, InventoryBase inventory, GameObject[] outsideGameObjectCraftButtonsWithImage)
     {
+        currentRecipe = recipe;
         SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
         ui.craftName.text = recipeResultType.typeName;
         ui.craftLore.text = recipeResultType.infomation;
@@ -76,6 +96,7 @@ public class CommonUI : MonoBehaviour, IBegin
 
         // 제작 시간 표시
         ui.timeLeft.text = $"{recipe.time}s";
+        ui.craftButtonWord.text = DefaultFabrication.CraftStart;
 
         // 크래프트 버튼 로직 배치
         ui.craftButton.onClick.RemoveAllListeners();
@@ -89,9 +110,14 @@ public class CommonUI : MonoBehaviour, IBegin
 
             // 제작 시간 타임 보여줌 + 제작 완료 시 또 제작할 수 있는지 업데이트
             // 다만 건설 아이템인경우 다른 로직이 쓰임
-
+            // Debug.Log($">> CommonUI.UpdateCraftWindowUi(DefaultFabrication ui, SItemRecipeSO recipe, InventoryBase inventory, GameObject[] outsideGameObjectCraftButtonsWithImage) : IsCurrentCrafting = {IsCurrentCrafting}");
+            if (IsCurrentCrafting)
+            {
+                StopCraft(ui);
+                ui.timeLeft.text = $"{recipe.time}s";
+            }
             // 아이템 조합인 경우
-            if (recipe.isBuilding == false)
+            else if (recipe.isBuilding == false)
             {
                 currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, outsideGameObjectCraftButtonsWithImage, ui));
             }
@@ -189,7 +215,7 @@ public class CommonUI : MonoBehaviour, IBegin
                 m_oneUi.button.onClick.AddListener(() =>
                 {
                     ui.gameObject.SetActive(true);
-                    UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { categoryButtonObject });
+                    UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { m_one });
                 });
             }
 
@@ -198,24 +224,17 @@ public class CommonUI : MonoBehaviour, IBegin
     }
 
     // 간이 제작 UI
-
-
-
-
-
-    // 아이템 버튼
-
     public Button ShowItemButton(GameObject parent, SItemRecipeSO recipe, DefaultFabrication ui,
         int index, int rowCount, Vector2 delta, Vector2 start, Vector2 size)
     {
         SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
-        
+
         // 버튼 배치
         GameObject itemButtonGameObject = Instantiate(instance.prefabItemButton, parent.transform);
         RectTransform rectTransform = itemButtonGameObject.GetComponent<RectTransform>();
         rectTransform.sizeDelta = size;
         SetPosition(itemButtonGameObject, parent, index, rowCount, delta, start);
-        
+
         // 버튼 가용성 표시
         mSetButtonAvailable(itemButtonGameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
 
@@ -231,77 +250,18 @@ public class CommonUI : MonoBehaviour, IBegin
 
         itemButton.onClick.AddListener(() => // 버튼 클릭 시
         {
-            // 결과 보여주는 로직
-            ui.craftName.text = recipeResultType.typeName;
-            ui.craftLore.text = recipeResultType.infomation;
-
-            for (int rIndex = 0; rIndex < 3; rIndex++)
-            {
-                ui.materialPivots[rIndex].SetActive(false);
-                //ui.materialEachText[rIndex].text = "";
-                ui.materialEachText[rIndex].enabled = false;
-                //ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
-                ui.materialIconImage[rIndex].enabled = false;
-            }
-
-            Vector3 mPositionPivot = Vector3.zero;
-            switch (recipe.input.Length)
-            {
-                case 1: mPositionPivot = new Vector3(0, 100, 0); break;
-                case 2: mPositionPivot = new Vector3(-112.5f, 100, 0); break;
-                case 3: mPositionPivot = new Vector3(-225f, 100, 0); break;
-                default: break;
-            }
-            Vector3 delta = new Vector3(225, 0, 0);
-            for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
-            {
-                ui.materialPivots[rIndex].SetActive(true);
-                ui.materialPivots[rIndex].GetComponent<RectTransform>().anchoredPosition
-                    = mPositionPivot + rIndex * delta;
-
-                ui.materialEachText[rIndex].enabled = true;
-                ui.materialIconImage[rIndex].enabled = true;
-
-                int need = recipe.input[rIndex].amount;
-                int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
-
-                ui.materialEachText[rIndex].text = $"{has}/{need}";
-                ui.materialIconImage[rIndex].sprite = ItemTypeManager.Instance.itemTypeSearch[recipe.input[rIndex].id].image;
-            }
-
-            mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
-
-            // 제작 시간 표시
-            ui.timeLeft.text = $"{recipe.time}s";
-
-            // 크래프트 버튼 로직 배치
-            ui.craftButton.onClick.RemoveAllListeners();
-            ui.craftButton.onClick.AddListener(() =>
-            {
-                if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
-                if (currentCraftCoroutine != null)
-                {
-                    StopCoroutine(currentCraftCoroutine);
-                }
-                //InventoryManager.Instance.Add(recipe.result);
-                //InventoryManager.Instance.Remove(recipe.input);
-
-                //for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
-                //{
-                //    int need = recipe.input[rIndex].amount;
-                //    int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
-
-                //    ui.materialEachText[rIndex].text = $"{has}/{need}";
-                //}
-
-                //mSetButtonAvailable(itemButtonGameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
-                //mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
-
-                currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, new GameObject[] { itemButtonGameObject }, ui));
-            });
+            ui.gameObject.SetActive(true);
+            UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { itemButtonGameObject });
         });
         return itemButton;
     }
+
+
+
+
+    // 아이템 버튼
+
+
 
 
 
@@ -353,8 +313,9 @@ public class CommonUI : MonoBehaviour, IBegin
     {
         // 입력 시간만큼 진행
         // 성공시 리턴
-
+        IsCurrentCrafting = true;
         float leftTime = recipe.time;
+        ui.craftButtonWord.text = DefaultFabrication.CraftEnd;
 
         while (leftTime > 0.0f)
         {
@@ -364,7 +325,9 @@ public class CommonUI : MonoBehaviour, IBegin
         }
         Craft(recipe, itemButtonGameObject, ui);
         ui.timeLeft.text = $"제작 완료";
+        ui.craftButtonWord.text = DefaultFabrication.CraftStart;
         InventoryUiMain.instance.IconRefresh();
+        IsCurrentCrafting = false;
     }
 
     public void Craft(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)
@@ -385,5 +348,20 @@ public class CommonUI : MonoBehaviour, IBegin
             mSetButtonAvailable(itemButtonGameObject[buttonIndex].GetComponent<UnityEngine.UI.Image>(), recipe);
         }
         mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
+    }
+
+    public void StopCraft(DefaultFabrication ui)
+    {
+        StopCoroutine(currentCraftCoroutine);
+        currentCraftCoroutine = null;
+        IsCurrentCrafting = false;
+        ui.craftButtonWord.text = DefaultFabrication.CraftStart;
+        ui.timeLeft.text = $"{currentRecipe.time}s";
+    }
+
+    public void CloseTab(DefaultFabrication ui)
+    {
+        if(IsCurrentCrafting) StopCraft(ui);
+        ui.gameObject.SetActive(false);
     }
 }
