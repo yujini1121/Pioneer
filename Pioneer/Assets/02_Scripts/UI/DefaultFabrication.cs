@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class DefaultFabrication : MonoBehaviour
 {
+    public const string CraftStart = "제작 시작";
+    public const string CraftEnd = "제작 중단";
+
     [Header("UI")]
     public GameObject pivotMaterial1;
     public GameObject pivotMaterial2;
@@ -18,7 +21,9 @@ public class DefaultFabrication : MonoBehaviour
     public TextMeshProUGUI material3eaText;
     public TextMeshProUGUI craftLore;
     public TextMeshProUGUI timeLeft;
+    public TextMeshProUGUI craftButtonWord;
     public UnityEngine.UI.Button craftButton;
+    public UnityEngine.UI.Button closeTabButton;
 
     public UnityEngine.UI.Image[] materialIconImage => new UnityEngine.UI.Image[]
     {
@@ -38,4 +43,8 @@ public class DefaultFabrication : MonoBehaviour
         pivotMaterial2,
         pivotMaterial3
     };
+    private void Start()
+    {
+        closeTabButton.onClick.AddListener(() => CommonUI.instance.CloseTab(this));
+    }
 }

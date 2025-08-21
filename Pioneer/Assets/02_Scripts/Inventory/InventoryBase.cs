@@ -46,7 +46,7 @@ public class InventoryBase : MonoBehaviour
             if (itemLists[inventoryIndex] == null)
             {
                 if (firstEmpty == -1) firstEmpty = inventoryIndex;
-                continue;
+                continue; // 다음 칸에 같은 아이템이 있을 수 있어서 break을 하지 않음.
             }
 
             if (itemLists[inventoryIndex].id == itemStack.id)
@@ -62,6 +62,7 @@ public class InventoryBase : MonoBehaviour
             return true;
         }
 
+        Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count}");
         return false;
     }
 

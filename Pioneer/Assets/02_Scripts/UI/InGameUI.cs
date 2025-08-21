@@ -27,6 +27,7 @@ public class InGameUI : MonoBehaviour, IBegin
     [Header("서브 UI 로직 클래스")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
+    public DefaultFabrication currentFabricationUi;
 
     public List<GameObject> currentOpenedUI = new List<GameObject>();
     private List<GameObject> mainCraftSelectUi;
@@ -69,9 +70,10 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void ShowDefaultCraftUI()
     {
+        CommonUI.instance.CloseTab(mainCraft.ui);
         Clear();
         // 여기서 세팅
-        
+
         if (isCraftButtonExist == false)
         {
             isCraftButtonExist = true;
@@ -129,13 +131,16 @@ public class InGameUI : MonoBehaviour, IBegin
         }
 
         Show(defaultCraftUI);
+        currentFabricationUi = mainCraft.ui;
     }
 
     public void CloseDefaultCraftUI()
     {
+        CommonUI.instance.CloseTab(makeshiftCraft.ui);
         Clear();
         Show(makeshiftCraftUI);
         InventoryUiMain.instance.IconRefresh();
+        currentFabricationUi = makeshiftCraft.ui;
     }
 
     public void Show(GameObject UiGo)
