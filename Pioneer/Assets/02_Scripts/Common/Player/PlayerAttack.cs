@@ -48,7 +48,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
             if (enemy != null)
             {
                 int damage = 10; // 예시로 데미지 값을 설정
-                enemy.TakeDamage(damage); // 적에게 데미지 전달
+                enemy.TakeDamage(damage, this.gameObject); // 적에게 데미지 전달
 
                 //if (enemy.hp <= 0)
                 //    enemy.Die();

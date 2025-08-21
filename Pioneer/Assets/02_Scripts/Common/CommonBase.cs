@@ -8,6 +8,7 @@ public class CommonBase : MonoBehaviour, IBegin
     public int hp;
     public int maxHp;
     public bool IsDead = false;
+    public GameObject attacker = null;
 
     public int CurrentHp => hp;
 
@@ -29,12 +30,14 @@ public class CommonBase : MonoBehaviour, IBegin
     }
 
     // 데미지 받는 함수
-    public virtual void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage, GameObject attacker)
     {
         if (IsDead) return;
 
         hp -= damage;
         Debug.Log($"데미지 {damage} 받음. 현재 HP: {hp}");
+
+        this.attacker = attacker;
 
         if (hp <= 0)
         {
