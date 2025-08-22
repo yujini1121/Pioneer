@@ -7,8 +7,9 @@ using UnityEngine;
 public class SItemRecipeSO : ScriptableObject
 {
     public SItemStack result;
+    public SInstallableObjectDataSO resultBuildingOrNull;
+
     public SItemStack[] input;
     public bool isMakeshift;
-    public bool isBuilding;
     public float time;
 }

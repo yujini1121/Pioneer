@@ -26,6 +26,8 @@ public class CreateObject : MonoBehaviour, IBegin
         public GameObject lantern;
     }
 
+    public static CreateObject instance;
+
     [Header("기본 설정")]
     [SerializeField] private Transform worldSpaceParent;
     private Transform playerTrans;
@@ -52,6 +54,9 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Awake()
     {
+        Debug.Log($">> CreateObject : {gameObject.name}");
+        instance = this;
+
         mainCamera = Camera.main;
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
@@ -409,6 +414,9 @@ public class CreateObject : MonoBehaviour, IBegin
         float dist = Vector3.Distance(playerAgent.transform.position, tempObj.transform.position);
         if (dist < 2.0f)
         {
+            // 여기서 시간을 소모한 뒤 물건을 빼앗아야 함.
+
+
             tempObj.GetComponent<Collider>().isTrigger = false;
             tempObj.GetComponent<Renderer>().material.color = Color.white;
 

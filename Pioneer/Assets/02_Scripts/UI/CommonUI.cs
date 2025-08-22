@@ -116,8 +116,7 @@ public class CommonUI : MonoBehaviour, IBegin
                 StopCraft(ui);
                 ui.timeLeft.text = $"{recipe.time}s";
             }
-            // 아이템 조합인 경우
-            else if (recipe.isBuilding == false)
+            else if (recipe.resultBuildingOrNull == null)
             {
                 currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, outsideGameObjectCraftButtonsWithImage, ui));
             }
@@ -128,6 +127,9 @@ public class CommonUI : MonoBehaviour, IBegin
                 // 헤당 위치로 이동
                 // 시간 소모
                 // 방해 없으면 계속 개발
+
+                // 여기서 건축물 선택
+                CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull);
 
 
             }
