@@ -221,28 +221,6 @@ public class MinionAI : EnemyBase, IBegin
         return closest;
     }
 
-    /// <summary>
-    /// 공격 범위 내에서 가장 가까운 적 찾기
-    /// </summary>
-    /// <returns></returns>
-    private GameObject FindClosestTargetInAttackRange(Collider[] detectColliders)
-    {
-        GameObject closestTarget = null;
-        float closestDis = float.MaxValue;
-
-        foreach (var target in detectColliders)
-        {
-            float dis = Vector3.Distance(transform.position, target.transform.position);
-            if (dis < closestDis)
-            {
-                closestDis = dis;
-                closestTarget = target.gameObject;
-            }
-        }
-
-        return closestTarget;
-    }
-
     private bool IsTargetInColliders(GameObject target, Collider[] colliders)
     {
         foreach (var col in colliders)
