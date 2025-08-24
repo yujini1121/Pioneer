@@ -17,8 +17,6 @@ public class MinionAI : EnemyBase, IBegin
     [Header("둥지 프리팹")]
     [SerializeField] private GameObject nestPrefab;
 
-
-
     // 네브 메시 
     private NavMeshAgent agent;
 
@@ -27,10 +25,13 @@ public class MinionAI : EnemyBase, IBegin
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
 
-
-
     // 공격 관련 변수
     private float lastAttackTime = 0f;
+
+    // 타겟 변수들
+    private GameObject mastTarget;  // 기본 목표 (돛대)
+    private GameObject revengeTarget;   // 나를 공격한 적
+    // 최종 목표 : currentAttackTarget
 
     void Start()
     {
@@ -45,16 +46,22 @@ public class MinionAI : EnemyBase, IBegin
 
     void Update()
     {
-        fov.DetectTargets(detectMask);
-
         if (!CheckOnGround())
             return;
 
-        if (CanCreateNest())
+        fov.DetectTargets(detectMask);
+
+        // 공격할 타겟 설정
+        UpdateTarget();
+
+        Collider[] targetsInAttackRange = DetectAttackRange();
+        bool isTargetInAttackRange = currentAttackTarget != null && IsTargetInColliders(currentAttackTarget, targetsInAttackRange);
+
+        if (CanCreateNest(isTargetInAttackRange))
         {
             CreateNest();
         }
-        else if (CanAttack())
+        else if (CanAttack(isTargetInAttackRange))
         {
             Attack();
         }
@@ -62,7 +69,17 @@ public class MinionAI : EnemyBase, IBegin
         {
             Move();
         }
+    }
 
+    public override void TakeDamage(int damage, GameObject attacker)
+    {
+        base.TakeDamage(damage, attacker);
+
+        if (attacker != null && !IsDead)
+        {
+            revengeTarget = attacker;
+            Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
+        }
     }
 
     protected override void SetAttribute()
@@ -73,22 +90,68 @@ public class MinionAI : EnemyBase, IBegin
         detectionRange = 4f;
         attackDelayTime = 2f;
         idleTime = 2f;
-        SetMastTarget();
-        fov.viewRadius = 2;
+        mastTarget = SetMastTarget();
+        fov.viewRadius = detectionRange;
+    }
+
+    private void UpdateTarget()
+    {
+        /* ===================================
+        1. 복수 대상이 유효하고 감지 범위 내에 있는지 확인
+        2. 감지 범위 내에 적이 있는지 확인 (복수 대상이 없을때 확인)
+        3. 기본 목표 돛대로 목표 설정
+        =================================== */
+
+        if(revengeTarget != null)
+        {
+            CommonBase targetBase = revengeTarget.GetComponent<CommonBase>();
+            
+            if(targetBase != null && !targetBase.IsDead && fov.visibleTargets.Contains(revengeTarget.transform))
+            {
+                currentAttackTarget = revengeTarget;
+                return;
+            }
+            else
+            {
+                revengeTarget = null;
+            }
+        }
+
+        Transform closestTarget = FindClosestTargetInDetect(fov.visibleTargets);
+        if(closestTarget != null)
+        {
+            currentAttackTarget = closestTarget.gameObject;
+            return;
+        }
+
+        currentAttackTarget = mastTarget;
     }
 
     // =============================================================
-    // 둥지
+    // 행동 조건
     // =============================================================
-    private bool CanCreateNest()
+    private bool CanCreateNest(bool isAttackable)
     {
         return isOnGround
             && !isNestCreated
             && Time.time >= nestCreationTime
             && nestCreationTime != -1f
-            && !CanAttack();
+            && !isAttackable;
     }
 
+    private bool CanAttack(bool isTargetInAttackRange)
+    {
+        return currentAttackTarget != null && isTargetInAttackRange && Time.time >= lastAttackTime + attackDelayTime; ;
+    }
+
+    private bool CanMove()
+    {
+        return currentAttackTarget != null;
+    }
+
+    // =============================================================
+    // 둥지 생성
+    // =============================================================
     void CreateNest()
     {
         Instantiate(nestPrefab, transform.position, Quaternion.identity);
@@ -97,100 +160,44 @@ public class MinionAI : EnemyBase, IBegin
 
     // =============================================================
     // 공격
-    // =============================================================
-    private bool CanAttack()
-    {
-        return DetectAttackRange().Length > 0 && Time.time >= lastAttackTime + attackDelayTime; ;
-    }
-
+    // =============================================================   
     void Attack()
     {
-        if (fov.visibleTargets.Count > 0)
+        if (currentAttackTarget == null)
+            return;
+
+        agent.isStopped = true;
+        transform.LookAt(currentAttackTarget.transform);
+
+        CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
+        if(targetBase != null && !targetBase.IsDead)
         {
-            Collider[] detectColliders = DetectAttackRange();
-
-            if (detectColliders.Length > 0)
-            {
-                currentAttackTarget = FindClosestTargetInAttackRange(detectColliders);
-                Debug.Log($"가까운 타겟 : {currentAttackTarget}");
-
-                if (currentAttackTarget != null)
-                {
-                    agent.isStopped = true;
-                    transform.LookAt(currentAttackTarget.transform);
-                    CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
-                    Debug.Log($"currentAttackTarget : {currentAttackTarget.gameObject.name}");
-                    if (targetBase != null)
-                    {
-                        targetBase.TakeDamage(attackDamage, this.gameObject);
-                        lastAttackTime = Time.time;
-                        Debug.Log($"공격 대상: {currentAttackTarget.name}, 현재 HP: {targetBase.CurrentHp}");
-                        if (targetBase.IsDead == true)
-                        {
-                            SetMastTarget();
-                        }
-
-                    }
-                }
-            }
+            targetBase.TakeDamage(attackDamage, this.gameObject);
+            lastAttackTime = Time.time;
         }
-    }
-
-    /// <summary>
-    /// 공격 범위 내에서 가장 가까운 적 찾기
-    /// </summary>
-    /// <returns></returns>
-    private GameObject FindClosestTargetInAttackRange(Collider[] detectColliders)
-    {
-        GameObject closestTarget = null;
-        float closestDis = float.MaxValue;
-
-        foreach (var target in detectColliders)
-        {
-            float dis = Vector3.Distance(transform.position, target.transform.position);
-            if (dis < closestDis)
-            {
-                closestDis = dis;
-                closestTarget = target.gameObject;
-            }
-        }
-
-        return closestTarget;
-    }
+    }    
 
     // =============================================================
     // 이동
     // =============================================================
-    private bool CanMove()
-    {
-        return currentAttackTarget != null || fov.visibleTargets.Count > 0;
-    }
-
     void Move()
     {
-        Transform moveTarget = currentAttackTarget != null ? currentAttackTarget.transform : null;
-        if (fov.visibleTargets.Count > 0)
-        {
-            moveTarget = FindClosestTargetInDetect(fov.visibleTargets);
-            currentAttackTarget = moveTarget.gameObject;
-        }
-        else
-        {
-            SetMastTarget();
-        }
+        if (currentAttackTarget == null)
+            return;
 
-        if (moveTarget != null && agent != null)
-        {
-            Collider col = moveTarget.GetComponent<Collider>();
-            Vector3 destination = col != null ? col.ClosestPoint(transform.position) : moveTarget.position;
+        agent.isStopped = false;
+        Vector3 destination = currentAttackTarget.GetComponent<Collider>().ClosestPoint(transform.position);
 
-            if (Vector3.Distance(agent.destination, destination) > 0.5f)
-            {
-                agent.isStopped = false;
-                agent.SetDestination(destination);
-            }
+        if(Vector3.Distance(agent.destination, destination) > 0.5f)
+        {
+            agent.SetDestination(destination);
         }
     }
+
+
+    // =============================================================
+    // 유틸리티 메서드
+    // =============================================================
 
     /// <summary>
     /// 가장 가까운 타겟을 찾음
@@ -215,6 +222,40 @@ public class MinionAI : EnemyBase, IBegin
     }
 
     /// <summary>
+    /// 공격 범위 내에서 가장 가까운 적 찾기
+    /// </summary>
+    /// <returns></returns>
+    private GameObject FindClosestTargetInAttackRange(Collider[] detectColliders)
+    {
+        GameObject closestTarget = null;
+        float closestDis = float.MaxValue;
+
+        foreach (var target in detectColliders)
+        {
+            float dis = Vector3.Distance(transform.position, target.transform.position);
+            if (dis < closestDis)
+            {
+                closestDis = dis;
+                closestTarget = target.gameObject;
+            }
+        }
+
+        return closestTarget;
+    }
+
+    private bool IsTargetInColliders(GameObject target, Collider[] colliders)
+    {
+        foreach (var col in colliders)
+        {
+            if (col.gameObject == target)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
     /// 배 플렛폼 위인지 검사
     /// </summary>
     /// <returns></returns>
@@ -235,16 +276,5 @@ public class MinionAI : EnemyBase, IBegin
         }
 
         return isOnGround;
-    }
-
-    public override void TakeDamage(int damage, GameObject attacker)
-    {
-        base.TakeDamage(damage, attacker);
-
-        if (attacker != null && !IsDead)
-        {
-            currentAttackTarget = attacker;
-            Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
-        }
-    }
+    }    
 }
