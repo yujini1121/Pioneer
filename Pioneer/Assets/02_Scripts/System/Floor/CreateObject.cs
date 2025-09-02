@@ -55,7 +55,7 @@ public class CreateObject : MonoBehaviour, IBegin
     private void Awake()
     {
         Debug.Log($">> CreateObject : {gameObject.name}");
-        instance = this;
+		instance = this;
 
         mainCamera = Camera.main;
         playerTrans = transform;
@@ -87,7 +87,6 @@ public class CreateObject : MonoBehaviour, IBegin
         onHand.GetComponent<Collider>().isTrigger = true;
     }
 
-    // 원래 Start() 였던 메서드
     private void Start()
     {
         ExitInstallMode(); // 게임 시작 시 설치 모드 OFF
@@ -197,10 +196,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.99f, 0.5f, 0.249f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f * i + 45f, 0f));
 
-                    if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
+					// 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어졌을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
+					if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                         return true;
-                    }
+                    else
+                        ItemDeckDisconnect.instance.DestroyItemDeck();
                 }
 
                 //그 외 설치 불가
