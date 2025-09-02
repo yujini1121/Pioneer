@@ -31,9 +31,10 @@ public class EnemyBase : CreatureBase, IBegin
     /// <summary>
     /// µ¿¥Î ≈∏∞Ÿ¿∏∑Œ º≥¡§
     /// </summary>
-    protected void SetMastTarget()
+    protected GameObject SetMastTarget()
     {
-        currentAttackTarget = GameObject.FindGameObjectWithTag("Engine");
+        GameObject mast = GameObject.FindGameObjectWithTag("Engine");
+        return mast;
     }
 
     /// <summary>
