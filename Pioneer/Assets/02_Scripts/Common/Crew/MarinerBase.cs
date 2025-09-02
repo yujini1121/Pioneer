@@ -300,6 +300,7 @@ public class MarinerBase : CreatureBase
         yield return null;
     }
 
+
     // ===== 기존 수리 관련 함수들 =====
     protected virtual void StartRepair()
     {

@@ -7,18 +7,12 @@ public class MakeshiftCraftUiMain : MonoBehaviour, IBegin
 {
     [Header("UI")]
     [SerializeField] GameObject pivot;
-    [SerializeField] DefaultFabrication ui;
-    [SerializeField] UnityEngine.UI.Button closeTab;
+    public DefaultFabrication ui;
     [SerializeField] Vector2 itemButtonSize;
 
     // Start is called before the first frame update
     void Start()
     {
-        closeTab.onClick.AddListener(() =>
-        {
-            ui.gameObject.SetActive(false);
-        });
-
         List<SItemRecipeSO> makeshift = new List<SItemRecipeSO>();
         foreach (SItemRecipeSO recipe in ItemRecipeManager.Instance.recipes)
         {
