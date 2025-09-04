@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
+// 돗대 시스템 관리자 (싱글톤)
 public class MastManager : MonoBehaviour
 {
     public static MastManager Instance;
@@ -75,8 +77,8 @@ public class MastManager : MonoBehaviour
     // 현재 갑판 개수 업데이트 (설치/제거시에만 호출)
     public void UpdateCurrentDeckCount()
     {
-        GameObject[] Platforms = GameObject.FindGameObjectsWithTag("Platform");
-        currentDeckCount = Platforms.Length;
+        GameObject[] decks = GameObject.FindGameObjectsWithTag("Deck");
+        currentDeckCount = decks.Length;
         Debug.Log($"현재 갑판 개수: {currentDeckCount}");
     }
 
@@ -112,7 +114,7 @@ public class MastManager : MonoBehaviour
 
         // 갑판 생성
         GameObject newDeck = Instantiate(deckPrefab, position, Quaternion.identity);
-        newDeck.tag = "Deck";
+        newDeck.layer = LayerMask.NameToLayer("Platform"); // 레이어로 변경 (실제 레이어명에 맞게 수정)
 
         // 갑판 수 업데이트
         UpdateCurrentDeckCount();

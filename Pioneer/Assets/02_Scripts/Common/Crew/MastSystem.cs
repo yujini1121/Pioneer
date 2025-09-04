@@ -37,14 +37,11 @@ public class MastSystem : CommonBase
 
     void Start()
     {
-        // 레벨에 따른 최대 체력 설정
         SetMastLevel(mastLevel);
         hp = maxHp;
 
-        // UI 초기화
         if (mastUI) mastUI.SetActive(false);
 
-        // 버튼 이벤트 연결
         if (enhanceButton) enhanceButton.onClick.AddListener(EnhanceMast);
         if (closeButton) closeButton.onClick.AddListener(CloseUI);
     }
@@ -57,7 +54,6 @@ public class MastSystem : CommonBase
         CheckMastCondition();
     }
 
-    // 레벨 설정
     void SetMastLevel(int level)
     {
         mastLevel = Mathf.Clamp(level, 1, 2);
@@ -78,7 +74,6 @@ public class MastSystem : CommonBase
         bool wasInRange = playerInRange;
         playerInRange = playersInRange.Length > 0;
 
-        // 상태 변화시에만 UI 업데이트
         if (wasInRange != playerInRange)
         {
             if (!playerInRange && isUIOpen)
@@ -89,7 +84,6 @@ public class MastSystem : CommonBase
         }
     }
 
-    // 입력 처리
     void HandleInput()
     {
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
@@ -101,27 +95,33 @@ public class MastSystem : CommonBase
         }
     }
 
-    // 상호작용 프롬프트 표시
     void ShowInteractionPrompt(bool show)
     {
         if (interactionPrompt)
             interactionPrompt.SetActive(show);
     }
 
-    // UI 열기
     void OpenUI()
     {
         isUIOpen = true;
         if (mastUI) mastUI.SetActive(true);
+
+        ShowInteractionPrompt(false);
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    // UI 닫기
     void CloseUI()
     {
         isUIOpen = false;
         if (mastUI) mastUI.SetActive(false);
+
+        if (playerInRange)  
+        {
+            ShowInteractionPrompt(true);  
+        }
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -131,14 +131,14 @@ public class MastSystem : CommonBase
     {
         if (!isUIOpen) return;
 
-        // 현재 단계 표시
+        // 다음 단계 단계 표시
         if (currentStageText) currentStageText.text = $"현재 {mastLevel}단계";
 
         // 강화 효과 설명
         if (enhanceEffectText)
         {
             if (mastLevel == 1)
-                enhanceEffectText.text = "2단계로 강화하면\n최대 갑판 설치 개수가\n30개에서 50개로 증가합니다";
+                enhanceEffectText.text = "최대 갑판 설치 개수가\n30개에서 50개로\n증가합니다";
             else
                 enhanceEffectText.text = "이미 최대 단계입니다";
         }
@@ -198,8 +198,6 @@ public class MastSystem : CommonBase
             yield return new WaitForSeconds(10f);
         }
     }
-
-    // 메시지 표시
     public void ShowMessage(string message, float duration)
     {
         if (messageCoroutine != null)
@@ -207,8 +205,6 @@ public class MastSystem : CommonBase
 
         messageCoroutine = StartCoroutine(ShowMessageCoroutine(message, duration));
     }
-
-    // 메시지 코루틴
     IEnumerator ShowMessageCoroutine(string message, float duration)
     {
         if (messagePanel) messagePanel.SetActive(true);
@@ -238,7 +234,6 @@ public class MastSystem : CommonBase
             return;
         }
 
-        // 자원 소모
         if (!MastManager.Instance.ConsumeItems(MastManager.Instance.woodItemID, 30) ||
             !MastManager.Instance.ConsumeItems(MastManager.Instance.clothItemID, 15))
         {
@@ -246,20 +241,17 @@ public class MastSystem : CommonBase
             return;
         }
 
-        // 레벨업
         SetMastLevel(mastLevel + 1);
-        hp = maxHp; // 강화시 체력 회복
+        hp = maxHp;
 
         ShowMessage("돛대가 강화되었습니다!", 3f);
 
-        // 인벤토리 UI 새로고침
         if (InventoryUiMain.instance != null)
         {
             InventoryUiMain.instance.IconRefresh();
         }
     }
 
-    // 데미지 받기 오버라이드
     public override void TakeDamage(int damage, GameObject attacker)
     {
         if (IsDead) return;
@@ -276,10 +268,10 @@ public class MastSystem : CommonBase
         }
     }
 
-    // 파괴시 처리 오버라이드
     public override void WhenDestroy()
     {
         Debug.Log("돛대 파괴됨 - 게임오버");
         MastManager.Instance.GameOver();
     }
+
 }

@@ -443,6 +443,14 @@ public class CreateObject : MonoBehaviour, IBegin
 
             navMeshSurface.BuildNavMesh();
 
+            //주훈 추가
+            if (creationType == CreationType.Platform && MastManager.Instance != null)
+            {
+                MastManager.Instance.UpdateCurrentDeckCount();
+                Debug.Log($"[갑판 설치 완료] 현재 개수: {MastManager.Instance.currentDeckCount}");
+            }
+            //여기까지
+
             Debug.Log($"[설치 완료됨] 거리: {dist}");
 
             playerAgent.ResetPath();
@@ -450,15 +458,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
             tempObj = null;
         }
-
-
-        //주훈 추가
-        if (creationType == CreationType.Platform && MastManager.Instance != null)
-        {
-            MastManager.Instance.UpdateCurrentDeckCount();
-            Debug.Log($"[갑판 설치 완료] 현재 개수: {MastManager.Instance.currentDeckCount}");
-        }
-        //여기까지
+ 
     }
 
 
