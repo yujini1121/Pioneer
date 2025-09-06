@@ -11,7 +11,7 @@ public class MastManager : MonoBehaviour
 
     [Header("갑판 관리")]
     public int currentDeckCount = 0;
-    public GameObject deckPrefab; // PF_ItemDeck 프리팹
+    public LayerMask platformLayerMask; // 플랫폼 레이어마스크
 
     [Header("아이템 ID 설정")]
     public int woodItemID = 30001; // 통나무 아이템 ID
@@ -31,7 +31,7 @@ public class MastManager : MonoBehaviour
         UpdateCurrentDeckCount();
     }
 
-    // 인벤토리에서 특정 아이템 개수 확인
+    // 인벤토리에서 특정 아이템 개수 확인 (돗대 강화용)
     public int GetItemCount(int itemID)
     {
         if (InventoryManager.Instance == null) return 0;
@@ -47,7 +47,7 @@ public class MastManager : MonoBehaviour
         return count;
     }
 
-    // 인벤토리에서 특정 아이템 소모
+    // 인벤토리에서 특정 아이템 소모 (돗대 강화용)
     public bool ConsumeItems(int itemID, int amount)
     {
         if (InventoryManager.Instance == null) return false;
@@ -74,60 +74,13 @@ public class MastManager : MonoBehaviour
         return remainingToConsume == 0;
     }
 
-    // 현재 갑판 개수 업데이트 (설치/제거시에만 호출)
+    // 현재 갑판 개수 업데이트 (CreateObject에서 호출)
     public void UpdateCurrentDeckCount()
     {
-        GameObject[] decks = GameObject.FindGameObjectsWithTag("Deck");
-        currentDeckCount = decks.Length;
+        // 레이어마스크로 플랫폼 오브젝트 검색
+        Collider[] platformColliders = Physics.OverlapSphere(Vector3.zero, 1000f, platformLayerMask);
+        currentDeckCount = platformColliders.Length;
         Debug.Log($"현재 갑판 개수: {currentDeckCount}");
-    }
-
-    // 갑판 설치 가능한지 확인
-    public bool CanBuildDeck(MastSystem mast)
-    {
-        int maxDecks = mast.GetMaxDeckCount();
-        return currentDeckCount < maxDecks && GetItemCount(woodItemID) >= 30 && GetItemCount(clothItemID) >= 15;
-    }
-
-    // 갑판 건설
-    public bool BuildDeck(MastSystem mast, Vector3 position)
-    {
-        if (!CanBuildDeck(mast))
-        {
-            if (currentDeckCount >= mast.GetMaxDeckCount())
-            {
-                mast.ShowMessage("갑판을 더이상 설치할 수 없다.", 4f);
-            }
-            else
-            {
-                mast.ShowMessage($"재료가 부족합니다.", 3f);
-            }
-            return false;
-        }
-
-        // 자원 소모
-        if (!ConsumeItems(woodItemID, 30) || !ConsumeItems(clothItemID, 15))
-        {
-            mast.ShowMessage("아이템 소모에 실패했습니다.", 3f);
-            return false;
-        }
-
-        // 갑판 생성
-        GameObject newDeck = Instantiate(deckPrefab, position, Quaternion.identity);
-        newDeck.layer = LayerMask.NameToLayer("Platform"); // 레이어로 변경 (실제 레이어명에 맞게 수정)
-
-        // 갑판 수 업데이트
-        UpdateCurrentDeckCount();
-
-        Debug.Log("갑판 건설 완료!");
-
-        // 인벤토리 UI 새로고침
-        if (InventoryUiMain.instance != null)
-        {
-            InventoryUiMain.instance.IconRefresh();
-        }
-
-        return true;
     }
 
     // 게임오버 처리
