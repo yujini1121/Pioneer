@@ -35,7 +35,7 @@ public class CommonBase : MonoBehaviour, IBegin
         if (IsDead) return;
 
         hp -= damage;
-        Debug.Log($"데미지 {damage} 받음. 현재 HP: {hp}");
+        Debug.Log(gameObject.name + "가 " + damage + "의 데미지를 입었습니다! 현재 체력: " + hp);
 
         this.attacker = attacker;
 

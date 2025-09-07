@@ -2,16 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-/* ================================================
-0821 수정하면 좋은 사항
-- 물리 연산 최적화 => DetectAttackRange() 같은 물리 연산을 Update 초반에 한 번 호출하고 변수에 저장하여 재활용
-- 타겟팅 로직 수정 => 공격을 받을 시 공격한 적을 타겟으로 삼아도 현재 시야에 더 가까운 적으로 타겟을 바꿔버리는 문제가 있음,
-                    현재 currentAttackTarget이 살아있는지 확인 후 살아있으면 유지 없거나 죽었을 때 시야 내에서 새로운 타겟을 찾도록 로직 변경
-                    -> 그러나 이렇게 변경하면 돛대가 타겟일때가 이상해짐 
-- 매직 넘버 최대한 제거
-- CreateNest에 CanAttack  말고 공격할 적이 있는지 여부만 확인, 있으면 공격 중인거고 아니면 공격중이 아니니까
-================================================ */
-
 public class MinionAI : EnemyBase, IBegin
 {
     [Header("둥지 프리팹")]
@@ -96,12 +86,6 @@ public class MinionAI : EnemyBase, IBegin
 
     private void UpdateTarget()
     {
-        /* ===================================
-        1. 복수 대상이 유효하고 감지 범위 내에 있는지 확인
-        2. 감지 범위 내에 적이 있는지 확인 (복수 대상이 없을때 확인)
-        3. 기본 목표 돛대로 목표 설정
-        =================================== */
-
         if(revengeTarget != null)
         {
             CommonBase targetBase = revengeTarget.GetComponent<CommonBase>();

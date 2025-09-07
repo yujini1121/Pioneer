@@ -1,85 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using UnityEngine;
 
-public class PlayerController : CreatureBase, IBegin
+// PlayerController: 입력만 처리해서 다른 스크립트에 명령 내리기
+public class PlayerController : MonoBehaviour
 {
-    [Header("Player Move Speed Setting")]
-    [SerializeField]private float moveSpeed = 5f;
+    private PlayerCore playerCore;
+    private PlayerAttack playerAttack;
 
-    [Header("Player Attack Range Object")]
-    [SerializeField]private PlayerAttack playerAttack;
-
-    [Header("Player Attack Power")]
-    [SerializeField] private float playerAttackPower = 3f;
-
-    private float attackCoolTime = 0.5f;
-
-    private bool isAttack = false;
-
-    private Rigidbody playerRb;
-    private Vector3 playerDir;
-
-    public float playerHP = 100;
-
-    void Start()
+    void Awake()
     {
-        playerRb = GetComponent<Rigidbody>();
-        playerAttack.playerTransform = transform;
+        playerCore = GetComponent<PlayerCore>();
+        playerAttack = GetComponentInChildren<PlayerAttack>();
     }
 
     void Update()
     {
-        PlayerMovement();
+        // move
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical");
+        playerCore.Move(new Vector3(moveX, 0, moveY));
 
-        if(Input.GetMouseButtonDown(0) && !isAttack)
-        {            
-            //StartCoroutine(AttackRoutine());
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (playerDir.sqrMagnitude > 0)
+        if(Input.GetMouseButtonDown(0))
         {
-            Vector3 targetPos = playerRb.position + playerDir * moveSpeed * Time.fixedDeltaTime;
-            playerRb.MovePosition(targetPos);
+            playerCore.Attack();
         }
     }
-
-    private void PlayerMovement()
-    {
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float verticalInput = Input.GetAxisRaw("Vertical");
-
-        playerDir = new Vector3(horizontalInput, 0f, verticalInput).normalized;
-    }
-
-    //private IEnumerator AttackRoutine()
-    //{
-    //    isAttack = true;
-    //    StartCoroutine(playerAttack.AttackRange());
-    //    yield return new WaitForSeconds(attackCoolTime);
-    //    isAttack = false;
-    //}
-
-    //public void TakeDamage(float damage)
-    //{
-    //    playerHP -= damage;
-
-    //    UnityEngine.Debug.Log($"[데미지] 받은 데미지: {damage} 현재 HP: {playerHP}");
-
-    //    if (playerHP <= 0)
-    //    {
-    //        playerHP = 0;
-    //        Die();
-    //    }
-    //}
-
-    //public void Die()
-    //{
-    //    UnityEngine.Debug.Log($"[사망] 플레이어 HP가 0 이하가 되었습니다! 현재 HP: {playerHP}");
-    //}
 }

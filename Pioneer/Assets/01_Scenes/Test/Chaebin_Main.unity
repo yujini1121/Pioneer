@@ -4293,9 +4293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d40adedd46c17934aab8eab48e356701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 0}
-  attackHeight: 1
-  attackDuration: 0.2
+  damage: 0
 --- !u!54 &361639217
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4404,8 +4402,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 2}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 439075667}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5383,7 +5381,8 @@ GameObject:
   - component: {fileID: 439075671}
   - component: {fileID: 439075669}
   - component: {fileID: 439075670}
-  - component: {fileID: 439075673}
+  - component: {fileID: 439075676}
+  - component: {fileID: 439075675}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -5414,7 +5413,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 116
   m_CollisionDetection: 0
@@ -5584,7 +5583,7 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &439075673
+--- !u!114 &439075675
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5593,23 +5592,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 439075660}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eee2e39d3fcca6e449dab66ce3851051, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b97c853f687c2445b996a4d0a3699bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   hp: 0
-  maxHp: 100
+  maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
-  fov: {fileID: 439075670}
-  speed: 5
-  attackDamage: 10
+  fov: {fileID: 0}
+  speed: 0
+  attackDamage: 0
   attackRange: 0
   attackDelayTime: 0
-  moveThreshold: 0.01
-  interactableCol: []
-  interactableLayer:
-    serializedVersion: 2
-    m_Bits: 0
+  playerAttack: {fileID: 361639216}
+  attackDuration: 0.2
+  attackHeight: 1
+--- !u!114 &439075676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439075660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15ec610ffeb4e9342913cd92c7cd6191, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &456132591
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26145,6 +26154,7 @@ MonoBehaviour:
     m_Bits: 0
   attackBoxCenterOffset: {x: 0, y: 0, z: 0}
   minionPrefab: {fileID: 1388221414}
+  maxMinionCount: 2
   initDelay: 5
 --- !u!1001 &2132415664
 PrefabInstance:

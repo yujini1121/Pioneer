@@ -81,6 +81,8 @@ public class TPlayerController : CreatureBase
         if (rb == null) return;
 
         Vector3 velocity = new Vector3(moveInput.x * speed, rb.velocity.y, moveInput.z * speed);
+        // if (GuiltySystem.instance.IsSlowed) velocity *= 0.5f;
+
         rb.velocity = velocity;
     }
 
