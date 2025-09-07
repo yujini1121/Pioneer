@@ -12,7 +12,7 @@ public class MastSystem : CommonBase
     public LayerMask playerLayer;
 
     [Header("첫 번째 UI - 기본 정보")]
-    public GameObject mastUI; // 첫 번째 UI (간단한 정보)
+    public GameObject mastUI; // 첫 번째 UI 
     public TextMeshProUGUI hpPercentageText; // 내구도 % 표시
     public Button upgradeMenuButton; // 업그레이드 메뉴로 가는 버튼
     public Button closeButton; // 닫기 버튼
@@ -124,7 +124,7 @@ public class MastSystem : CommonBase
         }
         else
         {
-            Debug.LogError("upgradeUI가 null입니다! Inspector에서 연결하세요.");
+            Debug.LogError("upgradeUI가 null.");
         }
     }
 
@@ -269,7 +269,7 @@ public class MastSystem : CommonBase
         SetMastLevel(mastLevel + 1);
         hp = maxHp;
 
-        ShowMessage("돛대가 강화되었습니다!", 3f);
+        ShowMessage("돛대가 강화되었습니다", 3f);
 
         if (InventoryUiMain.instance != null)
         {
@@ -295,7 +295,7 @@ public class MastSystem : CommonBase
 
     public override void WhenDestroy()
     {
-        Debug.Log("돛대 파괴됨 - 게임오버");
+        Debug.Log("돛대 파괴 게임오버");
         MastManager.Instance.GameOver();
     }
 

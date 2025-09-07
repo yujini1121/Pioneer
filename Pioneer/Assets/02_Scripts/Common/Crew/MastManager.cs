@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// 돗대 시스템 관리자 (싱글톤)
 public class MastManager : MonoBehaviour
 {
     public static MastManager Instance;
@@ -27,14 +26,12 @@ public class MastManager : MonoBehaviour
 
     void Start()
     {
-        // 시작시 현재 갑판 개수 계산
         UpdateCurrentDeckCount();
     }
 
-    // 인벤토리에서 특정 아이템 개수 확인 (돗대 강화용)
     public int GetItemCount(int itemID)
     {
-        if (InventoryManager.Instance == null) return 0;
+        if (InventoryManager.Instance == null) return 0; // 인벤에서 계싼
 
         int count = 0;
         foreach (var item in InventoryManager.Instance.itemLists)
@@ -77,10 +74,19 @@ public class MastManager : MonoBehaviour
     // 현재 갑판 개수 업데이트 (CreateObject에서 호출)
     public void UpdateCurrentDeckCount()
     {
-        // 레이어마스크로 플랫폼 오브젝트 검색
         Collider[] platformColliders = Physics.OverlapSphere(Vector3.zero, 1000f, platformLayerMask);
         currentDeckCount = platformColliders.Length;
+
+        Debug.Log($"=== 갑판 카운트 디버그 ===");
+        Debug.Log($"레이어마스크 값: {platformLayerMask.value}");
+        Debug.Log($"검색된 콜라이더 수: {platformColliders.Length}");
         Debug.Log($"현재 갑판 개수: {currentDeckCount}");
+
+        // 각 갑판 정보 출력
+        for (int i = 0; i < platformColliders.Length; i++)
+        {
+            Debug.Log($"갑판 {i}: {platformColliders[i].name} at {platformColliders[i].transform.position}");
+        }
     }
 
     // 게임오버 처리

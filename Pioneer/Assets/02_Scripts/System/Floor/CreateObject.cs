@@ -183,7 +183,7 @@ public class CreateObject : MonoBehaviour, IBegin
                 if (MastManager.Instance != null)
                 {
                     int currentDeckCount = MastManager.Instance.currentDeckCount;
-                    int maxDeckCount = 30; // 기본값 (1레벨)
+                    int maxDeckCount = 30; // 1레벨 최대 갯수
 
                     // 돗대 레벨에 따른 최대 개수 확인
                     MastSystem[] masts = FindObjectsOfType<MastSystem>();
@@ -200,6 +200,7 @@ public class CreateObject : MonoBehaviour, IBegin
                     }
                 }
                 // 여기까지
+
                 //1.414213 * 0.5
                 xArr = new float[]{ 0.707106f, 0.707106f, -0.707106f, -0.707106f };
                 zArr = new float[]{ 0.707106f, -0.707106f, -0.707106f, 0.707106f };
@@ -447,7 +448,7 @@ public class CreateObject : MonoBehaviour, IBegin
             if (creationType == CreationType.Platform && MastManager.Instance != null)
             {
                 MastManager.Instance.UpdateCurrentDeckCount();
-                Debug.Log($"[갑판 설치 완료] 현재 개수: {MastManager.Instance.currentDeckCount}");
+                Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
             }
             //여기까지
 
