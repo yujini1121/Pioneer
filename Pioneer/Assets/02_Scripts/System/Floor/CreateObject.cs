@@ -196,11 +196,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.99f, 0.5f, 0.249f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f * i + 45f, 0f));
 
-					// 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어졌을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
+					// 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어져있을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
 					if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                         return true;
                     else
-                        ItemDeckDisconnect.instance.DestroyItemDeck();
+                        ItemDeckDisconnect.instance.DestroyDeck();
                 }
 
                 //그 외 설치 불가
