@@ -56,7 +56,6 @@ public class PlayerCore : CreatureBase, IBegin
 
     [Header("공격 설정")]
     [SerializeField] private PlayerAttack playerAttack;
-    [SerializeField] private float attackDuration = 0.2f; // 공격 판정 유지 시간
     [SerializeField] private float attackHeight = 1.0f;
 
     private Rigidbody playerRb;
@@ -93,7 +92,7 @@ public class PlayerCore : CreatureBase, IBegin
         mental = maxMental;         // 정신력
         attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
-        attackRange = 0.4f;         // 공격 범위
+        //attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
     }
 
     // =============================================================
@@ -133,11 +132,13 @@ public class PlayerCore : CreatureBase, IBegin
             playerAttack.transform.position = position;
             playerAttack.transform.rotation = Quaternion.LookRotation(dir);
 
+            // TODO: 공격 애니메이션 시작 시간 추가해야 함!!!!!!!!!!! (0.6초)
             playerAttack.gameObject.SetActive(true);
             playerAttack.damage = this.attackDamage;
         }
 
-        yield return new WaitForSeconds(attackDuration);
+        // 공격 애니메이션 이후 지연 시간 (0.4초)
+        yield return new WaitForSeconds(attackDelayTime);
 
         playerAttack.gameObject.SetActive(false);
 
@@ -242,9 +243,9 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // public 형의 음식 섭취시 호출할 수 있는 함수 추가
-    public void EatFood()
+    public void EatFood(int increase)
     {
-
+        fullness += increase;
     }
 
     // =============================================================
