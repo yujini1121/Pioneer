@@ -179,6 +179,28 @@ public class CreateObject : MonoBehaviour, IBegin
         switch (creationType)
         {
             case CreationType.Platform:
+                // 주훈 추가
+                if (MastManager.Instance != null)
+                {
+                    int currentDeckCount = MastManager.Instance.currentDeckCount;
+                    int maxDeckCount = 30; // 1레벨 최대 갯수
+
+                    // 돗대 레벨에 따른 최대 개수 확인
+                    MastSystem[] masts = FindObjectsOfType<MastSystem>();
+                    if (masts.Length > 0)
+                    {
+                        maxDeckCount = masts[0].GetMaxDeckCount();
+                    }
+
+                    // 최대 개수 초과 시 설치 불가
+                    if (currentDeckCount >= maxDeckCount)
+                    {
+                        Debug.Log($"갑판 설치 불가: {currentDeckCount}/{maxDeckCount}개 (최대 도달)");
+                        return false;
+                    }
+                }
+                // 여기까지
+
                 //1.414213 * 0.5
                 xArr = new float[]{ 0.707106f, 0.707106f, -0.707106f, -0.707106f };
                 zArr = new float[]{ 0.707106f, -0.707106f, -0.707106f, 0.707106f };
@@ -422,6 +444,14 @@ public class CreateObject : MonoBehaviour, IBegin
 
             navMeshSurface.BuildNavMesh();
 
+            //주훈 추가
+            if (creationType == CreationType.Platform && MastManager.Instance != null)
+            {
+                MastManager.Instance.UpdateCurrentDeckCount();
+                Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
+            }
+            //여기까지
+
             Debug.Log($"[설치 완료됨] 거리: {dist}");
 
             playerAgent.ResetPath();
@@ -429,6 +459,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
             tempObj = null;
         }
+ 
     }
 
 
