@@ -79,17 +79,13 @@ public class MastSystem : CommonBase
         bool wasInRange = playerInRange;
         playerInRange = playersInRange.Length > 0;
 
-        // 범위 안에 처음 들어왔을 때 첫 번째 UI 표시
-        if (!wasInRange && playerInRange)
-        {
-            OpenUI();
-        }
         // 범위 이탈시 모든 UI 닫기
-        else if (wasInRange && !playerInRange)
+        if (wasInRange && !playerInRange)
         {
             CloseAllUI();
         }
     }
+
 
     void HandleInput()
     {
