@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ using UnityEngine;
     * 3 : 공격력 20% 상승 / 무기 아이템 내구도 감소량 -0.5
     * 4 : 공격력 25% 상승 / 무기 아이템 내구도 감소량 -0.8
     * 5 : 공격력 30% 상승 / 무기 아이템 내구도 감소량 -1.0
-==================================================================    
+==================================================================   
 ==================================================================  
     [[ 손재주 ]] => 태윤씨한테 질문해야할듯..
 - 설치형 오브젝트를 설치 완료 했을때 craftExp 획득
@@ -68,31 +69,150 @@ using UnityEngine;
     * 5 : 15% 확률로 자원 1개 추가 획득 / 50% 확률로 보물상자 1개 획득 (낚시로 보물상자를 얻었어도 받을 수 있음
 ============================================================= */
 
+public enum GrowStateType
+{
+    Combat,         // 전투
+    Crafting,       // 제작
+    Fishing,        // 낚시
+}
+
+[System.Serializable]
+public class GrowState
+{
+    public GrowStateType Type;      // 스테이터스 종류
+    public int level;               // 현재 레벨
+    public float currentExp;        // 현재 보유중인 경험치 값
+    public int[] maxExp;            // 레벨에 따른 경험치 최대값
+
+    public GrowState(GrowStateType type, int[] maxExp)
+    {
+        this.Type = type;
+        this.maxExp = maxExp;
+        this.level = 0;
+        this.currentExp = 0;
+    }
+}
+
 public class PlayerStatsLevel : MonoBehaviour
 {
-    // [ 성장 스테이터스 ]
-    int combatLevel = 0;                            // 전투 레벨
-    float combatExp = 0f;                           // 전투 경험치
+    public static PlayerStatsLevel instance { get; private set; }
 
-    int craftLevel = 0;                             // 제작 레벨
-    float craftExp = 0f;                            // 제작 경험치
+    public Dictionary<GrowStateType, GrowState> growStates = new Dictionary<GrowStateType, GrowState>();
 
-    int gatheringLevel = 0;                         // 낚시(채집) 레벨
-    float gatheringExp = 0f;						// 낚시(채집) 경험치
+    public PlayerCore player;
 
-    void Start()
+    private void Awake()
     {
-        
+        if(instance == null)
+            instance = this;
+        else
+            Destroy(instance);
+
+            player = GetComponent<PlayerCore>();
+
+        InitGrowState();
     }
 
-    void Update()
+    // 스테이터스 초기 상태 설정
+    void InitGrowState()
     {
-        
+        growStates.Add(GrowStateType.Combat, new GrowState(GrowStateType.Combat, new int[] { 50, 100, 150, 200, 250 }));
+        growStates.Add(GrowStateType.Crafting, new GrowState(GrowStateType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
+        growStates.Add(GrowStateType.Fishing, new GrowState(GrowStateType.Fishing, new int[] { 50, 100, 150, 200, 250 }));
     }
 
-    // =============================================================
-    // 전투 레벨
-    // =============================================================
+    /// <summary>
+    /// 경험치 획득
+    /// </summary>
+    /// <param name="type">스테이터스 종류</param>
+    /// <param name="amount">경험치 값</param>
+    public void AddExp(GrowStateType type, int amount)
+    {
+        GrowState growState = growStates[type];
 
+        if (growState.level >= growState.maxExp.Length)
+            return;
 
+        growState.currentExp += amount;
+
+        while (growState.level < growState.maxExp.Length && growState.currentExp >= growState.maxExp[growState.level])
+        {
+            growState.currentExp -= growState.maxExp[growState.level];
+            growState.level++;
+            Debug.Log($"{type} 레벨업 -> {growState.level}");
+
+            CombatLevelUpBuff(type);
+        }
+    }
+    
+
+    // [[ 전투 ]] 레벨업 시 효과 적용
+    private void CombatLevelUpBuff(GrowStateType type)
+    {
+        float increaseAttackDamage = 0f;
+        if (type == GrowStateType.Combat)
+        {
+            // 레벨에 따라 공격력 상승, 무기 아이템 내구도 감소량 감소
+            switch(growStates[GrowStateType.Combat].level)
+            {
+                case 1:
+                    increaseAttackDamage = 0.1f;
+                    break;
+                case 2:
+                    increaseAttackDamage = 0.15f;
+                    break;
+                case 3:
+                    increaseAttackDamage = 0.20f;
+                    break;
+                case 4:
+                    increaseAttackDamage = 0.25f;
+                    break;
+                case 5:
+                    increaseAttackDamage = 0.30f;
+                    break;
+            }
+
+            player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
+        }
+    }
+
+    // [[ 손재주 ]] 대성공 (제작) 확률 반환
+    public float CraftingLevelUpBuff()
+    {
+        switch (growStates[GrowStateType.Crafting].level)
+        {
+            case 1:
+                return 0.05f;
+            case 2:
+                return 0.1f;
+            case 3:
+                return 0.15f;
+            case 4:
+                return 0.2f;
+            case 5:
+                return 0.3f;
+            default:
+                return 0f;
+        }
+    }
+
+    // [[ 낚시 ]] 추가 획득 및 보물 상자 추가 획득 확률
+    public (float count, float chest) FishingLevelUpBuff()
+    {
+        switch(growStates[GrowStateType.Fishing].level)
+        {
+            case 1:
+                return (0.05f, 0f);
+            case 2:
+                return (0.07f, 0f);
+            case 3:
+                return (0.1f, 0.3f);
+            case 4:
+                return (0.12f, 0.4f);
+            case 5:
+                return (0.15f, 0.5f);
+            default:
+                return (0.0f, 0f);
+        }
+    }
 }
