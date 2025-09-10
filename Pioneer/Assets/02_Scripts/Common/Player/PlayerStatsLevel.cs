@@ -6,6 +6,7 @@ using UnityEngine;
 
 // PlayerLevelSystem : 전투, 제작, 채집 등 레벨과 경험치 관리
 
+#region 성장 스테이터스 기획 요약
 /* =============================================================
     [[ 전투 레벨 ]] => 에너미 베이스에서 해야하나..
 - 에너미가 플레이어 근접 공격으로 인해 사망할때 CombatExp 획득 (막타)
@@ -48,6 +49,8 @@ using UnityEngine;
     * 4 : 대성공 확률 20%
     * 5 : 대성공 확률 30%
     
+    // 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // 대성공 시스템 제작해야함;
     = 대성공이란? = 
     - 아이템 제작시 1개 더 획득
     - 제작시 소모해야 할 재료 아이템 40% 페이백..?
@@ -68,6 +71,7 @@ using UnityEngine;
     * 4 : 12% 확률로 자원 1개 추가 획득 / 40% 확률로 보물상자 1개 획득 (낚시로 보물상자를 얻었어도 받을 수 있음
     * 5 : 15% 확률로 자원 1개 추가 획득 / 50% 확률로 보물상자 1개 획득 (낚시로 보물상자를 얻었어도 받을 수 있음
 ============================================================= */
+#endregion
 
 public enum GrowStateType
 {
@@ -141,13 +145,13 @@ public class PlayerStatsLevel : MonoBehaviour
             growState.level++;
             Debug.Log($"{type} 레벨업 -> {growState.level}");
 
-            CombatLevelUpBuff(type);
+            CombatChance(type);
         }
     }
-    
 
+    // 아래 switch 문들에서 defalut로 받는 값은 레벨 0일때 값
     // [[ 전투 ]] 레벨업 시 효과 적용
-    private void CombatLevelUpBuff(GrowStateType type)
+    private void CombatChance(GrowStateType type)
     {
         float increaseAttackDamage = 0f;
         if (type == GrowStateType.Combat)
@@ -170,49 +174,81 @@ public class PlayerStatsLevel : MonoBehaviour
                 case 5:
                     increaseAttackDamage = 0.30f;
                     break;
+                default:
+                    increaseAttackDamage = 0f;
+                    break;
             }
 
             player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
         }
     }
 
+    // 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // 제작 확률이 정신력에서도 영향을 받고 있어서 현재 방법에서 수정이 필요할 듯 함
     // [[ 손재주 ]] 대성공 (제작) 확률 반환
-    public float CraftingLevelUpBuff()
+    /// <summary>
+    /// [[ 손재주 (아이템 제작) ]] 확률 적용
+    /// </summary>
+    /// <returns></returns>
+    public float CraftingChance()
     {
+        float greatSuccessChance = 0f;
         switch (growStates[GrowStateType.Crafting].level)
         {
             case 1:
-                return 0.05f;
+                greatSuccessChance = 0.05f;
+                break;
             case 2:
-                return 0.1f;
+                greatSuccessChance = 0.1f;
+                break;
             case 3:
-                return 0.15f;
+                greatSuccessChance = 0.15f;
+                break;
             case 4:
-                return 0.2f;
+                greatSuccessChance = 0.2f;
+                break;
             case 5:
-                return 0.3f;
+                greatSuccessChance = 0.3f;
+                break;
             default:
-                return 0f;
+                greatSuccessChance = 0f;
+                break;
         }
+        return greatSuccessChance;
     }
 
     // [[ 낚시 ]] 추가 획득 및 보물 상자 추가 획득 확률
-    public (float count, float chest) FishingLevelUpBuff()
+    /// <summary>
+    /// [[ 낚시 ]] 파밍 재료 및 보물상자 추가 획득 확률 적용
+    /// </summary>
+    /// <returns></returns>
+    public (float count, float chest) FishingChance()      // C#의 튜플이라는 방식의 구현
     {
+        (float count, float chest) fishingChance = (0f, 0f);
         switch(growStates[GrowStateType.Fishing].level)
         {
             case 1:
-                return (0.05f, 0f);
+                fishingChance = (0.05f, 0f);
+                break;
             case 2:
-                return (0.07f, 0f);
+                fishingChance = (0.07f, 0f);
+                break;
             case 3:
-                return (0.1f, 0.3f);
+                fishingChance = (0.1f, 0.3f);
+                break;
             case 4:
-                return (0.12f, 0.4f);
+                fishingChance = (0.12f, 0.4f);
+                break;
             case 5:
-                return (0.15f, 0.5f);
+                fishingChance = (0.15f, 0.5f);
+                break;
             default:
-                return (0.0f, 0f);
+                fishingChance = (0.0f, 0f);
+                break;
         }
+        return fishingChance;
     }
+
+    // 정신력에 따른 대성공 제작 확률 감소는 어떻게 해야할까..?
+    
 }

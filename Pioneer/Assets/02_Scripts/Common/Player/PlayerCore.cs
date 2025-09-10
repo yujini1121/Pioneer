@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
+#region 그냥 메모
 /* =============================================================
  * PlayerStats (CreatureBase 상속) : 체력, 공격력 같은 핵심 스탯 및 TakeDamage 같은 기능 관리
  [있어야 할 변수]
@@ -24,6 +25,7 @@ float attackRange = 0.4f;			// 공격 거리
     - 스테이터스 레벨 구현
     - 포만감 및 정신력 최소, 최대 제한 걸어두기
  ============================================================= */
+#endregion
 
 // TODO : 구현 완료 후 전체적인 코드 정리 및 빠진거 있는지 확인.. 그리고 포만감, 정신력 float로 변경해야함. 추가로 관련 코드를 수정사항 있는지 확인
 // + 매 프레임 NearEnemy 호출이 비효율적임 ..
@@ -58,6 +60,7 @@ public class PlayerCore : CreatureBase, IBegin
     int minMental = 0;                                              // 최소 정신력 값
     bool isDrunk = false;                                           // 만취 상태 여부
     private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴 
+    bool isApplyDebuff = false;
 
     [Header("정신력 설정")]
     [SerializeField] private float existEnemyMentalCool = 2f;        // 일정 범위 안 에너미 존재시 정신력이 깎이는 시간 텀
@@ -77,7 +80,12 @@ public class PlayerCore : CreatureBase, IBegin
     private bool isAttacking = false;
     private float defaultSpeed;
 
-    // 원래 공격력, 원래 제작 시스템 성공 확률, 원래 죄책감 레벨 적어둬야함 정신력이 멀쩡해지면 원래 값으로 돌아가야하기 때문
+    // 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // 원래 공격력, 원래 제작 시스템 성공 확률, 원래 죄책감 레벨 적어둬야함 정신력이 멀쩡해지면 원래 값으로 돌아가야하기 때문 
+    private int currentAttackDamage;    // 원래 공격력 잠시 저장할 변수
+    // 원래 제작 시스템 성공 확률 저장?할 변수? 방법 좀 생각해보고
+    // 원래 죄책감 레벨 저장..을 해야할까 그냥 그때되면 그냥 -1하면 되는게 아닐까.. 근데 그러면 정신력 때문에 죄책감 레벨이 하나 올라갔는데 거기서 레벨을 내리거나 올리거나 하면?
+    // 어떻게 되는거지...
 
 
     void Awake()
@@ -99,6 +107,7 @@ public class PlayerCore : CreatureBase, IBegin
         Debug.Log($"정신력 수치 : {currentMental}");
     }
 
+    #region 기본 시스템
     // =============================================================
     // 스테이터스 기초 값 세팅
     // =============================================================
@@ -113,6 +122,8 @@ public class PlayerCore : CreatureBase, IBegin
         attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
         //attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
+
+        currentAttackDamage = attackDamage;
     }
 
     // =============================================================
@@ -164,7 +175,9 @@ public class PlayerCore : CreatureBase, IBegin
 
         isAttacking = false;
     }
+    #endregion
 
+    #region 포만감
     /* =============================================================
        { 포만감 }
     - 시작시 80으로 설정, 최대 100 최소 0
@@ -179,6 +192,7 @@ public class PlayerCore : CreatureBase, IBegin
     ====================================
     25.09.07 : 포만감 굶주림 코루틴 수정
     ============================================================= */
+
 
     /// <summary>
     /// 초당 포만감 1씩 감소 Start 함수에서 시작 (코루틴)
@@ -288,7 +302,9 @@ public class PlayerCore : CreatureBase, IBegin
             starvationCoroutine = null;
         }
     }
+    #endregion
 
+    #region 정신력
     /* =============================================================
         { 정신력 }
     - 시작시 100으로 시작, 0 ~ 100 사이의 값을 가짐
@@ -312,21 +328,44 @@ public class PlayerCore : CreatureBase, IBegin
     TODO : 
     ============================================================= */
 
-    // TODO : 구현하고 어디서 호출할지도.. 해야지..
+    // 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     void MentalState()
     {
-        if(currentMental < 40)
+        currentAttackDamage = attackDamage;
+
+        if (currentMental < 40 && isApplyDebuff == false)
         {
             // 공격력(5%), 설치 작업 대성공 확률(40%)은 감소, 죄책감 시스템 레벨 증가(1Lv) => 정신력이 40이상이 되면 원래 레벨로 돌아감
+            
+        }
+        else
+        {
+            RemoveMentalDebuff();
         }
     }
 
     // TODO : 정신력 디버프 (0 ~ 39 사이 값일 때)  구현해야함..
     void ApplyMentalDebuff()
     {
-        float debuffAttackDamage = attackDamage * 0.5f;
+        isApplyDebuff = true;
+        // [[ 공격력 감소 ]]
+
+        float debuffAttackDamage = attackDamage * 0.5f; // 현재 공격력의 5% 계산하기 전에 원래 공격력 저장
+        attackDamage -= Mathf.RoundToInt(debuffAttackDamage); // 공격력 float형으로 바꿔도 되는지 물어봐야됨.. 지금은 반올림 해서 감소
+
+        // [[ 설치 작업 대성공 확률 감소 ]] => 어떻게 할지 생각 좀 해보고.. 지금 확률 관리하는 스크립트가 PlayerCore 스크립트 참조하고 있음
+
+        // 죄책감 시스템 레벨 1증가, 
+    }
+
+    // TODO : 정신력 디버프 해제
+    void RemoveMentalDebuff()
+    {
+        attackDamage = currentAttackDamage;
 
     }
+    // 여기 까지!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
     /// <summary>
     /// 정신력 계산 ? 메서드 
@@ -404,7 +443,10 @@ public class PlayerCore : CreatureBase, IBegin
             yield return new WaitForSeconds(existEnemyMentalCool);
             UpdateMental(existEnemyMentalDecrease);
         }        
-    }    
+    }
 
-    // 만취상태 효과 구현해야함 으아아악
+    // 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // 만취상태 효과 구현해야함 으아아악 코루틴으로
+
+    #endregion
 }
