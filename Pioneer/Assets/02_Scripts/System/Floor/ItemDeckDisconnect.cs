@@ -7,6 +7,7 @@ using UnityEngine;
 [System.Serializable]
 class DeckInfo
 {
+    public Vector2Int coord;
     public GameObject obj;
     public bool isConnected;
 }
@@ -21,10 +22,11 @@ public class ItemDeckDisconnect : MonoBehaviour
 {
     public static ItemDeckDisconnect instance;
 
-    [SerializeField] private Transform mast;       // 돛대
-    [SerializeField] private GameObject worldSpace; // 갑판 부모 오브젝트
-    [SerializeField] private LayerMask deckLayer;   // "Platform" 레이어
-    [SerializeField] private Vector2 gridSize = new(1, 1); // 좌표 스냅 단위
+    [SerializeField] private Transform mast;                // 돛대
+    [SerializeField] private GameObject worldSpace;         // 갑판 부모 오브젝트
+    [SerializeField] private LayerMask deckLayer;           // "Platform" 레이어
+    [SerializeField] private Vector2 gridSize = new(2, 2);  // 좌표 스냅 단위
+    [SerializeField] private List<DeckInfo> deckLists = new();  // 리스트 확인 용
 
     private Dictionary<Vector2Int, DeckInfo> decks = new();
     private readonly Vector2Int[] DIR4 = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
@@ -87,6 +89,7 @@ public class ItemDeckDisconnect : MonoBehaviour
 
         while (q.Count > 0)
         {
+            Debug.Log("테스트용3333");
             var cur = q.Dequeue();
             if (!decks.ContainsKey(cur)) continue;
 
@@ -94,16 +97,20 @@ public class ItemDeckDisconnect : MonoBehaviour
 
             foreach (var d in DIR4)
             {
+                Debug.Log("테스트용4444");
                 var nxt = cur + d;
                 if (visited.Contains(nxt)) continue;
                 if (decks.ContainsKey(nxt))
                 {
+                    Debug.Log("테스트용5555");
                     visited.Add(nxt);
                     q.Enqueue(nxt);
                 }
             }
         }
-    }
+
+		RefreshDebugView();
+	}
 
     /// <summary>
     /// 연결되지 않은 갑판(GameObject) 리스트 반환
@@ -117,10 +124,24 @@ public class ItemDeckDisconnect : MonoBehaviour
         return list;
     }
 
-    // -------------------- 내부 유틸 --------------------
-    private bool TryGetNearestDeckToMast(out Vector2Int coord)
+	public void RefreshDebugView()
+	{
+		deckLists.Clear();
+		foreach (var kv in decks)
+		{
+			deckLists.Add(new DeckInfo
+			{
+				coord = kv.Key,
+				obj = kv.Value.obj,
+				isConnected = kv.Value.isConnected
+			});
+		}
+	}
+
+	// -------------------- 내부 유틸 --------------------
+	private bool TryGetNearestDeckToMast(out Vector2Int coord)
     {
-        coord = default;
+		coord = default;
         float best = float.MaxValue;
         bool found = false;
 
@@ -143,4 +164,15 @@ public class ItemDeckDisconnect : MonoBehaviour
         int cy = Mathf.RoundToInt(pos.z / Mathf.Max(0.0001f, gridSize.y));
         return new Vector2Int(cx, cy);
     }
+
+	private void OnDrawGizmos()
+	{
+		if (decks == null) return;
+		foreach (var kv in decks)
+		{
+			Gizmos.color = kv.Value.isConnected ? Color.green : Color.red;
+			Gizmos.DrawSphere(kv.Value.obj.transform.position + Vector3.up * 0.5f, 0.2f);
+		}
+	}
+
 }
