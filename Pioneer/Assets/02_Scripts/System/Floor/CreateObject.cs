@@ -221,8 +221,8 @@ public class CreateObject : MonoBehaviour, IBegin
 					// 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어져있을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
 					if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                         return true;
-                    else
-                        ItemDeckDisconnect.instance.DestroyDeck();
+                    //else
+                        //ItemDeckDisconnect.instance.DestroyDeck();
                 }
 
                 //그 외 설치 불가
