@@ -5584,19 +5584,23 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
-  fov: {fileID: 0}
+  fov: {fileID: 439075677}
   speed: 0
   attackDamage: 0
   attackRange: 0
   attackDelayTime: 0
   fullnessDecreaseTime: 5
   fullnessModifier: 1.3
-  existEnemyMenetalCool: 2
+  existEnemyMentalCool: 2
+  existEnemyMentalDecrease: -1
+  attackedFromEnemy: -3
+  reduceMentalOnMarinerDie: 0.2
+  eatFoodincreaseMental: 10
   playerAttack: {fileID: 361639216}
   attackHeight: 1
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
 --- !u!114 &439075676
 MonoBehaviour:
   m_ObjectHideFlags: 0

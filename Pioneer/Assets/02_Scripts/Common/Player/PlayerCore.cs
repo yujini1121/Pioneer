@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 /* =============================================================
  * PlayerStats (CreatureBase 상속) : 체력, 공격력 같은 핵심 스탯 및 TakeDamage 같은 기능 관리
@@ -27,6 +26,7 @@ float attackRange = 0.4f;			// 공격 거리
  ============================================================= */
 
 // TODO : 구현 완료 후 전체적인 코드 정리 및 빠진거 있는지 확인.. 그리고 포만감, 정신력 float로 변경해야함. 추가로 관련 코드를 수정사항 있는지 확인
+// + 매 프레임 NearEnemy 호출이 비효율적임 ..
 public class PlayerCore : CreatureBase, IBegin
 {
     // 생체 시스템 변수
@@ -96,6 +96,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         fov.DetectTargets(enemyLayer);
         NearEnemy();
+        Debug.Log($"정신력 수치 : {currentMental}");
     }
 
     // =============================================================
@@ -307,6 +308,8 @@ public class PlayerCore : CreatureBase, IBegin
     [동결 조건]
     - 아이템 중 술을 마시면 만취 상태가 됨
     - 만취 상태 : 정신력 증가 및 감소 불가, 동결됨
+
+    TODO : 
     ============================================================= */
 
     // TODO : 구현하고 어디서 호출할지도.. 해야지..
@@ -385,7 +388,7 @@ public class PlayerCore : CreatureBase, IBegin
         }
         else if(fov.visibleTargets.Count == 0 && enemyExistCoroutine != null)
         {
-            StopCoroutine(EnemyExist());
+            StopCoroutine(enemyExistCoroutine);
             enemyExistCoroutine = null;
         }
     }
@@ -402,4 +405,6 @@ public class PlayerCore : CreatureBase, IBegin
             UpdateMental(existEnemyMentalDecrease);
         }        
     }    
+
+    // 만취상태 효과 구현해야함 으아아악
 }
