@@ -2,8 +2,9 @@ using System.Collections;
 using UnityEngine;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
-/* PlayerStats (CreatureBase 상속) : 체력, 공격력 같은 핵심 스탯 및 TakeDamage 같은 기능 관리
- * [있어야 할 변수]
+/* =============================================================
+ * PlayerStats (CreatureBase 상속) : 체력, 공격력 같은 핵심 스탯 및 TakeDamage 같은 기능 관리
+ [있어야 할 변수]
 int hp = 100;					// 체력
 int fullness = 100;				// 포만감
 int mental = 100;					// 정신력
@@ -13,13 +14,7 @@ float AttackCooldown = 0.4f;			// 공격 후 지연 시간
 float totalAttackTime = 1.0f;			// 총 공격 시간
 int attackPerSecond = 1;			// 초당 공격 가능 횟수
 float attackRange = 0.4f;			// 공격 거리
-============================================================================================
-- 이동
-- 공격
-- 포만감
-- 정신력
-- 체력 깎이는 함수 + 체력 올라가는 함수
-=============================================================================================
+===============================================================
 25.09.07 남은 일
     - 음식 섭취 했을 때 어떻게 구현할 것인지
     - 정신력 구현
@@ -29,8 +24,9 @@ float attackRange = 0.4f;			// 공격 거리
     - 정신력 구현
     - 스테이터스 레벨 구현
     - 포만감 및 정신력 최소, 최대 제한 걸어두기
- */
+ ============================================================= */
 
+// TODO : 구현 완료 후 전체적인 코드 정리 및 빠진거 있는지 확인.. 그리고 포만감, 정신력 float로 변경해야함. 추가로 관련 코드를 수정사항 있는지 확인
 public class PlayerCore : CreatureBase, IBegin
 {
     // 생체 시스템 변수
@@ -44,37 +40,45 @@ public class PlayerCore : CreatureBase, IBegin
         Starving    // 굶주림 (0)
     }
     
-        // 포만감 변수  
-    int currentfullness;         
-    int maxFullness = 100;
-    int minFullness = 0;
-    FullnessState currentFullnessState;
-    int fullnessStarvingMax = 100;
-    private Coroutine starvationCoroutine;
+        // [ 포만감 변수 ]  
+    int currentFullness;                                            // 현재 포만감 값
+    int maxFullness = 100;                                          // 최대 포만감 값
+    int minFullness = 0;                                            // 최소 포만감 값
+    FullnessState currentFullnessState;                             // 현재 포만감 상태
+    int fullnessStarvingMax = 100;                                  // 굶기 상태시 체력 깎이는 최대 횟수 (100회)
+    private Coroutine starvationCoroutine;                          // 굶기 상태시 실행되는 코루틴
 
     [Header("포만감 설정")]
-    [SerializeField] private float fullnessDecreaseTime = 5f;    // 포만감 기본 감소 속도(시간)
-    [SerializeField] private float fullnessModifier = 1.3f;      // 포만감 감소 속도 증가값 => 30%
+    [SerializeField] private float fullnessDecreaseTime = 5f;       // 포만감 기본 감소 속도(시간)
+    [SerializeField] private float fullnessModifier = 1.3f;         // 포만감 감소 속도 증가값 => 30%
 
-        // 정신력 변수
-    int currentmental;         
-    int maxMental = 100;
-    int minMental = 0;
-    bool isDrunk = false;
-    private Coroutine enemyExistCoroutine;
+        // [ 정신력 변수 ]
+    int currentMental;                                              // 현재 정신력 값
+    int maxMental = 100;                                            // 최대 정신력 값
+    int minMental = 0;                                              // 최소 정신력 값
+    bool isDrunk = false;                                           // 만취 상태 여부
+    private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴 
 
     [Header("정신력 설정")]
-    [SerializeField] private float existEnemyMenetalCool = 2f;
+    [SerializeField] private float existEnemyMentalCool = 2f;        // 일정 범위 안 에너미 존재시 정신력이 깎이는 시간 텀
+    [SerializeField] private int existEnemyMentalDecrease = -1;      // 일정 범위 안 에너미 존재시 깎이는 정신력 값 
+    [SerializeField] private int attackedFromEnemy = -3;             // 에너미한테 공격 당했을 경우 깎이는 정신력 값
+    [SerializeField] private float reduceMentalOnMarinerDie = 0.2f; // 승무원 사망시 깎이는 정신력 값
+    [SerializeField] private int eatFoodincreaseMental = 10;
 
+    // 공격 관련 설정 변수
     [Header("공격 설정")]
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private float attackHeight = 1.0f;
     [SerializeField] private LayerMask enemyLayer;
 
+    // 기본 시스템 관련 번수
     private Rigidbody playerRb;
     private bool isAttacking = false;
-
     private float defaultSpeed;
+
+    // 원래 공격력, 원래 제작 시스템 성공 확률, 원래 죄책감 레벨 적어둬야함 정신력이 멀쩡해지면 원래 값으로 돌아가야하기 때문
+
 
     void Awake()
     {
@@ -84,12 +88,14 @@ public class PlayerCore : CreatureBase, IBegin
     
     void Start()
     {
-        StartCoroutine(FullnessSystemCoroutine());
+        UpdateFullnessState();
+        StartCoroutine(FullnessSystemCoroutine());                   // 게임 시작시 포만감 계속 1씩 감소 시작
     }
 
     void Update()
     {
         fov.DetectTargets(enemyLayer);
+        NearEnemy();
     }
 
     // =============================================================
@@ -101,8 +107,8 @@ public class PlayerCore : CreatureBase, IBegin
         hp = maxHp;                 // 체력
         speed = 4.0f;               // 이동 속도
         defaultSpeed = speed;
-        currentfullness = 80;              // 포만감 (시작 값 80)
-        currentmental = maxMental;         // 정신력 (시작 값 100)
+        currentFullness = 80;              // 포만감 (시작 값 80)
+        currentMental = maxMental;         // 정신력 (시작 값 100)
         attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
         //attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
@@ -173,7 +179,10 @@ public class PlayerCore : CreatureBase, IBegin
     25.09.07 : 포만감 굶주림 코루틴 수정
     ============================================================= */
 
-    // 초당 포만감 1씩 감소 Start 함수에서 시작 (코루틴)
+    /// <summary>
+    /// 초당 포만감 1씩 감소 Start 함수에서 시작 (코루틴)
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator FullnessSystemCoroutine()
     {
         while(true)
@@ -186,12 +195,13 @@ public class PlayerCore : CreatureBase, IBegin
 
             yield return new WaitForSeconds(currentDecreaseTime);
 
-            if(currentfullness > 0)
+            if(currentFullness > 0)
             {
-                currentfullness--;
+                currentFullness--;
+                currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
                 UpdateFullnessState();
             }
-            Debug.Log($"굶주림 수치 : {currentfullness}");
+            Debug.Log($"굶주림 수치 : {currentFullness}");
         }
     }
 
@@ -202,31 +212,31 @@ public class PlayerCore : CreatureBase, IBegin
     {
         FullnessState fullnessState;
 
-        if (currentfullness >= 80)
+        if (currentFullness >= 80)
             fullnessState = FullnessState.Full;
-        else if (currentfullness >= 30)
+        else if (currentFullness >= 30)
             fullnessState = FullnessState.Normal;
-        else if (currentfullness >= 1)
+        else if (currentFullness >= 1)
             fullnessState = FullnessState.Hungry;
         else
             fullnessState = FullnessState.Starving;
 
-        if(fullnessState != currentFullnessState)
+        switch (fullnessState)
         {
-            currentFullnessState = fullnessState;
+            case FullnessState.Full:
+                speed = defaultSpeed * 1.2f;
+                break;
+            case FullnessState.Hungry:
+                speed = defaultSpeed * 0.7f;
+                break;
+            default:
+                speed = defaultSpeed;
+                break;
+        }
 
-            switch(currentFullnessState)
-            {
-                case FullnessState.Full:
-                    speed = defaultSpeed * 1.2f;
-                    break;
-                case FullnessState.Hungry:
-                    speed = defaultSpeed * 0.7f;
-                    break;
-                default:
-                    speed = defaultSpeed;
-                    break;
-            }
+        if (fullnessState != currentFullnessState)
+        {
+            currentFullnessState = fullnessState;            
 
             if(currentFullnessState == FullnessState.Starving)      // 굶주림 상태일때
             {
@@ -244,7 +254,10 @@ public class PlayerCore : CreatureBase, IBegin
         }
     }
 
-    // 초당 체력 1씩 감소하는 굶주림 함수 (코루틴)
+    /// <summary>
+    /// 초당 체력 1씩 감소하는 굶주림 함수 (코루틴)
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator StarvingDamageCorountine()
     {        
         Debug.Log("굶주림 상태 : 체력 감소 시작");
@@ -255,10 +268,24 @@ public class PlayerCore : CreatureBase, IBegin
         }        
     }
 
-    // public 형의 음식 섭취시 호출할 수 있는 함수 추가
-    public void EatFood(int increase)
+    /// <summary>
+    /// 음식 섭취시 포만감 증가, 증가값 매개변수로 전달
+    /// </summary>
+    /// <param name="increase"></param>
+    public void EatFoodFullness(int increase)
     {
-        currentfullness += increase;
+        currentFullness += increase;
+        currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
+    }
+
+    // 굶주림 제거 
+    public void RemoveStarvingIEnumerator()
+    {
+        if(starvationCoroutine != null)
+        {
+            StopCoroutine(starvationCoroutine);
+            starvationCoroutine = null;
+        }
     }
 
     /* =============================================================
@@ -268,38 +295,87 @@ public class PlayerCore : CreatureBase, IBegin
     - 정신력 0 ~ 39 : 공격력, 설치 작업 대성공 확률, 죄책감 시스템 레벨 감소
 
     [증가 조건]
-    - 아이템 사용에 따라 5 ~ 80까지 증가 가능
-    - 음식 섭취 시 10씩 증가 (종류 상관 없음)
+    - 둘 다 아이템 사용시 증가값만 전달하면 정신력 추가하는 함수를 추가
+        - 아이템 사용에 따라 5 ~ 80까지 증가 가능
+        - 음식 섭취 시 10씩 증가 (종류 상관 없음)
 
-    [감소 조건]
-    - 플레이어 반경 2M 내 에너미가 존재할 경우 2초당 1씩 감소
-    - 에너미에게 공격 받은 경우 공격 1회당 3씩 감소 (반경 내 에너미 존재 조건과 중첩 가능)
-    - 승무원 AI 사망시 현재 정신력의 20% 감소
+    [감소 조건]    
+        - 플레이어 반경 2M 내 에너미가 존재할 경우 2초당 1씩 감소
+        - 에너미에게 공격 받은 경우 공격 1회당 3씩 감소 (반경 내 에너미 존재 조건과 중첩 가능)
+        - 승무원 AI 사망시 현재 정신력의 20% 감소
 
     [동결 조건]
     - 아이템 중 술을 마시면 만취 상태가 됨
     - 만취 상태 : 정신력 증가 및 감소 불가, 동결됨
     ============================================================= */
 
+    // TODO : 구현하고 어디서 호출할지도.. 해야지..
+    void MentalState()
+    {
+        if(currentMental < 40)
+        {
+            // 공격력(5%), 설치 작업 대성공 확률(40%)은 감소, 죄책감 시스템 레벨 증가(1Lv) => 정신력이 40이상이 되면 원래 레벨로 돌아감
+        }
+    }
+
+    // TODO : 정신력 디버프 (0 ~ 39 사이 값일 때)  구현해야함..
+    void ApplyMentalDebuff()
+    {
+        float debuffAttackDamage = attackDamage * 0.5f;
+
+    }
+
+    /// <summary>
+    /// 정신력 계산 ? 메서드 
+    /// </summary>
+    /// <param name="increase"></param>
     void UpdateMental(int increase)
     {
         if(isDrunk)
             return;
 
-        currentmental += increase;
-        currentmental = Mathf.Clamp(currentmental, minMental, maxMental);
+        currentMental += increase;
+        currentMental = Mathf.Clamp(currentMental, minMental, maxMental);
 
-
-    }
-
-    // 정신력 올리는 아이템 사용시 호출
-    public void UseMentalItem(int increase)
-    {
-
+        // 수치에 따라 디버프 부여,,
     }
 
     /// <summary>
-    /// 반경 2m 내에 에너미가 존재 여부를 확인하고 정신력 감소 코루틴 실행 및 중단 함수
+    /// 정신력 올리는 아이템 사용시 호출, 
+    /// </summary>
+    /// <param name="increase"></param>
+    public void UseMentalItem(int increase)
+    {
+        UpdateMental(increase);
+    }
+
+    /// <summary>
+    /// 음식 섭취시 호출, 음식 종류 상관없이 10씩 증가..
+    /// </summary>
+    public void EatFoodMental()
+    {
+        UpdateMental(eatFoodincreaseMental);
+    }
+
+    /// <summary>
+    /// 에너미에게 공격 받은 경우 정신력 감소 시키는 함수 -3
+    /// </summary>
+    public void AttackedFromEnemy()
+    {
+        UpdateMental(attackedFromEnemy);
+    }
+
+    /// <summary>
+    /// 승무원 죽었을때 호출, 정신력 감소, 현재 정신력의 20%
+    /// </summary>
+    public void ReduceMentalOnMarinerDie()
+    {
+        float reduce = currentMental * reduceMentalOnMarinerDie;
+        UpdateMental(Mathf.RoundToInt(-reduce)); // 반올림하고 았는데 그냥 . 아래 수 버릴거면 수정 가능
+    }
+
+    /// <summary>
+    /// 반경 2m 내에 에너미가 존재 여부를 확인하고 정신력 감소 코루틴 실행 및 중단할때 호출 
     /// </summary>
     public void NearEnemy()
     {
@@ -315,15 +391,15 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// 에너미 존재시 2초에 한 번 정신력 감소
+    /// 에너미 존재시 2초에 한 번 정신력 감소 -1
     /// </summary>
     /// <returns></returns>
     private IEnumerator EnemyExist()
     {
         while(true)
         {
-            yield return new WaitForSeconds(existEnemyMenetalCool);
-            currentmental--;
+            yield return new WaitForSeconds(existEnemyMentalCool);
+            UpdateMental(existEnemyMentalDecrease);
         }        
-    }
+    }    
 }
