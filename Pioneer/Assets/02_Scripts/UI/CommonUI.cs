@@ -330,6 +330,8 @@ public class CommonUI : MonoBehaviour, IBegin
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
         InventoryUiMain.instance.IconRefresh();
         IsCurrentCrafting = false;
+        // 요기에 경험치 추가 로직
+        PlayerStatsLevel.Instance.AddExp(GrowStateType.Crafting, currentRecipe.exp);
     }
 
     public void Craft(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)

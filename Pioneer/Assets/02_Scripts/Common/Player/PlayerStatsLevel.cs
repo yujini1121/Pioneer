@@ -2,16 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using UnityEngine;
 
 // PlayerLevelSystem : 전투, 제작, 채집 등 레벨과 경험치 관리
+// TODO : 낚시를 제외한 전투, 제작은 경험치 획득 코드 추가 완료, 낚시 경험치 추가해야함
 
 #region 성장 스테이터스 기획 요약
 /* =============================================================
+- switch문들 리스트 방식으로 바꿔야함 
+
     [[ 전투 레벨 ]] => 에너미 베이스에서 해야하나..
-- 에너미가 플레이어 근접 공격으로 인해 사망할때 CombatExp 획득 (막타)
-    - 에너미 스크립트에서 attacker == Player && hp <= 0 일때 경험치 주는 함수 호출
-- 에너미 hp를 플레이어가 근접 공격으로 40% 이상 깎았을때 CombatExp 획득 -> 그러면... 너무.. 어렵지 않나..? 계산이 너무 많이 들어가야하는데..?
+- 에너미를 한 대 직접 때릴때마다, 경험치 획득 *
     
     { 에너미 처치시 획득 가능한 경험치 량 }
     * 둥지 : 3
@@ -31,7 +33,7 @@ using UnityEngine;
 ==================================================================  
     [[ 손재주 ]] => 태윤씨한테 질문해야할듯..
 - 설치형 오브젝트를 설치 완료 했을때 craftExp 획득
-- 일반 아이템 제작 완료시 craftExp 획득
+- 일반 아이템 제작 완료시 craftExp 획득 *
     - 제작된 후 실물이 존재해야함
     - 제작하는데 필요한 아이템이 1이상 소모
     
@@ -97,29 +99,53 @@ public class GrowState
     }
 }
 
+// 레벨업으로 인한 확률 switch 부분 리스트로 변경하기
 public class PlayerStatsLevel : MonoBehaviour
 {
-    public static PlayerStatsLevel instance { get; private set; }
+    public static PlayerStatsLevel Instance { get; private set; }
 
     public Dictionary<GrowStateType, GrowState> growStates = new Dictionary<GrowStateType, GrowState>();
 
     public PlayerCore player;
 
+    List<float> combatList = new List<float> { 0f, 0.10f, 0.15f, 0.20f, 0.25f, 0.30f };
+    List<float> craftingList = new List<float> { 0f, 0.05f, 0.10f, 0.15f, 0.20f, 0.30f };
+    List<(float count, float chest)> fishingList 
+        = new List<(float count, float chest)> { (0.0f, 0f), (0.05f, 0f), (0.1f, 0.3f), (0.12f, 0.4f), (0.15f, 0.5f) };
+
+
+    // =============== 디버깅용 인스펙터창에서 레벨과 경험치들 보이도록 ==================
+    [SerializeField] private List<GrowState> growStateForInspector;
+
+
     private void Awake()
     {
-        if(instance == null)
-            instance = this;
+        if(Instance == null)
+            Instance = this;
         else
-            Destroy(instance);
+            Destroy(Instance);
 
             player = GetComponent<PlayerCore>();
 
         InitGrowState();
     }
 
+    // =============== 디버깅용 인스펙터창에서 레벨과 경험치들 보이도록 ==================
+    private void Update()
+    {
+        // 에디터에서 실행 중일 때만 작동하도록 해서 성능 부담을 줄임
+        if (Application.isEditor)
+        {
+            // 딕셔너리의 모든 값을 가져와서 리스트에 넣어줌
+            // 이렇게 하면 매 프레임 인스펙터에 최신 정보가 업데이트됨
+            growStateForInspector = new List<GrowState>(growStates.Values);
+        }
+    }
+
     // 스테이터스 초기 상태 설정
     void InitGrowState()
     {
+        growStates.Clear();
         growStates.Add(GrowStateType.Combat, new GrowState(GrowStateType.Combat, new int[] { 50, 100, 150, 200, 250 }));
         growStates.Add(GrowStateType.Crafting, new GrowState(GrowStateType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
         growStates.Add(GrowStateType.Fishing, new GrowState(GrowStateType.Fishing, new int[] { 50, 100, 150, 200, 250 }));
@@ -132,6 +158,7 @@ public class PlayerStatsLevel : MonoBehaviour
     /// <param name="amount">경험치 값</param>
     public void AddExp(GrowStateType type, int amount)
     {
+        UnityEngine.Debug.Log($"AddExp() 시작");
         GrowState growState = growStates[type];
 
         if (growState.level >= growState.maxExp.Length)
@@ -143,112 +170,57 @@ public class PlayerStatsLevel : MonoBehaviour
         {
             growState.currentExp -= growState.maxExp[growState.level];
             growState.level++;
-            Debug.Log($"{type} 레벨업 -> {growState.level}");
+            UnityEngine.Debug.Log($"{type} 레벨업 -> {growState.level}");
 
             CombatChance(type);
         }
+        UnityEngine.Debug.Log($"{type} 스탯 경험치 {amount} 획득");
     }
 
-    // 아래 switch 문들에서 defalut로 받는 값은 레벨 0일때 값
-    // [[ 전투 ]] 레벨업 시 효과 적용
+    /// <summary>
+    /// [[ 전투 ]] 레벨업 시 효과 적용
+    /// </summary>
+    /// <param name="type"></param>
     private void CombatChance(GrowStateType type)
     {
+        int combatLevel = growStates[GrowStateType.Combat].level;
         float increaseAttackDamage = 0f;
-        if (type == GrowStateType.Combat)
+        if(combatLevel >= 0 && combatLevel < combatList.Count)
         {
-            // 레벨에 따라 공격력 상승, 무기 아이템 내구도 감소량 감소
-            switch(growStates[GrowStateType.Combat].level)
-            {
-                case 1:
-                    increaseAttackDamage = 0.1f;
-                    break;
-                case 2:
-                    increaseAttackDamage = 0.15f;
-                    break;
-                case 3:
-                    increaseAttackDamage = 0.20f;
-                    break;
-                case 4:
-                    increaseAttackDamage = 0.25f;
-                    break;
-                case 5:
-                    increaseAttackDamage = 0.30f;
-                    break;
-                default:
-                    increaseAttackDamage = 0f;
-                    break;
-            }
-
-            player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
+            increaseAttackDamage = combatList[combatLevel];
         }
+
+        player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
     }
 
-    // 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // 제작 확률이 정신력에서도 영향을 받고 있어서 현재 방법에서 수정이 필요할 듯 함
-    // [[ 손재주 ]] 대성공 (제작) 확률 반환
     /// <summary>
     /// [[ 손재주 (아이템 제작) ]] 확률 적용
     /// </summary>
     /// <returns></returns>
     public float CraftingChance()
     {
+        int level = growStates[GrowStateType.Crafting].level;
         float greatSuccessChance = 0f;
-        switch (growStates[GrowStateType.Crafting].level)
+        if (level >= 0 &&  level < craftingList.Count)
         {
-            case 1:
-                greatSuccessChance = 0.05f;
-                break;
-            case 2:
-                greatSuccessChance = 0.1f;
-                break;
-            case 3:
-                greatSuccessChance = 0.15f;
-                break;
-            case 4:
-                greatSuccessChance = 0.2f;
-                break;
-            case 5:
-                greatSuccessChance = 0.3f;
-                break;
-            default:
-                greatSuccessChance = 0f;
-                break;
-        }
-        return greatSuccessChance;
+            greatSuccessChance = craftingList[level];
+        }         
+
+        return PlayerCore.Instance.IsMentalDebuff() ? (greatSuccessChance * 6) / 10 : greatSuccessChance;
     }
 
-    // [[ 낚시 ]] 추가 획득 및 보물 상자 추가 획득 확률
     /// <summary>
     /// [[ 낚시 ]] 파밍 재료 및 보물상자 추가 획득 확률 적용
     /// </summary>
     /// <returns></returns>
     public (float count, float chest) FishingChance()      // C#의 튜플이라는 방식의 구현
     {
-        (float count, float chest) fishingChance = (0f, 0f);
-        switch(growStates[GrowStateType.Fishing].level)
+        int level = growStates[GrowStateType.Fishing].level;
+        if (level >= 0 && level < fishingList.Count)
         {
-            case 1:
-                fishingChance = (0.05f, 0f);
-                break;
-            case 2:
-                fishingChance = (0.07f, 0f);
-                break;
-            case 3:
-                fishingChance = (0.1f, 0.3f);
-                break;
-            case 4:
-                fishingChance = (0.12f, 0.4f);
-                break;
-            case 5:
-                fishingChance = (0.15f, 0.5f);
-                break;
-            default:
-                fishingChance = (0.0f, 0f);
-                break;
+            return fishingList[level];
         }
-        return fishingChance;
-    }
 
-    // 정신력에 따른 대성공 제작 확률 감소는 어떻게 해야할까..?
-    
+        return (0.0f, 0f);
+    }
 }
