@@ -7,7 +7,7 @@ public class CreatureBase : CommonBase
     public FOVController fov;   // �þ� ���� = ���� ����
 
     public float speed;
-    public int attackDamage;
+    public int attackDamage; // default value
     public float attackRange;
     public float attackDelayTime;
 

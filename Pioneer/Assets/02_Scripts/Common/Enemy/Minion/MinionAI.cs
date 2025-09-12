@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -227,7 +228,7 @@ public class MinionAI : EnemyBase, IBegin
         {
             if (!isOnGround)
             {
-                nestCool = Random.Range(5f, 15f);
+                nestCool = UnityEngine.Random.Range(5f, 15f);
                 nestCreationTime = Time.time + nestCool;
                 isOnGround = true;
             }

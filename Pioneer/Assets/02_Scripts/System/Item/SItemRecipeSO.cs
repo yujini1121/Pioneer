@@ -12,4 +12,5 @@ public class SItemRecipeSO : ScriptableObject
     public SItemStack[] input;
     public bool isMakeshift;
     public float time;
+    public int exp;
 }
