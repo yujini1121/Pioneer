@@ -17,8 +17,9 @@ public class GameManager : MonoBehaviour, IBegin
     public Gradient dayToNightGradient;
     public Gradient nightToDayGradient;
     public AnimationCurve exposureCurve;
-    public float dayDuration = 120f;
-    public float nightDuration = 60f;
+    public float dayDuration = 270f;
+    public float nightDuration = 90f;
+    public float oneDayDuration = 360f;
 
     private ColorAdjustments colorAdjustments;
     private float cycleTime = 0f;
@@ -34,6 +35,12 @@ public class GameManager : MonoBehaviour, IBegin
     [Header("미니언 에너미")]
     public GameObject minion;
 
+    [Header("게임오버 관리")]
+    public int totalCrewMembers = 0;
+    public int deadCrewMembers = 0;
+    public GameOverUI gameOverUI;
+    public Canvas[] allUICanvas;
+
     private List<GameObject> spawnedMinions = new List<GameObject>();
 
     private void Awake()
@@ -43,8 +50,7 @@ public class GameManager : MonoBehaviour, IBegin
         else
             Destroy(gameObject);
 
-        postProcessVolume.profile.TryGet(out colorAdjustments);
-        fullCycleDuration = dayDuration + nightDuration;
+        postProcessVolume.profile.TryGet(out colorAdjustments);    
     }
 
     private void Start()
@@ -63,7 +69,11 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void Update()
     {
-        currentGameTime += Time.deltaTime;
+        if (Time.timeScale > 0)
+        {
+            currentGameTime += Time.deltaTime;
+        }
+
         UpdateDayNightCycle();
     }
 
@@ -101,6 +111,60 @@ public class GameManager : MonoBehaviour, IBegin
         }
     }
 
+    public void GetGameTimeInfo(out int days, out int hours)
+    {
+        // 전체 경과 시간을 일 단위로 계산
+        days = Mathf.FloorToInt(currentGameTime / oneDayDuration);
+
+        // 남은 시간을 시간으로 계산 (하루 = 24시간 기준)
+        float remainingTime = currentGameTime % oneDayDuration;
+        hours = Mathf.FloorToInt((remainingTime / oneDayDuration) * 24f);
+    }
+    public void AddCrewMember() // 나중에 승무원 영입 시스템 쪽에서 추가해야할듯
+    {
+        totalCrewMembers++;
+    }
+
+    public void MarinerDiedCount() // 승무원 사망 카운트
+    {
+        deadCrewMembers++;
+    }
+
+    // 게임오버 실행
+    public void TriggerGameOver()
+    {
+        Time.timeScale = 0f;
+
+        // 플레이어 투명화
+        if (ThisIsPlayer.Player != null)
+        {
+            Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
+            if (playerRenderer != null)
+            {
+                Color color = playerRenderer.material.color;
+                color.a = 0f;
+                playerRenderer.material.color = color;
+            }
+        }
+
+        HideAllUI();
+
+        if (gameOverUI != null)
+        {
+            gameOverUI.ShowGameOverScreen(totalCrewMembers, deadCrewMembers);
+        }
+    }
+
+    void HideAllUI()
+    {
+        foreach (Canvas canvas in allUICanvas)
+        {
+            if (canvas != null && canvas != gameOverUI.GetComponent<Canvas>())
+            {
+                canvas.gameObject.SetActive(false);
+            }
+        }
+    }
     private void SpawnMinions()
     {
         if (spawnPoints.Length == 0 || minion == null) return;
@@ -142,4 +206,6 @@ public class GameManager : MonoBehaviour, IBegin
     {
         Debug.Log($"자원 획득: {type}");
     }
+
+
 }

@@ -2153,7 +2153,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &164871569
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2892,24 +2892,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
         type: 3}
-      propertyPath: gameOverUI
-      value: 
-      objectReference: {fileID: 1070422686}
-    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
-        type: 3}
       propertyPath: postProcessVolume
       value: 
       objectReference: {fileID: 990696443}
-    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
-        type: 3}
-      propertyPath: allUICanvas.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
-        type: 3}
-      propertyPath: allUICanvas.Array.data[0]
-      value: 
-      objectReference: {fileID: 1070422684}
     - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
         type: 3}
       propertyPath: spawnPoints.Array.data[0]
@@ -15175,7 +15160,6 @@ GameObject:
   - component: {fileID: 1070422684}
   - component: {fileID: 1070422683}
   - component: {fileID: 1070422682}
-  - component: {fileID: 1070422686}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -15268,26 +15252,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1070422686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1070422681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d26edf2a6772fe49918b34c7e9a27e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameOverPanel: {fileID: 164871568}
-  otherUIPanels:
-  - {fileID: 320167344}
-  - {fileID: 1167937807}
-  survivalTimeText: {fileID: 721959686}
-  crewStatsText: {fileID: 792769402}
-  restartButton: {fileID: 1208479120}
-  titleButton: {fileID: 386038215}
 --- !u!1001 &1076812879
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29478,6 +29442,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2119129786}
+  - component: {fileID: 2119129787}
   m_Layer: 5
   m_Name: GameOverUI
   m_TagString: Untagged
@@ -29505,6 +29470,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2119129787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2119129785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d26edf2a6772fe49918b34c7e9a27e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameOverPanel: {fileID: 164871568}
+  survivalTimeText: {fileID: 721959686}
+  crewStatsText: {fileID: 792769402}
+  restartButton: {fileID: 1208479120}
+  titleButton: {fileID: 386038215}
 --- !u!1001 &2132415664
 PrefabInstance:
   m_ObjectHideFlags: 0

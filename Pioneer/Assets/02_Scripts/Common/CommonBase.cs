@@ -49,7 +49,17 @@ public class CommonBase : MonoBehaviour, IBegin
     // 사라졌을때 호출하는 변수 (생명체인 경우 사망했을 때)
     public virtual void WhenDestroy()
     {
-        Debug.Log($"{gameObject.name} 오브젝트 파괴");
+        if (GameManager.Instance == null) return; // 얼리 리턴
+
+        if (gameObject.layer == LayerMask.NameToLayer("Player"))
+        {
+            GameManager.Instance.TriggerGameOver();
+            return;
+        }
+        else if (gameObject.layer == LayerMask.NameToLayer("Mariner"))
+        {
+            GameManager.Instance.MarinerDiedCount();
+        }
         Destroy(gameObject);
     }
 }

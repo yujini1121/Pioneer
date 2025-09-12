@@ -291,8 +291,10 @@ public class MastSystem : CommonBase
 
     public override void WhenDestroy()
     {
-        Debug.Log("µÀ´ë ÆÄ±« °ÔÀÓ¿À¹ö");
-        MastManager.Instance.GameOver();
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.TriggerGameOver();
+        }
     }
 
 }

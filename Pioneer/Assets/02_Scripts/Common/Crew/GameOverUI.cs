@@ -9,6 +9,8 @@ public class GameOverUI : MonoBehaviour
 {
     [Header("UI 요소")]
     public GameObject gameOverPanel;
+    public GameObject[] otherUIPanels; // 숨길 다른 UI 패널들
+
     public TextMeshProUGUI survivalTimeText;
     public TextMeshProUGUI crewStatsText;
     public Button restartButton;
@@ -17,10 +19,8 @@ public class GameOverUI : MonoBehaviour
     private void Start()
     {
         gameOverPanel.SetActive(false);
-
         if (restartButton != null)
             restartButton.onClick.AddListener(RestartGame);
-
         if (titleButton != null)
             titleButton.onClick.AddListener(GoToTitle);
     }
@@ -29,30 +29,22 @@ public class GameOverUI : MonoBehaviour
     {
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
-
         UpdateGameOverTexts(totalCrewMembers, deadCrewMembers);
     }
 
     private void UpdateGameOverTexts(int totalCrewMembers, int deadCrewMembers)
     {
-        // 시간 계산
-        float totalGameTime = 0f;
-        if (GameManager.Instance != null)
-        {
-            totalGameTime = GameManager.Instance.currentGameTime;
-        }
-
-        int totalDays = Mathf.FloorToInt(totalGameTime / (GameManager.Instance.dayDuration + GameManager.Instance.nightDuration));
-        float remainingTime = totalGameTime % (GameManager.Instance.dayDuration + GameManager.Instance.nightDuration);
-        int totalHours = Mathf.FloorToInt(remainingTime / 3600f * 24f);
+        // GameManager에서 일수와 시간 가져오기
+        int days, hours;
+        GameManager.Instance.GetGameTimeInfo(out days, out hours);
 
         // 생존 시간 텍스트
         if (survivalTimeText != null)
         {
-            if (totalDays > 0)
-                survivalTimeText.text = $"당신은 {totalDays}일, {totalHours}시간 동안 항해했습니다.";
+            if (days > 0)
+                survivalTimeText.text = $"당신은 {days}일 {hours}시간 동안 항해했습니다.";
             else
-                survivalTimeText.text = $"당신은 {totalHours}시간 동안 항해했습니다.";
+                survivalTimeText.text = $"당신은 {hours}시간 동안 항해했습니다.";
         }
 
         // 승무원 통계 텍스트
