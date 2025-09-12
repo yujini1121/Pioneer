@@ -4,12 +4,12 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private PlayerCore playerCore;
-    private PlayerAttack playerAttack;
+    // private PlayerAttack playerAttack;
 
     void Awake()
     {
         playerCore = GetComponent<PlayerCore>();
-        playerAttack = GetComponentInChildren<PlayerAttack>();
+        // playerAttack = GetComponentInChildren<PlayerAttack>();
     }
 
     void Update()

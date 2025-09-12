@@ -331,7 +331,7 @@ public class CommonUI : MonoBehaviour, IBegin
         InventoryUiMain.instance.IconRefresh();
         IsCurrentCrafting = false;
         // 요기에 경험치 추가 로직
-        PlayerStatsLevel.Instance.AddExp(GrowStateType.Crafting, currentRecipe.exp);
+        PlayerStatsLevel.Instance.AddExp(GrowStatType.Crafting, currentRecipe.exp);
     }
 
     public void Craft(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)

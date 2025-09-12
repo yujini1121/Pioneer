@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -75,7 +76,7 @@ using UnityEngine;
 ============================================================= */
 #endregion
 
-public enum GrowStateType
+public enum GrowStatType
 {
     Combat,         // 전투
     Crafting,       // 제작
@@ -85,12 +86,12 @@ public enum GrowStateType
 [System.Serializable]
 public class GrowState
 {
-    public GrowStateType Type;      // 스테이터스 종류
+    public GrowStatType Type;      // 스테이터스 종류
     public int level;               // 현재 레벨
     public float currentExp;        // 현재 보유중인 경험치 값
     public int[] maxExp;            // 레벨에 따른 경험치 최대값
 
-    public GrowState(GrowStateType type, int[] maxExp)
+    public GrowState(GrowStatType type, int[] maxExp)
     {
         this.Type = type;
         this.maxExp = maxExp;
@@ -104,19 +105,21 @@ public class PlayerStatsLevel : MonoBehaviour
 {
     public static PlayerStatsLevel Instance { get; private set; }
 
-    public Dictionary<GrowStateType, GrowState> growStates = new Dictionary<GrowStateType, GrowState>();
+    public Dictionary<GrowStatType, GrowState> growStates = new Dictionary<GrowStatType, GrowState>();
 
     public PlayerCore player;
 
-    List<float> combatList = new List<float> { 0f, 0.10f, 0.15f, 0.20f, 0.25f, 0.30f };
-    List<float> craftingList = new List<float> { 0f, 0.05f, 0.10f, 0.15f, 0.20f, 0.30f };
-    List<(float count, float chest)> fishingList 
+    public List<(float attack, float durability)> combatList 
+        = new List<(float attack, float durability)> { (0f, 0f), (0.10f, -0.1f), (0.15f, -0.3f), (0.20f, -0.5f), (0.25f, -0.8f), (0.30f, -1) };
+    public List<float> craftingList = new List<float> { 0f, 0.05f, 0.10f, 0.15f, 0.20f, 0.30f };
+    public List<(float count, float chest)> fishingList 
         = new List<(float count, float chest)> { (0.0f, 0f), (0.05f, 0f), (0.1f, 0.3f), (0.12f, 0.4f), (0.15f, 0.5f) };
 
+    public static event Action<GrowStatType> StatLevelUp;
+    // 
 
     // =============== 디버깅용 인스펙터창에서 레벨과 경험치들 보이도록 ==================
     [SerializeField] private List<GrowState> growStateForInspector;
-
 
     private void Awake()
     {
@@ -133,11 +136,8 @@ public class PlayerStatsLevel : MonoBehaviour
     // =============== 디버깅용 인스펙터창에서 레벨과 경험치들 보이도록 ==================
     private void Update()
     {
-        // 에디터에서 실행 중일 때만 작동하도록 해서 성능 부담을 줄임
         if (Application.isEditor)
         {
-            // 딕셔너리의 모든 값을 가져와서 리스트에 넣어줌
-            // 이렇게 하면 매 프레임 인스펙터에 최신 정보가 업데이트됨
             growStateForInspector = new List<GrowState>(growStates.Values);
         }
     }
@@ -146,9 +146,9 @@ public class PlayerStatsLevel : MonoBehaviour
     void InitGrowState()
     {
         growStates.Clear();
-        growStates.Add(GrowStateType.Combat, new GrowState(GrowStateType.Combat, new int[] { 50, 100, 150, 200, 250 }));
-        growStates.Add(GrowStateType.Crafting, new GrowState(GrowStateType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
-        growStates.Add(GrowStateType.Fishing, new GrowState(GrowStateType.Fishing, new int[] { 50, 100, 150, 200, 250 }));
+        growStates.Add(GrowStatType.Combat, new GrowState(GrowStatType.Combat, new int[] { 50, 100, 150, 200, 250 }));
+        growStates.Add(GrowStatType.Crafting, new GrowState(GrowStatType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
+        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 50, 100, 150, 200, 250 }));
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class PlayerStatsLevel : MonoBehaviour
     /// </summary>
     /// <param name="type">스테이터스 종류</param>
     /// <param name="amount">경험치 값</param>
-    public void AddExp(GrowStateType type, int amount)
+    public void AddExp(GrowStatType type, int amount)
     {
         UnityEngine.Debug.Log($"AddExp() 시작");
         GrowState growState = growStates[type];
@@ -172,7 +172,11 @@ public class PlayerStatsLevel : MonoBehaviour
             growState.level++;
             UnityEngine.Debug.Log($"{type} 레벨업 -> {growState.level}");
 
-            CombatChance(type);
+            if (type == GrowStatType.Combat)
+            {
+                CombatChance(type);
+            }
+            StatLevelUp?.Invoke(type);
         }
         UnityEngine.Debug.Log($"{type} 스탯 경험치 {amount} 획득");
     }
@@ -181,13 +185,13 @@ public class PlayerStatsLevel : MonoBehaviour
     /// [[ 전투 ]] 레벨업 시 효과 적용
     /// </summary>
     /// <param name="type"></param>
-    private void CombatChance(GrowStateType type)
+    private void CombatChance(GrowStatType type)
     {
-        int combatLevel = growStates[GrowStateType.Combat].level;
+        int combatLevel = growStates[GrowStatType.Combat].level;
         float increaseAttackDamage = 0f;
         if(combatLevel >= 0 && combatLevel < combatList.Count)
         {
-            increaseAttackDamage = combatList[combatLevel];
+            increaseAttackDamage = combatList[combatLevel].attack;
         }
 
         player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
@@ -199,7 +203,7 @@ public class PlayerStatsLevel : MonoBehaviour
     /// <returns></returns>
     public float CraftingChance()
     {
-        int level = growStates[GrowStateType.Crafting].level;
+        int level = growStates[GrowStatType.Crafting].level;
         float greatSuccessChance = 0f;
         if (level >= 0 &&  level < craftingList.Count)
         {
@@ -215,7 +219,7 @@ public class PlayerStatsLevel : MonoBehaviour
     /// <returns></returns>
     public (float count, float chest) FishingChance()      // C#의 튜플이라는 방식의 구현
     {
-        int level = growStates[GrowStateType.Fishing].level;
+        int level = growStates[GrowStatType.Fishing].level;
         if (level >= 0 && level < fishingList.Count)
         {
             return fishingList[level];

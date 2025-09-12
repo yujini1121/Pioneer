@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
@@ -60,8 +61,8 @@ public class PlayerCore : CreatureBase, IBegin
         }
     }
         // [ 포만감 변수 ]  
-    int currentFullness;                                            // 현재 포만감 값
-    int maxFullness = 100;                                          // 최대 포만감 값
+    public int currentFullness;                                            // 현재 포만감 값
+    public int maxFullness = 100;                                          // 최대 포만감 값
     int minFullness = 0;                                            // 최소 포만감 값
     FullnessState currentFullnessState;                             // 현재 포만감 상태
     int fullnessStarvingMax = 100;                                  // 굶기 상태시 체력 깎이는 최대 횟수 (100회)
@@ -72,8 +73,8 @@ public class PlayerCore : CreatureBase, IBegin
     [SerializeField] private float fullnessModifier = 1.3f;         // 포만감 감소 속도 증가값 => 30%
 
         // [ 정신력 변수 ]
-    int currentMental;                                              // 현재 정신력 값
-    int maxMental = 100;                                            // 최대 정신력 값
+    public int currentMental;                                              // 현재 정신력 값
+    public int maxMental = 100;                                            // 최대 정신력 값
     int minMental = 0;                                              // 최소 정신력 값
     bool isDrunk = false;                                           // 만취 상태 여부
     private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴 
@@ -97,6 +98,10 @@ public class PlayerCore : CreatureBase, IBegin
     private bool isAttacking = false;
     private float defaultSpeed;
 
+    public static event Action<int> PlayerHpChanged;
+    public static event Action<int> PlayerFullnessChanged;
+    public static event Action<int> PlayerMentalChanged;
+
     void Awake()
     {
         Instance = this;
@@ -115,7 +120,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         fov.DetectTargets(enemyLayer);
         NearEnemy();
-        UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
+        // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
     }
 
     #region 기본 시스템
@@ -132,7 +137,7 @@ public class PlayerCore : CreatureBase, IBegin
         currentMental = maxMental;         // 정신력 (시작 값 100)
         attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
-        //attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
+        attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
     }
 
     // =============================================================
@@ -190,6 +195,14 @@ public class PlayerCore : CreatureBase, IBegin
         playerAttack.DisableAttackCollider();
         isAttacking = false;
     }
+
+    public override void TakeDamage(int damage, GameObject attacker)
+    {
+        base.TakeDamage(damage, attacker);
+        PlayerHpChanged?.Invoke(hp);
+        if(attacker.CompareTag("Enemy"))
+            AttackedFromEnemy();
+    }
     #endregion
 
     #region 포만감
@@ -230,6 +243,8 @@ public class PlayerCore : CreatureBase, IBegin
                 currentFullness--;
                 currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
                 UpdateFullnessState();
+
+                PlayerFullnessChanged?.Invoke(currentFullness);
             }
             UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
         }
@@ -306,6 +321,8 @@ public class PlayerCore : CreatureBase, IBegin
     {
         currentFullness += increase;
         currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
+
+        PlayerFullnessChanged?.Invoke(currentFullness);
     }
 
     // 굶주림 제거 
@@ -394,6 +411,8 @@ public class PlayerCore : CreatureBase, IBegin
 
         currentMental += increase;
         currentMental = Mathf.Clamp(currentMental, minMental, maxMental);
+
+        PlayerMentalChanged?.Invoke(currentMental);
 
         // 수치에 따라 디버프 부여,,
     }

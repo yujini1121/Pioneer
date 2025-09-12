@@ -20,7 +20,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
         {
             other.GetComponent<CreatureBase>()?.TakeDamage(damage, this.gameObject);
             // 경험치 제공
-            PlayerStatsLevel.Instance.AddExp(GrowStateType.Combat, damage);
+            PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
             UnityEngine.Debug.Log($"AddExp() 호출");
         }
     }
