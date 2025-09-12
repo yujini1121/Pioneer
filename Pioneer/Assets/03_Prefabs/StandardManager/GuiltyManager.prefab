@@ -49,14 +49,40 @@ MonoBehaviour:
   forwardVector: {x: 0, y: 0, z: 0}
   rightVector: {x: 0, y: 0, z: 0}
   AudioSourceScream: {fileID: 2502511458023142496}
-  prefab: {fileID: 571654075716604057, guid: db498839f4009f849ad24017a0304ca3, type: 3}
+  prefabDarkObject: {fileID: 571654075716604057, guid: db498839f4009f849ad24017a0304ca3,
+    type: 3}
+  prefabDarkFog: {fileID: 7494159433938094266, guid: c223446ab46c27340b327c87166f9f0e,
+    type: 3}
   player: {fileID: 0}
   pivot: {fileID: 0}
   size: {x: 5, y: 3}
   darkObjectLifeTime: 10
   darkObjectTerm: 12
-  screamSoundChance: 0
-  screamSoundTerm: 0
+  darkFogTime: 3
+  darkFogSpawnTerm:
+  - 1
+  - 1
+  - 1
+  - 30
+  - 20
+  screamSoundChance:
+  - 0
+  - 0
+  - 0.3
+  - 0.5
+  - 0.5
+  screamSoundTerm:
+  - 5
+  - 5
+  - 3
+  - 3
+  - 2
+  screamSoundVolume:
+  - 0
+  - 0
+  - 0.1
+  - 0.3
+  - 0.4
   volumeScreenTransformation: {fileID: 0}
 --- !u!82 &2502511458023142496
 AudioSource:
@@ -69,7 +95,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 920fb1f162114f14ebef631ad8ec837e, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0

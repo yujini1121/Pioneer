@@ -37,6 +37,8 @@ public class JH_PlayerMovement : MonoBehaviour
         if (rb == null) return;
 
         Vector3 velocity = new Vector3(moveInput.x * moveSpeed, rb.velocity.y, moveInput.z * moveSpeed);
+        if (GuiltySystem.instance.IsSlowed) velocity *= 0.5f;
+
         rb.velocity = velocity;
     }
 
