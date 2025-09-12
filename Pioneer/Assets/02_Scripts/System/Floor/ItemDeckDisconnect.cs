@@ -88,7 +88,7 @@ public class ItemDeckDisconnect : MonoBehaviour
 			return;
 		}
 
-		// 3. BFS Å½»ö ½ÃÀÛ
+		// 3. BFS Å½»ö ½ÃÀÛ!@!!!!!!!!!!!!!!!!!!!!!
 		var visited = new HashSet<Vector2Int>();
 		var q = new Queue<Vector2Int>();
 		visited.Add(root);
@@ -130,7 +130,7 @@ public class ItemDeckDisconnect : MonoBehaviour
 
 	public void RefreshDebugView()
 	{
-		deckLists.Clear();
+		deckLists.Clear(); 
 		foreach (var kv in decks)
 		{
 			deckLists.Add(new DeckInfo
