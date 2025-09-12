@@ -17,6 +17,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject gameObjectItemGet;
     public GameObject gameObjectClock;
     public GameObject gameObjectRepair;
+    public GameObject gameObjectBackgroundWhiteScreen;
     public GameObject defaultCraftUI;
     public GameObject defaultCraftUiSubPivot;
     public GameObject makeshiftCraftUI;
@@ -24,6 +25,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject gameObjectInventory;
     public GameObject ManuUI;
     public GameObject ManuDenyUI;
+    public List<GameObject> gameObjectListExpandedInventory; // 인벤토리 칸 / 정렬 버튼 / 버리기 버튼
     [Header("서브 UI 로직 클래스")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
@@ -36,6 +38,8 @@ public class InGameUI : MonoBehaviour, IBegin
     float denyUiEndTime = 0.0f;
     float denyUiLifeTime = 2.0f;
     bool isCraftButtonExist = false;
+    bool isPannelExpand = true;
+    bool isNearCraft = false;
 
     private void Awake()
     {
@@ -56,6 +60,10 @@ public class InGameUI : MonoBehaviour, IBegin
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             UseESC();
+        }
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            UseTab();
         }
         
         if (Time.time < denyUiEndTime)
@@ -132,6 +140,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
         Show(defaultCraftUI);
         currentFabricationUi = mainCraft.ui;
+        isNearCraft = true;
     }
 
     public void CloseDefaultCraftUI()
@@ -139,8 +148,10 @@ public class InGameUI : MonoBehaviour, IBegin
         CommonUI.instance.CloseTab(makeshiftCraft.ui);
         Clear();
         Show(makeshiftCraftUI);
+        makeshiftCraftUI.SetActive(isPannelExpand);
         InventoryUiMain.instance.IconRefresh();
         currentFabricationUi = makeshiftCraft.ui;
+        isNearCraft = false;
     }
 
     public void Show(GameObject UiGo)
@@ -181,5 +192,35 @@ public class InGameUI : MonoBehaviour, IBegin
                 denyUiEndTime = Time.time + denyUiLifeTime;
             }
         }
+    }
+
+    public void UseTab()
+    {
+        // 간이 제작 탭이 열림(조합대 닿지 않을때)
+        // 인벤토리 탭이 확장됨
+        // 정렬 버튼
+        // 버리기 버튼
+        // 장비 창
+
+        isPannelExpand = !isPannelExpand;
+
+        gameObjectBackgroundWhiteScreen.SetActive(isPannelExpand);
+
+        foreach (GameObject g in gameObjectListExpandedInventory)
+        {
+            g.SetActive(isPannelExpand);
+        }
+        if (isPannelExpand == false)
+        {
+            if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
+            makeshiftCraftUI.SetActive(false);
+
+            Debug.Log(">> 닫기");
+        }
+        if (isPannelExpand == true && isNearCraft == false)
+        {
+            makeshiftCraftUI.SetActive(true);
+        }
+
     }
 }

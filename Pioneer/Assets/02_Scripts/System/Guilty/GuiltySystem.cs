@@ -8,6 +8,8 @@ public class GuiltySystem : MonoBehaviour, IBegin
 {
     public static GuiltySystem instance;
 
+    public bool IsSlowed => Time.time < slowEndTime;
+
     public bool canUseESC = false;
 
     
@@ -16,21 +18,27 @@ public class GuiltySystem : MonoBehaviour, IBegin
     public Vector3 forwardVector; // 카메라가 사선으로 배치된 경우, 이는 중요합니다.
     public Vector3 rightVector;
     [SerializeField] AudioSource AudioSourceScream;
-    [SerializeField] GameObject prefab;
+    [SerializeField] GameObject prefabDarkObject;
+    [SerializeField] GameObject prefabDarkFog;
     [SerializeField] GameObject player;
     [SerializeField] Transform pivot;
     [SerializeField] Vector2 size;
     [SerializeField] float darkObjectLifeTime;
     [SerializeField] float darkObjectTerm;
-    [SerializeField] float screamSoundChance;
-    [SerializeField] float screamSoundTerm;
+    [SerializeField] float darkFogTime;
+    [SerializeField] List<float> darkFogSpawnTerm;
+    [SerializeField] List<float> screamSoundChance;
+    [SerializeField] List<float> screamSoundTerm;
+    [SerializeField] List<float> screamSoundVolume;
     [SerializeField] Volume volumeScreenTransformation;
     private Coroutine darkObjectCoroutine;
+    private Coroutine darkFogCoroutine;
     private Coroutine screamCoroutine;
     private Vector3[] mEdgePoints;
     private Vector3 mForwardVector;
     private Vector3 mRightVector;
     private Vector2 mSize;
+    private float slowEndTime = 0.0f;
     private int deadCount = 0;
     private int maxAttackWeight = 20; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
     private int currentAttackWeight = 0; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
@@ -62,6 +70,22 @@ public class GuiltySystem : MonoBehaviour, IBegin
         {
             canUseESC = true;
         }
+        if (level >= 3)
+        {
+            if (darkFogCoroutine == null)
+            {
+                darkFogCoroutine = StartCoroutine(CoroutineDarkFog());
+            }
+        }
+        else
+        {
+            if (darkFogCoroutine != null)
+            {
+                StopCoroutine(darkFogCoroutine);
+                darkFogCoroutine = null;
+            }
+        }
+
         if (level >= 2)
         {
             volumeScreenTransformation.enabled = true;
@@ -103,6 +127,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
     }
     public void TimeReachedToDayTime() => ChangeWeight(-1);
     public void Drink() => ChangeWeight(-2);
+    public void DarkFogTouched() => slowEndTime = Time.time + darkFogTime;
 
     private void Awake()
     {
@@ -158,10 +183,17 @@ public class GuiltySystem : MonoBehaviour, IBegin
             default: break;
         }
 
-        GameObject darkObject = Instantiate(prefab,
+        GameObject darkObject = Instantiate(prefabDarkObject,
             Vector3.Lerp(mEdge1, mEdge2, Random.Range(0f, 1f)), Quaternion.identity);
         darkObject.transform.LookAt(player.transform.position);
         Destroy(darkObject, darkObjectLifeTime);
+    }
+    
+    private void SpawnDarkFog()
+    {
+        Debug.Log($">> GuiltySystem.SpawnDarkFog()");
+        GameObject fog = Instantiate(prefabDarkFog, player.transform.position, Quaternion.identity);
+        fog.GetComponent<DarkFog>().armedTime = Time.time + 3.0f;
     }
 
     IEnumerator CoroutineDarkObject()
@@ -192,14 +224,23 @@ public class GuiltySystem : MonoBehaviour, IBegin
     {
         while (true)
         {
-            yield return new WaitForSeconds(screamSoundTerm);
+            yield return new WaitForSeconds(screamSoundTerm[level]);
 
-
-            if (Random.Range(0.0f, 1.0f) < screamSoundChance)
+            if (Random.Range(0.0f, 1.0f) < screamSoundChance[level])
             {
-                SpawnDarkObject();
+                AudioSourceScream.volume = screamSoundVolume[level];
+                AudioSourceScream.Play();
             }
+        }
+    }
 
+    IEnumerator CoroutineDarkFog()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(darkFogSpawnTerm[level]);
+
+            SpawnDarkFog();
         }
     }
 }
