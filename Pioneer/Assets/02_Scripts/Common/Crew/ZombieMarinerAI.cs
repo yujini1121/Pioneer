@@ -210,5 +210,11 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         EnterWanderingState();
     }
 
+    public override void WhenDestroy()
+    {
+        GameManager.Instance.MarinerDiedCount();
+        base.WhenDestroy();
+    }
+
 
 }

@@ -394,4 +394,10 @@ public class MarinerAI : MarinerBase, IBegin
     {
         MarinerManager.Instance.StoreItemsAndReturnToBase(this);
     }
+    public override void WhenDestroy()
+    {
+        GameManager.Instance.MarinerDiedCount();
+        base.WhenDestroy();
+    }
+
 }
