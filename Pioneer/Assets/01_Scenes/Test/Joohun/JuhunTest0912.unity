@@ -2153,7 +2153,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &164871569
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2890,6 +2890,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: gameOverUI
+      value: 
+      objectReference: {fileID: 2119129787}
     - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
         type: 3}
       propertyPath: postProcessVolume
@@ -6158,8 +6163,11 @@ GameObject:
   - component: {fileID: 439075661}
   - component: {fileID: 439075671}
   - component: {fileID: 439075663}
+  - component: {fileID: 439075675}
   - component: {fileID: 439075669}
   - component: {fileID: 439075670}
+  - component: {fileID: 439075674}
+  - component: {fileID: 439075673}
   - component: {fileID: 439075672}
   m_Layer: 10
   m_Name: Player
@@ -6392,6 +6400,69 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   colliders: []
+--- !u!114 &439075673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439075660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b97c853f687c2445b996a4d0a3699bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  fov: {fileID: 0}
+  speed: 0
+  attackDamage: 0
+  attackRange: 0
+  attackDelayTime: 0
+  currentFullness: 0
+  maxFullness: 100
+  fullnessDecreaseTime: 5
+  fullnessModifier: 1.3
+  currentMental: 0
+  maxMental: 100
+  existEnemyMentalCool: 2
+  existEnemyMentalDecrease: -1
+  attackedFromEnemy: -3
+  reduceMentalOnMarinerDie: 0.2
+  eatFoodincreaseMental: 10
+  playerAttack: {fileID: 361639216}
+  attackHeight: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 256
+--- !u!114 &439075674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439075660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d40adedd46c17934aab8eab48e356701, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 0
+  attackCollider: {fileID: 361639218}
+--- !u!114 &439075675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439075660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15ec610ffeb4e9342913cd92c7cd6191, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &456132591
 PrefabInstance:
   m_ObjectHideFlags: 0

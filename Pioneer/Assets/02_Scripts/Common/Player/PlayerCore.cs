@@ -495,4 +495,5 @@ public class PlayerCore : CreatureBase, IBegin
         isDrunk = false;
     }
     #endregion
+
 }
