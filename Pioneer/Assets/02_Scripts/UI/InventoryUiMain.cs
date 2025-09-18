@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -24,6 +25,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     RectTransform followUiRect1;
     RectTransform followUiRect2;
     ItemSlotUI[] itemSlotUIs;
+    ItemSlotUI mCurrentSelectedHotbarSlot;
 
     public void InventoryExpand(bool value)
     {
@@ -110,6 +112,16 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         InventoryManager.Instance.RemoveMouseItem();
         mouseUI.Clear();
     }
+    public void SelectSlot(int index)
+    {
+        Debug.Assert(index >= 0);
+        Debug.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
+
+        InventoryManager.Instance.SelectSlot(index);
+
+        mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
+        IconRefresh();
+    }
 
     private void Awake()
     {
@@ -148,6 +160,20 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         followUiRect2.anchoredPosition = mMousePos + new Vector2(50, 50);
 
         ShowWindow();
+
+        // 인벤토리 핫키 선택 시작
+        int hotkeyInventoryNum = -1;
+        if (Input.GetKeyDown(KeyCode.Alpha1)) hotkeyInventoryNum = 0;
+        if (Input.GetKeyDown(KeyCode.Alpha2)) hotkeyInventoryNum = 1;
+        if (Input.GetKeyDown(KeyCode.Alpha3)) hotkeyInventoryNum = 2;
+        if (Input.GetKeyDown(KeyCode.Alpha4)) hotkeyInventoryNum = 3;
+        if (Input.GetKeyDown(KeyCode.Alpha5)) hotkeyInventoryNum = 4;
+        if (Input.GetKeyDown(KeyCode.Alpha6)) hotkeyInventoryNum = 5;
+        if (Input.GetKeyDown(KeyCode.Alpha7)) hotkeyInventoryNum = 6;
+        if (Input.GetKeyDown(KeyCode.Alpha8)) hotkeyInventoryNum = 7;
+        if (Input.GetKeyDown(KeyCode.Alpha9)) hotkeyInventoryNum = 8;
+        if (hotkeyInventoryNum > -1) SelectSlot(hotkeyInventoryNum);
+        // ~~종료~~ 인벤토리 핫키 선택 시작
     }
 
     string GetInfomation(SItemStack target)
@@ -176,9 +202,16 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         {
             //if (InventoryManager.Instance.itemLists[index] == null) continue;
 
-            slotGameObjects[index].GetComponent<ItemSlotUI>().Show(
-                InventoryManager.Instance.itemLists[index]);
+            ItemSlotUI _forUi = slotGameObjects[index].GetComponent<ItemSlotUI>();
+
+            _forUi.Show(InventoryManager.Instance.itemLists[index]);
+            _forUi.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
         }
         mouseUI.Show(InventoryManager.Instance.mouseInventory);
+        mouseUI.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+        if (mCurrentSelectedHotbarSlot != null)
+        {
+            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+        }
     }
 }
