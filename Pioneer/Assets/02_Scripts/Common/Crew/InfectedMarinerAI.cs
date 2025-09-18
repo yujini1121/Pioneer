@@ -27,7 +27,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
-    public override void Start()
+    public void Start()
     {
         if (fov != null)
         {

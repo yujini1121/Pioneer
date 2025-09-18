@@ -11,8 +11,10 @@ public class CreatureBase : CommonBase
     public float attackRange;
     public float attackDelayTime;
 
-    public virtual void Start()
+    public void Start()
     {
+        Debug.Log($">> 게임오브젝트{gameObject.name}의 CreatureBase.Start 호출됨");
+
         fov = GetComponent<FOVController>();
     }
 }

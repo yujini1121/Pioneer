@@ -110,14 +110,20 @@ public class PlayerCore : CreatureBase, IBegin
         SetSetAttribute();
     }
     
-    void Start()
+    new void Start()
     {
+        base.Start();
+
         UpdateFullnessState();
         StartCoroutine(FullnessSystemCoroutine());                   // 게임 시작시 포만감 계속 1씩 감소 시작
     }
 
     void Update()
     {
+        UnityEngine.Debug.Assert(fov != null);
+        UnityEngine.Debug.Assert(enemyLayer != null);
+
+
         fov.DetectTargets(enemyLayer);
         NearEnemy();
         // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");

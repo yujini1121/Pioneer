@@ -29,7 +29,7 @@ public class MarinerAI : MarinerBase, IBegin
         targetLayer = LayerMask.GetMask("Enemy");
     }
 
-    public override void Start()
+    public void Start()
     {
         SetRandomDirection();
         stateTimer = moveDuration;

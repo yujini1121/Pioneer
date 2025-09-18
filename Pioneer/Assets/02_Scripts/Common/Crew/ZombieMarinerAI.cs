@@ -50,7 +50,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
     }
 
-    public override void Start()
+    public void Start()
     {
         SetRandomDirection();
         stateTimer = moveDuration;

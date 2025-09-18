@@ -39,8 +39,10 @@ public class MarinerBase : CreatureBase
     // NavMeshAgent 공통 사용
     protected NavMeshAgent agent;
 
-    public override void Start()
+    public void Start()
     {
+        base.Start();
+
         agent = GetComponent<NavMeshAgent>();
         if (agent != null)
         {
