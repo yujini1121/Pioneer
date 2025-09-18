@@ -1140,6 +1140,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
         type: 3}
+      propertyPath: dayDuration
+      value: 270
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: nightDuration
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
       propertyPath: postProcessVolume
       value: 
       objectReference: {fileID: 990696443}
@@ -1203,6 +1213,111 @@ PrefabInstance:
       propertyPath: spawnPoints.Array.data[11]
       value: 
       objectReference: {fileID: 550368356}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[0].total
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[1].total
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[2].titan
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[2].total
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[3].titan
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[3].total
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[4].titan
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[4].total
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[0].minion
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[1].minion
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[2].minion
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[3].minion
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[4].minion
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[1].crawler
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[2].crawler
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[3].crawler
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemySpawnTable.Array.data[4].crawler
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemyScaleTable.Array.data[3].hpPercent
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemyScaleTable.Array.data[4].hpPercent
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemyScaleTable.Array.data[3].attackPercent
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8925764393872876362, guid: 2d995153bec65ba4c9f70557dc8ba186,
+        type: 3}
+      propertyPath: enemyScaleTable.Array.data[4].attackPercent
+      value: 50
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2212,9 +2327,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d40adedd46c17934aab8eab48e356701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 0}
-  attackHeight: 1
-  attackDuration: 0.2
+  damage: 0
+  attackCollider: {fileID: 0}
 --- !u!54 &361639217
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2736,19 +2850,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15ec610ffeb4e9342913cd92c7cd6191, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 0
-  IsDead: 0
-  attacker: {fileID: 0}
-  fov: {fileID: 0}
-  speed: 0
-  attackDamage: 0
-  attackRange: 0
-  attackDelayTime: 0
-  moveSpeed: 5
-  playerAttack: {fileID: 361639216}
-  playerAttackPower: 3
-  playerHP: 100
 --- !u!23 &439075665
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2867,6 +2968,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b206fcdc475c5d40a9d51ce88671b29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  viewRadius: 10
+  viewAngle: 360
+  visibleTargets: []
 --- !u!195 &439075671
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -13867,6 +13971,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f1ee1cbea1a86349a1cb691f63ba220, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  objectData: {fileID: 0}
+  smoothRotate: 0
+  rotationSpeed: 0
+  detectType: 0
+  currentHP: 0
+  attackPower: 0
+  attackRange: 0
+  attackHalfBound: {x: 0, y: 0, z: 0}
+  attackCooldown: 0
+  attackSpeed: 0
+  boltHalfSize: {x: 0, y: 0, z: 0}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  gunnerPos: {fileID: 0}
+  boltPool: {fileID: 0}
+  drawGizmos: 0
+  isUsing: 0
+  enemyDetect: 0
+  colliders: []
+  nearestTrans: {fileID: 0}
 --- !u!33 &8156243681696342421
 MeshFilter:
   m_ObjectHideFlags: 0
