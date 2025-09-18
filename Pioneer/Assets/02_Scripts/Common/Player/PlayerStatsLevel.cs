@@ -172,11 +172,13 @@ public class PlayerStatsLevel : MonoBehaviour
             growState.level++;
             UnityEngine.Debug.Log($"{type} 레벨업 -> {growState.level}");
 
+            // switch 문으로 수정
             if (type == GrowStatType.Combat)
             {
                 CombatChance(type);
             }
-            StatLevelUp?.Invoke(type);
+            // ===========================================
+            StatLevelUp?.Invoke(type); // ui 업데이트 이벤튼
         }
         UnityEngine.Debug.Log($"{type} 스탯 경험치 {amount} 획득");
     }

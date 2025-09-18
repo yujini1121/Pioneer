@@ -43,6 +43,7 @@ public class PlayerStatUI : MonoBehaviour
         
     }
 
+#warning 버그 터지면 수정해야할 부분
     private void OnEnable()
     {
         PlayerStatsLevel.StatLevelUp += UpdatePlayerGrowStatUI;
@@ -108,7 +109,7 @@ public class PlayerStatUI : MonoBehaviour
             case GrowStatType.Combat:
                 combatLevel.text = $"{currentLv}";     // 전투 레벨                
                 additionCombat.text = $"{statLevel.combatList[currentLv].attack * 100:F0} %";        // 공격력 + 추가 공격력 퍼센트                
-                additionCombat_WeaponDurability.text = $"{statLevel.combatList[currentLv].durability}";   // 무기 내구도 감소치 + 추가 무기 내구도 감소치
+                additionCombat_WeaponDurability.text = $"{statLevel.combatList[currentLv].durability} %";   // 무기 내구도 감소치 + 추가 무기 내구도 감소치
                 break;
             case GrowStatType.Crafting:
                 craftingLevel.text = $"{currentLv}";     // 제작 레벨
