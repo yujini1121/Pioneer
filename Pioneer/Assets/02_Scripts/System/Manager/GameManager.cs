@@ -4,6 +4,22 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+// 임시로 만든 Stats
+public class EnemyStats
+{
+    public float baseHP = 100f;
+    public float baseATK = 10f;
+    public float hp, atk;
+
+    void Awake() { hp = baseHP; atk = baseATK; }
+
+    public void ApplyScaling(float atkMul, float hpMul)
+    {
+        atk = baseATK * atkMul;
+        hp = baseHP * hpMul;
+    }
+}
+
 public class GameManager : MonoBehaviour, IBegin
 {
     public static GameManager Instance;
@@ -23,8 +39,6 @@ public class GameManager : MonoBehaviour, IBegin
 
     private ColorAdjustments colorAdjustments;
     private float cycleTime = 0f;
-    private float fullCycleDuration;
-    private bool transitioningToNight = true;
 
     [Header("스포너 지점")]
     public GameObject[] spawnPoints;
@@ -32,8 +46,10 @@ public class GameManager : MonoBehaviour, IBegin
     [Header("승무원 스프라이트 지정")]
     public Sprite[] marinerSprites;
 
-    [Header("미니언 에너미")]
-    public GameObject minion;
+    [Header("에너미 프리팹")]
+    public GameObject minion;   // 미니언
+    public GameObject crawler;  // 크롤러
+    public GameObject titan;    // 타이탄
 
     [Header("게임오버 관리")]
     public int totalCrewMembers = 0;
@@ -41,16 +57,38 @@ public class GameManager : MonoBehaviour, IBegin
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
 
-    private List<GameObject> spawnedMinions = new List<GameObject>();
+    private List<GameObject> spawnedEnemies = new List<GameObject>();
+
+    [System.Serializable]
+    public struct DayEnemyRow
+    {
+        public int total;   // 총 출현 수(참고용)
+        public int minion;  // 미니언 수
+        public int crawler; // 크롤러 수
+        public int titan;   // 타이탄 수
+    }
+
+    [System.Serializable]
+    public struct EnemyScaleRow
+    {
+        [Range(0, 200)] public float attackPercent; // 공격력 증가 %
+        [Range(0, 200)] public float hpPercent;     // 체력 증가 %
+    }
+
+    [Header("일차별 에너미 출현 표 (1~5일차)")]
+    public DayEnemyRow[] enemySpawnTable = new DayEnemyRow[5];
+
+    [Header("일차별 능력치 강화 표 (1~5일차)")]
+    public EnemyScaleRow[] enemyScaleTable = new EnemyScaleRow[5];
+
+    private int currentDay = 1; // 1일차 시작
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
 
-        postProcessVolume.profile.TryGet(out colorAdjustments);    
+        postProcessVolume.profile.TryGet(out colorAdjustments);
     }
 
     private void Start()
@@ -58,13 +96,9 @@ public class GameManager : MonoBehaviour, IBegin
         Debug.Log($">> GameManager.Start()");
 
         if (InventoryUiMain.instance != null)
-        {
             InventoryUiMain.instance.Start();
-        }
         else
-        {
             Debug.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
-        }
     }
 
     private void Update()
@@ -72,6 +106,7 @@ public class GameManager : MonoBehaviour, IBegin
         if (Time.timeScale > 0)
         {
             currentGameTime += Time.deltaTime;
+            cycleTime += Time.deltaTime;
         }
 
         UpdateDayNightCycle();
@@ -79,63 +114,68 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void UpdateDayNightCycle()
     {
-        cycleTime += Time.deltaTime;
         float t;
 
         if (IsDaytime)
         {
             t = Mathf.Clamp01(cycleTime / dayDuration);
-            colorAdjustments.colorFilter.value = Color.Lerp(dayToNightGradient.Evaluate(0f), dayToNightGradient.Evaluate(1f), t);
+            colorAdjustments.colorFilter.value =
+                Color.Lerp(dayToNightGradient.Evaluate(0f), dayToNightGradient.Evaluate(1f), t);
+
+            // 낮 종료 → 밤 시작
+            if (cycleTime >= dayDuration)
+            {
+                IsDaytime = false;
+                cycleTime = 0f;
+                Debug.Log($"밤이 되었습니다. (Day {currentDay})");
+                OnNightStart();
+            }
         }
         else
         {
             t = Mathf.Clamp01(cycleTime / nightDuration);
-            colorAdjustments.colorFilter.value = Color.Lerp(nightToDayGradient.Evaluate(0f), nightToDayGradient.Evaluate(1f), t);
+            colorAdjustments.colorFilter.value =
+                Color.Lerp(nightToDayGradient.Evaluate(0f), nightToDayGradient.Evaluate(1f), t);
+
+            // 밤 종료 → 아침 시작
+            if (cycleTime >= nightDuration)
+            {
+                IsDaytime = true;
+                cycleTime = 0f;
+                Debug.Log($"아침이 되었습니다. (Day {currentDay})");
+                OnNightEnd();
+                currentDay++; // 밤이 끝나면 다음 일차로 넘어감
+            }
         }
 
         colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
+    }
 
-        if (IsDaytime && cycleTime >= dayDuration)
-        {
-            IsDaytime = false;
-            cycleTime = 0f;
-            Debug.Log("밤이 되었습니다.");
-            SpawnMinions(); // 밤에 미니언 생성
-        }
-        else if (!IsDaytime && cycleTime >= nightDuration)
-        {
-            IsDaytime = true;
-            cycleTime = 0f;
-            Debug.Log("아침이 되었습니다.");
-            DespawnMinions(); // 아침에 미니언 제거
-        }
+    private void OnNightStart()
+    {
+        SpawnEnemiesForCurrentDay();
+    }
+
+    private void OnNightEnd()
+    {
+        DespawnAllEnemies();
+        ApplyCrewEmbarkRule(); 
     }
 
     public void GetGameTimeInfo(out int days, out int hours)
     {
-        // 전체 경과 시간을 일 단위로 계산
         days = Mathf.FloorToInt(currentGameTime / oneDayDuration);
-
-        // 남은 시간을 시간으로 계산 (하루 = 24시간 기준)
         float remainingTime = currentGameTime % oneDayDuration;
         hours = Mathf.FloorToInt((remainingTime / oneDayDuration) * 24f);
     }
-    public void AddCrewMember() // 나중에 승무원 영입 시스템 쪽에서 추가해야할듯
-    {
-        totalCrewMembers++;
-    }
 
-    public void MarinerDiedCount() // 승무원 사망 카운트
-    {
-        deadCrewMembers++;
-    }
+    public void AddCrewMember() { totalCrewMembers++; }
+    public void MarinerDiedCount() { deadCrewMembers++; }
 
-    // 게임오버 실행
     public void TriggerGameOver()
     {
         Time.timeScale = 0f;
 
-        // 플레이어 투명화
         if (ThisIsPlayer.Player != null)
         {
             Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
@@ -150,9 +190,7 @@ public class GameManager : MonoBehaviour, IBegin
         HideAllUI();
 
         if (gameOverUI != null)
-        {
             gameOverUI.ShowGameOverScreen(totalCrewMembers, deadCrewMembers);
-        }
     }
 
     void HideAllUI()
@@ -160,52 +198,114 @@ public class GameManager : MonoBehaviour, IBegin
         foreach (Canvas canvas in allUICanvas)
         {
             if (canvas != null && canvas != gameOverUI.GetComponent<Canvas>())
-            {
                 canvas.gameObject.SetActive(false);
+        }
+    }
+
+    private void SpawnEnemiesForCurrentDay()
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0) return;
+
+        DayEnemyRow row = GetSpawnRowForDay(currentDay);
+        EnemyScaleRow scale = GetScaleRowForDay(currentDay);
+
+        // 미니언
+        SpawnOf(minion, row.minion, scale);
+        // 크롤러
+        SpawnOf(crawler, row.crawler, scale);
+        // 타이탄
+        SpawnOf(titan, row.titan, scale);
+
+        int spawnedCount = row.minion + row.crawler + row.titan;
+        Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
+    }
+
+    private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
+    {
+        if (prefab == null || count <= 0) return;
+
+        for (int i = 0; i < count; i++)
+        {
+            int sp = Random.Range(0, spawnPoints.Length);
+            Transform p = spawnPoints[sp].transform;
+            Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
+
+            GameObject e = Instantiate(prefab, p.position + offset, Quaternion.identity);
+            spawnedEnemies.Add(e);
+
+
+            if (e.TryGetComponent(out EnemyStats stats))
+            {
+                float atkMul = 1f + (scale.attackPercent * 0.01f);
+                float hpMul = 1f + (scale.hpPercent * 0.01f);
+                stats.ApplyScaling(atkMul, hpMul);
             }
         }
     }
-    private void SpawnMinions()
+
+    private void DespawnAllEnemies()
     {
-        if (spawnPoints.Length == 0 || minion == null) return;
+        foreach (GameObject e in spawnedEnemies)
+            if (e != null) Destroy(e);
 
-        int spawnIndex = Random.Range(0, spawnPoints.Length);   // 1~12까지 스폰포인트 탐색
-        Transform spawnTransform = spawnPoints[spawnIndex].transform;
-
-        int count = Random.Range(2, 8); // 2~7마리
-        for (int i = 0; i < count; i++)
-        {
-            Vector3 offset = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f));
-            GameObject m = Instantiate(minion, spawnTransform.position + offset, Quaternion.identity);
-            spawnedMinions.Add(m);
-        }
-
-        Debug.Log($"{count}마리 미니언이 스폰되었습니다.");
+        spawnedEnemies.Clear();
+        Debug.Log("[Despawn] 밤 종료로 모든 에너미 제거");
     }
 
-    private void DespawnMinions()
+    private DayEnemyRow GetSpawnRowForDay(int day)
     {
-        foreach (GameObject m in spawnedMinions)
+        if (enemySpawnTable != null && enemySpawnTable.Length > 0)
         {
-            if (m != null) Destroy(m);
+            int idx = Mathf.Clamp(day - 1, 0, enemySpawnTable.Length - 1);
+            return enemySpawnTable[idx];
         }
+        return new DayEnemyRow { total = 0, minion = Random.Range(2, 8), crawler = 0, titan = 0 };
+    }
 
-        spawnedMinions.Clear();
-        Debug.Log("아침이 되어 미니언이 제거되었습니다.");
+    private EnemyScaleRow GetScaleRowForDay(int day)
+    {
+        if (enemyScaleTable != null && enemyScaleTable.Length > 0)
+        {
+            int idx = Mathf.Clamp(day - 1, 0, enemyScaleTable.Length - 1);
+            return enemyScaleTable[idx];
+        }
+        return new EnemyScaleRow { attackPercent = 0, hpPercent = 0 };
+    }
+
+    private void ApplyCrewEmbarkRule()
+    {
+        int add = CalcCrewEmbarkCount(currentDay, totalCrewMembers);
+        for (int i = 0; i < add; i++) AddCrewMember();
+
+        if (add > 0)
+            Debug.Log($"[Crew] Day {currentDay} 아침: 승선 {add}명 → 총 {totalCrewMembers}명");
+    }
+
+    // 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
+    // 5일차: 현재 승무원 수 ≤3 → 4명, ≥4 → 5명
+    private int CalcCrewEmbarkCount(int day, int crewNow)
+    {
+        switch (Mathf.Clamp(day, 1, 5))
+        {
+            case 1: return 0;
+            case 2: return 1;
+            case 3: return 2;
+            case 4: return 3;
+            case 5: return (crewNow <= 3) ? 4 : 5;
+            default:
+                // 6일차 이상은 마지막 값을 유지하거나, 필요 시 규칙 확장
+                return (crewNow <= 3) ? 4 : 5;
+        }
     }
 
     public float TimeUntilNight()
     {
-        if (IsDaytime)
-            return Mathf.Max(0f, dayDuration - cycleTime);
-        else
-            return 0f;
+        if (IsDaytime) return Mathf.Max(0f, dayDuration - cycleTime);
+        else return 0f;
     }
 
     public void CollectResource(string type)
     {
         Debug.Log($"자원 획득: {type}");
     }
-
-
 }
