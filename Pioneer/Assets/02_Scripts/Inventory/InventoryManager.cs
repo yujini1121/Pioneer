@@ -6,17 +6,19 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
+// 이녀석 백앤드임. 프론트앤드의 통제를 받음.
 public class InventoryManager : InventoryBase
 {
     public static InventoryManager Instance;
 
     public SItemStack mouseInventory;
+    public int selectedSlotIndex;
+    public SItemStack SelectedSlotInventory;
     //public List<SItemStack> itemLists;
     //public Dictionary<int, SItemStack> fastSearch;
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
     [SerializeField] Vector3 dropOffset = new Vector3(1, -0.8f, -1);
-
 
 
     public void MouseSwitch(int index)
@@ -150,6 +152,12 @@ public class InventoryManager : InventoryBase
             itemLists[index + 9] = (list[index]);
         }
         SafeClean();
+    }
+
+    public void SelectSlot(int index)
+    {
+        SelectedSlotInventory = itemLists[index];
+        selectedSlotIndex = index;
     }
 
     protected override void SafeClean()
