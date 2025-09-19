@@ -10,6 +10,8 @@ Material:
   m_Name: StylizedWater2_Demo_DioramaTop
   m_Shader: {fileID: -6465566751694194690, guid: d7b0192b9bf19c949900035fa781fdc4,
     type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ADVANCED_SHADING
   - _CAUSTICS
@@ -22,6 +24,7 @@ Material:
   m_InvalidKeywords:
   - ADVANCED_LIGHTING
   - _DEPTH_TEX
+  - _RECEIVEDYNAMICEFFECTS_ON
   - _SIMPLE_LIGHTING
   - _WORLDSPACEUV_ON
   - _ZCLIP_ON
@@ -32,6 +35,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -139,6 +143,7 @@ Material:
     - _BumpScale: 1
     - _CROSSPAN_INTERSECTIONOn: 1
     - _CausticsBrightness: 2
+    - _CausticsChromance: 1
     - _CausticsDistortion: 0.23
     - _CausticsOn: 1
     - _CausticsSpeed: 0.1
@@ -184,6 +189,7 @@ Material:
     - _GlossyReflections: 0
     - _HorizonDistance: 5.8
     - _IntersectionClipping: 0.583
+    - _IntersectionDistortion: 0.2
     - _IntersectionFalloff: 1
     - _IntersectionLength: 2.81
     - _IntersectionRippleDist: 20
@@ -214,6 +220,7 @@ Material:
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
+    - _ReceiveDynamicEffects: 1
     - _ReceiveShadows: 1
     - _ReflectionBlur: 0
     - _ReflectionDistortion: 1
@@ -269,12 +276,12 @@ Material:
     - _VertexColorDepth: 0
     - _VertexColorFoam: 0
     - _VertexColorWaveFlattening: 0
-    - _WaveCount: 3
-    - _WaveDistance: 0.96
-    - _WaveHeight: 1.22
-    - _WaveNormalStr: 32
-    - _WaveSpeed: 1.75
-    - _WaveSteepness: 0
+    - _WaveCount: 2
+    - _WaveDistance: 0.873
+    - _WaveHeight: 0.3
+    - _WaveNormalStr: 7.6
+    - _WaveSpeed: 0.7
+    - _WaveSteepness: 0.54
     - _WaveTint: 0.013
     - _WavesOn: 1
     - _WorkflowMode: 1
@@ -299,7 +306,7 @@ Material:
     - _WaterColor: {r: 0.21176466, g: 0.6745098, b: 1, a: 1}
     - _WaterShallowColor: {r: 0, g: 0.9394503, b: 1, a: 1}
     - _WaveDirection: {r: 1, g: 1, b: 1, a: 1}
-    - _WaveFadeDistance: {r: 191.13924, g: 341.13934, b: 0, a: 0}
+    - _WaveFadeDistance: {r: 229.60077, g: 341.13934, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &6498140463000427223
 MonoBehaviour:
