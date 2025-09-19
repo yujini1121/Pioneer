@@ -80,13 +80,14 @@ GameObject:
   - component: {fileID: 4224384830257271042}
   - component: {fileID: 3143503116569624188}
   - component: {fileID: 5715423834321406939}
+  - component: {fileID: 5547569317624284329}
   - component: {fileID: 5582197554025574421}
   - component: {fileID: 4915185602058288525}
   - component: {fileID: 1536190738458640625}
   - component: {fileID: 2029828995776725162}
+  - component: {fileID: 8510462437380211151}
   - component: {fileID: 66496165390327820}
   - component: {fileID: 4241827649253925412}
-  - component: {fileID: 5547569317624284329}
   m_Layer: 10
   m_Name: Player
   m_TagString: Untagged
@@ -169,6 +170,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &5547569317624284329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010547728333062472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 838f29dbf27dbfb4ca7b536526e2a006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &5582197554025574421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254,6 +267,40 @@ MonoBehaviour:
   viewRadius: 2
   viewAngle: 360
   visibleTargets: []
+--- !u!114 &8510462437380211151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010547728333062472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d124675bfc715041a7738d0935e7fbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldSpaceParent: {fileID: 0}
+  creationType: 0
+  maxDistance: 0
+  platformLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  creationLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  rejectColor: {r: 0, g: 0, b: 0, a: 0}
+  permitColor: {r: 0, g: 0, b: 0, a: 0}
+  creationList:
+    platform: {fileID: 0}
+    wall: {fileID: 0}
+    door: {fileID: 0}
+    barricade: {fileID: 0}
+    craftingTable: {fileID: 0}
+    ballista: {fileID: 0}
+    trap: {fileID: 0}
+    lantern: {fileID: 0}
+  navMeshSurface: {fileID: 0}
+  stopDistance: 1.5
 --- !u!195 &66496165390327820
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -297,18 +344,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &5547569317624284329
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4010547728333062472}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 838f29dbf27dbfb4ca7b536526e2a006, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4131920404888409297
 GameObject:
   m_ObjectHideFlags: 0

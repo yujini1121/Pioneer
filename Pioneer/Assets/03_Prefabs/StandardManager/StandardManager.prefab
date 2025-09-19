@@ -76,6 +76,8 @@ GameObject:
   m_Component:
   - component: {fileID: 591521452174387999}
   - component: {fileID: 5768762475559848083}
+  - component: {fileID: 2524180883447383586}
+  - component: {fileID: 5686995413484302855}
   m_Layer: 0
   m_Name: DefaultGameManager
   m_TagString: Untagged
@@ -223,6 +225,38 @@ MonoBehaviour:
     hpPercent: 0
   - attackPercent: 0
     hpPercent: 0
+--- !u!114 &2524180883447383586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8063884484373130190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6cb61862b182b747bfef9687f56fc43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  infectionStartTime: 180
+  infectionInterval: 10
+--- !u!114 &5686995413484302855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8063884484373130190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fddd712ef2c3c494d89e06725ccfeb39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentDeckCount: 0
+  platformLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  woodItemID: 30001
+  clothItemID: 30003
 --- !u!1001 &480823030009369033
 PrefabInstance:
   m_ObjectHideFlags: 0

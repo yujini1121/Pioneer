@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2152152127719893496}
   - component: {fileID: 6201443550321480378}
   - component: {fileID: 1546079290981050899}
+  - component: {fileID: 2853514008745676546}
   m_Layer: 8
   m_Name: Minion
   m_TagString: Untagged
@@ -166,6 +167,37 @@ MonoBehaviour:
   viewRadius: 10
   viewAngle: 360
   visibleTargets: []
+--- !u!114 &2853514008745676546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646136597593253128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374411dd8b130fc448a35aa02daf4043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  fov: {fileID: 0}
+  speed: 0
+  attackDamage: 0
+  attackRange: 0
+  attackDelayTime: 0
+  currentAttackTarget: {fileID: 0}
+  detectMask:
+    serializedVersion: 2
+    m_Bits: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  attackBoxCenterOffset: {x: 0, y: 0, z: 0}
+  nestPrefab: {fileID: 0}
+  isNestCreated: 0
 --- !u!1 &4659406265448088296
 GameObject:
   m_ObjectHideFlags: 0
