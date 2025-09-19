@@ -10,14 +10,21 @@ public class InGameUI : MonoBehaviour, IBegin
 {
     static public InGameUI instance;
 
-    [Header("서브 UI 게임오브젝트")]
+    [Header("서브 UI 게임오브젝트")]// UI 게임 오브젝트가 존재하고 외부 스크립트에서 접근할 필요가 있다고 판단하는 경우, 여기에 추가하실 수 있습니다.
     public GameObject gameObjectBarChart;
-    public GameObject gameObjectGuiltyBarChart;
+    public GameObject gameObjectGuiltyBarChart; // 죄책감
     public GameObject gameObjectBuffEffect;
     public GameObject gameObjectItemGet;
     public GameObject gameObjectClock;
+    public GameObject gameObjectGameOverUI;
     public GameObject gameObjectRepair;
     public GameObject gameObjectBackgroundWhiteScreen;
+    public GameObject gameObjectMastParent;
+    public GameObject gameObjectMastBase;
+    public GameObject gameObjectMastMessage;
+    public GameObject gameObjectMastInteractiveText;
+    public GameObject gameObjectMastUpgrade;
+    public GameObject gameObjectPlayerStatUiParent;
     public GameObject defaultCraftUI;
     public GameObject defaultCraftUiSubPivot;
     public GameObject makeshiftCraftUI;
@@ -29,7 +36,9 @@ public class InGameUI : MonoBehaviour, IBegin
     [Header("서브 UI 로직 클래스")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
+    [HideInInspector]
     public DefaultFabrication currentFabricationUi;
+    public PlayerStatUI playerStatUi;
 
     public List<GameObject> currentOpenedUI = new List<GameObject>();
     private List<GameObject> mainCraftSelectUi;

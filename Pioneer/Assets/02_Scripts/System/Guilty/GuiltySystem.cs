@@ -131,12 +131,16 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
     private void Awake()
     {
+        Debug.Assert(player != null);
+
         instance = this;
 
         mForwardVector = forwardVector.normalized;
         mRightVector = rightVector.normalized;
         mSize = size / 2;
         Vector3 mHalf = size / 2;
+
+        
 
         mEdgePoints = new Vector3[4]
         {
