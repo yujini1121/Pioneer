@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Playables;
+using static MarinerBase;
 
 #region 그냥 메모
 /* =============================================================
@@ -34,9 +36,18 @@ public class PlayerCore : CreatureBase, IBegin
 {
     public static PlayerCore Instance;
 
-    // 생체 시스템 변수
+        // 플레이어 행동 상태 열거형
+    public enum PlayerState
+    {
+        Default,            // 기본
+        ChargingFishing,    // 낚시 키 누르는 중
+        ActionFishing,      // 낚시 중
+        Dead                // 사망
+    }    
 
-        // 포만감 열거형 (fullness 변수 값에 따른 상태)
+    // 생체 시스템 변수 ///
+
+    // 포만감 열거형 (fullness 변수 값에 따른 상태)
     public enum FullnessState
     {
         Full,       // 배부름 (80 ~ 100)
@@ -102,6 +113,8 @@ public class PlayerCore : CreatureBase, IBegin
     public static event Action<int> PlayerFullnessChanged;
     public static event Action<int> PlayerMentalChanged;
 
+    public PlayerState currentState { get; private set; }
+
     void Awake()
     {
         Instance = this;
@@ -146,11 +159,19 @@ public class PlayerCore : CreatureBase, IBegin
         attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
     }
 
+    public void SetState(PlayerState state)
+    {
+        currentState = state;
+        UnityEngine.Debug.Log("Player State Changed to: " + state);
+    }
+
     // =============================================================
     // 이동
     // =============================================================
     public void Move(Vector3 moveInput)
     {
+        if (currentState != PlayerState.Default) return;
+
         Vector3 moveVelocity = moveInput.normalized * speed;
 
         playerRb.velocity = new Vector3(moveVelocity.x, playerRb.velocity.y, moveVelocity.z);
@@ -161,6 +182,7 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     public void Attack()
     {
+        if (currentState != PlayerState.Default) return;
         if (isAttacking) return;
         StartCoroutine(AttackCoroutine());
     }
@@ -208,6 +230,12 @@ public class PlayerCore : CreatureBase, IBegin
         PlayerHpChanged?.Invoke(hp);
         if(attacker.CompareTag("Enemy"))
             AttackedFromEnemy();
+
+        if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
+        {
+            SetState(PlayerState.Default);
+            UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
+        }
     }
     #endregion
 
