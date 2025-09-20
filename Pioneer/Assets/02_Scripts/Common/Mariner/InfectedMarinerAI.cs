@@ -27,8 +27,10 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
-    public void Start()
+    public override void Start()
     {
+        base.Start();  // 먼저 호출
+
         if (fov != null)
         {
             fov.Start();
@@ -37,8 +39,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         nightConfusionTime = Random.Range(0f, 30f);
         Debug.Log($"감염된 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}");
         Debug.Log($"{marinerId} 밤 혼란 시드값 생성: {nightConfusionTime:F2}초");
-
-        base.Start();
     }
 
     private void Update()
@@ -66,48 +66,17 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     /// </summary>
     public override IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log("감염된 AI 스파이 활동 진행 중, 쓰레기 파밍 안함.");
-
-        GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
-
-        int chosenIndex = marinerId % spawnPoints.Length;
-
-        Debug.Log($"감염된 승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
-
-        UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
-        MoveTo(targetSpawn.position);
-
-        while (!IsArrived())
-        {
-            yield return null;
-        }
-
-        // NavMesh 경로 초기화
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.ResetPath();
-        }
-
-        if (GameManager.Instance.TimeUntilNight() <= 30f)
-        {
-            Debug.Log("감염된 승무원 밤 행동 시작");
-            StoreItemsAndReturnToBase(); // 감염된 승무원 전용 처리
-            yield break;
-        }
-
-        Debug.Log("감염된 승무원 가짜 파밍 10초");
-        yield return new WaitForSeconds(10f);
+        Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍");
+        yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
-        if (needRepairList.Count > 0)// 수리대상 확인
+        if (needRepairList.Count > 0)
         {
-            Debug.Log("감염된 승무원 수리 대상 발견으로 1순위 행동 실행");
             isSecondPriorityStarted = false;
             StartRepair();
         }
         else
         {
-            Debug.Log("감염된 승무원 수리 대상 미발견으로 2순위 행동 실행");
             StartCoroutine(StartSecondPriorityAction());
         }
     }
@@ -196,5 +165,11 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     protected override void OnNightApproaching()
     {
         StoreItemsAndReturnToBase();
+    }
+
+    protected override void OnPersonalFarmingCompleted()
+    {
+        // 감염된 승무원은 자원을 수집하지 않음
+        Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
     }
 }

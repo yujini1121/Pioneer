@@ -24,9 +24,9 @@ public class MarinerBase : CreatureBase
     protected Coroutine attackRoutine;
 
     // 추격 시스템 관련 변수
-    protected float chaseRange = 8f;  // 추격 시작 범위
-    protected bool isChasing = false; // 추격 중인지 확인
-    protected float chaseUpdateInterval = 0.2f; // 추격 목표 업데이트 간격
+    protected float chaseRange = 8f;
+    protected bool isChasing = false;
+    protected float chaseUpdateInterval = 0.2f;
     protected float lastChaseUpdate = 0f;
 
     // 수리 관련 공통 변수
@@ -36,10 +36,18 @@ public class MarinerBase : CreatureBase
     protected int repairAmount = 30;
     protected bool isSecondPriorityStarted = false;
 
+    // 개별 경계 탐색 설정
+    [Header("개별 경계 탐색 설정")]
+    public int personalRayCount = 8; // 개인별 Ray 개수 (45도씩)
+    public float personalMaxDistance = 50f; // 개인별 최대 탐색 거리
+
+    protected Vector3 personalEdgePoint;
+    protected bool hasFoundPersonalEdge = false;
+
     // NavMeshAgent 공통 사용
     protected NavMeshAgent agent;
 
-    public void Start()
+    public virtual void Start()
     {
         base.Start();
 
@@ -51,7 +59,6 @@ public class MarinerBase : CreatureBase
             agent.angularSpeed = 360f;
             agent.stoppingDistance = 0.5f;
         }
-        base.Start();
     }
 
     protected bool IsTargetInFOV()
@@ -63,9 +70,8 @@ public class MarinerBase : CreatureBase
         return fov.visibleTargets.Contains(target);
     }
 
-    protected virtual void Wander() // 배회
+    protected virtual void Wander()
     {
-        // NavMesh를 사용한 배회
         if (agent != null && agent.isOnNavMesh)
         {
             if (!agent.hasPath || agent.remainingDistance < 0.5f)
@@ -75,7 +81,6 @@ public class MarinerBase : CreatureBase
         }
         else
         {
-            // 기존 방식 (NavMesh 없을 때 fallback)
             transform.position += moveDirection * speed * Time.deltaTime;
         }
 
@@ -89,7 +94,6 @@ public class MarinerBase : CreatureBase
 
     protected virtual void Idle()
     {
-        // Idle 상태에서는 NavMesh 정지
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
@@ -148,31 +152,6 @@ public class MarinerBase : CreatureBase
         {
             agent.SetDestination(hit.position);
         }
-    }
-
-    protected bool DetectTarget()
-    {
-        Collider[] hits = Physics.OverlapBox(
-            transform.position,
-            new Vector3(attackRange / 2f, 0.5f, attackRange / 2f),
-            Quaternion.identity,
-            targetLayer
-        );
-
-        float minDist = float.MaxValue;
-        target = null;
-
-        foreach (var hit in hits)
-        {
-            float dist = Vector3.Distance(transform.position, hit.transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                target = hit.transform;
-            }
-        }
-
-        return target != null;
     }
 
     protected void LookAtTarget()
@@ -246,7 +225,6 @@ public class MarinerBase : CreatureBase
 
         float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
-        // 공격 범위 내에 있고 쿨다운이 끝났으면 공격
         if (distanceToTarget <= attackRange && GetAttackCooldown() <= 0f)
         {
             if (IsTargetInFOV() && attackRoutine == null)
@@ -256,7 +234,6 @@ public class MarinerBase : CreatureBase
         }
         else
         {
-            // NavMesh를 사용한 추격
             ChaseTarget();
         }
     }
@@ -302,14 +279,150 @@ public class MarinerBase : CreatureBase
         yield return null;
     }
 
+    // ===== 개별 경계 탐색 기능 =====
+    protected Vector3 FindMyOwnEdgePoint()
+    {
+        List<Vector3> candidatePoints = new List<Vector3>();
+        Vector3 myPosition = transform.position;
 
-    // ===== 기존 수리 관련 함수들 =====
+        float angleStep = 360f / personalRayCount;
+
+        for (int i = 0; i < personalRayCount; i++)
+        {
+            float angle = i * angleStep + Random.Range(-10f, 10f);
+            Vector3 direction = new Vector3(
+                Mathf.Cos(angle * Mathf.Deg2Rad),
+                0f,
+                Mathf.Sin(angle * Mathf.Deg2Rad)
+            );
+
+            Vector3 edgePoint = FindEdgeInDirection(myPosition, direction);
+            if (edgePoint != Vector3.zero && Vector3.Distance(myPosition, edgePoint) > 5f)
+            {
+                candidatePoints.Add(edgePoint);
+            }
+        }
+
+        if (candidatePoints.Count > 0)
+        {
+            Vector3 bestPoint = candidatePoints[0];
+            float maxDistance = Vector3.Distance(myPosition, bestPoint);
+
+            foreach (var point in candidatePoints)
+            {
+                float distance = Vector3.Distance(myPosition, point);
+                if (distance > maxDistance)
+                {
+                    maxDistance = distance;
+                    bestPoint = point;
+                }
+            }
+
+            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점 발견 - {bestPoint}");
+            return bestPoint;
+        }
+
+        Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾지 못함");
+        return Vector3.zero;
+    }
+
+    private Vector3 FindEdgeInDirection(Vector3 startPoint, Vector3 direction)
+    {
+        float stepSize = 2f;
+        Vector3 lastValidPoint = startPoint;
+
+        for (float distance = stepSize; distance < personalMaxDistance; distance += stepSize)
+        {
+            Vector3 testPoint = startPoint + direction * distance;
+
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(testPoint, out hit, stepSize, NavMesh.AllAreas))
+            {
+                lastValidPoint = hit.position;
+            }
+            else
+            {
+                return lastValidPoint;
+            }
+        }
+
+        return lastValidPoint;
+    }
+
+    protected IEnumerator MoveToMyEdgeAndFarm()
+    {
+        if (!hasFoundPersonalEdge)
+        {
+            personalEdgePoint = FindMyOwnEdgePoint();
+            if (personalEdgePoint == Vector3.zero)
+            {
+                Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾을 수 없어 현재 위치에서 파밍");
+                personalEdgePoint = transform.position;
+            }
+            hasFoundPersonalEdge = true;
+        }
+
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점으로 이동 - {personalEdgePoint}");
+
+        MoveTo(personalEdgePoint);
+
+        while (!IsArrived())
+        {
+            if (!isSecondPriorityStarted)
+            {
+                yield break;
+            }
+            yield return null;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+
+        yield return StartCoroutine(PerformPersonalEdgeFarming());
+    }
+
+    protected virtual IEnumerator PerformPersonalEdgeFarming()
+    {
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계에서 파밍 시작");
+
+        float farmingTime = 0f;
+        float totalFarmingTime = 10f;
+
+        while (farmingTime < totalFarmingTime)
+        {
+            if (!isSecondPriorityStarted)
+            {
+                yield break;
+            }
+
+            if (GameManager.Instance.TimeUntilNight() <= 30f)
+            {
+                Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 밤이 가까워 파밍 중단");
+                OnNightApproaching();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1f);
+            farmingTime += 1f;
+        }
+
+        OnPersonalFarmingCompleted();
+        hasFoundPersonalEdge = false;
+    }
+
+    protected virtual void OnPersonalFarmingCompleted()
+    {
+        // 각 AI에서 오버라이드
+    }
+
+    // ===== 수리 관련 함수들 =====
     protected virtual void StartRepair()
     {
         Debug.Log($"승무원 {GetMarinerId()}: StartRepair() 호출됨");
 
         MarinerManager.Instance.UpdateRepairTargets();
-
         List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
         Debug.Log($"승무원 {GetMarinerId()}: 수리 대상 개수: {needRepairList.Count}");
 
@@ -330,7 +443,7 @@ public class MarinerBase : CreatureBase
                 }
                 else
                 {
-                    MarinerManager.Instance.ReleaseRepairObject(obj); // 점유 해제
+                    MarinerManager.Instance.ReleaseRepairObject(obj);
                 }
             }
         }
@@ -369,7 +482,6 @@ public class MarinerBase : CreatureBase
             yield return null;
         }
 
-        // 기본 수리 성공률 100% (일반 승무원용)
         bool repairSuccess = GetRepairSuccessRate() > Random.value;
         int actualRepairAmount = repairSuccess ? repairAmount : 0;
 
@@ -393,7 +505,7 @@ public class MarinerBase : CreatureBase
     public virtual IEnumerator StartSecondPriorityAction()
     {
         Debug.Log($"{GetCrewTypeName()} 2순위 행동 - 기본 구현");
-        yield return new WaitForSeconds(1f);
+        yield return StartCoroutine(MoveToMyEdgeAndFarm());
     }
 
     // ===== NavMeshAgent 관련 공통 함수들 =====
@@ -441,17 +553,17 @@ public class MarinerBase : CreatureBase
 
     protected virtual float GetRepairSuccessRate()
     {
-        return 1.0f; // 기본 100% 성공률 (일반 승무원)
+        return 1.0f;
     }
 
     protected virtual int GetMarinerId()
     {
-        return 0; // 기본값
+        return 0;
     }
 
     protected virtual string GetCrewTypeName()
     {
-        return "승무원"; // 기본값
+        return "승무원";
     }
 
     protected virtual void OnNightApproaching()
@@ -468,6 +580,13 @@ public class MarinerBase : CreatureBase
             Gizmos.matrix = Matrix4x4.TRS(boxCenter, transform.rotation, Vector3.one);
             Gizmos.DrawWireCube(Vector3.zero, new Vector3(2f, 1f, 2f));
         }
-    }
 
+        // 개인 경계 지점 표시
+        if (hasFoundPersonalEdge && personalEdgePoint != Vector3.zero)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(personalEdgePoint, 1f);
+            Gizmos.DrawLine(transform.position, personalEdgePoint);
+        }
+    }
 }
