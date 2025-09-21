@@ -45,8 +45,7 @@ public class PlayerCore : CreatureBase, IBegin
         Dead                // 사망
     }    
 
-    // 생체 시스템 변수 ///
-
+    // { 생체 시스템 변수 } //
     // 포만감 열거형 (fullness 변수 값에 따른 상태)
     public enum FullnessState
     {
