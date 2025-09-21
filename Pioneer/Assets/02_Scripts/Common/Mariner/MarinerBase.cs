@@ -279,7 +279,7 @@ public class MarinerBase : CreatureBase
         yield return null;
     }
 
-    // ===== 개별 경계 탐색 기능 =====
+    // ===== 파밍시스템 y축 관련으로 해결법 찾아야할듯?=====
     protected Vector3 FindMyOwnEdgePoint()
     {
         List<Vector3> candidatePoints = new List<Vector3>();
@@ -415,6 +415,8 @@ public class MarinerBase : CreatureBase
     protected virtual void OnPersonalFarmingCompleted()
     {
         // 각 AI에서 오버라이드
+        //감염된 승무원은 파밍 x
+        // 그냥 승무원은 파밍 ㅇㅇ
     }
 
     // ===== 수리 관련 함수들 =====

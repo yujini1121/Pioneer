@@ -64,14 +64,16 @@ public class MarinerManager : MonoBehaviour
     {
         if (mariner == null) return;
 
-        Debug.Log("°¨¿° ¹ß»ý");
+        Debug.Log($"°¨¿° ¹ß»ý: ½Â¹«¿ø {mariner.marinerId}");
 
-        int id = mariner.marinerId;
-        GameObject go = mariner.gameObject;
+        InfectedMarinerAI infected = mariner.GetComponent<InfectedMarinerAI>();
+        if (infected != null)
+        {
+            infected.enabled = true;
+            infected.marinerId = mariner.marinerId;
+        }
 
-        Destroy(mariner);
-        InfectedMarinerAI infected = go.AddComponent<InfectedMarinerAI>();
-        infected.marinerId = id;
+        mariner.enabled = false;
     }
 
     /// <summary>

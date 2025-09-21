@@ -40,6 +40,13 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
+        Vector3 pos = transform.position;
+        if (Mathf.Abs(pos.y - 1f) > 0.1f) // Y축이 1에서 벗어나면
+        {
+            pos.y = 1f;
+            transform.position = pos;
+        }
+
         if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 
         if (!isRegistered)
