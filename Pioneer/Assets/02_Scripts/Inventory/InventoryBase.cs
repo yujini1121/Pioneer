@@ -62,7 +62,7 @@ public class InventoryBase : MonoBehaviour
             return true;
         }
 
-        Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count}");
+        Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count} / adding : {itemStack.id} + {itemStack.amount}");
         return false;
     }
 
