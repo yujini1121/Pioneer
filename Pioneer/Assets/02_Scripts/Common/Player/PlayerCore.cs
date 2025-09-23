@@ -159,10 +159,10 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     // 공격
     // =============================================================
-    public void Attack()
+    public void Attack(SItemWeaponTypeSO weapon)
     {
         if (isAttacking) return;
-        StartCoroutine(AttackCoroutine());
+        StartCoroutine(AttackCoroutine(weapon, InventoryManager.Instance.SelectedSlotInventory));
     }
 
     public bool IsMentalDebuff()
@@ -170,15 +170,19 @@ public class PlayerCore : CreatureBase, IBegin
         return currentMental < 40.0f; 
     }
 
-    private IEnumerator AttackCoroutine()
+    private IEnumerator AttackCoroutine(SItemWeaponTypeSO weapon, SItemStack itemWithState)
     {
         isAttacking = true;
+
+        // 공격 시 애니메이션
+        yield return new WaitForSeconds(weapon.weaponAnimation);
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, Mathf.Infinity))
         {
+
             Vector3 dir = (hit.point - transform.position).normalized;
             dir.y = 0f;
             transform.rotation = Quaternion.LookRotation(dir);
@@ -191,11 +195,22 @@ public class PlayerCore : CreatureBase, IBegin
             // TODO: 공격 애니메이션 시작 시간 추가해야 함!!!!!!!!!!! (0.6초)
             // playerAttack.gameObject.SetActive(true);
             playerAttack.EnableAttackCollider();
-            playerAttack.damage = this.attackDamage;
+            playerAttack.damage = (int)(weapon.weaponDamage);
+
+            if (itemWithState != null)
+            {
+                itemWithState.duability -= weapon.duabilityRedutionPerHit;
+            }
+
+            // 인벤토리 업데이트 
+            InventoryUiMain.instance.IconRefresh();
         }
 
         // 공격 애니메이션 이후 지연 시간 (0.4초)
-        yield return new WaitForSeconds(attackDelayTime);
+        //yield return new WaitForSeconds(attackDelayTime);
+
+        // 공격 애니메이션 이후 재공격을 위한 지연 시간
+        yield return new WaitForSeconds(weapon.weaponDelay);
 
         // playerAttack.gameObject.SetActive(false);
         playerAttack.DisableAttackCollider();

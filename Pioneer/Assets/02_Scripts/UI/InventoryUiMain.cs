@@ -88,18 +88,42 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     }
     public void ClickOut()
     {
-        if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory))
+        // 마우스 아이탬 핸들
+        // 플레이어 아이템 핸들
+
+        if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory) == false)
         {
-            Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭 {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭1");
+            InventoryManager.Instance.MouseDrop();
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭2");
+            mouseUI.Clear();
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭3");
+
             return;
         }
+        // 플레이어 아이템 핸들
+        Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
 
-        //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭 {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
-        //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭1");
-        InventoryManager.Instance.MouseDrop();
-        //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭2");
-        mouseUI.Clear();
-        //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭3");
+        if (InventoryManager.Instance.SelectedSlotInventory != null)
+        {
+            SItemTypeSO receved = ItemTypeManager.
+                                    Instance.
+                                    types[InventoryManager.Instance.SelectedSlotInventory.id];
+            // 만약 무기다 && 내구도가 있다
+            SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
+            if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
+            {
+                PlayerCore.Instance.Attack(weaponObject);
+                return;
+            }
+            // 소비형 아이템이다
+            
+        }
+
+
+        // 내구도가 만료된 무기 혹은 맨손
+
     }
 
     public void Sort()
@@ -198,6 +222,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void IconRefresh()
     {
+        // 모든 아이템을
+        // + 선택되지 않은 상태로 바꿈
+        // + 내구도 체크
         for (int index = 0; index < slotGameObjects.Count; ++index)
         {
             //if (InventoryManager.Instance.itemLists[index] == null) continue;
@@ -206,9 +233,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
             _forUi.Show(InventoryManager.Instance.itemLists[index]);
             _forUi.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+
         }
         mouseUI.Show(InventoryManager.Instance.mouseInventory);
         mouseUI.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+
+
         if (mCurrentSelectedHotbarSlot != null)
         {
             mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);

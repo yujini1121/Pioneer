@@ -19,9 +19,11 @@ public class PlayerController : MonoBehaviour
         float moveY = Input.GetAxisRaw("Vertical");
         playerCore.Move(new Vector3(moveX, 0, moveY));
 
-        if(Input.GetMouseButtonDown(0))
-        {
-            playerCore.Attack();
-        }
+
+        // 플레이어의 클릭을 받았는데 + 
+        //if(Input.GetMouseButtonDown(0))
+        //{
+        //    playerCore.Attack();
+        //}
     }
 }

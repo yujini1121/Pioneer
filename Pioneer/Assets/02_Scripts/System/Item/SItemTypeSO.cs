@@ -4,7 +4,7 @@ using UnityEngine;
 
 [System.Serializable]
 [CreateAssetMenu(fileName = "ItemType", menuName = "ScriptableObjects/Items/ItemType", order = 1)]
-public class SItemTypeSO : ScriptableObject
+public class SItemTypeSO : ScriptableObject, IItemUse<CommonBase, SItemStack>
 {
     public int id;
     public int maxStack;
@@ -16,5 +16,12 @@ public class SItemTypeSO : ScriptableObject
     public SItemTypeSO()
     {
 
+    }
+
+    public virtual IEnumerable Use(CommonBase userGameObject, SItemStack itemWithState)
+    {
+        itemWithState.isUseCoroutineEnd = false;
+        yield return null;
+        itemWithState.isUseCoroutineEnd = true;
     }
 }
