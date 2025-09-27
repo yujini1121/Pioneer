@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Playables;
 using UnityEngine.UI;
 
 public class InventoryUiMain : MonoBehaviour, IBegin
@@ -197,6 +198,10 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if (Input.GetKeyDown(KeyCode.Alpha8)) hotkeyInventoryNum = 7;
         if (Input.GetKeyDown(KeyCode.Alpha9)) hotkeyInventoryNum = 8;
         if (hotkeyInventoryNum > -1) SelectSlot(hotkeyInventoryNum);
+
+# warning 나중에 채빈씨 브랜치 머지 하고 업데이트 된경우 주석 풀기
+        //if (hotkeyInventoryNum > -1 &&
+        //    PlayerCore.Instance.currentState != PlayerCore.PlayerState.Default) SelectSlot(hotkeyInventoryNum);
         // ~~종료~~ 인벤토리 핫키 선택 시작
     }
 
