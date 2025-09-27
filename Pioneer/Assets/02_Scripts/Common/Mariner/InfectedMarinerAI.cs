@@ -27,18 +27,16 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
-    public void Start()
+    public override void Start()
     {
+        base.Start();  // 먼저 호출
+
         if (fov != null)
         {
             fov.Start();
         }
-
-        nightConfusionTime = Random.Range(0f, 30f);
-        Debug.Log($"감염된 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}, 속도: {speed}");
-        Debug.Log($"{marinerId} 밤 혼란 시드값 생성: {nightConfusionTime:F2}초");
-
-        base.Start();
+         
+        nightConfusionTime = 10f; // 변신 시간
     }
 
     private void Update()
@@ -66,48 +64,17 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     /// </summary>
     public override IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log("감염된 AI 스파이 활동 진행 중, 쓰레기 파밍 안함.");
-
-        GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
-
-        int chosenIndex = marinerId % spawnPoints.Length;
-
-        Debug.Log($"감염된 승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
-
-        UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
-        MoveTo(targetSpawn.position);
-
-        while (!IsArrived())
-        {
-            yield return null;
-        }
-
-        // NavMesh 경로 초기화
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.ResetPath();
-        }
-
-        if (GameManager.Instance.TimeUntilNight() <= 30f)
-        {
-            Debug.Log("감염된 승무원 밤 행동 시작");
-            StoreItemsAndReturnToBase(); // 감염된 승무원 전용 처리
-            yield break;
-        }
-
-        Debug.Log("감염된 승무원 가짜 파밍 10초");
-        yield return new WaitForSeconds(10f);
+        Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍");
+        yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
-        if (needRepairList.Count > 0)// 수리대상 확인
+        if (needRepairList.Count > 0)
         {
-            Debug.Log("감염된 승무원 수리 대상 발견으로 1순위 행동 실행");
             isSecondPriorityStarted = false;
             StartRepair();
         }
         else
         {
-            Debug.Log("감염된 승무원 수리 대상 미발견으로 2순위 행동 실행");
             StartCoroutine(StartSecondPriorityAction());
         }
     }
@@ -124,29 +91,52 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     /// <summary>
     /// 밤 혼란 행동
     /// </summary>
+    /// <summary>
+    /// 밤 혼란 행동 - NavMesh로 한 방향 이동
+    /// </summary>
     private IEnumerator NightBehaviorRoutine()
     {
         isNightBehaviorStarted = true;
         isConfused = true;
-        Debug.Log("혼란 상태 시작");
+        Debug.Log("혼란 상태 시작 - NavMesh로 이동");
 
         float escapedTime = 0;
 
         float angle = Random.Range(0f, 360f);
         Vector3 direction = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0f, Mathf.Sin(angle * Mathf.Deg2Rad)).normalized;
 
-        while (escapedTime < nightConfusionTime)
+        if (agent != null && agent.isOnNavMesh)
         {
-            escapedTime += Time.deltaTime;
-            transform.position += direction * speed * Time.deltaTime;
+            agent.isStopped = false;
 
-            yield return null;
+            while (escapedTime < nightConfusionTime)
+            {
+                escapedTime += Time.deltaTime;
+
+                Vector3 targetPosition = transform.position + direction * 10f; 
+                agent.SetDestination(targetPosition);
+
+                yield return new WaitForSeconds(0.1f); 
+            }
+
+            agent.isStopped = true;
+        }
+        else
+        {
+            while (escapedTime < nightConfusionTime)
+            {
+                escapedTime += Time.deltaTime;
+                transform.position += direction * speed * Time.deltaTime;
+                yield return null;
+            }
         }
 
         isConfused = false;
         Debug.Log("혼란 종료 후 좀비 AI로 변경");
 
-        agent.ResetPath();
+        if (agent != null)
+            agent.ResetPath();
+
         ChangeToZombieAI();
     }
 
@@ -157,13 +147,26 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         Debug.Log("좀비 AI전환");
 
-        if (GetComponent<ZombieMarinerAI>() == null)
+        // 좀비 AI 활성화
+        ZombieMarinerAI zombieAI = GetComponent<ZombieMarinerAI>();
+        if (zombieAI != null)
         {
-            ZombieMarinerAI zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
+            zombieAI.enabled = true;
             zombieAI.marinerId = this.marinerId;
+
+            // 공격 박스 활성화
+            if (zombieAI.attackRangeObject != null)
+                zombieAI.attackRangeObject.SetActive(true);
+
+            // 레이어 변경
+            gameObject.layer = LayerMask.NameToLayer("Enemy");
+
+            // 타겟 레이어 변경
+            zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         }
 
-        Destroy(this);
+        // 자신(감염된 승무원) 비활성화
+        this.enabled = false;
     }
 
     /// <summary>
@@ -196,5 +199,11 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     protected override void OnNightApproaching()
     {
         StoreItemsAndReturnToBase();
+    }
+
+    protected override void OnPersonalFarmingCompleted()
+    {
+        // 감염된 승무원은 자원을 수집하지 않음
+        Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
     }
 }

@@ -29,13 +29,13 @@ public class MarinerAI : MarinerBase, IBegin
         targetLayer = LayerMask.GetMask("Enemy");
     }
 
-    public void Start()
+    public override void Start()
     {
+        base.Start();  // 먼저 호출 (NavMeshAgent 설정)
+
         SetRandomDirection();
         stateTimer = moveDuration;
-
         fov.Start();
-        base.Start();
     }
 
     private void Update()
@@ -138,7 +138,7 @@ public class MarinerAI : MarinerBase, IBegin
         {
             isChasing = false;
             target = null;
-            ResetAgentPath(); 
+            ResetAgentPath();
         }
     }
 
@@ -156,7 +156,7 @@ public class MarinerAI : MarinerBase, IBegin
         {
             CancelCurrentRepair();
             isSecondPriorityStarted = false;
-            ResetAgentPath(); 
+            ResetAgentPath();
         }
     }
 
@@ -164,7 +164,7 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (IsDead) return;
 
-        UpdateTargetDetection(); 
+        UpdateTargetDetection();
 
         if (target != null)
         {
@@ -233,7 +233,7 @@ public class MarinerAI : MarinerBase, IBegin
         if (IsDead) return;
 
         attackCooldown -= Time.deltaTime;
-        UpdateTargetDetection(); 
+        UpdateTargetDetection();
 
         if (isChasing && target != null)
         {
@@ -263,11 +263,11 @@ public class MarinerAI : MarinerBase, IBegin
         {
             attackRoutine = null;
             isChasing = false;
-            HandlePostCombatAction(); 
+            HandlePostCombatAction();
             yield break;
         }
 
-        ResetAgentPath(); 
+        ResetAgentPath();
         LookAtTarget();
 
         isShowingAttackBox = true;
@@ -289,13 +289,13 @@ public class MarinerAI : MarinerBase, IBegin
             {
                 target = null;
                 isChasing = false;
-                HandlePostCombatAction(); 
+                HandlePostCombatAction();
             }
         }
         else
         {
             isChasing = false;
-            HandlePostCombatAction(); 
+            HandlePostCombatAction();
         }
 
         attackRoutine = null;
@@ -321,57 +321,8 @@ public class MarinerAI : MarinerBase, IBegin
 
     public override IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log("일반 승무원 2순위 낮 행동 시작");
-
-        GameObject[] spawnPoints = GameManager.Instance.spawnPoints;
-        int chosenIndex = (marinerId - 1) % spawnPoints.Length;
-
-        Debug.Log($"승무원 {marinerId}: 할당된 스포너 {chosenIndex}로 이동");
-
-        UnityEngine.Transform targetSpawn = spawnPoints[chosenIndex].transform;
-        MoveTo(targetSpawn.position);
-
-        while (!IsArrived())
-        {
-            if (CheckSecondPriorityActionCancellation("이동 중")) 
-            {
-                yield break;
-            }
-            yield return null;
-        }
-
-        ResetAgentPath(); 
-
-        if (GameManager.Instance.TimeUntilNight() <= 30f)
-        {
-            Debug.Log($"승무원 {marinerId}: 밤이 가까워 수집 작업 중단");
-            MarinerManager.Instance.StoreItemsAndReturnToBase(this);
-            yield break;
-        }
-
-        Debug.Log($"승무원 {marinerId}: 10초 동안 자원 수집 시작");
-
-        float collectTime = 0f;
-        float totalCollectTime = 10f;
-
-        while (collectTime < totalCollectTime)
-        {
-            if (CheckSecondPriorityActionCancellation("자원 수집 중")) 
-            {
-                yield break;
-            }
-
-            yield return new WaitForSeconds(1f); 
-            collectTime += 1f;
-        }
-
-        if (CheckSecondPriorityActionCancellation("자원 수집 완료 후")) 
-        {
-            yield break;
-        }
-
-        GameManager.Instance.CollectResource("wood");
-        Debug.Log($"승무원 {marinerId}: 자원 수집 완료");
+        Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
+        yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
         var needRepairList = MarinerManager.Instance.GetNeedsRepair();
         if (needRepairList.Count > 0)
@@ -400,4 +351,9 @@ public class MarinerAI : MarinerBase, IBegin
         base.WhenDestroy();
     }
 
+    protected override void OnPersonalFarmingCompleted()
+    {
+        GameManager.Instance.CollectResource("wood");
+        Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
+    }
 }

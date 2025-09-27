@@ -50,8 +50,10 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
     }
 
-    public void Start()
+    public override void Start()
     {
+        base.Start();
+
         SetRandomDirection();
         stateTimer = moveDuration;
 
@@ -61,7 +63,6 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
 
         Debug.Log($"좀비 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}");
-        base.Start();
     }
 
     private void Update()
@@ -216,5 +217,12 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         base.WhenDestroy();
     }
 
+    private void OnEnable()
+    {
+        Debug.Log($"좀비 승무원 {marinerId} 활성화됨");
+
+        if (attackRangeObject != null)
+            attackRangeObject.SetActive(false);
+    }
 
 }
