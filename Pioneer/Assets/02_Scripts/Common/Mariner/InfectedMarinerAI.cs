@@ -203,7 +203,13 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     protected override void OnPersonalFarmingCompleted()
     {
-        // 감염된 승무원은 자원을 수집하지 않음
+        MarinerInventory inventory = GetComponent<MarinerInventory>();
+        if (inventory != null)
+        {
+            // 감염된 승무원도 아이템은 획득 (나중에 버릴 예정)
+            inventory.AddItem(30001, 1);
+        }
         Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
+
     }
 }

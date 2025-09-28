@@ -52,7 +52,7 @@ public class InventoryBase : MonoBehaviour
             if (itemLists[inventoryIndex].id == itemStack.id)
             {
                 itemLists[inventoryIndex].amount += itemStack.amount;
-                InventoryUiMain.instance.IconRefresh();
+                //InventoryUiMain.instance.IconRefresh(); -> ÁÖÈÆ ¼öÁ¤
                 return true;
             }
         }

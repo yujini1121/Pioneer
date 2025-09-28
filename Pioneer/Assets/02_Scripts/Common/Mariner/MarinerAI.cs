@@ -353,7 +353,11 @@ public class MarinerAI : MarinerBase, IBegin
 
     protected override void OnPersonalFarmingCompleted()
     {
-        GameManager.Instance.CollectResource("wood");
+        MarinerInventory inventory = GetComponent<MarinerInventory>();
+        if (inventory != null && !inventory.IsMovingToStorage())
+        {
+            inventory.AddItem(30001, 1);
+        }
         Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
     }
 }
