@@ -116,7 +116,7 @@ public class PlayerStatsLevel : MonoBehaviour
         = new List<(float count, float chest)> { (0.0f, 0f), (0.05f, 0f), (0.1f, 0.3f), (0.12f, 0.4f), (0.15f, 0.5f) };
 
     public static event Action<GrowStatType> StatLevelUp;
-    // 
+     
 
     // =============== 디버깅용 인스펙터창에서 레벨과 경험치들 보이도록 ==================
     [SerializeField] private List<GrowState> growStateForInspector;
