@@ -321,18 +321,75 @@ public class MarinerAI : MarinerBase, IBegin
 
     public override IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
-        yield return StartCoroutine(MoveToMyEdgeAndFarm());
-
-        var needRepairList = MarinerManager.Instance.GetNeedsRepair();
-        if (needRepairList.Count > 0)
+        // 인벤토리 체크 - 7개 이상이면 보관함으로 이동
+        MarinerInventory inventory = GetComponent<MarinerInventory>();
+        if (inventory != null && inventory.ShouldMoveToStorage())
         {
-            isSecondPriorityStarted = false;
-            StartRepair();
+            Debug.Log($"승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 보관함으로 이동");
+
+            // 보관함 찾기
+            GameObject storage = GameObject.FindWithTag("Engine");
+            if (storage != null)
+            {
+                // NavMeshAgent로 보관함으로 이동
+                if (agent != null && agent.isOnNavMesh)
+                {
+                    agent.SetDestination(storage.transform.position);
+
+                    // 보관함에 도착할 때까지 대기
+                    while (!IsArrived())
+                    {
+                        if (!isSecondPriorityStarted)
+                        {
+                            yield break;
+                        }
+
+                        if (GameManager.Instance.TimeUntilNight() <= 30f)
+                        {
+                            OnNightApproaching();
+                            yield break;
+                        }
+                        yield return null;
+                    }
+
+                    Debug.Log($"승무원 {marinerId}: 보관함에 도착 - 아이템 저장");
+
+                    // 보관함에 아이템 저장
+                    var storageInventory = storage.GetComponent<InventoryBase>();
+                    if (storageInventory != null)
+                    {
+                        inventory.TransferAllItemsToStorage(storageInventory);
+                    }
+
+                    Debug.Log($"승무원 {marinerId}: 보관함 저장 완료 - 1순위 행동 재확인");
+
+                    // 보관함 저장 후 1순위 행동(수리) 재확인
+                    isSecondPriorityStarted = false;
+                    StartRepair();
+                    yield break;
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"승무원 {marinerId}: 보관함을 찾을 수 없음");
+            }
         }
         else
         {
-            StartCoroutine(StartSecondPriorityAction());
+            // 기존 파밍 시스템 그대로 유지
+            Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
+            yield return StartCoroutine(MoveToMyEdgeAndFarm());
+
+            var needRepairList = MarinerManager.Instance.GetNeedsRepair();
+            if (needRepairList.Count > 0)
+            {
+                isSecondPriorityStarted = false;
+                StartRepair();
+            }
+            else
+            {
+                StartCoroutine(StartSecondPriorityAction());
+            }
         }
     }
 
@@ -354,9 +411,13 @@ public class MarinerAI : MarinerBase, IBegin
     protected override void OnPersonalFarmingCompleted()
     {
         MarinerInventory inventory = GetComponent<MarinerInventory>();
-        if (inventory != null && !inventory.IsMovingToStorage())
+        if (inventory != null)
         {
-            inventory.AddItem(30001, 1);
+            Debug.Log($"AddItem 호출 전 - itemLists null 여부: {inventory.itemLists == null}");
+            Debug.Log($"AddItem 호출 전 - itemLists 크기: {inventory.itemLists?.Count ?? 0}");
+
+            bool result = inventory.AddItem(30001, 1);
+            Debug.Log($"AddItem 결과: {result}");
         }
         Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
     }
