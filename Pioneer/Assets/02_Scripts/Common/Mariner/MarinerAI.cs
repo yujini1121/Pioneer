@@ -360,6 +360,24 @@ public class MarinerAI : MarinerBase, IBegin
                     {
                         inventory.TransferAllItemsToStorage(storageInventory);
                     }
+                    else // 보관함 구현 후 삭제? or 에러처리? 
+                    {
+                        Debug.LogWarning("보관함에 InventoryBase가 없음 - 아이템 제거, 보관함 구현 후 삭제?");
+
+                        List<SItemStack> itemsToRemove = new List<SItemStack>();
+                        for (int i = 0; i < inventory.itemLists.Count; i++)
+                        {
+                            if (inventory.itemLists[i] != null)
+                            {
+                                itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
+                            }
+                        }
+
+                        if (itemsToRemove.Count > 0)
+                        {
+                            inventory.Remove(itemsToRemove.ToArray());
+                        }
+                    }
 
                     Debug.Log($"승무원 {marinerId}: 보관함 저장 완료 - 1순위 행동 재확인");
 
@@ -371,7 +389,15 @@ public class MarinerAI : MarinerBase, IBegin
             }
             else
             {
-                Debug.LogWarning($"승무원 {marinerId}: 보관함을 찾을 수 없음");
+                Debug.LogWarning($"승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
+
+                SetRandomDestination();
+
+                yield return new WaitForSeconds(3f); // 움직이고 3초 대기
+
+                isSecondPriorityStarted = false;
+                StartRepair();
+                yield break;
             }
         }
         else
