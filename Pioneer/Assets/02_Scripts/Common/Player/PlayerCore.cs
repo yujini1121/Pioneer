@@ -232,7 +232,10 @@ public class PlayerCore : CreatureBase, IBegin
 
         if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
         {
-            SetState(PlayerState.Default);
+            SetState(PlayerState.Default);         
+            
+            // ++++ 낚시 ui 바꿔야하는데 음 
+
             UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
         }
     }

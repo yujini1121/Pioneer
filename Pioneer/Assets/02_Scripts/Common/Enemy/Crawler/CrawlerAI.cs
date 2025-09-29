@@ -24,8 +24,9 @@ hp 50
     - 공격 후 경직 3초
 
 ==============================================
-- 돛대 타겟 디폴트
+- 돛대 타겟 디폴트 *
 - 공격 받으면 공격 받은 대상으로 타겟 변경
+- 플레이어한테 공격 받으면 갑자기 없어짐... 왜이래 ..
 */
 
 public class CrawlerAI : EnemyBase, IBegin
@@ -38,6 +39,12 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private int closeTarget = 0;
 
+    private GameObject revengeTarget;
+
+    private bool isAttack = false;
+
+    private float attackTimer = 0f;
+
     void Start()
     {
         base.Start();
@@ -47,21 +54,26 @@ public class CrawlerAI : EnemyBase, IBegin
 
     void Update()
     {
+        if (attackTimer > 0)
+        {
+            attackTimer -= Time.deltaTime;
+            return;
+        }
+
         fov.DetectTargets(detectMask);
 
-        bool isCanMove = CanMove();
-        if (isCanMove == false)
+        if (fov.visibleTargets.Count == 0)
         {
-            SetMastTarget();
+            currentAttackTarget = SetMastTarget();
         }
 
-        if (isCanMove)
-        {
-            Move();
-        }
-        else if(CanAttack())
+        if (CanAttack())
         {
             Attack();
+        }
+        else if (CanMove())
+        {
+            Move();
         }
     }
 
@@ -74,17 +86,22 @@ public class CrawlerAI : EnemyBase, IBegin
         speed = 1;
         fov.viewRadius = 6;
         attackRange = 4;
-        attackDelayTime = 3; 
+        attackDelayTime = 3;
     }
-    
+
     private bool CanMove()
     {
-        return fov.visibleTargets.Any(target => detectMask == (detectMask | (1 << target.gameObject.layer)));
+        return fov.visibleTargets.Any(target => detectMask == (detectMask | (1 << target.gameObject.layer))) || currentAttackTarget != null;
     }
 
     private bool CanAttack()
     {
-        return true;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, detectMask);
+
+        if (hitColliders.Length > 0 && attackTimer <= 0)
+            return true;
+        else
+            return false;
     }
 
     private void Move()
@@ -92,15 +109,16 @@ public class CrawlerAI : EnemyBase, IBegin
         // 감지 리스트에 있는 설치형 오브젝트 중 가장 가까운 오브젝트부터 공격하기 부서져서 공격이 끝나면 다음으로 가까운 애 공격하러 가기
 
         // fov에 감지된 오브젝트 가까운 순으로 정렬
-        SortCloseObj();
-        currentAttackTarget = sortedTarget[closeTarget].gameObject;
-        Vector3 destination = currentAttackTarget.GetComponent<Collider>().ClosestPoint(transform.position);
-        if (sortedTarget.Count > 0)
+        if (fov.visibleTargets.Count > 0)
         {
-            if (Vector3.Distance(agent.destination, destination) > 0.5f)
-            {
-                agent.SetDestination(destination);
-            }
+            SortCloseObj();
+            currentAttackTarget = sortedTarget[closeTarget].gameObject;
+        }
+
+        Vector3 destination = currentAttackTarget.GetComponent<Collider>().ClosestPoint(transform.position);
+        if (Vector3.Distance(agent.destination, destination) > 0.5f)
+        {
+            agent.SetDestination(destination);
         }
     }
 
@@ -110,13 +128,48 @@ public class CrawlerAI : EnemyBase, IBegin
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
-            CommonBase targetBase = hitColliders[i].GetComponent<CommonBase>();
-            targetBase.TakeDamage(attackDamage, this.gameObject);
+            GameObject currentObject = hitColliders[i].gameObject;
+
+            UnityEngine.Debug.Log($"[검사 시작] 이름: {currentObject.name}, 레이어: {LayerMask.LayerToName(currentObject.layer)}");
+
+            CommonBase targetBase = currentObject.GetComponent<CommonBase>();
+
+            if (targetBase == null)
+            {
+                UnityEngine.Debug.LogError($"-> 실패: '{currentObject.name}'에서 CommonBase 컴포넌트를 찾을 수 없습니다! (targetBase is null)");
+            }
+            else
+            {
+                UnityEngine.Debug.Log($"-> 성공: '{currentObject.name}'에서 CommonBase 컴포넌트를 찾았습니다.");
+
+                if (targetBase.IsDead)
+                {
+                    if (fov.visibleTargets.Count > 0)
+                    {
+                        SortCloseObj();
+                        currentAttackTarget = fov.visibleTargets[closeTarget].gameObject;
+                    }
+                    return;
+                }
+                targetBase.TakeDamage(attackDamage, this.gameObject);
+            }
         }
+        attackTimer = attackDelayTime;
     }
 
     private void SortCloseObj()
     {
         sortedTarget = fov.visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
+    }
+
+    public override void TakeDamage(int damage, GameObject attacker)
+    {
+        base.TakeDamage(damage, attacker);
+
+        /*if (attacker != null && !IsDead)
+        {
+            revengeTarget = attacker;
+            UnityEngine.Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
+        }*/
     }
 }
