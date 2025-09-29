@@ -76,6 +76,7 @@ public class MinionAI : EnemyBase, IBegin
     protected override void SetAttribute()
     {
         hp = 20;
+        maxHp = hp;
         attackDamage = 1;
         speed = 2f;
         detectionRange = 4f;
