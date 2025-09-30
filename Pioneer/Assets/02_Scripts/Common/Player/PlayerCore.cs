@@ -90,8 +90,12 @@ public class PlayerCore : CreatureBase, IBegin
     // 공격 관련 설정 변수
     [Header("공격 설정")]
     [SerializeField] private PlayerAttack playerAttack;
+    public PlayerAttack PlayerAttack => playerAttack;
     [SerializeField] private float attackHeight = 1.0f;
+    public float AttackHeight => attackHeight;
     [SerializeField] private LayerMask enemyLayer;
+    public LayerMask EnemyLayer => enemyLayer;
+    public SItemWeaponTypeSO handAttack;
 
     // 기본 시스템 관련 번수
     private Rigidbody playerRb;
@@ -101,6 +105,11 @@ public class PlayerCore : CreatureBase, IBegin
     public static event Action<int> PlayerHpChanged;
     public static event Action<int> PlayerFullnessChanged;
     public static event Action<int> PlayerMentalChanged;
+
+    // 코루틴 변수
+    private bool isRunningCoroutineItem = false;
+    public bool IsRunningCoroutineItem => isRunningCoroutineItem;
+
 
     void Awake()
     {
@@ -168,6 +177,20 @@ public class PlayerCore : CreatureBase, IBegin
     public bool IsMentalDebuff()
     {
         return currentMental < 40.0f; 
+    }
+
+    public bool BeginCoroutine(IEnumerator coroutine)
+    {
+        if (isRunningCoroutineItem) return false;
+        StartCoroutine(CoroutineWraper(coroutine));
+        return true;
+    }
+
+    private IEnumerator CoroutineWraper(IEnumerator coroutine)
+    {
+        isRunningCoroutineItem = true;
+        yield return coroutine;
+        isRunningCoroutineItem = false;
     }
 
     private IEnumerator AttackCoroutine(SItemWeaponTypeSO weapon, SItemStack itemWithState)

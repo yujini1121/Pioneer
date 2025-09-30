@@ -103,26 +103,41 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
             return;
         }
+
         // 플레이어 아이템 핸들
         Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
-
-        if (InventoryManager.Instance.SelectedSlotInventory != null)
+        if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
         {
-            SItemTypeSO receved = ItemTypeManager.
-                                    Instance.
-                                    types[InventoryManager.Instance.SelectedSlotInventory.id];
-            // 만약 무기다 && 내구도가 있다
-            SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
-            if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
-            {
-                PlayerCore.Instance.Attack(weaponObject);
-                return;
-            }
-            // 소비형 아이템이다
-            
+
+        }
+        else
+        {
+            PlayerCore.Instance.BeginCoroutine(
+                ItemTypeManager.Instance.itemTypeSearch[
+                    InventoryManager.Instance.SelectedSlotInventory.id].Use(
+                            PlayerCore.Instance,
+                            InventoryManager.Instance.SelectedSlotInventory
+                        )
+                );
         }
 
 
+        //if (InventoryManager.Instance.SelectedSlotInventory != null)
+        //{
+        //    SItemTypeSO receved = ItemTypeManager.
+        //                            Instance.
+        //                            types[InventoryManager.Instance.SelectedSlotInventory.id];
+        //    // 만약 무기다 && 내구도가 있다
+        //    SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
+        //    if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
+        //    {
+        //        PlayerCore.Instance.BeginCoroutine()
+        //        PlayerCore.Instance.Attack(weaponObject);
+        //        return;
+        //    }
+        //    // 소비형 아이템이다
+        //    SItemConsumeTypeSO consumeObject = receved as SItemConsumeTypeSO;
+        //}
         // 내구도가 만료된 무기 혹은 맨손
 
     }

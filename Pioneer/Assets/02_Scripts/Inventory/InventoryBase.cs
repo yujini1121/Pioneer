@@ -59,6 +59,13 @@ public class InventoryBase : MonoBehaviour
         if (firstEmpty != -1)
         {
             itemLists[firstEmpty] = new SItemStack(itemStack.id, itemStack.amount);
+
+            SItemWeaponTypeSO weaponSo = ItemTypeManager.Instance.itemTypeSearch[itemStack.id] as SItemWeaponTypeSO;
+            if (weaponSo != null)
+            {
+                Debug.Log($">> InventoryBase.TryAdd : 무기 추가. 내구도 = {weaponSo.weaponDuability}");
+                itemLists[firstEmpty].duability = weaponSo.weaponDuability;
+            }
             return true;
         }
 

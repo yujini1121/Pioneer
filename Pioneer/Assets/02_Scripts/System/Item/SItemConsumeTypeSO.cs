@@ -10,8 +10,10 @@ public class SItemConsumeTypeSO : SItemTypeSO
     public int EffectTarget;
     public int Max_Use_Count;
 
-    public override IEnumerable Use(CommonBase userGameObject, SItemStack itemWithState)
+    public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
+        Debug.Log(">> 아이템_소모 : 사용됨");
+
         itemWithState.isUseCoroutineEnd = false;
 
         SItemStack removeItem = new SItemStack(itemWithState.id, 1);
@@ -71,6 +73,11 @@ public class SItemConsumeTypeSO : SItemTypeSO
         }
 
         yield return base.Use(userGameObject, itemWithState);
+
+        
+
+
+        InventoryUiMain.instance.IconRefresh();
     }
 
 }

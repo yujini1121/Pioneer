@@ -15,11 +15,33 @@ public class SItemWeaponTypeSO : SItemTypeSO
     public int weaponDuability;
     public int duabilityRedutionPerHit;
 
-    public override IEnumerable Use(CommonBase userGameObject, SItemStack itemWithState)
+    public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
+        Debug.Log(">> 아이템_무기 : 사용됨");
+
         itemWithState.isUseCoroutineEnd = false;
 
-        yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState, this);
+        if (itemWithState.duability > 0)
+        {
+            Debug.Log(">> 아이템_무기 : WeaponUseUtils.AttackCoroutine");
+            yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState, this);
+        }
+        else
+        {
+            yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState, 
+                new SItemWeaponTypeSO()
+                {
+                    weaponDamage = PlayerCore.Instance.AttackDamageCalculated,
+                    weaponRange = PlayerCore.Instance.attackRange,
+                    weaponDelay = 0.5f,
+                    weaponAnimation = 0.3f
+                }
+                    
+                );
+        }
+        
+
+
 
         yield return base.Use(userGameObject, itemWithState);
     }
