@@ -6,7 +6,7 @@ public class MarinerManager : MonoBehaviour
 {
     public static MarinerManager Instance;
 
-    [Header("감염 설정")]
+    [Header("감염 설정(수정 필요)")]
     public float infectionStartTime = 180f;
     public float infectionInterval = 10f;
     private bool infectionStarted = false;
