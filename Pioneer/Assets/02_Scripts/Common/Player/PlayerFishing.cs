@@ -19,6 +19,8 @@ public class PlayerFishing : MonoBehaviour
 
     private Coroutine fishingLoopCoroutine;
 
+    private int fishingExp = 5;
+
     private void Awake()
     {
 
@@ -53,8 +55,37 @@ public class PlayerFishing : MonoBehaviour
             {                
                 SItemStack itemStack = new SItemStack(caughtItem.id, 1);
                 InventoryManager.Instance.Add(itemStack);
-                PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, 5);
-                Debug.Log($"아이템 획득: {caughtItem.typeName}, 경험치 +{5}");
+
+                if(caughtItem == treasureItem)
+                {
+                    fishingExp = 10;
+                }
+                else
+                {
+                    fishingExp = 5;
+                }
+
+                    PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
+                Debug.Log($"아이템 획득: {caughtItem.typeName}, 경험치 +{fishingExp}");
+
+                (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
+
+                if(Random.Range(0f, 1f) < chances.extraItemChance)
+                {
+                    SItemStack bonusItemStack = new SItemStack(caughtItem.id, 1);
+                    InventoryManager.Instance.Add(bonusItemStack);
+                    Debug.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
+                }
+
+                if(Random.Range(0f, 1f) < chances.treasureChestChance)
+                {
+                    if(treasureItem != null)
+                    {
+                        SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
+                        InventoryManager.Instance.Add(treasureItemStack);
+                        Debug.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
+                    }
+                }
             }
             else
             {
@@ -79,11 +110,8 @@ public class PlayerFishing : MonoBehaviour
         {
             return dropItemTable[0].itemData;
         }
-        Debug.Log($"가중치 계산 끝 : {totalProbability}");
         // 2. 0 ~ 전체 가중치사이 랜덤 숫자 뽑기
         float randomNum = Random.Range(0f, totalProbability);
-        Debug.Log("랜덤 수 걸림");
-        Debug.Log($"randomNum : {randomNum}");
         // 3. 랜덤 숫자가 현재 아이템의 가중치 보다 작으면 당첨
         foreach (var item in dropItemTable)
         {
