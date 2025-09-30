@@ -7,18 +7,19 @@ public class PlayerFishing : MonoBehaviour
     [System.Serializable]
     public struct FishingDropItem
     {
-        public SItemStack itemStack;
+        public SItemTypeSO itemData;
         public float dropProbability;
     }
 
     [Header("낚시 아이템 드랍 테이블")]
     public List<FishingDropItem> dropItemTable;
 
-    [Header("낚시 아이템 경험치")]
-    private int fishingExp = 5;
-    private int treasureChestExp = 10;
+    [Header("보물 아이템")]
+    public SItemTypeSO treasureItem;
 
     private Coroutine fishingLoopCoroutine;
+
+    private int fishingExp = 5;
 
     private void Awake()
     {
@@ -49,33 +50,79 @@ public class PlayerFishing : MonoBehaviour
         {
             Debug.Log("낚시 시작");
             yield return new WaitForSeconds(2f);
-            GetItem();
-            // PlayerStatsLevel.Instance.AddExp(); => 아이템 결정되면 해당 아이템에따라 경험치 부여?
+            SItemTypeSO caughtItem = GetItem();
+            if(caughtItem != null)
+            {                
+                SItemStack itemStack = new SItemStack(caughtItem.id, 1);
+                InventoryManager.Instance.Add(itemStack);
+
+                if(caughtItem == treasureItem)
+                {
+                    fishingExp = 10;
+                }
+                else
+                {
+                    fishingExp = 5;
+                }
+
+                    PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
+                Debug.Log($"아이템 획득: {caughtItem.typeName}, 경험치 +{fishingExp}");
+
+                (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
+
+                if(Random.Range(0f, 1f) < chances.extraItemChance)
+                {
+                    SItemStack bonusItemStack = new SItemStack(caughtItem.id, 1);
+                    InventoryManager.Instance.Add(bonusItemStack);
+                    Debug.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
+                }
+
+                if(Random.Range(0f, 1f) < chances.treasureChestChance)
+                {
+                    if(treasureItem != null)
+                    {
+                        SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
+                        InventoryManager.Instance.Add(treasureItemStack);
+                        Debug.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("아이템 획득에 실패했습니다. 드랍 테이블을 확인해주세요.");
+            }
+
             Debug.Log("낚시 끝");
         }
     }
 
-    private void GetItem()
+    private SItemTypeSO GetItem()
     {
+        Debug.Log("아이템 얻기 시작");
         float totalProbability = 0f;
         // 1. 전체 가중치 합 계산
         for (int i = 0; i < dropItemTable.Count; i++)
         {
             totalProbability += dropItemTable[i].dropProbability;
         }
+
+        if (totalProbability <= 0)
+        {
+            return dropItemTable[0].itemData;
+        }
         // 2. 0 ~ 전체 가중치사이 랜덤 숫자 뽑기
         float randomNum = Random.Range(0f, totalProbability);
         // 3. 랜덤 숫자가 현재 아이템의 가중치 보다 작으면 당첨
-        foreach(var item in dropItemTable)
+        foreach (var item in dropItemTable)
         {
             if(randomNum <= item.dropProbability)
             {
-                // 아이템 획득 로직
-                Debug.Log("아이템 획득");
-                return;
+                return item.itemData;
             }
             // 4. 당첨되지않았으면 현재 아이템 가중치를 빼고 다음 아이템으로 넘어감
             randomNum -= item.dropProbability;
         }
+        
+        return dropItemTable[dropItemTable.Count - 1].itemData;
     }
 }
