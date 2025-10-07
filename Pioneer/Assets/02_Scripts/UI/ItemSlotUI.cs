@@ -12,6 +12,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public UnityEngine.UI.Image image;
     public TextMeshProUGUI hotKey;
     public TextMeshProUGUI count;
+    public TextMeshProUGUI durability;
     public bool isSlot;
 
     public void Show(SItemStack item,
@@ -41,6 +42,10 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             image.sprite = ItemTypeManager.Instance.itemTypeSearch[item.id].image;
         }
         count.text = item.amount.ToString();
+
+        durability.text = $"{InventoryManager.Instance.itemLists[index].duability}%";
+        image.color =
+            (InventoryManager.Instance.itemLists[index].duability > 0) ? Color.white : Color.white;
     }
     public void Clear()
     {
@@ -48,6 +53,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         
         image.enabled = false;
         count.text = "";
+        durability.text = "";
     }
 
     public void OnPointerEnter(PointerEventData eventData)

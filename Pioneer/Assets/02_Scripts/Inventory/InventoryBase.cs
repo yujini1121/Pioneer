@@ -43,7 +43,7 @@ public class InventoryBase : MonoBehaviour
 
         for (int inventoryIndex = 0; inventoryIndex < itemLists.Count; ++inventoryIndex)
         {
-            if (itemLists[inventoryIndex] == null || itemLists[inventoryIndex].id ==0)
+            if (itemLists[inventoryIndex] == null)
             {
                 if (firstEmpty == -1) firstEmpty = inventoryIndex;
                 continue; // 다음 칸에 같은 아이템이 있을 수 있어서 break을 하지 않음.
@@ -52,17 +52,24 @@ public class InventoryBase : MonoBehaviour
             if (itemLists[inventoryIndex].id == itemStack.id)
             {
                 itemLists[inventoryIndex].amount += itemStack.amount;
-                //InventoryUiMain.instance.IconRefresh();
+                InventoryUiMain.instance.IconRefresh();
                 return true;
             }
         }
         if (firstEmpty != -1)
         {
             itemLists[firstEmpty] = new SItemStack(itemStack.id, itemStack.amount);
+
+            SItemWeaponTypeSO weaponSo = ItemTypeManager.Instance.itemTypeSearch[itemStack.id] as SItemWeaponTypeSO;
+            if (weaponSo != null)
+            {
+                Debug.Log($">> InventoryBase.TryAdd : 무기 추가. 내구도 = {weaponSo.weaponDuability}");
+                itemLists[firstEmpty].duability = weaponSo.weaponDuability;
+            }
             return true;
         }
 
-        Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count}");
+        Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count} / adding : {itemStack.id} + {itemStack.amount}");
         return false;
     }
 

@@ -184,23 +184,35 @@ public class InventoryManager : InventoryBase
         }
 
         mouseInventory = null;
+
     }
 
     private void Start()
     {
         Demo();
+        InventoryUiMain.instance.IconRefresh();
     }
 
     private void Demo()
     {
-        Add(new SItemStack(30001, 10));
-        Add(new SItemStack(30002, 10));
+        //Add(new SItemStack(30001, 10));
+        //Add(new SItemStack(30002, 10));
 
-        itemLists[0] = new SItemStack(30002, 100);
-        itemLists[1] = new SItemStack(100, 100);
-        itemLists[2] = new SItemStack(101, 100);
-        itemLists[3] = new SItemStack(102, 100);
-        itemLists[4] = new SItemStack(103, 100);
-        itemLists[4] = new SItemStack(30001, 200);
+        //itemLists[0] = new SItemStack(30002, 100);
+        //itemLists[1] = new SItemStack(100, 100);
+        //itemLists[2] = new SItemStack(101, 100);
+        //itemLists[3] = new SItemStack(102, 100);
+        //itemLists[4] = new SItemStack(103, 100);
+        //itemLists[5] = new SItemStack(30001, 200);
+        //itemLists[6] = new SItemStack(20001, 1);
+        //itemLists[7] = new SItemStack(40001, 200);
+        Add(new SItemStack(30002, 100));
+        Add(new SItemStack(100, 100));
+        Add(new SItemStack(101, 100));
+        Add(new SItemStack(102, 100));
+        Add(new SItemStack(103, 100));
+        Add(new SItemStack(30001, 200));
+        Add(new SItemStack(20001, 1));
+        Add(new SItemStack(40001, 200));
     }
 }
