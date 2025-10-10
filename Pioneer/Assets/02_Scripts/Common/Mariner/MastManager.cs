@@ -89,6 +89,16 @@ public class MastManager : MonoBehaviour
         }
     }
 
+    public void DecrementDeckCount(int destroyedCount)
+    {
+        currentDeckCount -= destroyedCount;
+
+        if (currentDeckCount < 0)
+        {
+            currentDeckCount = 0;
+        }
+
+    }
     // 게임오버 처리
     public void GameOver()
     {
