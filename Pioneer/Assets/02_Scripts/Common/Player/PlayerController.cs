@@ -79,10 +79,10 @@ public class PlayerController : MonoBehaviour
         }
 
         // 공격
-        if (Input.GetMouseButtonDown(0))
-        {
-            playerCore.Attack();
-        }
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    playerCore.Attack();
+        //}
 
         // 낚시 시작 조건 확인하고 낚시 상태 전환?
         if(isSeaInFront) // + 낮인지 && gameManager.currentGameTime < dayDuration?

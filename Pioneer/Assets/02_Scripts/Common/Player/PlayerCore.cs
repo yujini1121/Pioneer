@@ -102,6 +102,10 @@ public class PlayerCore : CreatureBase, IBegin
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private float attackHeight = 1.0f;
     [SerializeField] private LayerMask enemyLayer;
+    public PlayerAttack PlayerAttack => playerAttack;
+    public float AttackHeight => attackHeight;
+    public LayerMask EnemyLayer => enemyLayer;
+    public SItemWeaponTypeSO handAttack;
 
     // 기본 시스템 관련 번수
     private Rigidbody playerRb;
@@ -113,6 +117,10 @@ public class PlayerCore : CreatureBase, IBegin
     public static event Action<int> PlayerMentalChanged;
 
     public PlayerState currentState { get; private set; }
+
+    // 코루틴 변수
+    private bool isRunningCoroutineItem = false;
+    public bool IsRunningCoroutineItem => isRunningCoroutineItem;
 
     void Awake()
     {
@@ -179,11 +187,11 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     // 공격
     // =============================================================
-    public void Attack()
+    public void Attack(SItemWeaponTypeSO weapon)
     {
         if (currentState != PlayerState.Default) return;
         if (isAttacking) return;
-        StartCoroutine(AttackCoroutine());
+        StartCoroutine(AttackCoroutine(weapon, InventoryManager.Instance.SelectedSlotInventory));
     }
 
     public bool IsMentalDebuff()
@@ -191,9 +199,25 @@ public class PlayerCore : CreatureBase, IBegin
         return currentMental < 40.0f; 
     }
 
-    private IEnumerator AttackCoroutine()
+    public bool BeginCoroutine(IEnumerator coroutine)
+    {
+        if (isRunningCoroutineItem) return false;
+        StartCoroutine(CoroutineWraper(coroutine));
+        return true;
+    }
+
+    private IEnumerator CoroutineWraper(IEnumerator coroutine)
+    {
+        isRunningCoroutineItem = true;
+        yield return coroutine;
+        isRunningCoroutineItem = false;
+    }
+
+    private IEnumerator AttackCoroutine(SItemWeaponTypeSO weapon, SItemStack itemWithState)
     {
         isAttacking = true;
+
+        yield return new WaitForSeconds(weapon.weaponAnimation);
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -212,11 +236,19 @@ public class PlayerCore : CreatureBase, IBegin
             // TODO: 공격 애니메이션 시작 시간 추가해야 함!!!!!!!!!!! (0.6초)
             // playerAttack.gameObject.SetActive(true);
             playerAttack.EnableAttackCollider();
-            playerAttack.damage = this.attackDamage;
+            playerAttack.damage = (int)(weapon.weaponDamage) + this.attackDamage;
+
+            if (itemWithState != null)
+            {
+                itemWithState.duability -= weapon.duabilityRedutionPerHit;
+            }
+
+            InventoryUiMain.instance.IconRefresh();
         }
 
         // 공격 애니메이션 이후 지연 시간 (0.4초)
-        yield return new WaitForSeconds(attackDelayTime);
+        //yield return new WaitForSeconds(attackDelayTime);
+        yield return new WaitForSeconds(weapon.weaponDelay);
 
         // playerAttack.gameObject.SetActive(false);
         playerAttack.DisableAttackCollider();
