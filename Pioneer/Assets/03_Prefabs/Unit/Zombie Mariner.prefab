@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4649584092089060864}
   - component: {fileID: 4359640814979290742}
-  m_Layer: 11
+  m_Layer: 8
   m_Name: 2D Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 8984755715972634190}
   - component: {fileID: 5615173323918950529}
   - component: {fileID: 4765768502787444952}
-  m_Layer: 11
+  m_Layer: 8
   m_Name: Zombie Mariner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -208,7 +208,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 0
+  m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &8825753805637791600
@@ -251,6 +251,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   isRepairing: 0
+  personalRayCount: 8
+  personalMaxDistance: 50
   marinerId: 0
 --- !u!114 &5615173323918950529
 MonoBehaviour:
@@ -277,6 +279,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   isRepairing: 0
+  personalRayCount: 8
+  personalMaxDistance: 50
   marinerId: 0
 --- !u!114 &4765768502787444952
 MonoBehaviour:
@@ -303,6 +307,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   isRepairing: 0
+  personalRayCount: 8
+  personalMaxDistance: 50
   marinerId: 0
   spriteTransform: {fileID: 0}
   spriteRenderer: {fileID: 0}
@@ -319,7 +325,7 @@ GameObject:
   - component: {fileID: 8865758059415035714}
   - component: {fileID: 6564680215377663242}
   - component: {fileID: 6762324052616338003}
-  m_Layer: 11
+  m_Layer: 8
   m_Name: AttackBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}

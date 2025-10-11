@@ -148,6 +148,13 @@ public class PlayerCore : CreatureBase, IBegin
         NearEnemy();
         // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
     }
+    public override void WhenDestroy()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.TriggerGameOver();
+        }
+    }
 
     #region 기본 시스템
     // =============================================================

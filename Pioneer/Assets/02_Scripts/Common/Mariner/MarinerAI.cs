@@ -38,7 +38,8 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
-        maxHp = 100;  // Mariner HP
+        maxHp = 100;
+        hp = 100;
         speed = 2f;
         attackDamage = 6;
         attackRange = 4f;
@@ -115,6 +116,7 @@ public class MarinerAI : MarinerBase, IBegin
         if (GameManager.Instance.IsDaytime)
         {
             Debug.Log($"승무원 {marinerId}: 전투 종료, 수리 재개");
+            // 즉시 1순위 행동 시작
             StartRepair();
         }
         else
@@ -185,7 +187,15 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (IsDead) return;
 
-        UpdateTargetDetection();
+        // 전투 중이 아닐 때만 타겟 탐지
+        if (!isChasing && target == null)
+        {
+            ValidateCurrentTarget();
+            if (target == null)
+            {
+                TryFindNewTarget();
+            }
+        }
 
         if (target != null)
         {
@@ -197,7 +207,7 @@ public class MarinerAI : MarinerBase, IBegin
 
             if (isSecondPriorityStarted)
             {
-                Debug.Log($"승무원 {marinerId}: 적 발견으로 2순위 작업 중단");
+                Debug.Log($"승무원 {marinerId}: 적 발견으로 파밍 중단");
                 CancelSecondPriorityAction();
             }
 
@@ -244,6 +254,7 @@ public class MarinerAI : MarinerBase, IBegin
         if (isSecondPriorityStarted)
         {
             isSecondPriorityStarted = false;
+            StopAllCoroutines();
             ResetAgentPath();
             Debug.Log($"승무원 {marinerId}: 2순위 작업 취소");
         }
@@ -254,7 +265,16 @@ public class MarinerAI : MarinerBase, IBegin
         if (IsDead) return;
 
         attackCooldown -= Time.deltaTime;
-        UpdateTargetDetection();
+
+        // 전투 중이 아닐 때만 타겟 탐지
+        if (!isChasing && target == null)
+        {
+            ValidateCurrentTarget();
+            if (target == null)
+            {
+                TryFindNewTarget();
+            }
+        }
 
         if (isChasing && target != null)
         {
@@ -298,6 +318,7 @@ public class MarinerAI : MarinerBase, IBegin
         PerformMarinerAttack();
         attackCooldown = attackInterval;
 
+        // 공격 후 타겟 상태 확인
         if (target != null)
         {
             CommonBase targetBase = target.GetComponent<CommonBase>();
@@ -308,15 +329,23 @@ public class MarinerAI : MarinerBase, IBegin
             }
             else
             {
+                // 적이 죽었으므로 즉시 1순위 행동으로 전환
+                Debug.Log($"승무원 {marinerId}: 적 처치 완료");
                 target = null;
                 isChasing = false;
+                attackRoutine = null;
                 HandlePostCombatAction();
+                yield break;
             }
         }
         else
         {
+            // 적이 없어졌으므로 즉시 1순위 행동으로 전환
+            Debug.Log($"승무원 {marinerId}: 적 소실");
             isChasing = false;
+            attackRoutine = null;
             HandlePostCombatAction();
+            yield break;
         }
 
         attackRoutine = null;
@@ -423,7 +452,7 @@ public class MarinerAI : MarinerBase, IBegin
         }
         else
         {
-            // 기존 파밍 시스템 그대로 유지
+            // 기존 파밍 시스템
             Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
@@ -449,6 +478,7 @@ public class MarinerAI : MarinerBase, IBegin
     {
         MarinerManager.Instance.StoreItemsAndReturnToBase(this);
     }
+
     public override void WhenDestroy()
     {
         GameManager.Instance.MarinerDiedCount();

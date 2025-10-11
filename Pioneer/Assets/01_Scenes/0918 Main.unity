@@ -1237,7 +1237,7 @@ Transform:
   m_GameObject: {fileID: 689466767}
   serializedVersion: 2
   m_LocalRotation: {x: -0.00000001792346, y: 0.000000029802326, z: 7.554114e-16, w: 1}
-  m_LocalPosition: {x: 1.09, y: 1, z: -8.65}
+  m_LocalPosition: {x: 4.15, y: 1, z: -8.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2504,6 +2504,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: DemoCraftTable
       objectReference: {fileID: 0}
+    - target: {fileID: 6437376967595750746, guid: cc8ac825a7109e444b90a0b54c816c5b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7674789406135211127, guid: cc8ac825a7109e444b90a0b54c816c5b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3156,7 +3161,7 @@ Transform:
   m_GameObject: {fileID: 1897114960}
   serializedVersion: 2
   m_LocalRotation: {x: -0.00000001792346, y: 0.000000029802326, z: 5.341608e-16, w: 1}
-  m_LocalPosition: {x: 1.09, y: 1, z: -8.65}
+  m_LocalPosition: {x: 4.15, y: 1, z: -8.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3584,6 +3589,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Titan
       objectReference: {fileID: 0}
+    - target: {fileID: 4926383961205332390, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6860211199804016371, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3754,6 +3764,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2008802959356694732, guid: beb078de7959e8c40891facd91f4cbc4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2106102194222777445, guid: beb078de7959e8c40891facd91f4cbc4,
         type: 3}
       propertyPath: m_Pivot.x
@@ -3884,6 +3899,11 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6362181801169442192, guid: beb078de7959e8c40891facd91f4cbc4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7572120651321608691, guid: beb078de7959e8c40891facd91f4cbc4,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -3892,6 +3912,11 @@ PrefabInstance:
     - target: {fileID: 7572120651321608691, guid: beb078de7959e8c40891facd91f4cbc4,
         type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467714032832867601, guid: beb078de7959e8c40891facd91f4cbc4,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -3962,6 +3987,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Infected Mariner
       objectReference: {fileID: 0}
+    - target: {fileID: 1038291238442652822, guid: 36da3e1d5edc503419fb63f735d7e508,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3911414593113072074, guid: 36da3e1d5edc503419fb63f735d7e508,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -4030,10 +4060,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 4010547728333062472, guid: cce60509c089aa64cb418e4b28c36ebc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8573141634137602712, guid: cce60509c089aa64cb418e4b28c36ebc,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.09
+      value: 4.15
       objectReference: {fileID: 0}
     - target: {fileID: 8573141634137602712, guid: cce60509c089aa64cb418e4b28c36ebc,
         type: 3}
@@ -4148,6 +4183,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Nest
       objectReference: {fileID: 0}
+    - target: {fileID: 9198897501529124499, guid: 84b0a0fbe5b086c4d8978cdf37b68f89,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4196,10 +4236,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1375703526008371511, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1375703526008371511, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1375703526008371511, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3561193102560471837, guid: 4f0fc9d4378722248af9e19be05ccb4a,
         type: 3}
       propertyPath: m_Name
       value: Zombie Mariner
+      objectReference: {fileID: 0}
+    - target: {fileID: 3561193102560471837, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6969020934916925896, guid: 4f0fc9d4378722248af9e19be05ccb4a,
         type: 3}
@@ -4250,6 +4310,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7101856785687944091, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8825753805637791600, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: viewAngle
+      value: 360
+      objectReference: {fileID: 0}
+    - target: {fileID: 8825753805637791600, guid: 4f0fc9d4378722248af9e19be05ccb4a,
+        type: 3}
+      propertyPath: viewRadius
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4403,6 +4478,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crawler
       objectReference: {fileID: 0}
+    - target: {fileID: 4665850972790329012, guid: 57925bfba29c1704c94a26d630545e00,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4430,10 +4510,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1611188805888511943, guid: 316cb427c30adb4468fc8c263d8ac8fe,
+        type: 3}
+      propertyPath: hp
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1611188805888511943, guid: 316cb427c30adb4468fc8c263d8ac8fe,
+        type: 3}
+      propertyPath: targetLayer.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5261718270079172171, guid: 316cb427c30adb4468fc8c263d8ac8fe,
         type: 3}
       propertyPath: m_Name
       value: Default Mariner
+      objectReference: {fileID: 0}
+    - target: {fileID: 5261718270079172171, guid: 316cb427c30adb4468fc8c263d8ac8fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5317882094897480116, guid: 316cb427c30adb4468fc8c263d8ac8fe,
         type: 3}
@@ -4485,6 +4580,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5647335983272422670, guid: 316cb427c30adb4468fc8c263d8ac8fe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9040290924793373641, guid: 316cb427c30adb4468fc8c263d8ac8fe,
+        type: 3}
+      propertyPath: m_BaseOffset
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4518,6 +4623,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Minion
+      objectReference: {fileID: 0}
+    - target: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9078708644997992570, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}

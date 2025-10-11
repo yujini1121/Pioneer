@@ -39,6 +39,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     private void Awake()
     {
         maxHp = 100;
+        hp = 100;
         speed = 1f;
         attackDamage = 6;
         attackRange = 3f;
