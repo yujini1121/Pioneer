@@ -5,6 +5,28 @@ using UnityEngine.AI;
 
 public class InfectedMarinerAI : MarinerBase, IBegin
 {
+    [System.Serializable]
+    public struct ItemDrop
+    {
+        public int itemID;
+        public float probability;
+    }
+
+    private static readonly ItemDrop[] FixedItemDrops = new ItemDrop[]
+    {
+        new ItemDrop { itemID = 30001, probability = 0.20f },
+        new ItemDrop { itemID = 30002, probability = 0.15f },
+        new ItemDrop { itemID = 30003, probability = 0.15f },
+        new ItemDrop { itemID = 30004, probability = 0.10f },
+        new ItemDrop { itemID = 30005, probability = 0.10f },
+        new ItemDrop { itemID = 30006, probability = 0.075f },
+        new ItemDrop { itemID = 30007, probability = 0.0525f },
+        new ItemDrop { itemID = 30008, probability = 0.0525f },
+        new ItemDrop { itemID = 30009, probability = 0.06f },
+        new ItemDrop { itemID = 40009, probability = 0.06f }
+    };
+
+
     // 감염된 승무원 고유 설정
     public int marinerId;
 
@@ -273,13 +295,35 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     protected override void OnPersonalFarmingCompleted()
     {
+        int acquiredItemID = GetRandomItemIDByProbability(FixedItemDrops);
+
         MarinerInventory inventory = GetComponent<MarinerInventory>();
         if (inventory != null)
         {
-            // 감염된 승무원도 아이템은 획득 (나중에 버릴 예정)
-            inventory.AddItem(30001, 1);
+            bool result = inventory.AddItem(acquiredItemID, 1);
+            Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
         Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
 
     }
+
+    private int GetRandomItemIDByProbability(ItemDrop[] dropList)
+    {
+        float randomValue = Random.value; // 0.0에서 1.0 사이의 무작위 값
+        float cumulativeProbability = 0f;
+
+        foreach (var drop in dropList)
+        {
+            cumulativeProbability += drop.probability;
+
+            if (randomValue <= cumulativeProbability)
+            {
+                return drop.itemID;
+            }
+        }
+
+        Debug.LogError("확률 계산 오류: 첫 번째 아이템 반환.");
+        return dropList.Length > 0 ? dropList[0].itemID : 0;
+    }
+
 }

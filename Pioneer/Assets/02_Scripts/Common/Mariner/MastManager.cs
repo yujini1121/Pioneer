@@ -29,46 +29,20 @@ public class MastManager : MonoBehaviour
         UpdateCurrentDeckCount();
     }
 
-    public int GetItemCount(int itemID)
-    {
-        if (InventoryManager.Instance == null) return 0; // 인벤에서 계싼
-
-        int count = 0;
-        foreach (var item in InventoryManager.Instance.itemLists)
-        {
-            if (item != null && item.id == itemID)
-            {
-                count += item.amount;
-            }
-        }
-        return count;
-    }
-
     // 인벤토리에서 특정 아이템 소모 (돗대 강화용)
     public bool ConsumeItems(int itemID, int amount)
     {
         if (InventoryManager.Instance == null) return false;
-        if (GetItemCount(itemID) < amount) return false;
 
-        int remainingToConsume = amount;
-
-        for (int i = 0; i < InventoryManager.Instance.itemLists.Count && remainingToConsume > 0; i++)
+        if (InventoryManager.Instance.Get(itemID) < amount)
         {
-            var item = InventoryManager.Instance.itemLists[i];
-            if (item != null && item.id == itemID)
-            {
-                int consumeFromSlot = Mathf.Min(item.amount, remainingToConsume);
-                item.amount -= consumeFromSlot;
-                remainingToConsume -= consumeFromSlot;
-
-                if (item.amount <= 0)
-                {
-                    InventoryManager.Instance.itemLists[i] = null;
-                }
-            }
+            Debug.LogWarning($"{itemID} 아이템이 {amount}개보다 부족합니다.");
+            return false;
         }
 
-        return remainingToConsume == 0;
+        InventoryManager.Instance.Remove(new SItemStack(itemID, amount));
+
+        return true;
     }
 
     // 현재 갑판 개수 업데이트 (CreateObject에서 호출)
