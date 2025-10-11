@@ -169,19 +169,21 @@ public class MastSystem : CommonBase
                     enhanceEffectText.text = "이미 최대 단계입니다";
             }
 
+            int requiredWood = 30;
+            int requiredCloth = 15;
             int currentWood = InventoryManager.Instance.Get(MastManager.Instance.woodItemID);
             int currentCloth = InventoryManager.Instance.Get(MastManager.Instance.clothItemID);
 
             if (material1CountText)
             {
-                material1CountText.text = $"{currentWood}/30";
-                material1CountText.color = currentWood >= 30 ? Color.white : Color.red;
+                material1CountText.text = $"{currentWood}/{requiredWood}";
+                material1CountText.color = currentWood >= requiredWood ? Color.white : Color.red;
             }
 
             if (material2CountText)
             {
-                material2CountText.text = $"{currentCloth}/15";
-                material2CountText.color = currentCloth >= 15 ? Color.white : Color.red;
+                material2CountText.text = $"{currentCloth}/{requiredCloth}";
+                material2CountText.color = currentCloth >= requiredCloth ? Color.white : Color.red;
             }
 
             if (enhanceButton)

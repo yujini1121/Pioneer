@@ -29,22 +29,6 @@ public class MastManager : MonoBehaviour
         UpdateCurrentDeckCount();
     }
 
-    // 인벤토리에서 특정 아이템 소모 (돗대 강화용)
-    public bool ConsumeItems(int itemID, int amount)
-    {
-        if (InventoryManager.Instance == null) return false;
-
-        if (InventoryManager.Instance.Get(itemID) < amount)
-        {
-            Debug.LogWarning($"{itemID} 아이템이 {amount}개보다 부족합니다.");
-            return false;
-        }
-
-        InventoryManager.Instance.Remove(new SItemStack(itemID, amount));
-
-        return true;
-    }
-
     // 현재 갑판 개수 업데이트 (CreateObject에서 호출)
     public void UpdateCurrentDeckCount()
     {
