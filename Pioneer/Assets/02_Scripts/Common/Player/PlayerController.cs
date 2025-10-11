@@ -26,7 +26,10 @@ public class PlayerController : MonoBehaviour
     private LayerMask combinedMask;
     private float currentChargeTime;
     private bool isCharging;
-    
+
+    [SerializeField] private float fishingCancelDelay = 1.0f;
+    private float cancelDelayTimer;
+
 
     void Awake()
     {
@@ -78,11 +81,11 @@ public class PlayerController : MonoBehaviour
             lastMoveDirection = moveDirection;
         }
 
-        // 공격
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    playerCore.Attack();
-        //}
+        /*// 공격
+        if (Input.GetMouseButtonDown(0))
+        {
+            playerCore.Attack();
+        }*/
 
         // 낚시 시작 조건 확인하고 낚시 상태 전환?
         if(isSeaInFront) // + 낮인지 && gameManager.currentGameTime < dayDuration?
@@ -116,6 +119,7 @@ public class PlayerController : MonoBehaviour
                 isCharging = false;
                 playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
                 playerFishing.StartFishingLoop();
+                cancelDelayTimer = fishingCancelDelay;
                 currentChargeTime = 0f;
                 chargeSlider.value = 0f;
                 fishingUI.gameObject.SetActive(false);
@@ -134,6 +138,12 @@ public class PlayerController : MonoBehaviour
 
     private void HendleFishing()
     {
+        if (cancelDelayTimer > 0)
+        {
+            cancelDelayTimer -= Time.deltaTime;
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
             currentChargeTime = 0f;
@@ -182,5 +192,27 @@ public class PlayerController : MonoBehaviour
         }
         else
             return false;
+    }
+
+    /// <summary>
+    /// 피격 등으로 낚시가 강제 취소되었을 때 UI와 상태를 정리하는 함수
+    /// </summary>
+    public void CancelFishing()
+    {
+        isCharging = false;
+        currentChargeTime = 0f;
+
+        if (chargeSlider != null) 
+            chargeSlider.value = 0f;
+        if (cencleChargeSlider != null)
+            cencleChargeSlider.value = 0f;
+
+        if (fishingCencleUI != null) 
+            fishingCencleUI.gameObject.SetActive(false);
+
+        if (isSeaInFront && fishingUI != null)
+        {
+            fishingUI.gameObject.SetActive(true);
+        }
     }
 }

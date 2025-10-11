@@ -125,5 +125,7 @@ public class PlayerStatUI : MonoBehaviour
                 break;
 
         }
+
+        UpdateBasicStatUI();
     }
 }

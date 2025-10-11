@@ -102,6 +102,9 @@ public class PlayerCore : CreatureBase, IBegin
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private float attackHeight = 1.0f;
     [SerializeField] private LayerMask enemyLayer;
+    private PlayerController playerController;
+    private bool isattacked = false;
+
     public PlayerAttack PlayerAttack => playerAttack;
     public float AttackHeight => attackHeight;
     public LayerMask EnemyLayer => enemyLayer;
@@ -125,7 +128,7 @@ public class PlayerCore : CreatureBase, IBegin
     void Awake()
     {
         Instance = this;
-
+        playerController = GetComponent<PlayerController>();
         playerRb = GetComponent<Rigidbody>();
         SetSetAttribute();
     }
@@ -271,10 +274,13 @@ public class PlayerCore : CreatureBase, IBegin
 
         if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
         {
-            SetState(PlayerState.Default);         
-            
-            // ++++ 낚시 ui 바꿔야하는데 음 
+            SetState(PlayerState.Default);
 
+            // ++++ 낚시 ui 바꿔야하는데 음 
+            if (playerController != null)
+            {
+                playerController.CancelFishing();
+            }
             UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
         }
     }

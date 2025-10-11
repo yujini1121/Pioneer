@@ -116,6 +116,7 @@ GameObject:
   - component: {fileID: 4915185602058288525}
   - component: {fileID: 1536190738458640625}
   - component: {fileID: 2029828995776725162}
+  - component: {fileID: 3080922750383480643}
   - component: {fileID: 8510462437380211151}
   - component: {fileID: 66496165390327820}
   - component: {fileID: 4241827649253925412}
@@ -226,15 +227,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15ec610ffeb4e9342913cd92c7cd6191, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rayOffset: 0
-  ChargeTime: 0
+  rayOffset: 1.5
+  ChargeTime: 1
   isSeaInFront: 0
   seaLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 16
   groundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8256
   fishingUI: {fileID: 0}
   fishingCencleUI: {fileID: 0}
   chargeSlider: {fileID: 0}
@@ -313,6 +314,42 @@ MonoBehaviour:
   viewRadius: 2
   viewAngle: 360
   visibleTargets: []
+--- !u!114 &3080922750383480643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010547728333062472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d108b171bc508942b328b18b9d6d4ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropItemTable:
+  - itemData: {fileID: 11400000, guid: 2f3e674e1365bec4e8cb2a25e0f18762, type: 2}
+    dropProbability: 0.2
+  - itemData: {fileID: 11400000, guid: 870d647744a32dd4f93441c5aea4e8eb, type: 2}
+    dropProbability: 0.15
+  - itemData: {fileID: 11400000, guid: f32955ee9c05fff46ba275e6367a87e1, type: 2}
+    dropProbability: 0.15
+  - itemData: {fileID: 11400000, guid: 732df024ec85cec488bca87b76650e61, type: 2}
+    dropProbability: 0.1
+  - itemData: {fileID: 11400000, guid: aec89c3cbea9cc543925b6f42a8c6e71, type: 2}
+    dropProbability: 0.1
+  - itemData: {fileID: 11400000, guid: b2d74b7b5e01fc643924cc0e8448b2c7, type: 2}
+    dropProbability: 0.075
+  - itemData: {fileID: 11400000, guid: 3135c1dac455ed649b4403857f56ac2c, type: 2}
+    dropProbability: 0.0525
+  - itemData: {fileID: 11400000, guid: 9ba2c5625c2bafa40949b41591f13b3e, type: 2}
+    dropProbability: 0.0525
+  - itemData: {fileID: 11400000, guid: de4353f2126fa884b9e9dbceea4fd8f5, type: 2}
+    dropProbability: 0.06
+  - itemData: {fileID: 11400000, guid: de4353f2126fa884b9e9dbceea4fd8f5, type: 2}
+    dropProbability: 0.06
+  - itemData: {fileID: 11400000, guid: 61c371c8ed6b1854f8e21e59f7c92dd3, type: 2}
+    dropProbability: 0.06
+  treasureItem: {fileID: 11400000, guid: de4353f2126fa884b9e9dbceea4fd8f5, type: 2}
 --- !u!114 &8510462437380211151
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,16 +363,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldSpaceParent: {fileID: 0}
-  creationType: 0
-  maxDistance: 0
+  creationType: 5
+  maxDistance: 7
   platformLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   creationLayer:
     serializedVersion: 2
-    m_Bits: 0
-  rejectColor: {r: 0, g: 0, b: 0, a: 0}
-  permitColor: {r: 0, g: 0, b: 0, a: 0}
+    m_Bits: 128
+  rejectColor: {r: 1, g: 0, b: 0, a: 0}
+  permitColor: {r: 0.040236473, g: 1, b: 0, a: 0}
   creationList:
     platform: {fileID: 0}
     wall: {fileID: 0}
