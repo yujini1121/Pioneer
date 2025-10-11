@@ -9,6 +9,8 @@ public class ItemTypeManager : MonoBehaviour, IBegin
     public List<SItemTypeSO> types;
     public Dictionary<int, SItemTypeSO> itemTypeSearch;
 
+    [SerializeField] bool isDebugging = true;
+
     private void Add(SItemTypeSO type)
     {
         types.Add(type);
@@ -72,6 +74,8 @@ public class ItemTypeManager : MonoBehaviour, IBegin
     {
         foreach (SItemTypeSO one in types)
         {
+            Debug.Log($">> ItemTypeManager.InspectorRegister() : {one.id} added!");
+
             itemTypeSearch.Add(one.id, one);
         }
     }
