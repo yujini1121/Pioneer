@@ -26,7 +26,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void InitZombieStats()
     {
-        maxHp = 40; 
+        maxHp = 40;
+        hp = 40;
         speed = 2f;
         attackDamage = 6;
         attackRange = 4f;
@@ -178,6 +179,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
         foreach (var hit in hits)
         {
+            if (hit.gameObject == this.gameObject) continue;
             Debug.Log($"좀비가 {hit.name} 공격 범위 내 감지");
 
             CommonBase targetBase = hit.GetComponent<CommonBase>();

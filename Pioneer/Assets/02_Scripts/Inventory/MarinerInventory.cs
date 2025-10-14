@@ -8,6 +8,9 @@ public class MarinerInventory : InventoryBase
     [SerializeField] private int storageThreshold = 7;
     [SerializeField] private float interactionRange = 4f;
 
+    [Header("UI")]
+    [SerializeField] private GameObject exclamationMarkImage;
+
     private Transform playerTransform;
 
     void Start()
@@ -30,10 +33,29 @@ public class MarinerInventory : InventoryBase
             }
         }
 
+        CheckForExclamationMark();
+
         // 플레이어 상호작용 체크
         if (Input.GetMouseButtonDown(0))
         {
             CheckPlayerInteraction();
+        }
+    }
+
+    /// <summary>
+    /// 인벤토리에 아이템이 있는지 확인하고 느낌표 이미지를 제어합니다.
+    /// </summary>
+    private void CheckForExclamationMark()
+    {
+        if (exclamationMarkImage == null) return;
+
+        int totalItems = GetAllItem();
+
+        bool shouldShowExclamation = totalItems > 0;
+
+        if (exclamationMarkImage.activeSelf != shouldShowExclamation)
+        {
+            exclamationMarkImage.SetActive(shouldShowExclamation);
         }
     }
 
@@ -110,7 +132,7 @@ public class MarinerInventory : InventoryBase
     public void TransferAllItemsToStorage(InventoryBase storageInventory)
     {
         Debug.Log("모든 아이템 보관함에 저장 함수 호출");
-        if (storageInventory == null); // 오류 검증을 위한 return 제거
+        if (storageInventory == null) ; // 오류 검증을 위한 return 제거
 
         for (int i = 0; i < itemLists.Count; i++)
         {

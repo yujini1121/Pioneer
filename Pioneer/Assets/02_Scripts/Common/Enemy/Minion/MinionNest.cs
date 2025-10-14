@@ -20,6 +20,13 @@ public class MinionNest : EnemyBase
         StopAllCoroutines();
     }
 
+    protected override void SetAttribute()
+    {
+        base.SetAttribute();
+        maxHp = 10;
+        hp = maxHp;
+    }
+
     IEnumerator SpawnMinionRoutine()
     {
         yield return new WaitForSeconds(initDelay);

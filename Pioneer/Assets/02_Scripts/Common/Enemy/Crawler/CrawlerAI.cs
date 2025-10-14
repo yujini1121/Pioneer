@@ -85,8 +85,9 @@ public class CrawlerAI : EnemyBase, IBegin
         attackDamage = 10;
         speed = 1;
         fov.viewRadius = 6;
-        attackRange = 4;
+        attackRange = 2;
         attackDelayTime = 3;
+        currentAttackTarget = SetMastTarget();
     }
 
     private bool CanMove()
@@ -160,16 +161,5 @@ public class CrawlerAI : EnemyBase, IBegin
     private void SortCloseObj()
     {
         sortedTarget = fov.visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
-    }
-
-    public override void TakeDamage(int damage, GameObject attacker)
-    {
-        base.TakeDamage(damage, attacker);
-
-        /*if (attacker != null && !IsDead)
-        {
-            revengeTarget = attacker;
-            UnityEngine.Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
-        }*/
     }
 }

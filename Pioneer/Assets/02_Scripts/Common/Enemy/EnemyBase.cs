@@ -33,7 +33,7 @@ public class EnemyBase : CreatureBase, IBegin
     /// </summary>
     protected GameObject SetMastTarget()
     {
-        GameObject mast = GameObject.FindGameObjectWithTag("Engine");
+        GameObject mast = GameObject.FindGameObjectWithTag("Mast");
         return mast;
     }
 

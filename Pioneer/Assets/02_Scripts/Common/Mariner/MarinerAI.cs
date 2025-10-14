@@ -6,6 +6,27 @@ using UnityEngine.AI;
 [RequireComponent(typeof(FOVController))]
 public class MarinerAI : MarinerBase, IBegin
 {
+    [System.Serializable]
+    public struct ItemDrop
+    {
+        public int itemID;
+        public float probability;
+    }
+
+    private static readonly ItemDrop[] FixedItemDrops = new ItemDrop[]
+    {
+        new ItemDrop { itemID = 30001, probability = 0.20f },
+        new ItemDrop { itemID = 30002, probability = 0.15f },
+        new ItemDrop { itemID = 30003, probability = 0.15f },
+        new ItemDrop { itemID = 30004, probability = 0.10f },
+        new ItemDrop { itemID = 30005, probability = 0.10f },
+        new ItemDrop { itemID = 30006, probability = 0.075f },
+        new ItemDrop { itemID = 30007, probability = 0.0525f },
+        new ItemDrop { itemID = 30008, probability = 0.0525f },
+        new ItemDrop { itemID = 30009, probability = 0.06f },
+        new ItemDrop { itemID = 40009, probability = 0.06f }
+    };
+
     public int marinerId;
 
     private float attackCooldown = 0f;
@@ -17,7 +38,8 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
-        maxHp = 100;  // Mariner HP
+        maxHp = 100;
+        hp = 100;
         speed = 2f;
         attackDamage = 6;
         attackRange = 4f;
@@ -94,6 +116,7 @@ public class MarinerAI : MarinerBase, IBegin
         if (GameManager.Instance.IsDaytime)
         {
             Debug.Log($"승무원 {marinerId}: 전투 종료, 수리 재개");
+            // 즉시 1순위 행동 시작
             StartRepair();
         }
         else
@@ -164,7 +187,15 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (IsDead) return;
 
-        UpdateTargetDetection();
+        // 전투 중이 아닐 때만 타겟 탐지
+        if (!isChasing && target == null)
+        {
+            ValidateCurrentTarget();
+            if (target == null)
+            {
+                TryFindNewTarget();
+            }
+        }
 
         if (target != null)
         {
@@ -176,7 +207,7 @@ public class MarinerAI : MarinerBase, IBegin
 
             if (isSecondPriorityStarted)
             {
-                Debug.Log($"승무원 {marinerId}: 적 발견으로 2순위 작업 중단");
+                Debug.Log($"승무원 {marinerId}: 적 발견으로 파밍 중단");
                 CancelSecondPriorityAction();
             }
 
@@ -223,6 +254,7 @@ public class MarinerAI : MarinerBase, IBegin
         if (isSecondPriorityStarted)
         {
             isSecondPriorityStarted = false;
+            StopAllCoroutines();
             ResetAgentPath();
             Debug.Log($"승무원 {marinerId}: 2순위 작업 취소");
         }
@@ -233,7 +265,16 @@ public class MarinerAI : MarinerBase, IBegin
         if (IsDead) return;
 
         attackCooldown -= Time.deltaTime;
-        UpdateTargetDetection();
+
+        // 전투 중이 아닐 때만 타겟 탐지
+        if (!isChasing && target == null)
+        {
+            ValidateCurrentTarget();
+            if (target == null)
+            {
+                TryFindNewTarget();
+            }
+        }
 
         if (isChasing && target != null)
         {
@@ -277,6 +318,7 @@ public class MarinerAI : MarinerBase, IBegin
         PerformMarinerAttack();
         attackCooldown = attackInterval;
 
+        // 공격 후 타겟 상태 확인
         if (target != null)
         {
             CommonBase targetBase = target.GetComponent<CommonBase>();
@@ -287,15 +329,23 @@ public class MarinerAI : MarinerBase, IBegin
             }
             else
             {
+                // 적이 죽었으므로 즉시 1순위 행동으로 전환
+                Debug.Log($"승무원 {marinerId}: 적 처치 완료");
                 target = null;
                 isChasing = false;
+                attackRoutine = null;
                 HandlePostCombatAction();
+                yield break;
             }
         }
         else
         {
+            // 적이 없어졌으므로 즉시 1순위 행동으로 전환
+            Debug.Log($"승무원 {marinerId}: 적 소실");
             isChasing = false;
+            attackRoutine = null;
             HandlePostCombatAction();
+            yield break;
         }
 
         attackRoutine = null;
@@ -402,7 +452,7 @@ public class MarinerAI : MarinerBase, IBegin
         }
         else
         {
-            // 기존 파밍 시스템 그대로 유지
+            // 기존 파밍 시스템
             Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
@@ -428,6 +478,7 @@ public class MarinerAI : MarinerBase, IBegin
     {
         MarinerManager.Instance.StoreItemsAndReturnToBase(this);
     }
+
     public override void WhenDestroy()
     {
         GameManager.Instance.MarinerDiedCount();
@@ -436,15 +487,36 @@ public class MarinerAI : MarinerBase, IBegin
 
     protected override void OnPersonalFarmingCompleted()
     {
+        int acquiredItemID = GetRandomItemIDByProbability(FixedItemDrops);
+
         MarinerInventory inventory = GetComponent<MarinerInventory>();
+
         if (inventory != null)
         {
-            Debug.Log($"AddItem 호출 전 - itemLists null 여부: {inventory.itemLists == null}");
-            Debug.Log($"AddItem 호출 전 - itemLists 크기: {inventory.itemLists?.Count ?? 0}");
+            bool result = inventory.AddItem(acquiredItemID, 1);
 
-            bool result = inventory.AddItem(30001, 1);
-            Debug.Log($"AddItem 결과: {result}");
+            Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
+
         Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
+    }
+
+    private int GetRandomItemIDByProbability(ItemDrop[] dropList)
+    {
+        float randomValue = Random.value; // 0.0에서 1.0 사이의 무작위 값
+        float cumulativeProbability = 0f;
+
+        foreach (var drop in dropList)
+        {
+            cumulativeProbability += drop.probability;
+
+            if (randomValue <= cumulativeProbability)
+            {
+                return drop.itemID;
+            }
+        }
+
+        Debug.LogError("확률 계산 오류: 아이템이 선택되지 않았습니다. 첫 번째 아이템 반환.");
+        return dropList.Length > 0 ? dropList[0].itemID : 0;
     }
 }

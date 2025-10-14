@@ -169,19 +169,21 @@ public class MastSystem : CommonBase
                     enhanceEffectText.text = "이미 최대 단계입니다";
             }
 
-            int currentWood = MastManager.Instance.GetItemCount(MastManager.Instance.woodItemID);
-            int currentCloth = MastManager.Instance.GetItemCount(MastManager.Instance.clothItemID);
+            int requiredWood = 30;
+            int requiredCloth = 15;
+            int currentWood = InventoryManager.Instance.Get(MastManager.Instance.woodItemID);
+            int currentCloth = InventoryManager.Instance.Get(MastManager.Instance.clothItemID);
 
             if (material1CountText)
             {
-                material1CountText.text = $"{currentWood}/30";
-                material1CountText.color = currentWood >= 30 ? Color.white : Color.red;
+                material1CountText.text = $"{currentWood}/{requiredWood}";
+                material1CountText.color = currentWood >= requiredWood ? Color.white : Color.red;
             }
 
             if (material2CountText)
             {
-                material2CountText.text = $"{currentCloth}/15";
-                material2CountText.color = currentCloth >= 15 ? Color.white : Color.red;
+                material2CountText.text = $"{currentCloth}/{requiredCloth}";
+                material2CountText.color = currentCloth >= requiredCloth ? Color.white : Color.red;
             }
 
             if (enhanceButton)
@@ -240,31 +242,35 @@ public class MastSystem : CommonBase
 
     void EnhanceMast()
     {
-        int currentWood = MastManager.Instance.GetItemCount(MastManager.Instance.woodItemID);
-        int currentCloth = MastManager.Instance.GetItemCount(MastManager.Instance.clothItemID);
-
         if (mastLevel >= 2)
         {
             ShowMessage("이미 최대 단계입니다.", 3f);
             return;
         }
 
-        if (currentWood < 30 || currentCloth < 15)
+        const int requiredWood = 30;
+        const int requiredCloth = 15;
+
+        // MastManager에 아이템 ID가 정의되어 있음 30001 : 나무와 30003 : 천으로
+        int woodId = MastManager.Instance.woodItemID;
+        int clothId = MastManager.Instance.clothItemID;
+
+        // 인벤토리에 재료가 충분한지 확인
+        if (InventoryManager.Instance.Get(woodId) < requiredWood ||
+            InventoryManager.Instance.Get(clothId) < requiredCloth)
         {
             ShowMessage("재료가 부족합니다.", 3f);
             return;
         }
 
-        if (!MastManager.Instance.ConsumeItems(MastManager.Instance.woodItemID, 30) ||
-            !MastManager.Instance.ConsumeItems(MastManager.Instance.clothItemID, 15))
-        {
-            ShowMessage("아이템 소모에 실패했습니다.", 3f);
-            return;
-        }
+        // Remove 메서드를 한 번만 호출하여 모든 재료를 소모합니다.
+        InventoryManager.Instance.Remove(
+            new SItemStack(woodId, requiredWood),
+            new SItemStack(clothId, requiredCloth)
+        );
 
         SetMastLevel(mastLevel + 1);
         hp = maxHp;
-
         ShowMessage("돛대가 강화되었습니다", 3f);
 
         if (InventoryUiMain.instance != null)
