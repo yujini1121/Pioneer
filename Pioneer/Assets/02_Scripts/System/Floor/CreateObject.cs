@@ -89,11 +89,12 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Start()
     {
-        ExitInstallMode(); // 게임 시작 시 설치 모드 OFF
+        //ExitInstallMode(); // 게임 시작 시 설치 모드 OFF
     }
 
     private void Update()
     {
+        .; ; ; ;
         if (onHand == null) return;
 
         CheckCreatable();
