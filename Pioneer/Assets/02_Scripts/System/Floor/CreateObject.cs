@@ -94,7 +94,6 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Update()
     {
-        .; ; ; ;
         if (onHand == null) return;
 
         CheckCreatable();
