@@ -125,7 +125,8 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private void Attack()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, detectMask);
+        // Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, detectMask);
+        Collider[] hitColliders = DetectAttackRange();
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
