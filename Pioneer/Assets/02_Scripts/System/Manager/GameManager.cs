@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour, IBegin
     public AnimationCurve exposureCurve;
     public float dayDuration = 270f;
     public float nightDuration = 90f;
-    public float oneDayDuration = 360f;
+    private float oneDayDuration;
 
     private ColorAdjustments colorAdjustments;
     private float cycleTime = 0f;
@@ -93,6 +93,8 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void Start()
     {
+        oneDayDuration = dayDuration + nightDuration;
+
         Debug.Log($">> GameManager.Start()");
 
         if (InventoryUiMain.instance != null)
