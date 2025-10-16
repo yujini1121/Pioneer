@@ -16264,8 +16264,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 60
-  nightDuration: 30
+  dayDuration: 10
+  nightDuration: 10
   spawnPoints: []
   marinerSprites: []
   minion: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9, type: 3}
@@ -16276,37 +16276,37 @@ MonoBehaviour:
   gameOverUI: {fileID: 2188712732434231756}
   allUICanvas: []
   enemySpawnTable:
-  - total: 0
-    minion: 0
+  - total: 4
+    minion: 4
     crawler: 0
     titan: 0
-  - total: 0
-    minion: 0
-    crawler: 0
+  - total: 7
+    minion: 4
+    crawler: 3
     titan: 0
-  - total: 0
-    minion: 0
-    crawler: 0
-    titan: 0
-  - total: 0
-    minion: 0
-    crawler: 0
-    titan: 0
-  - total: 0
-    minion: 0
-    crawler: 0
-    titan: 0
+  - total: 10
+    minion: 5
+    crawler: 3
+    titan: 2
+  - total: 13
+    minion: 6
+    crawler: 4
+    titan: 3
+  - total: 17
+    minion: 8
+    crawler: 5
+    titan: 4
   enemyScaleTable:
-  - attackPercent: 0
-    hpPercent: 0
-  - attackPercent: 0
-    hpPercent: 0
-  - attackPercent: 0
-    hpPercent: 0
-  - attackPercent: 0
-    hpPercent: 0
-  - attackPercent: 0
-    hpPercent: 0
+  - attackPercent: 100
+    hpPercent: 100
+  - attackPercent: 100
+    hpPercent: 100
+  - attackPercent: 100
+    hpPercent: 100
+  - attackPercent: 120
+    hpPercent: 140
+  - attackPercent: 150
+    hpPercent: 160
 --- !u!222 &5779147867970060696
 CanvasRenderer:
   m_ObjectHideFlags: 0

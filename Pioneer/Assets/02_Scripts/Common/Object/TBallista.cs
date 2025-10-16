@@ -94,6 +94,7 @@ public class TBallista : StructureBase
 
     }
 
+#if UNITY_EDITOR
     void OnDrawGizmos()
     {
         // 감지 범위 및 공격 범위 표시
@@ -110,4 +111,6 @@ public class TBallista : StructureBase
             Gizmos.DrawSphere(center, 0.5f);
         }
     }
+#endif
+
 }

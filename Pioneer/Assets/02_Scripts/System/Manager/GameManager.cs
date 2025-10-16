@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -26,7 +27,10 @@ public class GameManager : MonoBehaviour, IBegin
 
     [Header("시간 설정")]
     public float currentGameTime = 0f;
+
+    [Header("낮밤 체크 및 일차수 확인")]
     public bool IsDaytime = true;
+    public int currentDay = 1; // 1일차 시작
 
     [Header("낮밤 순환 설정")]
     public Volume postProcessVolume;
@@ -62,7 +66,8 @@ public class GameManager : MonoBehaviour, IBegin
     [System.Serializable]
     public struct DayEnemyRow
     {
-        public int total;   // 총 출현 수(참고용)
+        [Tooltip("총 출현 수 = 미니언 + 크룰러 + 타이탄")]
+        public int total;   // 총 출현수
         public int minion;  // 미니언 수
         public int crawler; // 크롤러 수
         public int titan;   // 타이탄 수
@@ -80,8 +85,6 @@ public class GameManager : MonoBehaviour, IBegin
 
     [Header("일차별 능력치 강화 표 (1~5일차)")]
     public EnemyScaleRow[] enemyScaleTable = new EnemyScaleRow[5];
-
-    private int currentDay = 1; // 1일차 시작
 
     private void Awake()
     {
@@ -116,42 +119,41 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void UpdateDayNightCycle()
     {
-        float t;
+        // 현재 페이즈(낮/밤)에 맞는 설정을 한 번에 가져옴
+        bool isDay = IsDaytime;
+        float duration = isDay ? dayDuration : nightDuration;
+        Gradient grad = isDay ? dayToNightGradient : nightToDayGradient;
 
-        if (IsDaytime)
+        // 진행도 0~1
+        float t = Mathf.Clamp01(cycleTime / duration);
+
+        // 컬러/노출 보정
+        colorAdjustments.colorFilter.value = grad.Evaluate(t);
+        colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
+
+        // 아직 페이즈가 끝나지 않았으면 리턴
+        if (cycleTime < duration) return;
+
+        // 페이즈 종료 처리
+        cycleTime = 0f;
+
+        if (isDay)
         {
-            t = Mathf.Clamp01(cycleTime / dayDuration);
-            colorAdjustments.colorFilter.value =
-                Color.Lerp(dayToNightGradient.Evaluate(0f), dayToNightGradient.Evaluate(1f), t);
-
-            // 낮 종료 → 밤 시작
-            if (cycleTime >= dayDuration)
-            {
-                IsDaytime = false;
-                cycleTime = 0f;
-                Debug.Log($"밤이 되었습니다. (Day {currentDay})");
-                OnNightStart();
-            }
+            // 낮 -> 밤 전환
+            IsDaytime = false;
+            Debug.Log($"밤이 되었습니다. (Day {currentDay})");
+            OnNightStart();
         }
         else
         {
-            t = Mathf.Clamp01(cycleTime / nightDuration);
-            colorAdjustments.colorFilter.value =
-                Color.Lerp(nightToDayGradient.Evaluate(0f), nightToDayGradient.Evaluate(1f), t);
-
-            // 밤 종료 → 아침 시작
-            if (cycleTime >= nightDuration)
-            {
-                IsDaytime = true;
-                cycleTime = 0f;
-                Debug.Log($"아침이 되었습니다. (Day {currentDay})");
-                OnNightEnd();
-                currentDay++; // 밤이 끝나면 다음 일차로 넘어감
-            }
+            // 밤 -> 낮 전환
+            IsDaytime = true;
+            currentDay++;
+            Debug.Log($"아침이 되었습니다. (Day {currentDay})");
+            OnNightEnd();
         }
-
-        colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
     }
+
 
     private void OnNightStart()
     {
@@ -211,12 +213,9 @@ public class GameManager : MonoBehaviour, IBegin
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
         EnemyScaleRow scale = GetScaleRowForDay(currentDay);
 
-        // 미니언
-        SpawnOf(minion, row.minion, scale);
-        // 크롤러
-        SpawnOf(crawler, row.crawler, scale);
-        // 타이탄
-        SpawnOf(titan, row.titan, scale);
+        SpawnOf(minion, row.minion, scale);     // 미니언
+        SpawnOf(crawler, row.crawler, scale);   // 크롤러
+        SpawnOf(titan, row.titan, scale);       // 타이탄
 
         int spawnedCount = row.minion + row.crawler + row.titan;
         Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
