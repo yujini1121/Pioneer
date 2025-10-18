@@ -108,7 +108,10 @@ public class PlayerCore : CreatureBase, IBegin
     public PlayerAttack PlayerAttack => playerAttack;
     public float AttackHeight => attackHeight;
     public LayerMask EnemyLayer => enemyLayer;
-    public SItemWeaponTypeSO handAttack;
+
+    public SItemWeaponTypeSO handAttackStartDefault;
+    
+    [SerializeField] private SItemWeaponTypeSO handAttackCurrentValue;
 
     // 기본 시스템 관련 번수
     private Rigidbody playerRb;
@@ -131,6 +134,8 @@ public class PlayerCore : CreatureBase, IBegin
         playerController = GetComponent<PlayerController>();
         playerRb = GetComponent<Rigidbody>();
         SetSetAttribute();
+
+        handAttackCurrentValue.DeepCopyFrom(handAttackStartDefault);
     }
     
     new void Start()
