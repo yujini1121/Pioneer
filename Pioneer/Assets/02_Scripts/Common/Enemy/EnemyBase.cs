@@ -20,6 +20,10 @@ public class EnemyBase : CreatureBase, IBegin
     // 공격 박스 중심 오프셋 조정
     [SerializeField] private Vector3 attackBoxCenterOffset;
 
+
+    [Header("마스트 게임오브젝트")]
+    public GameObject mast;
+
     /// <summary>
     /// 속성 변수에 값 할당
     /// </summary>
@@ -33,8 +37,7 @@ public class EnemyBase : CreatureBase, IBegin
     /// </summary>
     protected GameObject SetMastTarget()
     {
-        GameObject mast = GameObject.FindGameObjectWithTag("Mast");
-        return mast;
+		return mast;
     }
 
     /// <summary>

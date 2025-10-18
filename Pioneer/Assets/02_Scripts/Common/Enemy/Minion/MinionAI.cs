@@ -140,7 +140,7 @@ public class MinionAI : EnemyBase, IBegin
     // =============================================================
     void CreateNest()
     {
-        Instantiate(nestPrefab, transform.position, Quaternion.identity);
+        Instantiate(nestPrefab, new Vector3(transform.position.x, 0, transform.position.z), Quaternion.identity);
         isNestCreated = true;
     }
 

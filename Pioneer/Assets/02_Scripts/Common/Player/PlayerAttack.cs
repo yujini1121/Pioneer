@@ -4,6 +4,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
 {
     public int damage;
     public Collider attackCollider;
+    public LayerMask enemyLayer;
 
     private void Awake()
     {
