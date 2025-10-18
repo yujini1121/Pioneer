@@ -15,6 +15,31 @@ public class SItemWeaponTypeSO : SItemTypeSO
     public int weaponDuability;
     public int duabilityRedutionPerHit;
 
+    public static SItemWeaponTypeSO operator+ (SItemWeaponTypeSO l, SItemWeaponTypeSO r)
+    {
+        return new SItemWeaponTypeSO()
+        {
+            weaponDamage = l.weaponDamage + r.weaponDamage,
+            weaponAnimation = l.weaponAnimation + r.weaponAnimation,
+            weaponDelay = l.weaponDelay + r.weaponDelay,
+            attackCycleTime = l.attackCycleTime + r.attackCycleTime,
+            weaponDuability = l.weaponDuability + r.weaponDuability,
+            weaponRange = l.weaponRange + r.weaponDelay
+        };
+    }
+
+    public void DeepCopyFrom(SItemWeaponTypeSO othersWhichHasValue)
+    {
+        this.weaponDamage = othersWhichHasValue.weaponDamage;
+        this.weaponAnimation = othersWhichHasValue.weaponAnimation;
+        this.weaponDelay = othersWhichHasValue.weaponAnimation;
+        this.attackCycleTime = othersWhichHasValue.attackCycleTime;
+        this.attackPerSpeed = othersWhichHasValue.attackPerSpeed;
+        this.weaponRange = othersWhichHasValue.weaponRange;
+        this.weaponDuability = othersWhichHasValue.weaponDuability;
+        this.duabilityRedutionPerHit = othersWhichHasValue.duabilityRedutionPerHit;
+    }
+
     public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
         Debug.Log(">> 아이템_무기 : 사용됨");
@@ -28,15 +53,11 @@ public class SItemWeaponTypeSO : SItemTypeSO
         }
         else
         {
-            yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState, 
-                new SItemWeaponTypeSO()
-                {
-                    weaponDamage = PlayerCore.Instance.AttackDamageCalculated,
-                    weaponRange = PlayerCore.Instance.attackRange,
-                    weaponDelay = 0.5f,
-                    weaponAnimation = 0.3f
-                }
-                    
+            
+
+            yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState,
+                PlayerCore.Instance.handAttackStartDefault
+
                 );
         }
         

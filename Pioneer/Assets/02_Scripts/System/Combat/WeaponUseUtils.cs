@@ -72,9 +72,7 @@ public class WeaponUseUtils
         // 아이템 인벤토리 업데이트
 
         // 모션 시작
-        // 여기 애니메이션 코드 넣기
-        yield return new WaitForSeconds(data.weaponAnimation);
-        // 모션 종료
+
 
         // 플레이어 클릭 방향
         Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -86,7 +84,7 @@ public class WeaponUseUtils
         if (Physics.Raycast(m_rayFromMouse, out m_hitOnMap, Mathf.Infinity))
         {
             Debug.Log($">> WeaponUseUtils.AttackCoroutine : 내구도 닳기 : {data.duabilityRedutionPerHit}");
-
+            //data.weaponRange;
             Vector3 dir = (m_hitOnMap.point - userGameObject.transform.position).normalized;
             dir.y = 0f;
             userGameObject.transform.rotation = Quaternion.LookRotation(dir);
@@ -96,12 +94,20 @@ public class WeaponUseUtils
             PlayerCore.Instance.PlayerAttack.transform.position = position;
             PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
             PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
-            PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage);
-            
+            PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.handAttackStartDefault.weaponDamage);
+            // 공격 범위 세팅
+            PlayerCore.Instance.PlayerAttack.SetAttackRange(data.weaponRange);
+
+            // 여기 애니메이션 코드 넣기
+            yield return new WaitForSeconds(data.weaponAnimation);
+            // 모션 종료
+
+
             // 내구도 닳기
-            itemWithState.duability -= data.duabilityRedutionPerHit;
+            itemWithState.duability = Mathf.Max(0, itemWithState.duability - data.duabilityRedutionPerHit);
 
             PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
+            PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
             // 인벤토리 업데이트 
             InventoryUiMain.instance.IconRefresh();
 

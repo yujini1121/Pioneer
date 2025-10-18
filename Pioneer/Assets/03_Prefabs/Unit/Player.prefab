@@ -14,7 +14,7 @@ GameObject:
   m_Layer: 10
   m_Name: Attack Box
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
@@ -240,6 +240,7 @@ MonoBehaviour:
   fishingCencleUI: {fileID: 0}
   chargeSlider: {fileID: 0}
   cencleChargeSlider: {fileID: 0}
+  fishingCancelDelay: 1
 --- !u!114 &4915185602058288525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,7 +299,7 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
-  handAttack: {fileID: 0}
+  handAttack: {fileID: 11400000, guid: 44a7ec6ff666348499c27d7843f6d17c, type: 2}
 --- !u!114 &2029828995776725162
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -35,7 +35,10 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         Debug.Assert(ItemTypeManager.Instance.itemTypeSearch != null);
         Debug.Assert(ItemTypeManager.Instance.itemTypeSearch[item.id] != null);
         Debug.Log($">> ItemSlotUI.Show(SItemStack item) : {item.id} / {item.amount}");
-        
+
+        SItemTypeSO itemType = ItemTypeManager.Instance.itemTypeSearch[item.id];
+        bool isNeedShowDuability = itemType.categories == EDataType.WeaponItem;
+
         if (ItemTypeManager.Instance.itemTypeSearch[item.id].image != null)
         {
             image.enabled = true;
@@ -43,9 +46,16 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         }
         count.text = item.amount.ToString();
 
-        durability.text = $"{InventoryManager.Instance.itemLists[index].duability}%";
-        image.color =
-            (InventoryManager.Instance.itemLists[index].duability > 0) ? Color.white : Color.white;
+        if (isNeedShowDuability)
+        {
+            durability.text = $"{InventoryManager.Instance.itemLists[index].duability}%";
+            image.color = (InventoryManager.Instance.itemLists[index].duability > 0) ? Color.white : Color.red;
+        }
+        else
+        {
+            durability.text = "";
+            image.color = Color.white;
+        }
     }
     public void Clear()
     {

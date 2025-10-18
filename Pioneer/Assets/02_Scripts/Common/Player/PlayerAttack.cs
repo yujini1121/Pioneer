@@ -29,6 +29,8 @@ public class PlayerAttack : MonoBehaviour, IBegin
     {
         if (attackCollider != null)
         {
+            UnityEngine.Debug.Log($">> PlayerAttack.EnableAttackCollider() »£√‚");
+
             attackCollider.enabled = true;
         }
     }
@@ -39,5 +41,12 @@ public class PlayerAttack : MonoBehaviour, IBegin
         {
             attackCollider.enabled = false;
         }
+    }
+
+    public void SetAttackRange(float range)
+    {
+        Vector3 v = transform.localScale;
+        v.z = range;
+        transform.localScale = v;
     }
 }
