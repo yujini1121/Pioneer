@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 // 임시로 만든 Stats
-public class EnemyStats
+public class EnemyStats : MonoBehaviour
 {
     public float baseHP = 100f;
     public float baseATK = 10f;
@@ -62,6 +62,9 @@ public class GameManager : MonoBehaviour, IBegin
     public Canvas[] allUICanvas;
 
     private List<GameObject> spawnedEnemies = new List<GameObject>();
+
+    // 추가: 생성된 적들을 한 곳에 모아 보기 위한 부모 Transform
+    private Transform enemyRoot;
 
     [System.Serializable]
     public struct DayEnemyRow
@@ -124,7 +127,7 @@ public class GameManager : MonoBehaviour, IBegin
         float duration = isDay ? dayDuration : nightDuration;
         Gradient grad = isDay ? dayToNightGradient : nightToDayGradient;
 
-        // 진행도 0~1
+        // 진행도 0~1f
         float t = Mathf.Clamp01(cycleTime / duration);
 
         // 컬러/노출 보정
@@ -140,30 +143,32 @@ public class GameManager : MonoBehaviour, IBegin
         if (isDay)
         {
             // 낮 -> 밤 전환
-            IsDaytime = false;
             Debug.Log($"밤이 되었습니다. (Day {currentDay})");
+            IsDaytime = false;
             OnNightStart();
         }
         else
         {
             // 밤 -> 낮 전환
             IsDaytime = true;
+            OnNightEnd();
             currentDay++;
             Debug.Log($"아침이 되었습니다. (Day {currentDay})");
-            OnNightEnd();
         }
     }
 
 
     private void OnNightStart()
     {
+        var s = GetScaleRowForDay(currentDay);
+        Debug.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
         SpawnEnemiesForCurrentDay();
     }
 
     private void OnNightEnd()
     {
         DespawnAllEnemies();
-        ApplyCrewEmbarkRule(); 
+        ApplyCrewEmbarkRule();
     }
 
     public void GetGameTimeInfo(out int days, out int hours)
@@ -208,6 +213,8 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void SpawnEnemiesForCurrentDay()
     {
+        Debug.Log("Spawn Enemies");
+
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
@@ -221,9 +228,16 @@ public class GameManager : MonoBehaviour, IBegin
         Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
     }
 
+    // 일차별 공격력 적용된 에너미 생성
     private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
     {
+        DayEnemyRow row = GetSpawnRowForDay(currentDay);
+        Debug.Log($"[Table] Day{currentDay} -> M:{row.minion}, C:{row.crawler}, T:{row.titan}");
+
         if (prefab == null || count <= 0) return;
+
+        // 부모 컨테이너 
+        EnsureEnemyRoot();
 
         for (int i = 0; i < count; i++)
         {
@@ -232,14 +246,22 @@ public class GameManager : MonoBehaviour, IBegin
             Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
 
             GameObject e = Instantiate(prefab, p.position + offset, Quaternion.identity);
-            spawnedEnemies.Add(e);
 
+            // 계층 정리 및 식별용 이름
+            if (enemyRoot != null) e.transform.SetParent(enemyRoot);
+            e.name = $"{prefab.name}_Day{currentDay}_#{i + 1}";
+
+            spawnedEnemies.Add(e);
 
             if (e.TryGetComponent(out EnemyStats stats))
             {
                 float atkMul = 1f + (scale.attackPercent * 0.01f);
                 float hpMul = 1f + (scale.hpPercent * 0.01f);
                 stats.ApplyScaling(atkMul, hpMul);
+
+                Debug.Log($"[Scale] Day {currentDay} {e.name} " +
+                          $"ATK {stats.baseATK}→{stats.atk} (x{atkMul:0.00}), " +
+                          $"HP {stats.baseHP}→{stats.hp} (x{hpMul:0.00})");
             }
         }
     }
@@ -283,7 +305,7 @@ public class GameManager : MonoBehaviour, IBegin
     }
 
     // 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
-    // 5일차: 현재 승무원 수 ≤3 → 4명, ≥4 → 5명
+    // 5일차: 현재 승무원 수 ≤3 → 4명, 현재 승무원 수 ≥4 → 5명
     private int CalcCrewEmbarkCount(int day, int crewNow)
     {
         switch (Mathf.Clamp(day, 1, 5))
@@ -308,5 +330,15 @@ public class GameManager : MonoBehaviour, IBegin
     public void CollectResource(string type)
     {
         Debug.Log($"자원 획득: {type}");
+    }
+
+    // 부모 컨테이너를 보장
+    private void EnsureEnemyRoot()
+    {
+        if (enemyRoot == null)
+        {
+            var go = GameObject.Find("__ENEMIES__");
+            enemyRoot = (go != null) ? go.transform : new GameObject("__ENEMIES__").transform;
+        }
     }
 }
