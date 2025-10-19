@@ -93,7 +93,7 @@ public class PlayerStatUI : MonoBehaviour
 
     void UpdateBasicStatUI()
     {
-        playerAttackDamage.text = $"{PlayerCore.Instance.attackDamage}";
+        playerAttackDamage.text = $"{PlayerCore.Instance.handAttackCurrentValueRaw.weaponDamage}";
         playerAttackSpeed.text = $"{PlayerCore.Instance.attackDelayTime}";
         playerAttackRange.text = $"{PlayerCore.Instance.attackRange}";
     }

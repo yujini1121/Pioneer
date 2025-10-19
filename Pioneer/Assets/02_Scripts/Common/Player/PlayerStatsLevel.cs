@@ -140,6 +140,16 @@ public class PlayerStatsLevel : MonoBehaviour
         {
             growStateForInspector = new List<GrowState>(growStates.Values);
         }
+
+        if (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
+        {
+            if (Input.GetKeyDown(KeyCode.F8)) growStates[GrowStatType.Combat].level++;
+            if (Input.GetKeyDown(KeyCode.F9)) growStates[GrowStatType.Crafting].level++;
+            if (Input.GetKeyDown(KeyCode.F10)) growStates[GrowStatType.Fishing].level++;
+
+		}
+
+
     }
 
     // 스테이터스 초기 상태 설정
@@ -175,7 +185,7 @@ public class PlayerStatsLevel : MonoBehaviour
             // switch 문으로 수정
             if (type == GrowStatType.Combat)
             {
-                CombatChance(type);
+                CombatLevelUp(type); // 레벨 업 순간
             }
             // ===========================================
             StatLevelUp?.Invoke(type); // ui 업데이트 이벤튼
@@ -187,7 +197,8 @@ public class PlayerStatsLevel : MonoBehaviour
     /// [[ 전투 ]] 레벨업 시 효과 적용
     /// </summary>
     /// <param name="type"></param>
-    private void CombatChance(GrowStatType type)
+    /// 호출 시점 : 경험치를 얻는 시점 && 레벨 업 / not 공격력을 얻
+    private void CombatLevelUp(GrowStatType type)
     {
         int combatLevel = growStates[GrowStatType.Combat].level;
         float increaseAttackDamage = 0f;
@@ -196,8 +207,15 @@ public class PlayerStatsLevel : MonoBehaviour
             increaseAttackDamage = combatList[combatLevel].attack;
         }
 
-        player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
-    }
+        player.duabilityReducePrevent += combatList[combatLevel].durability;
+
+        int prevDamage = (int)player.handAttackCurrentValueRaw.weaponDamage;
+
+        player.handAttackCurrentValueRaw.weaponDamage =
+            Mathf.RoundToInt(prevDamage * (1 + increaseAttackDamage)); // 레벨 업에 따른 원본 변경
+
+		//player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
+	}
 
     /// <summary>
     /// [[ 손재주 (아이템 제작) ]] 확률 적용
@@ -224,9 +242,13 @@ public class PlayerStatsLevel : MonoBehaviour
         int level = growStates[GrowStatType.Fishing].level;
         if (level >= 0 && level < fishingList.Count)
         {
-            return fishingList[level];
+            return fishingList[level]; // 정상 출력
         }
 
-        return (0.0f, 0f);
+        return (0.0f, 0f); // 이건 아마 에러용
     }
+
+
+
+
 }

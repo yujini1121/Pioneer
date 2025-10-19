@@ -108,10 +108,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
         if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
         {
+            // 빈 아이템 주먹 공격
+
             PlayerCore.Instance.BeginCoroutine(WeaponUseUtils.AttackCoroutine(
                 PlayerCore.Instance,
                 PlayerCore.Instance.dummyHandAttackItem,
-                PlayerCore.Instance.handAttackStartDefault));
+                PlayerCore.Instance.CalculatedHandAttack));
         }
         else
         {

@@ -14,10 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   result:
     id: 100
-    amount: 0
+    amount: 1
+    duability: 0
+    isCanStack: 0
+    isUseCoroutineEnd: 0
+  resultBuildingOrNull: {fileID: 0}
   input:
   - id: 103
     amount: 3
+    duability: 0
+    isCanStack: 0
+    isUseCoroutineEnd: 0
   isMakeshift: 1
-  isBuilding: 0
   time: 0
+  exp: 9

@@ -1712,16 +1712,14 @@ MonoBehaviour:
     m_Bits: 114663
   m_UseGeometry: 0
   m_DefaultArea: 0
-  m_GenerateLinks: 0
   m_IgnoreNavMeshAgent: 1
   m_IgnoreNavMeshObstacle: 1
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.06666667
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
+  m_VoxelSize: 0.16666667
   m_BuildHeightMesh: 0
+  m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
 --- !u!1 &895135392 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5762745788972289707, guid: b80126354b6c58e44b0c9771a74576a1,
@@ -7568,7 +7566,10 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
+  duabilityReducePrevent: 0
   handAttackStartDefault: {fileID: 11400000, guid: cac60e5c912990f459fe7c629b5e80e6,
+    type: 2}
+  handAttackCurrentValueRaw: {fileID: 11400000, guid: 44a7ec6ff666348499c27d7843f6d17c,
     type: 2}
   dummyHandAttackItem:
     id: 0
@@ -7576,8 +7577,6 @@ MonoBehaviour:
     duability: 0
     isCanStack: 0
     isUseCoroutineEnd: 0
-  handAttackCurrentValue: {fileID: 11400000, guid: 44a7ec6ff666348499c27d7843f6d17c,
-    type: 2}
 --- !u!114 &1540831117581621062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11216,7 +11215,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7613303f2734a0240b7010c820d5b5ec, type: 2}
   - {fileID: 11400000, guid: 92359a5035989e24597752997fb9c877, type: 2}
   - {fileID: 11400000, guid: f7c1da1b4206ce340b006f4e810fbfb7, type: 2}
-  isDebugging: 1
+  isDebugging: 0
 --- !u!114 &3334080376752270662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14174,7 +14173,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4131920404726635129}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
   m_Name: 
@@ -16790,7 +16789,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 100
+  dayDuration: 10
   nightDuration: 100
   spawnPoints:
   - {fileID: 681547787}
@@ -22425,6 +22424,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   recipes:
+  - {fileID: 11400000, guid: b5d217af2ec0d794ebc7bcbf9e8cc118, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: 07b27226dd08a604e898175b8ded3661, type: 2}
+  - {fileID: 11400000, guid: 084de50bbfa05294587c4dd15bdf5adf, type: 2}
+  - {fileID: 11400000, guid: 503dfc8f0eab06b418e2777f5dad1462, type: 2}
+  - {fileID: 11400000, guid: 437297f4799d71c4996be1e099ef06e1, type: 2}
+  - {fileID: 11400000, guid: 5a0226bca53d7c14c8976f47fe8e658a, type: 2}
+  - {fileID: 11400000, guid: da4e4947603e47a42a5ea6cf8e542839, type: 2}
+  - {fileID: 11400000, guid: 219ff5e07eba1fb44a8566e17e5891ae, type: 2}
+  - {fileID: 11400000, guid: d8d434ce7e3c93d41a0415561958fd34, type: 2}
+  - {fileID: 11400000, guid: 165f42591a0b4784a8883ab6e84a5391, type: 2}
+  - {fileID: 11400000, guid: d28ab532c53a9734eb92c9716c667be7, type: 2}
+  - {fileID: 11400000, guid: 8a8e82d814e2d5845b6abc2d99396c11, type: 2}
+  - {fileID: 11400000, guid: 20792605b6920f8449f2493aff9ac0a3, type: 2}
+  - {fileID: 11400000, guid: a57e9fd546b13884486fa4d8725766a1, type: 2}
+  - {fileID: 11400000, guid: 9d45b990883ff33458328415eff42e38, type: 2}
+  - {fileID: 11400000, guid: bb2e95ad8ec81e740b3f58a5cb4a5911, type: 2}
   - {fileID: 11400000, guid: d9bc01a6f1d1dac488a13782818c2620, type: 2}
   - {fileID: 11400000, guid: b6b9abcc85c31f541aab72d38aa33a0c, type: 2}
   - {fileID: 11400000, guid: 01cf01ae8a0190642bdcfe851356d00b, type: 2}
@@ -22433,19 +22449,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3da4d92846934774caf31ff5d223fe44, type: 2}
   - {fileID: 11400000, guid: 805ba72d51b6d994282de7a5a2e21a9b, type: 2}
   - {fileID: 11400000, guid: 1c62d34221e8a63409b71223e6372d65, type: 2}
-  - {fileID: 11400000, guid: b5d217af2ec0d794ebc7bcbf9e8cc118, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
-  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
 --- !u!222 &7969948933000371321
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -23628,6 +23631,7 @@ MonoBehaviour:
     trap: {fileID: 6496894871947221018, guid: 2e1b17aa88865d14e832cfab90be1c1b, type: 3}
     lantern: {fileID: 8600612548437967184, guid: 48ada4cc6191cd944802c98adfe22c51,
       type: 3}
+  navMeshSurface: {fileID: 0}
   stopDistance: 1.5
 --- !u!1001 &8526916259828762702
 PrefabInstance:
@@ -23847,6 +23851,8 @@ MonoBehaviour:
   inventoryCount: 27
   positionDrop: {fileID: 8068855977270320697}
   dropOffset: {x: 1, y: -0.8, z: -1}
+  isDebugging: 0
+  isDebuggingAdd: 0
 --- !u!1 &8560405975616301542
 GameObject:
   m_ObjectHideFlags: 0
@@ -24974,7 +24980,9 @@ MonoBehaviour:
   prefabItemCategoryButton: {fileID: 590576477171757539, guid: 9ac639694a13adc4989714d1fde1171a,
     type: 3}
   imageEmpty: {fileID: 21300000, guid: 344168bb29e09c04e8a7437d60165d4e, type: 3}
-  isDebugging: 0
+  isDebugging: 1
+  isDebugging_Craft: 1
+  isDebugging_CraftCoroutine: 1
 --- !u!224 &9156499640099217444
 RectTransform:
   m_ObjectHideFlags: 0

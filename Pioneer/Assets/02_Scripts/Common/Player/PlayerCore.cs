@@ -104,15 +104,38 @@ public class PlayerCore : CreatureBase, IBegin
     [SerializeField] private LayerMask enemyLayer;
     private PlayerController playerController;
     private bool isattacked = false;
+    public float duabilityReducePrevent = 0f;
+    public int DuabilityReducePrevent => Mathf.RoundToInt(duabilityReducePrevent);
 
-    public PlayerAttack PlayerAttack => playerAttack;
+
+
+	public PlayerAttack PlayerAttack => playerAttack;
     public float AttackHeight => attackHeight;
     public LayerMask EnemyLayer => enemyLayer;
 
-    public SItemWeaponTypeSO handAttackStartDefault;
+    [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
+	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
+
+	public SItemWeaponTypeSO CalculatedHandAttack
+    {
+        get
+        {
+            SItemWeaponTypeSO returnValue = new SItemWeaponTypeSO();
+            returnValue.DeepCopyFrom(handAttackCurrentValueRaw);
+            
+            if (IsMentalDebuff())
+            {
+#warning [생체 시스템 : 정신력 시스템] 정신력 40미만 공격력 감소량 구체적으로 작성
+				returnValue.weaponDamage /= 2; // 정신적으로 미쳐있을때만 영향 줌. 원래대로 복구함. 감소값 수정
+			}
+
+            return returnValue;
+		}
+    }
+
+
     public SItemStack dummyHandAttackItem;
 
-    [SerializeField] private SItemWeaponTypeSO handAttackCurrentValue;
 
     // 기본 시스템 관련 번수
     private Rigidbody playerRb;
@@ -136,7 +159,7 @@ public class PlayerCore : CreatureBase, IBegin
         playerRb = GetComponent<Rigidbody>();
         SetSetAttribute();
 
-        handAttackCurrentValue.DeepCopyFrom(handAttackStartDefault);
+        handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
         dummyHandAttackItem = new SItemStack(-1, -1);
     }
     
@@ -178,7 +201,7 @@ public class PlayerCore : CreatureBase, IBegin
         defaultSpeed = speed;
         currentFullness = 80;              // 포만감 (시작 값 80)
         currentMental = maxMental;         // 정신력 (시작 값 100)
-        attackDamage = 2;           // 공격력
+        //attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
         attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
     }
@@ -204,12 +227,12 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     // 공격
     // =============================================================
-    public void Attack(SItemWeaponTypeSO weapon)
-    {
-        if (currentState != PlayerState.Default) return;
-        if (isAttacking) return;
-        StartCoroutine(AttackCoroutine(weapon, InventoryManager.Instance.SelectedSlotInventory));
-    }
+    //public void Attack(SItemWeaponTypeSO weapon)
+    //{
+    //    if (currentState != PlayerState.Default) return;
+    //    if (isAttacking) return;
+    //    StartCoroutine(AttackCoroutine(weapon, InventoryManager.Instance.SelectedSlotInventory));
+    //}
 
     public bool IsMentalDebuff()
     {
@@ -230,47 +253,47 @@ public class PlayerCore : CreatureBase, IBegin
         isRunningCoroutineItem = false;
     }
 
-    private IEnumerator AttackCoroutine(SItemWeaponTypeSO weapon, SItemStack itemWithState)
-    {
-        isAttacking = true;
+    //private IEnumerator AttackCoroutine(SItemWeaponTypeSO weapon, SItemStack itemWithState)
+    //{
+    //    isAttacking = true;
 
-        yield return new WaitForSeconds(weapon.weaponAnimation);
+    //    yield return new WaitForSeconds(weapon.weaponAnimation);
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-        {
-            Vector3 dir = (hit.point - transform.position).normalized;
-            dir.y = 0f;
-            transform.rotation = Quaternion.LookRotation(dir);
+    //    RaycastHit hit;
+    //    if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+    //    {
+    //        Vector3 dir = (hit.point - transform.position).normalized;
+    //        dir.y = 0f;
+    //        transform.rotation = Quaternion.LookRotation(dir);
 
-            Vector3 position = transform.position + dir * 0.5f;
-            position.y = attackHeight;
-            playerAttack.transform.position = position;
-            playerAttack.transform.rotation = Quaternion.LookRotation(dir);
+    //        Vector3 position = transform.position + dir * 0.5f;
+    //        position.y = attackHeight;
+    //        playerAttack.transform.position = position;
+    //        playerAttack.transform.rotation = Quaternion.LookRotation(dir);
 
-            // TODO: 공격 애니메이션 시작 시간 추가해야 함!!!!!!!!!!! (0.6초)
-            // playerAttack.gameObject.SetActive(true);
-            playerAttack.EnableAttackCollider();
-            playerAttack.damage = (int)(weapon.weaponDamage) + this.attackDamage;
+    //        // TODO: 공격 애니메이션 시작 시간 추가해야 함!!!!!!!!!!! (0.6초)
+    //        // playerAttack.gameObject.SetActive(true);
+    //        playerAttack.EnableAttackCollider();
+    //        playerAttack.damage = (int)(weapon.weaponDamage) + this.attackDamage;
 
-            if (itemWithState != null)
-            {
-                itemWithState.duability -= weapon.duabilityRedutionPerHit;
-            }
+    //        if (itemWithState != null)
+    //        {
+    //            itemWithState.duability -= weapon.duabilityRedutionPerHit;
+    //        }
 
-            InventoryUiMain.instance.IconRefresh();
-        }
+    //        InventoryUiMain.instance.IconRefresh();
+    //    }
 
-        // 공격 애니메이션 이후 지연 시간 (0.4초)
-        //yield return new WaitForSeconds(attackDelayTime);
-        yield return new WaitForSeconds(weapon.weaponDelay);
+    //    // 공격 애니메이션 이후 지연 시간 (0.4초)
+    //    //yield return new WaitForSeconds(attackDelayTime);
+    //    yield return new WaitForSeconds(weapon.weaponDelay);
 
-        // playerAttack.gameObject.SetActive(false);
-        playerAttack.DisableAttackCollider();
-        isAttacking = false;
-    }
+    //    // playerAttack.gameObject.SetActive(false);
+    //    playerAttack.DisableAttackCollider();
+    //    isAttacking = false;
+    //}
 
     public override void TakeDamage(int damage, GameObject attacker)
     {

@@ -19,7 +19,10 @@ public class InventoryManager : InventoryBase
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
     [SerializeField] Vector3 dropOffset = new Vector3(1, -0.8f, -1);
-
+    [Header("DEBUG")]
+    [SerializeField] bool isDebugging;
+    [SerializeField] bool isDebuggingAdd;
+    bool IsDebuggingAdd => isDebugging && isDebuggingAdd;
 
     public void MouseSwitch(int index)
     {
@@ -106,6 +109,11 @@ public class InventoryManager : InventoryBase
 
     public void Add(SItemStack item)
     {
+        if (IsDebuggingAdd)
+        {
+            Debug.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
+        }
+
         Debug.Assert(InventoryUiMain.instance != null);
         if (TryAdd(item) == false)
         {

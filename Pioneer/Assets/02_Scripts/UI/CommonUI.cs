@@ -20,7 +20,12 @@ public class CommonUI : MonoBehaviour, IBegin
     [SerializeField] GameObject prefabCraftSelectItemButton;
     [SerializeField] GameObject prefabItemCategoryButton;
     [SerializeField] Sprite imageEmpty;
+    [Header("DEBUG")]
     [SerializeField] bool isDebugging;
+    [SerializeField] bool isDebugging_Craft;
+    [SerializeField] bool isDebugging_CraftCoroutine;
+    private bool IsDebuggingCraft => isDebugging && isDebugging_Craft;
+    private bool IsDebuggingCraftCoroutine => isDebugging && isDebugging_CraftCoroutine;
     Coroutine currentCraftCoroutine;
     SItemRecipeSO currentRecipe;
 
@@ -52,6 +57,11 @@ public class CommonUI : MonoBehaviour, IBegin
     // GameObject[] outsideGameObjectCraftButtonsWithImage : 이미지를 가지고 있는 게임오브젝트의 목록이며, 해당 게임오브젝트는 아이템을 만들 수 있는지 아닌지 여부를 보여주기 위함입니다. 못 만들면 반투명하게 해야 하거든요
     public void UpdateCraftWindowUi(DefaultFabrication ui, SItemRecipeSO recipe, InventoryBase inventory, GameObject[] outsideGameObjectCraftButtonsWithImage)
     {
+        if (IsDebuggingCraft)
+        {
+            Debug.Log($">> CommonUI.UpdateCraftWindowUi(...) -> 함수 호출됨");
+        }
+
         currentRecipe = recipe;
         SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
         ui.craftName.text = recipeResultType.typeName;
@@ -119,6 +129,7 @@ public class CommonUI : MonoBehaviour, IBegin
             else if (recipe.resultBuildingOrNull == null)
             {
                 currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, outsideGameObjectCraftButtonsWithImage, ui));
+
             }
             // 건물 건축인 경우
             else
@@ -313,6 +324,11 @@ public class CommonUI : MonoBehaviour, IBegin
 
     private IEnumerator CraftCoroutine(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)
     {
+        if (isDebugging_CraftCoroutine)
+        {
+            Debug.Log($">> CommonUI.CraftCoroutine(...) -> 함수 호출됨");
+        }
+
         // 입력 시간만큼 진행
         // 성공시 리턴
         IsCurrentCrafting = true;
@@ -326,7 +342,8 @@ public class CommonUI : MonoBehaviour, IBegin
             yield return null;
         }
         Craft(recipe, itemButtonGameObject, ui);
-        ui.timeLeft.text = $"제작 완료";
+
+		ui.timeLeft.text = $"제작 완료";
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
         InventoryUiMain.instance.IconRefresh();
         IsCurrentCrafting = false;
@@ -339,7 +356,30 @@ public class CommonUI : MonoBehaviour, IBegin
         InventoryManager.Instance.Add(recipe.result);
         InventoryManager.Instance.Remove(recipe.input);
 
-        for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+		if (UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance())
+		{
+            if (IsDebuggingCraftCoroutine)
+            {
+                Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
+            }
+
+			// 대성공 발생
+            // 아이템 하나 더 추가
+			InventoryManager.Instance.Add(recipe.result);
+
+            // 아이템 페이백
+            foreach (SItemStack one in recipe.input)
+            {
+                SItemStack newRef = one.Copy();
+
+				newRef.amount *= 4;
+				newRef.amount /= 10;
+
+				InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
+			}
+		}
+
+		for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
         {
             int need = recipe.input[rIndex].amount;
             int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);

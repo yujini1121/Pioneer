@@ -48,15 +48,17 @@ public class SItemWeaponTypeSO : SItemTypeSO
 
         if (itemWithState.duability > 0)
         {
+            // 내구도 1 이상 무기 공격
             Debug.Log(">> 아이템_무기 : WeaponUseUtils.AttackCoroutine");
             yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState, this);
         }
         else
         {
+            // 내구도 0 주먹 공격
             Debug.Log(">> 아이템_무기 : Fist Attack");
 
             yield return WeaponUseUtils.AttackCoroutine(userGameObject, PlayerCore.Instance.dummyHandAttackItem,
-                PlayerCore.Instance.handAttackStartDefault);
+                PlayerCore.Instance.CalculatedHandAttack);
         }
         
 

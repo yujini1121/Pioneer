@@ -94,7 +94,7 @@ public class WeaponUseUtils
             PlayerCore.Instance.PlayerAttack.transform.position = position;
             PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
             PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
-            PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.handAttackStartDefault.weaponDamage);
+            PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
             // 공격 범위 세팅
             PlayerCore.Instance.PlayerAttack.SetAttackRange(data.weaponRange);
 
@@ -104,7 +104,8 @@ public class WeaponUseUtils
 
 
             // 내구도 닳기
-            itemWithState.duability = Mathf.Max(0, itemWithState.duability - data.duabilityRedutionPerHit);
+            itemWithState.duability = Mathf.Max(0, itemWithState.duability -
+				Mathf.Max(0, data.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
 
             PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
             PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
