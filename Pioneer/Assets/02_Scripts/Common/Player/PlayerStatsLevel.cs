@@ -147,6 +147,7 @@ public class PlayerStatsLevel : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.F9)) growStates[GrowStatType.Crafting].level++;
             if (Input.GetKeyDown(KeyCode.F10)) growStates[GrowStatType.Fishing].level++;
 
+
 		}
 
 

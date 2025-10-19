@@ -166,6 +166,8 @@ public class InventoryManager : InventoryBase
     {
         SelectedSlotInventory = itemLists[index];
         selectedSlotIndex = index;
+
+        
     }
 
     protected override void SafeClean()

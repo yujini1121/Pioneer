@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class PlayerStatUI : MonoBehaviour
 {
+    public static PlayerStatUI Instance;
+
     [Header("Basic Stats UI")]
     public TextMeshProUGUI playerHp;
     public TextMeshProUGUI playerAttackDamage;
@@ -32,8 +34,12 @@ public class PlayerStatUI : MonoBehaviour
     public Slider fullnessBar;
     public Slider mentalBar;
 
+	private void Awake()
+	{
+        Instance = this;
+	}
 
-    void Start()
+	void Start()
     {
         InitUi();
     }
@@ -91,11 +97,36 @@ public class PlayerStatUI : MonoBehaviour
         hpBar.value = currentHp;
     }
 
-    void UpdateBasicStatUI()
+    public void UpdateBasicStatUI()
     {
-        playerAttackDamage.text = $"{PlayerCore.Instance.handAttackCurrentValueRaw.weaponDamage}";
-        playerAttackSpeed.text = $"{PlayerCore.Instance.attackDelayTime}";
-        playerAttackRange.text = $"{PlayerCore.Instance.attackRange}";
+
+
+        SItemStack selectedItem = InventoryManager.Instance.SelectedSlotInventory;
+        SItemWeaponTypeSO weaponOrNull = null;
+
+		if (SItemStack.IsEmpty(selectedItem) == false)
+        {
+			int itemId = selectedItem.id;
+			weaponOrNull =
+				ItemTypeManager.Instance.itemTypeSearch[itemId] as SItemWeaponTypeSO;
+		}
+
+
+        if (weaponOrNull != null)
+        {
+			playerAttackDamage.text = $"{PlayerCore.Instance.CalculatedHandAttack.weaponDamage + weaponOrNull.weaponDamage}";
+			playerAttackSpeed.text = $"{weaponOrNull.weaponDelay / 1f}";
+			playerAttackRange.text = $"{weaponOrNull.weaponRange}";
+		}
+        else
+        {
+            // 무기가 아니기에 맨손 기준 적용
+
+			playerAttackDamage.text = $"{PlayerCore.Instance.CalculatedHandAttack.weaponDamage}";
+			playerAttackSpeed.text = $"{PlayerCore.Instance.attackDelayTime}";
+			playerAttackRange.text = $"{PlayerCore.Instance.attackRange}";
+		}
+
     }
 
     void UpdatePlayerGrowStatUI(GrowStatType type)

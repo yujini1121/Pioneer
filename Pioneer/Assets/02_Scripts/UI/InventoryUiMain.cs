@@ -166,7 +166,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
         IconRefresh();
-    }
+        PlayerStatUI.Instance.UpdateBasicStatUI();
+
+	}
 
     private void Awake()
     {
