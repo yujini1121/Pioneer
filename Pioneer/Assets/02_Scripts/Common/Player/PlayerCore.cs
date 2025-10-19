@@ -110,7 +110,8 @@ public class PlayerCore : CreatureBase, IBegin
     public LayerMask EnemyLayer => enemyLayer;
 
     public SItemWeaponTypeSO handAttackStartDefault;
-    
+    public SItemStack dummyHandAttackItem;
+
     [SerializeField] private SItemWeaponTypeSO handAttackCurrentValue;
 
     // 기본 시스템 관련 번수
@@ -136,6 +137,7 @@ public class PlayerCore : CreatureBase, IBegin
         SetSetAttribute();
 
         handAttackCurrentValue.DeepCopyFrom(handAttackStartDefault);
+        dummyHandAttackItem = new SItemStack(-1, -1);
     }
     
     new void Start()

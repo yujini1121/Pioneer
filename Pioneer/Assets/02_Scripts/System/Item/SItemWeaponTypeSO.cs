@@ -53,12 +53,10 @@ public class SItemWeaponTypeSO : SItemTypeSO
         }
         else
         {
-            
+            Debug.Log(">> 아이템_무기 : Fist Attack");
 
-            yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState,
-                PlayerCore.Instance.handAttackStartDefault
-
-                );
+            yield return WeaponUseUtils.AttackCoroutine(userGameObject, PlayerCore.Instance.dummyHandAttackItem,
+                PlayerCore.Instance.handAttackStartDefault);
         }
         
 
