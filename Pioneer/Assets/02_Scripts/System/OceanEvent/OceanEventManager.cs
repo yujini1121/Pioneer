@@ -11,6 +11,7 @@ public class OceanEventManager : MonoBehaviour
 	public OceanEventBase currentEvent;
 
 	public Coroutine currentCoroutine;
+	private bool isCoroutineStoped = true;
 
 	private void Awake()
 	{
@@ -40,5 +41,18 @@ public class OceanEventManager : MonoBehaviour
 	public void EnterNight()
 	{
 		currentEvent.EnterNight();
+	}
+
+	public void BeginCoroutine(IEnumerator coroutine)
+	{
+		IEnumerator m_LocalCoroutine(IEnumerator mCoroutine)
+		{
+			isCoroutineStoped = false;
+			yield return mCoroutine;
+			isCoroutineStoped = true;
+        }
+
+
+		if (isCoroutineStoped) currentCoroutine = StartCoroutine(m_LocalCoroutine(coroutine));
 	}
 }
