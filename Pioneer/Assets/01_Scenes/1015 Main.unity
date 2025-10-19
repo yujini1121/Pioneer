@@ -1189,7 +1189,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1200,7 +1200,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 681547787}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1449,7 +1449,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1460,7 +1460,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 715152145}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1572,7 +1572,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1583,7 +1583,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 819044374}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1650,7 +1650,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 860495885}
-  - component: {fileID: 860495884}
+  - component: {fileID: 860495886}
   m_Layer: 0
   m_Name: WorldSpace
   m_TagString: Untagged
@@ -1658,35 +1658,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &860495884
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 860495883}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AgentTypeID: 0
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 49127
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
-  m_BuildHeightMesh: 0
-  m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
 --- !u!4 &860495885
 Transform:
   m_ObjectHideFlags: 0
@@ -1720,6 +1691,37 @@ Transform:
   - {fileID: 491804331}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
+--- !u!114 &860495886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860495883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 114663
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.06666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &895135392 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5762745788972289707, guid: b80126354b6c58e44b0c9771a74576a1,
@@ -3406,7 +3408,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -3417,7 +3419,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1969941936}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -3937,7 +3939,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 1.5
+  m_BaseOffset: 1.1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!1 &70798206488983418
@@ -16788,8 +16790,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 5
-  nightDuration: 5
+  dayDuration: 100
+  nightDuration: 100
   spawnPoints:
   - {fileID: 681547787}
   - {fileID: 715152145}
@@ -22433,6 +22435,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1c62d34221e8a63409b71223e6372d65, type: 2}
   - {fileID: 11400000, guid: b5d217af2ec0d794ebc7bcbf9e8cc118, type: 2}
   - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
+  - {fileID: 11400000, guid: c6c17b04ed7bf7049ae4c151ffdd503b, type: 2}
 --- !u!222 &7969948933000371321
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -23615,7 +23628,6 @@ MonoBehaviour:
     trap: {fileID: 6496894871947221018, guid: 2e1b17aa88865d14e832cfab90be1c1b, type: 3}
     lantern: {fileID: 8600612548437967184, guid: 48ada4cc6191cd944802c98adfe22c51,
       type: 3}
-  navMeshSurface: {fileID: 0}
   stopDistance: 1.5
 --- !u!1001 &8526916259828762702
 PrefabInstance:
