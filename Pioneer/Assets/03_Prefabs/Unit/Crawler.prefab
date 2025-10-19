@@ -196,6 +196,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8256
   attackBoxCenterOffset: {x: 0, y: 0, z: 1}
+  mast: {fileID: 0}
 --- !u!1 &8293167387613736193
 GameObject:
   m_ObjectHideFlags: 0
@@ -206,6 +207,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2367966048663166238}
   - component: {fileID: 640465341989891565}
+  - component: {fileID: 4456402184997952669}
   m_Layer: 8
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -280,3 +282,15 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &4456402184997952669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8293167387613736193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

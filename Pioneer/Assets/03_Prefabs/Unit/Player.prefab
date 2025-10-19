@@ -47,6 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 0
   attackCollider: {fileID: 8215995545924638442}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!65 &8215995545924638442
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -299,7 +302,14 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
-  handAttack: {fileID: 11400000, guid: 44a7ec6ff666348499c27d7843f6d17c, type: 2}
+  handAttackStartDefault: {fileID: 0}
+  dummyHandAttackItem:
+    id: 0
+    amount: 0
+    duability: 0
+    isCanStack: 0
+    isUseCoroutineEnd: 0
+  handAttackCurrentValue: {fileID: 0}
 --- !u!114 &2029828995776725162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,6 +448,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3492871857481899163}
   - component: {fileID: 4775383469292780595}
+  - component: {fileID: 5624774914298726858}
   m_Layer: 10
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -512,3 +523,15 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &5624774914298726858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4131920404888409297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
