@@ -74,7 +74,7 @@ public class ItemTypeManager : MonoBehaviour, IBegin
     {
         foreach (SItemTypeSO one in types)
         {
-            Debug.Log($">> ItemTypeManager.InspectorRegister() : {one.id} added!");
+            //Debug.Log($">> ItemTypeManager.InspectorRegister() : {one.id} added!");
 
             itemTypeSearch.Add(one.id, one);
         }
