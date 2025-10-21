@@ -65,5 +65,7 @@ public class SItemWeaponTypeSO : SItemTypeSO
 
 
         yield return base.Use(userGameObject, itemWithState);
-    }
+
+		InventoryUiMain.instance.IconRefresh();
+	}
 }

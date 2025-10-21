@@ -22,6 +22,9 @@ public class DroppedItem : MonoBehaviour
         if (ThisIsPlayer.IsThisPlayer(collision))
         {
             InventoryManager.Instance.Add(itemValue);
+            InventoryManager.Instance.UpdateSlot();
+            PlayerStatUI.Instance.UpdateBasicStatUI();
+			InventoryUiMain.instance.IconRefresh();
 
             Destroy(gameObject);
         }

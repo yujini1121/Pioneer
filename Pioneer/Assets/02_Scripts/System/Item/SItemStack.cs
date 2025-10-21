@@ -19,6 +19,14 @@ public class SItemStack
         this.id = id;
         this.amount = amount;
     }
+    public SItemStack(int id, int amount, int duability)
+    {
+        this.id = id;
+        this.amount = amount;
+        this.duability = duability;
+
+	}
+
     public static bool IsEmpty(SItemStack target)
     {
         if (target == null) return true;
@@ -27,7 +35,7 @@ public class SItemStack
     }
     public SItemStack Copy()
     {
-        return new SItemStack(id, amount);
+        return new SItemStack(id, amount, duability);
     }
 
     // 아이템이 있는 곳에서는 종류와 갯수를 가리키는 것과 어떤 아이템이 쓰이는지 강하게 연결되어있을 것으로 보입니다.

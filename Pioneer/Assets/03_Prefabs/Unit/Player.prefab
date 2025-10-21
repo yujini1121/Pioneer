@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6876841259372092170
 Transform:
   m_ObjectHideFlags: 0
@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 1.6}
+  m_LocalScale: {x: 0.8, y: 3, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8573141634137602712}
@@ -302,14 +302,15 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
+  duabilityReducePrevent: 0
   handAttackStartDefault: {fileID: 0}
+  handAttackCurrentValueRaw: {fileID: 0}
   dummyHandAttackItem:
     id: 0
     amount: 0
     duability: 0
     isCanStack: 0
     isUseCoroutineEnd: 0
-  handAttackCurrentValue: {fileID: 0}
 --- !u!114 &2029828995776725162
 MonoBehaviour:
   m_ObjectHideFlags: 0

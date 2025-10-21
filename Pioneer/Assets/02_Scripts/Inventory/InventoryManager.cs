@@ -166,11 +166,13 @@ public class InventoryManager : InventoryBase
     {
         SelectedSlotInventory = itemLists[index];
         selectedSlotIndex = index;
-
-        
     }
 
-    protected override void SafeClean()
+    public void UpdateSlot() => SelectedSlotInventory = itemLists[selectedSlotIndex];
+
+
+
+	protected override void SafeClean()
     {
         base.SafeClean();
 
@@ -222,7 +224,7 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(102, 100));
         Add(new SItemStack(103, 100));
         Add(new SItemStack(30001, 200));
-        Add(new SItemStack(20001, 1));
+        Add(new SItemStack(20001, 1, 100));
         Add(new SItemStack(40001, 200));
     }
 }

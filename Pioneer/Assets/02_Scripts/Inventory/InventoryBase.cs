@@ -55,17 +55,19 @@ public class InventoryBase : MonoBehaviour
                 return true;
             }
         }
+
+        // 인벤토리에 아이템을 넣을 빈 슬롯을 발견했습니다.
         if (firstEmpty != -1)
         {
-            itemLists[firstEmpty] = new SItemStack(itemStack.id, itemStack.amount);
+            itemLists[firstEmpty] = itemStack.Copy();
 
-            SItemWeaponTypeSO weaponSo = ItemTypeManager.Instance.itemTypeSearch[itemStack.id] as SItemWeaponTypeSO;
-            if (weaponSo != null)
-            {
-                Debug.Log($">> InventoryBase.TryAdd : 무기 추가. 내구도 = {weaponSo.weaponDuability}");
-                itemLists[firstEmpty].duability = weaponSo.weaponDuability;
-            }
-            return true;
+			//SItemWeaponTypeSO weaponSo = ItemTypeManager.Instance.itemTypeSearch[itemStack.id] as SItemWeaponTypeSO;
+			//if (weaponSo != null)
+			//{
+			//    Debug.Log($">> InventoryBase.TryAdd : 무기 추가. 내구도 = {weaponSo.weaponDuability}");
+			//    itemLists[firstEmpty].duability = weaponSo.weaponDuability;
+			//}
+			return true;
         }
 
         Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count} / adding : {itemStack.id} + {itemStack.amount}");
