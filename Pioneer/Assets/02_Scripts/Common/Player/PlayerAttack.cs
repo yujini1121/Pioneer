@@ -17,8 +17,9 @@ public class PlayerAttack : MonoBehaviour, IBegin
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy"))
+        if (other.CompareTag("Enemy") || other.gameObject.layer == enemyLayer)
         {
+            // Debug.Log($"current other : {other.name}");
             other.GetComponent<CreatureBase>()?.TakeDamage(damage, this.gameObject);
             // 경험치 제공
             PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);

@@ -10,7 +10,18 @@ public class MinionNest : EnemyBase
     [Header("생성 시간 설정")]
     [SerializeField] float initDelay = 5.0f;
 
-    void OnEnable()
+	private void Start()
+	{
+        SetAttribute(); 
+	}
+
+	private void Update()
+	{
+        if (hp <= 0)
+            WhenDestroy();
+	}
+
+	void OnEnable()
     {
         StartCoroutine(SpawnMinionRoutine());
     }
@@ -41,6 +52,6 @@ public class MinionNest : EnemyBase
             }
         }
 
-        Destroy(gameObject);
-    }
+		WhenDestroy();
+	}
 }

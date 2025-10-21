@@ -13405,9 +13405,9 @@ GameObject:
   - component: {fileID: 5317472184176719453}
   - component: {fileID: 9013357165903058199}
   - component: {fileID: 5490841420609007718}
-  m_Layer: 16
+  m_Layer: 8
   m_Name: Nest
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13725,7 +13725,7 @@ MonoBehaviour:
   attackCollider: {fileID: 8215995545158883394}
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
 --- !u!114 &4289791705529440528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20429,7 +20429,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 1.6}
+  m_LocalScale: {x: 0.8, y: 3, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8573141634702029872}

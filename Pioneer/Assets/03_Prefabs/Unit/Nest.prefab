@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 828154716369138294}
   m_Layer: 8
   m_Name: Nest
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -118,7 +118,7 @@ MonoBehaviour:
   minionPrefab: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
     type: 3}
   maxMinionCount: 1
-  initDelay: 5
+  initDelay: 20
 --- !u!65 &828154716369138294
 BoxCollider:
   m_ObjectHideFlags: 0
