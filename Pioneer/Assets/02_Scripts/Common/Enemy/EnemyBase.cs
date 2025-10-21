@@ -17,7 +17,7 @@ public class EnemyBase : CreatureBase, IBegin
     // 바닥 확인 변수
     protected bool isOnGround = false;
 
-    // 공격 박스 중심 오프셋 조정
+    [Header("Attack Box 중심 오프셋 조정")]
     [SerializeField] private Vector3 attackBoxCenterOffset;
 
 
@@ -77,7 +77,9 @@ public class EnemyBase : CreatureBase, IBegin
         return isOnGround;
     }
 
-    //================
+    /// <summary>
+    /// Debug
+    /// </summary>
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
