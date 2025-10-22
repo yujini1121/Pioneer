@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour, IBegin
 
 	[Header("뗏목 끝지점 탐색")]
 	[SerializeField] Transform mast;
-	[SerializeField] 
+	[SerializeField] int points = 12;
 
 
 
@@ -104,7 +104,10 @@ public class GameManager : MonoBehaviour, IBegin
     {
         List<Vector3> candidatePoints = new List<Vector3>();
         
-        //for (int i = 0; i < CalcCrewEmbarkCount(); i++)
+        for (int i = 0; i < points; i++)
+		{
+
+		}
 	}
 
 
