@@ -106,7 +106,7 @@ public class GameManager : MonoBehaviour, IBegin
         
         for (int i = 0; i < points; i++)
 		{
-
+			// TODO : NavMesh Hit 또는 NavMesh RayCast로 처리
 		}
 	}
 
