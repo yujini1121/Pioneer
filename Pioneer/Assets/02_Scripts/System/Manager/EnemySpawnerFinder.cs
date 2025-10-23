@@ -2,9 +2,9 @@
 using UnityEngine;
 
 #if UNITY_EDITOR
-using UnityEditor
+using UnityEditor;
 #endif
-;
+
 
 /// <summary>
 /// mast의 '로컬 기준' 동/북/서/남 4방향을 초기 고정하고,
