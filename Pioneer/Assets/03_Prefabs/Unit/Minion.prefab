@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6201443550321480378}
   - component: {fileID: 1546079290981050899}
   - component: {fileID: 2853514008745676546}
+  - component: {fileID: -4521112962048500382}
   m_Layer: 8
   m_Name: Minion
   m_TagString: Enemy
@@ -201,6 +202,21 @@ MonoBehaviour:
   nestPrefab: {fileID: 9198897501529124499, guid: 84b0a0fbe5b086c4d8978cdf37b68f89,
     type: 3}
   isNestCreated: 0
+--- !u!114 &-4521112962048500382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646136597593253128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc5c5d51652fc13468c3473c737cc25a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeDuration: 2
+  playOnEnable: 1
+  stopAgentDuringIntro: 1
 --- !u!1 &2874263711392787887
 GameObject:
   m_ObjectHideFlags: 0

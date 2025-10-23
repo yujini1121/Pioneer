@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4375767623059517345}
   - component: {fileID: 3611879626036163164}
   - component: {fileID: 9053531323269981545}
+  - component: {fileID: 7595422899972394721}
   m_Layer: 8
   m_Name: Titan
   m_TagString: Untagged
@@ -197,6 +198,21 @@ MonoBehaviour:
     m_Bits: 0
   attackBoxCenterOffset: {x: 0, y: 0, z: 1}
   mast: {fileID: 0}
+--- !u!114 &7595422899972394721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4926383961205332390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc5c5d51652fc13468c3473c737cc25a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeDuration: 2
+  playOnEnable: 1
+  stopAgentDuringIntro: 1
 --- !u!1 &6042525674292446187
 GameObject:
   m_ObjectHideFlags: 0
