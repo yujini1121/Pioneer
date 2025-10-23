@@ -443,6 +443,7 @@ public class CreateObject : MonoBehaviour, IBegin
             tempObj.GetComponent<Renderer>().material.color = Color.white;
 
             navMeshSurface.BuildNavMesh();
+            GameManager.Instance?.NotifyPlatformLayoutChanged();
 
             //¡÷»∆ √ﬂ∞°
             if (creationType == CreationType.Platform && MastManager.Instance != null)

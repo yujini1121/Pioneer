@@ -24,7 +24,6 @@ public class EnemyStats : MonoBehaviour
 
 public class GameManager : MonoBehaviour, IBegin
 {
-	#region 아 너무 길어요 
 	public static GameManager Instance;
 
     [Header("시간 설정")]
@@ -63,9 +62,17 @@ public class GameManager : MonoBehaviour, IBegin
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
 
-    private List<GameObject> spawnedEnemies = new List<GameObject>();
+    [Header("동적 스포너(EnemySpawnerFinder 연동)")]
+    [SerializeField] private EnemySpawnerFinder spawnerFinder;			// Inspector에서 할당
+    [SerializeField] private float spawnLiftY = 0.05f;					// 살짝 띄워서 스폰
+    [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";	// 하이어라키 정리용
+    private Transform spawnRoot;										// 스폰 포인트 부모
 
-    // 생성된 적들을 한 곳에 모아 보기 위한 부모 Transform
+    // EnemySpawnerFinder에서 찾은 스폰 포인트 수
+    private int activeSpawnCount = 0;
+
+	// 생성된 에너미 리스트
+    private List<GameObject> spawnedEnemies = new List<GameObject>();
     private Transform enemyRoot;
 
 	[System.Serializable]
@@ -90,29 +97,10 @@ public class GameManager : MonoBehaviour, IBegin
 
     [Header("일차별 능력치 강화 표 (1~5일차)")]
     public EnemyScaleRow[] enemyScaleTable = new EnemyScaleRow[5];
-	#endregion
-
-	[Header("뗏목 끝지점 탐색")]
-	[SerializeField] Transform mast;
-	[SerializeField] int points = 12;
 
 
-
-
-
-	void FindEdgePoint()
-    {
-        List<Vector3> candidatePoints = new List<Vector3>();
-        
-        for (int i = 0; i < points; i++)
-		{
-			// TODO : NavMesh Hit 또는 NavMesh RayCast로 처리
-		}
-	}
-
-
-	#region 집 보내주세요
-	private void Awake()
+    #region 임시 정리 
+    private void Awake()
 	{
 		if (Instance == null) Instance = this;
 		else Destroy(gameObject);
@@ -183,7 +171,9 @@ public class GameManager : MonoBehaviour, IBegin
 
 	private void OnNightStart()
 	{
-		var s = GetScaleRowForDay(currentDay);
+        RefreshSpawnPointsFromFinder();
+
+        var s = GetScaleRowForDay(currentDay);
 		Debug.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
 		SpawnEnemiesForCurrentDay();
 	}
@@ -251,45 +241,56 @@ public class GameManager : MonoBehaviour, IBegin
 		Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
 	}
 
-	// 일차별 공격력 적용된 에너미 생성
-	private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
-	{
-		DayEnemyRow row = GetSpawnRowForDay(currentDay);
-		Debug.Log($"[Table] Day{currentDay} -> M:{row.minion}, C:{row.crawler}, T:{row.titan}");
+    // 일차별 공격력 적용된 에너미 생성
+    private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
+    {
+        DayEnemyRow row = GetSpawnRowForDay(currentDay);
+        Debug.Log($"[Table] Day{currentDay} -> M:{row.minion}, C:{row.crawler}, T:{row.titan}");
 
-		if (prefab == null || count <= 0) return;
+        if (prefab == null || count <= 0) return;
 
-		// 부모 컨테이너 
-		EnsureEnemyRoot();
+        // 부모 컨테이너 
+        EnsureEnemyRoot();
 
-		for (int i = 0; i < count; i++)
-		{
-			int sp = Random.Range(0, spawnPoints.Length);
-			Transform p = spawnPoints[sp].transform;
-			Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
+        for (int i = 0; i < count; i++)
+        {
+            if (spawnPoints == null || activeSpawnCount == 0) { Debug.LogWarning("[Spawn] 활성 스폰 포인트 없음"); return; }
 
-			GameObject e = Instantiate(prefab, p.position + offset, Quaternion.identity);
+            // 활성화 된 것만 대상으로 랜덤(Found=true인 인덱스 선택)
+            int spIndex = -1;
+            for (int safe = 0; safe < 16; safe++)
+            {
+                int tryIdx = Random.Range(0, Mathf.Max(4, spawnPoints.Length));
+                if (tryIdx < spawnPoints.Length && spawnPoints[tryIdx] != null && spawnPoints[tryIdx].activeSelf)
+                {
+                    spIndex = tryIdx; break;
+                }
+            }
+            if (spIndex == -1) { Debug.LogWarning("[Spawn] 활성 스폰 포인트 선택 실패"); return; }
 
-			// 계층 정리 및 식별용 이름
-			if (enemyRoot != null) e.transform.SetParent(enemyRoot);
-			e.name = $"{prefab.name}_Day{currentDay}_#{i + 1}";
+            Transform p = spawnPoints[spIndex].transform;
+            Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
 
-			spawnedEnemies.Add(e);
+            GameObject e = Instantiate(prefab, p.position + offset, Quaternion.identity);
 
-			if (e.TryGetComponent(out EnemyStats stats))
-			{
-				float atkMul = 1f + (scale.attackPercent * 0.01f);
-				float hpMul = 1f + (scale.hpPercent * 0.01f);
-				stats.ApplyScaling(atkMul, hpMul);
+            if (enemyRoot != null) e.transform.SetParent(enemyRoot);
+            e.name = $"{prefab.name}_Day{currentDay}_#{i + 1}";
 
-				Debug.Log($"[Scale] Day {currentDay} {e.name} " +
-						  $"ATK {stats.baseATK}→{stats.atk} (x{atkMul:0.00}), " +
-						  $"HP {stats.baseHP}→{stats.hp} (x{hpMul:0.00})");
-			}
-		}
-	}
+            spawnedEnemies.Add(e);
 
-	private void DespawnAllEnemies()
+            if (e.TryGetComponent(out EnemyStats stats))
+            {
+                float atkMul = 1f + (scale.attackPercent * 0.01f);
+                float hpMul = 1f + (scale.hpPercent * 0.01f);
+                stats.ApplyScaling(atkMul, hpMul);
+
+                Debug.Log($"[Scale] Day {currentDay} {e.name} ATK {stats.baseATK}→{stats.atk} (x{atkMul:0.00}), HP {stats.baseHP}→{stats.hp} (x{hpMul:0.00})");
+            }
+        }
+    }
+
+
+    private void DespawnAllEnemies()
 	{
 		foreach (GameObject e in spawnedEnemies)
 			if (e != null) Destroy(e);
@@ -354,9 +355,97 @@ public class GameManager : MonoBehaviour, IBegin
 	{
 		Debug.Log($"자원 획득: {type}");
 	}
-	#endregion
-	#region 하이어라키창에서 보기 쉽게 정리 (부모 보장)
-	private void EnsureEnemyRoot()
+    #endregion
+
+
+    private void EnsureSpawnRoot()
+    {
+        if (spawnRoot == null)
+        {
+            var go = GameObject.Find(spawnRootName);
+            spawnRoot = (go != null) ? go.transform : new GameObject(spawnRootName).transform;
+        }
+    }
+
+    private GameObject CreateOrGetSpawnPoint(int index)
+    {
+        // 기존 public GameObject[] spawnPoints 를 그대로 사용
+        if (spawnPoints == null || spawnPoints.Length < 4)
+        {
+            // 길이가 4가 아니면 4로 맞춰 재할당(기존 값은 유지 불가 → 새로 채움)
+            spawnPoints = new GameObject[4];
+        }
+
+        if (spawnPoints[index] == null)
+        {
+            EnsureSpawnRoot();
+            var go = new GameObject($"SP_{index}"); // 임시 큐브 대신 빈 오브젝트로 관리
+            go.transform.SetParent(spawnRoot);
+            spawnPoints[index] = go;
+        }
+        return spawnPoints[index];
+    }
+
+    /// <summary>
+    /// EnemySpawnerFinder의 4방향 결과를 읽어와 spawnPoints를 ‘현재 플랫폼 상태’로 동기화.
+    /// 4개 전부 성공하면 true, 일부만 있으면 false(있는 것만 활성).
+    /// </summary>
+    private bool RefreshSpawnPointsFromFinder()
+    {
+        if (spawnerFinder == null)
+        {
+            Debug.LogWarning("[Spawner] EnemySpawnerFinder가 할당되지 않았습니다.");
+            activeSpawnCount = 0;
+            return false;
+        }
+
+        // 최신 플랫폼 배치 반영
+        bool ok = spawnerFinder.Refresh();
+
+        // Finder에서 찾은 방향들만 반영(최대 4)
+        int count = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            if (!spawnerFinder.found[i]) continue;
+
+            var sp = CreateOrGetSpawnPoint(i);
+            Vector3 pos = spawnerFinder.resultPos[i];
+            pos.y += spawnLiftY;
+            sp.transform.position = pos;
+            count++;
+        }
+
+        // 못 찾은 방향은 null 처리(스폰 대상에서 제외)
+        for (int i = 0; i < 4; i++)
+        {
+            if (!spawnerFinder.found[i] && spawnPoints != null && i < spawnPoints.Length)
+            {
+                // 굳이 삭제까진 안 해도 되지만, 실수 스폰 방지용으로 비활성화 가능
+                if (spawnPoints[i] != null) spawnPoints[i].SetActive(false);
+            }
+            else if (spawnerFinder.found[i] && spawnPoints[i] != null)
+            {
+                spawnPoints[i].SetActive(true);
+            }
+        }
+
+        activeSpawnCount = count;
+        if (count == 0)
+            Debug.LogWarning("[Spawner] 사용 가능한 동적 스폰 포인트가 없습니다. 플랫폼을 설치하세요.");
+
+        // 4개 모두 채워졌는지 반환
+        return ok;
+    }
+
+    // 어디서든 호출 가능: 플랫폼 배치 변경 후 스폰 포인트 즉시 갱신
+    public void NotifyPlatformLayoutChanged()
+    {
+        RefreshSpawnPointsFromFinder();
+    }
+
+
+    #region 하이어라키창에서 보기 쉽게 정리 (부모 보장)
+    private void EnsureEnemyRoot()
     {
         if (enemyRoot == null)
         {
