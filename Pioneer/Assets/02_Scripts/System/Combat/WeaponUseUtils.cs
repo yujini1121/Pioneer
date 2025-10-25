@@ -71,58 +71,68 @@ public class WeaponUseUtils
         // 내구도 닳기
         // 아이템 인벤토리 업데이트
 
-        // 모션 시작
+        // 플레이어 이동 제한
+        float originalSpeed = PlayerCore.Instance.speed;
 
-
-        // 플레이어 클릭 방향
-        Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit m_hitOnMap;
-        Vector3 direction;
-        LayerMask mapMaskLayer = LayerMask.NameToLayer("MouseClickArea");
-
-        // 공격 범위 생성
-        if (Physics.Raycast(m_rayFromMouse, out m_hitOnMap, Mathf.Infinity))
+        try
         {
-            Debug.Log($">> WeaponUseUtils.AttackCoroutine : 내구도 닳기 : {data.duabilityRedutionPerHit}");
-            //data.weaponRange;
-            Vector3 dir = (m_hitOnMap.point - userGameObject.transform.position).normalized;
-            dir.y = 0f;
-            userGameObject.transform.rotation = Quaternion.LookRotation(dir);
+            PlayerCore.Instance.speed = 0f;
 
-            Vector3 position = userGameObject.transform.position + dir * 0.5f;
-            position.y = PlayerCore.Instance.AttackHeight;
-            PlayerCore.Instance.PlayerAttack.transform.position = position;
-            PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
-            PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
-            PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
-            // 공격 범위 세팅
-            PlayerCore.Instance.PlayerAttack.SetAttackRange(data.weaponRange);
+            Debug.Log($"플레이어 이동 멈춤 : {PlayerCore.Instance.speed}");
+            // 모션 시작
 
-            // 여기 애니메이션 코드 넣기
-            yield return new WaitForSeconds(data.weaponAnimation);
-            // 모션 종료
+            // 플레이어 클릭 방향
+            Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit m_hitOnMap;
+            Vector3 direction;
+            LayerMask mapMaskLayer = LayerMask.NameToLayer("MouseClickArea");
+
+            // 공격 범위 생성
+            if (Physics.Raycast(m_rayFromMouse, out m_hitOnMap, Mathf.Infinity))
+            {
+                Debug.Log($">> WeaponUseUtils.AttackCoroutine : 내구도 닳기 : {data.duabilityRedutionPerHit}");
+                //data.weaponRange;
+                Vector3 dir = (m_hitOnMap.point - userGameObject.transform.position).normalized;
+                dir.y = 0f;
+                userGameObject.transform.rotation = Quaternion.LookRotation(dir);
+
+                Vector3 position = userGameObject.transform.position + dir * 0.5f;
+                position.y = PlayerCore.Instance.AttackHeight;
+                PlayerCore.Instance.PlayerAttack.transform.position = position;
+                PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
+                PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
+                PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
+                // 공격 범위 세팅
+                PlayerCore.Instance.PlayerAttack.SetAttackRange(data.weaponRange);
+
+                // 여기 애니메이션 코드 넣기
+                yield return new WaitForSeconds(data.weaponAnimation);
+                // 모션 종료
 
 
-            // 내구도 닳기
-            itemWithState.duability = Mathf.Max(0, itemWithState.duability -
-				Mathf.Max(0, data.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
+                // 내구도 닳기
+                itemWithState.duability = Mathf.Max(0, itemWithState.duability -
+                    Mathf.Max(0, data.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
 
-            PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
-            PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
+                PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
+                PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
+                // 인벤토리 업데이트 
+                InventoryUiMain.instance.IconRefresh();
+
+                // ... RayCastHit m_hitOnMap의 정보를 활용한 코드
+                direction = (m_hitOnMap.point - userGameObject.transform.position).normalized;
+            }
+
             // 인벤토리 업데이트 
-            InventoryUiMain.instance.IconRefresh();
+            InventoryUiMain.instance.IconRefresh();            
 
-            // ... RayCastHit m_hitOnMap의 정보를 활용한 코드
-            direction = (m_hitOnMap.point - userGameObject.transform.position).normalized;
+            // 공격 딜레이
+            yield return new WaitForSeconds(data.weaponDelay);
         }
-
-        // 인벤토리 업데이트 
-        InventoryUiMain.instance.IconRefresh();
-
-        // 공격 딜레이
-        yield return new WaitForSeconds(data.weaponDelay);
-        //
-
-        
+        finally
+        {
+            // 플레이어 속도 복구
+            PlayerCore.Instance.speed = originalSpeed;
+        }
     }
 }
