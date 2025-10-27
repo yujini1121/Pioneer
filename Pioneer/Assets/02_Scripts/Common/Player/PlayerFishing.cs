@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerFishing : MonoBehaviour
 {
+    public static PlayerFishing instance;
+
     [System.Serializable]
     public struct FishingDropItem
     {
@@ -23,7 +25,7 @@ public class PlayerFishing : MonoBehaviour
 
     private void Awake()
     {
-
+        instance = this;
     }
 
     public void StartFishingLoop()
@@ -84,6 +86,20 @@ public class PlayerFishing : MonoBehaviour
                         SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
                         InventoryManager.Instance.Add(treasureItemStack);
                         Debug.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
+                    }
+                }
+
+                // 바디이벤트 녹조로 얻는 추가 아이템 획득 
+                if(OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
+                {
+                    OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
+
+                    SItemTypeSO bonusItem = waterBloomEnvent.GetMoreItem();
+
+                    if(bonusItem != null)
+                    {
+                        SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
+                        InventoryManager.Instance.Add(waterBloombonusItemStack);
                     }
                 }
             }
