@@ -6,6 +6,9 @@ using UnityEngine.AI;
 [RequireComponent(typeof(FOVController))]
 public class MarinerAI : MarinerBase, IBegin
 {
+    public bool isCharmed = false;
+    public NavMeshAgent Agent => agent;
+
     [System.Serializable]
     public struct ItemDrop
     {
@@ -518,5 +521,15 @@ public class MarinerAI : MarinerBase, IBegin
 
         Debug.LogError("확률 계산 오류: 아이템이 선택되지 않았습니다. 첫 번째 아이템 반환.");
         return dropList.Length > 0 ? dropList[0].itemID : 0;
+    }
+
+    public void RestartNormalAI()
+    {
+        if (!IsDead)
+        {
+            isCharmed = false;
+            StopAllCoroutines();
+            StartCoroutine(StartSecondPriorityAction());
+        }
     }
 }
