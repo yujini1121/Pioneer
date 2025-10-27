@@ -50,22 +50,24 @@ public class PlayerFishing : MonoBehaviour
         {
             Debug.Log("≥¨Ω√ Ω√¿€");
             yield return new WaitForSeconds(2f);
+
             SItemTypeSO caughtItem = GetItem();
             if(caughtItem != null)
             {                
                 SItemStack itemStack = new SItemStack(caughtItem.id, 1);
-                InventoryManager.Instance.Add(itemStack);
 
                 if(caughtItem == treasureItem)
                 {
+                    TreasureBoxManager.instance.GetBox();
                     fishingExp = 10;
                 }
                 else
                 {
                     fishingExp = 5;
+                    InventoryManager.Instance.Add(itemStack);
                 }
 
-                    PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
+                PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
                 Debug.Log($"æ∆¿Ã≈€ »πµÊ: {caughtItem.typeName}, ∞Ê«Ëƒ° +{fishingExp}");
 
                 (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();

@@ -11,6 +11,11 @@ public class ItemTypeManager : MonoBehaviour, IBegin
 
     [SerializeField] bool isDebugging = true;
 
+    public SItemTypeSO FindType(SItemStack stack)
+    {
+        return itemTypeSearch[stack.id];
+    }
+
     private void Add(SItemTypeSO type)
     {
         types.Add(type);
