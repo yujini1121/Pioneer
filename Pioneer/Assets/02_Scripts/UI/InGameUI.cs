@@ -211,6 +211,7 @@ public class InGameUI : MonoBehaviour, IBegin
         // 정렬 버튼
         // 버리기 버튼
         // 장비 창
+        // 플레이어 스탯 창
 
         isPannelExpand = !isPannelExpand;
 
@@ -224,12 +225,14 @@ public class InGameUI : MonoBehaviour, IBegin
         {
             if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
             makeshiftCraftUI.SetActive(false);
+            gameObjectPlayerStatUiParent.SetActive(false);
 
             Debug.Log(">> 닫기");
         }
         if (isPannelExpand == true && isNearCraft == false)
         {
             makeshiftCraftUI.SetActive(true);
+            gameObjectPlayerStatUiParent.SetActive(true);
         }
 
     }
