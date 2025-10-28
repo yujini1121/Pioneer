@@ -61,6 +61,7 @@ public class InGameUI : MonoBehaviour, IBegin
     void Start()
     {
         Show(makeshiftCraftUI);
+        UseTab();
     }
 
     // Update is called once per frame
