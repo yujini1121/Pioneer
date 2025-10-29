@@ -65,6 +65,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void ClickSlot(int index)
     {
+        // 현재 크래프팅 중
         if (CommonUI.instance.IsCurrentCrafting && InGameUI.instance.currentFabricationUi != null)
         {
             CommonUI.instance.StopCraft(InGameUI.instance.currentFabricationUi);

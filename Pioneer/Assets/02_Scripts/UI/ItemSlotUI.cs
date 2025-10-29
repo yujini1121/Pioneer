@@ -27,6 +27,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             Clear();
             return;
         }
+        Debug.Log($">> ItemSlotUI.Show(SItemStack item) : ³»±¸µµ = {item.duability}");
 
 
         Debug.Assert(item != null);
@@ -48,8 +49,8 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         if (isNeedShowDuability)
         {
-            durability.text = $"{InventoryManager.Instance.itemLists[index].duability}%";
-            image.color = (InventoryManager.Instance.itemLists[index].duability > 0) ? Color.white : Color.red;
+            durability.text = $"{item.duability}%";
+            image.color = (item.duability > 0) ? Color.white : Color.red;
         }
         else
         {

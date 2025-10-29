@@ -8,12 +8,20 @@ public class SItemStack
     public int id;
     public int amount;
     public int duability; // 내구도
-    public bool isCanStack;
+    //public bool isCanStack;
     public bool isUseCoroutineEnd = true; // 해당 클래스가 조작하지 않음. SItemTypeSO 등 외부 클래스가 접근
 
-    public virtual int GetID() => id;
-    public virtual bool IsCanStack() => isCanStack;
+    public SItemTypeSO itemBaseType => ItemTypeManager.Instance.FindType(this);
 
+    public virtual int GetID() => id;
+    //public virtual bool IsCanStack() => isCanStack;
+
+    public SItemStack(SItemStack from)
+    {
+        this.id = from.id;
+        this.amount = from.amount;
+        this.duability = from.duability;
+    }
     public SItemStack(int id, int amount)
     {
         this.id = id;
