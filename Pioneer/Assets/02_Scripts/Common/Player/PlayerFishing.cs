@@ -70,14 +70,20 @@ public class PlayerFishing : MonoBehaviour
                 }
 
                 PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
-                Debug.Log($"아이템 획득: {caughtItem.typeName}, 경험치 +{fishingExp}");
+                Debug.Log($">> PlayerFishing.FishingLoop() 아이템 획득: 숫자 {caughtItem.id}, 이름 {caughtItem.typeName}, 경험치 +{fishingExp}");
 
                 (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
 
                 if(Random.Range(0f, 1f) < chances.extraItemChance)
                 {
-                    SItemStack bonusItemStack = new SItemStack(caughtItem.id, 1);
-                    InventoryManager.Instance.Add(bonusItemStack);
+                    if (caughtItem == treasureItem)
+                    {
+                        TreasureBoxManager.instance.GetBox();
+                    }
+                    else
+                    {
+                        InventoryManager.Instance.Add(itemStack);
+                    }
                     Debug.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
                 }
 
@@ -85,8 +91,10 @@ public class PlayerFishing : MonoBehaviour
                 {
                     if(treasureItem != null)
                     {
-                        SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
-                        InventoryManager.Instance.Add(treasureItemStack);
+                        //SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
+                        //InventoryManager.Instance.Add(treasureItemStack);
+
+                        TreasureBoxManager.instance.GetBox();
                         Debug.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
                     }
                 }
