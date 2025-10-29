@@ -15,7 +15,9 @@ public class OceanEventManager : MonoBehaviour
 
 	private void Awake()
 	{
-		eventList = new List<OceanEventBase>()
+		instance = this;
+
+        eventList = new List<OceanEventBase>()
 		{
 			new OcenaEventNormal(),		// 평범
 			new OceanEventFog(),		// 안개
