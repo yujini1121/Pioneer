@@ -54,4 +54,10 @@ public class MinionNest : EnemyBase
 
 		WhenDestroy();
 	}
+
+    public override void WhenDestroy()
+    {
+		GameManager.Instance.checkTotalNest--;
+		base.WhenDestroy();
+	}
 }

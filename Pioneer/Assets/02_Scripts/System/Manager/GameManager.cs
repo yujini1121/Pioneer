@@ -101,7 +101,10 @@ public class GameManager : MonoBehaviour, IBegin
     [Header("승무원 스폰")]
     [SerializeField] private GameObject marinerPrefab;   
     [SerializeField] private Transform mast;            
-    [SerializeField] private Vector3 crewSpawnOffset = Vector3.zero; 
+    [SerializeField] private Vector3 crewSpawnOffset = Vector3.zero;
+
+    [Header("전체 둥지 개수 체크")]
+    public int checkTotalNest;
 
     #region 임시 정리 
     private void Awake()
@@ -294,10 +297,21 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void DespawnAllEnemies()
     {
+		/*
         foreach (GameObject e in spawnedEnemies)
             if (e != null) Destroy(e);
 
-        spawnedEnemies.Clear();
+        spawnedEnemies.Clear();*/
+		Debug.Log($"DespawnAllEnemies 들어옴 / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
+
+		foreach (GameObject one in GameObject.FindGameObjectsWithTag("Enemy"))
+        {
+            Debug.Log($"DespawnAllEnemies : {one.name}");
+            Destroy(one);
+			Debug.Log($"DespawnAllEnemies one 삭제");
+		}
+
+
         Debug.Log("[Despawn] 밤 종료로 모든 에너미 제거");
     }
 
@@ -491,6 +505,19 @@ public class GameManager : MonoBehaviour, IBegin
 
             // 카운트 반영
             AddCrewMember();
+        }
+    }
+
+    // 전체 둥지 수 제한
+    public bool LimitsNest()
+    {
+        if (checkTotalNest < 2)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }
