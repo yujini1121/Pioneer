@@ -24,7 +24,7 @@ public class EnemyStats : MonoBehaviour
 
 public class GameManager : MonoBehaviour, IBegin
 {
-	public static GameManager Instance;
+    public static GameManager Instance;
 
     [Header("시간 설정")]
     public float currentGameTime = 0f;
@@ -52,9 +52,9 @@ public class GameManager : MonoBehaviour, IBegin
     public Sprite[] marinerSprites;
 
     [Header("에너미 프리팹")]
-    public GameObject minion;   
-    public GameObject crawler;  
-    public GameObject titan;   
+    public GameObject minion;
+    public GameObject crawler;
+    public GameObject titan;
 
     [Header("게임오버 관리")]
     public int totalCrewMembers = 0;
@@ -63,19 +63,19 @@ public class GameManager : MonoBehaviour, IBegin
     public Canvas[] allUICanvas;
 
     [Header("동적 스포너(EnemySpawnerFinder 연동)")]
-    [SerializeField] private EnemySpawnerFinder spawnerFinder;			// Inspector에서 할당
-    [SerializeField] private float spawnLiftY = 0.05f;					// 살짝 띄워서 스폰
-    [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";	// 하이어라키 정리용
-    private Transform spawnRoot;										// 스폰 포인트 부모
+    [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector에서 할당
+    [SerializeField] private float spawnLiftY = 0.05f;                   // 살짝 띄워서 스폰
+    [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";   // 하이어라키 정리용
+    private Transform spawnRoot;                                         // 스폰 포인트 부모
 
     // EnemySpawnerFinder에서 찾은 스폰 포인트 수
     private int activeSpawnCount = 0;
 
-	// 생성된 에너미 리스트
+    // 생성된 에너미 리스트
     private List<GameObject> spawnedEnemies = new List<GameObject>();
     private Transform enemyRoot;
 
-	[System.Serializable]
+    [System.Serializable]
     public struct DayEnemyRow
     {
         [Tooltip("총 출현 수 = 미니언 + 크룰러 + 타이탄")]
@@ -98,148 +98,151 @@ public class GameManager : MonoBehaviour, IBegin
     [Header("일차별 능력치 강화 표 (1~5일차)")]
     public EnemyScaleRow[] enemyScaleTable = new EnemyScaleRow[5];
 
+    [Header("승무원 스폰")]
+    [SerializeField] private GameObject marinerPrefab;   
+    [SerializeField] private Transform mast;            
+    [SerializeField] private Vector3 crewSpawnOffset = Vector3.zero; 
 
     #region 임시 정리 
     private void Awake()
-	{
-		if (Instance == null) Instance = this;
-		else Destroy(gameObject);
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
 
-		postProcessVolume.profile.TryGet(out colorAdjustments);
-	}
+        postProcessVolume.profile.TryGet(out colorAdjustments);
+    }
 
-	private void Start()
-	{
-		oneDayDuration = dayDuration + nightDuration;
+    private void Start()
+    {
+        oneDayDuration = dayDuration + nightDuration;
 
-		Debug.Log($">> GameManager.Start()");
+        Debug.Log($">> GameManager.Start()");
 
-		if (InventoryUiMain.instance != null)
-			InventoryUiMain.instance.Start();
-		else
-			Debug.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
-	}
+        if (InventoryUiMain.instance != null)
+            InventoryUiMain.instance.Start();
+        else
+            Debug.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
+    }
 
-	private void Update()
-	{
-		if (Time.timeScale > 0)
-		{
-			currentGameTime += Time.deltaTime;
-			cycleTime += Time.deltaTime;
-		}
+    private void Update()
+    {
+        if (Time.timeScale > 0)
+        {
+            currentGameTime += Time.deltaTime;
+            cycleTime += Time.deltaTime;
+        }
 
-		UpdateDayNightCycle();
-	}
+        UpdateDayNightCycle();
+    }
 
-	private void UpdateDayNightCycle()
-	{
-		// 현재 페이즈(낮/밤)에 맞는 설정을 한 번에 가져옴
-		bool isDay = IsDaytime;
-		float duration = isDay ? dayDuration : nightDuration;
-		Gradient grad = isDay ? dayToNightGradient : nightToDayGradient;
+    private void UpdateDayNightCycle()
+    {
+        // 현재 페이즈(낮/밤)에 맞는 설정을 한 번에 가져옴
+        bool isDay = IsDaytime;
+        float duration = isDay ? dayDuration : nightDuration;
+        Gradient grad = isDay ? dayToNightGradient : nightToDayGradient;
 
-		// 진행도 0~1f
-		float t = Mathf.Clamp01(cycleTime / duration);
+        // 진행도 0~1f
+        float t = Mathf.Clamp01(cycleTime / duration);
 
-		// 컬러/노출 보정
-		colorAdjustments.colorFilter.value = grad.Evaluate(t);
-		colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
+        // 컬러/노출 보정
+        colorAdjustments.colorFilter.value = grad.Evaluate(t);
+        colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
 
-		// 아직 페이즈가 끝나지 않았으면 리턴
-		if (cycleTime < duration) return;
+        // 아직 페이즈가 끝나지 않았으면 리턴
+        if (cycleTime < duration) return;
 
-		// 페이즈 종료 처리
-		cycleTime = 0f;
+        // 페이즈 종료 처리
+        cycleTime = 0f;
 
-		if (isDay)
-		{
-			// 낮 -> 밤 전환
-			Debug.Log($"밤이 되었습니다. (Day {currentDay})");
-			IsDaytime = false;
-			OnNightStart();
-		}
-		else
-		{
-			// 밤 -> 낮 전환
-			IsDaytime = true;
-			OnNightEnd();
-			currentDay++;
-			Debug.Log($"아침이 되었습니다. (Day {currentDay})");
-		}
-	}
+        if (isDay)
+        {
+            // 낮 -> 밤 전환
+            Debug.Log($"밤이 되었습니다. (Day {currentDay})");
+            IsDaytime = false;
+            OnNightStart();
+        }
+        else
+        {
+            // 밤 -> 낮 전환
+            IsDaytime = true;
+            OnNightEnd();
+            currentDay++;
+            Debug.Log($"아침이 되었습니다. (Day {currentDay})");
+        }
+    }
 
-
-	private void OnNightStart()
-	{
+    private void OnNightStart()
+    {
         RefreshSpawnPointsFromFinder();
 
         var s = GetScaleRowForDay(currentDay);
-		Debug.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
-		SpawnEnemiesForCurrentDay();
-	}
+        Debug.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
+        SpawnEnemiesForCurrentDay();
+    }
 
-	private void OnNightEnd()
-	{
-		DespawnAllEnemies();
-		ApplyCrewEmbarkRule();
-	}
+    private void OnNightEnd()
+    {
+        DespawnAllEnemies();
+        ApplyCrewEmbarkRule();
+    }
 
-	public void GetGameTimeInfo(out int days, out int hours)
-	{
-		days = Mathf.FloorToInt(currentGameTime / oneDayDuration);
-		float remainingTime = currentGameTime % oneDayDuration;
-		hours = Mathf.FloorToInt((remainingTime / oneDayDuration) * 24f);
-	}
+    public void GetGameTimeInfo(out int days, out int hours)
+    {
+        days = Mathf.FloorToInt(currentGameTime / oneDayDuration);
+        float remainingTime = currentGameTime % oneDayDuration;
+        hours = Mathf.FloorToInt((remainingTime / oneDayDuration) * 24f);
+    }
 
-	public void AddCrewMember() { totalCrewMembers++; }
-	public void MarinerDiedCount() { deadCrewMembers++; }
+    public void AddCrewMember() { totalCrewMembers++; }
+    public void MarinerDiedCount() { deadCrewMembers++; }
 
-	public void TriggerGameOver()
-	{
-		Time.timeScale = 0f;
+    public void TriggerGameOver()
+    {
+        Time.timeScale = 0f;
 
-		if (ThisIsPlayer.Player != null)
-		{
-			Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
-			if (playerRenderer != null)
-			{
-				Color color = playerRenderer.material.color;
-				color.a = 0f;
-				playerRenderer.material.color = color;
-			}
-		}
+        if (ThisIsPlayer.Player != null)
+        {
+            Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
+            if (playerRenderer != null)
+            {
+                Color color = playerRenderer.material.color;
+                color.a = 0f;
+                playerRenderer.material.color = color;
+            }
+        }
 
-		HideAllUI();
+        HideAllUI();
 
-		if (gameOverUI != null)
-			gameOverUI.ShowGameOverScreen(totalCrewMembers, deadCrewMembers);
-	}
+        if (gameOverUI != null)
+            gameOverUI.ShowGameOverScreen(totalCrewMembers, deadCrewMembers);
+    }
 
-	void HideAllUI()
-	{
-		foreach (Canvas canvas in allUICanvas)
-		{
-			if (canvas != null && canvas != gameOverUI.GetComponent<Canvas>())
-				canvas.gameObject.SetActive(false);
-		}
-	}
+    void HideAllUI()
+    {
+        foreach (Canvas canvas in allUICanvas)
+        {
+            if (canvas != null && canvas != gameOverUI.GetComponent<Canvas>())
+                canvas.gameObject.SetActive(false);
+        }
+    }
 
-	private void SpawnEnemiesForCurrentDay()
-	{
-		Debug.Log("Spawn Enemies");
+    private void SpawnEnemiesForCurrentDay()
+    {
+        Debug.Log("Spawn Enemies");
 
-		if (spawnPoints == null || spawnPoints.Length == 0) return;
+        if (spawnPoints == null || spawnPoints.Length == 0) return;
 
-		DayEnemyRow row = GetSpawnRowForDay(currentDay);
-		EnemyScaleRow scale = GetScaleRowForDay(currentDay);
+        DayEnemyRow row = GetSpawnRowForDay(currentDay);
+        EnemyScaleRow scale = GetScaleRowForDay(currentDay);
 
-		SpawnOf(minion, row.minion, scale);     // 미니언
-		SpawnOf(crawler, row.crawler, scale);   // 크롤러
-		SpawnOf(titan, row.titan, scale);       // 타이탄
+        SpawnOf(minion, row.minion, scale);     // 미니언
+        SpawnOf(crawler, row.crawler, scale);   // 크롤러
+        SpawnOf(titan, row.titan, scale);       // 타이탄
 
-		int spawnedCount = row.minion + row.crawler + row.titan;
-		Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
-	}
+        int spawnedCount = row.minion + row.crawler + row.titan;
+        Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
+    }
 
     // 일차별 공격력 적용된 에너미 생성
     private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
@@ -289,74 +292,79 @@ public class GameManager : MonoBehaviour, IBegin
         }
     }
 
-
     private void DespawnAllEnemies()
-	{
-		foreach (GameObject e in spawnedEnemies)
-			if (e != null) Destroy(e);
+    {
+        foreach (GameObject e in spawnedEnemies)
+            if (e != null) Destroy(e);
 
-		spawnedEnemies.Clear();
-		Debug.Log("[Despawn] 밤 종료로 모든 에너미 제거");
-	}
+        spawnedEnemies.Clear();
+        Debug.Log("[Despawn] 밤 종료로 모든 에너미 제거");
+    }
 
-	private DayEnemyRow GetSpawnRowForDay(int day)
-	{
-		if (enemySpawnTable != null && enemySpawnTable.Length > 0)
-		{
-			int idx = Mathf.Clamp(day - 1, 0, enemySpawnTable.Length - 1);
-			return enemySpawnTable[idx];
-		}
-		return new DayEnemyRow { total = 0, minion = Random.Range(2, 8), crawler = 0, titan = 0 };
-	}
+    private DayEnemyRow GetSpawnRowForDay(int day)
+    {
+        if (enemySpawnTable != null && enemySpawnTable.Length > 0)
+        {
+            int idx = Mathf.Clamp(day - 1, 0, enemySpawnTable.Length - 1);
+            return enemySpawnTable[idx];
+        }
+        return new DayEnemyRow { total = 0, minion = Random.Range(2, 8), crawler = 0, titan = 0 };
+    }
 
-	private EnemyScaleRow GetScaleRowForDay(int day)
-	{
-		if (enemyScaleTable != null && enemyScaleTable.Length > 0)
-		{
-			int idx = Mathf.Clamp(day - 1, 0, enemyScaleTable.Length - 1);
-			return enemyScaleTable[idx];
-		}
-		return new EnemyScaleRow { attackPercent = 0, hpPercent = 0 };
-	}
+    private EnemyScaleRow GetScaleRowForDay(int day)
+    {
+        if (enemyScaleTable != null && enemyScaleTable.Length > 0)
+        {
+            int idx = Mathf.Clamp(day - 1, 0, enemyScaleTable.Length - 1);
+            return enemyScaleTable[idx];
+        }
+        return new EnemyScaleRow { attackPercent = 0, hpPercent = 0 };
+    }
 
-	private void ApplyCrewEmbarkRule()
-	{
-		int add = CalcCrewEmbarkCount(currentDay, totalCrewMembers);
-		for (int i = 0; i < add; i++) AddCrewMember();
+    // ==========================
+    // [교체] 아침 승무원 스폰 규칙 적용
+    // ==========================
+    private void ApplyCrewEmbarkRule()
+    {
+        int add = CalcCrewEmbarkCount(currentDay, totalCrewMembers);
+        if (add <= 0)
+        {
+            Debug.Log($"[Crew] Day {currentDay} 아침: 승선 0명 → 총 {totalCrewMembers}명");
+            return;
+        }
 
-		if (add > 0)
-			Debug.Log($"[Crew] Day {currentDay} 아침: 승선 {add}명 → 총 {totalCrewMembers}명");
-	}
+        SpawnCrew(add);
+        Debug.Log($"[Crew] Day {currentDay} 아침: 승선 {add}명 → 총 {totalCrewMembers}명");
+    }
 
-	// 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
-	// 5일차: 현재 승무원 수 ≤3 → 4명, 현재 승무원 수 ≥4 → 5명
-	private int CalcCrewEmbarkCount(int day, int crewNow)
-	{
-		switch (Mathf.Clamp(day, 1, 5))
-		{
-			case 1: return 0;
-			case 2: return 1;
-			case 3: return 2;
-			case 4: return 3;
-			case 5: return (crewNow <= 3) ? 4 : 5;
-			default:
-				// 6일차 이상은 마지막 값을 유지하거나, 필요 시 규칙 확장
-				return (crewNow <= 3) ? 4 : 5;
-		}
-	}
+    // 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
+    // 5일차: 현재 승무원 수 ≤3 → 4명, 현재 승무원 수 ≥4 → 5명
+    private int CalcCrewEmbarkCount(int day, int crewNow)
+    {
+        switch (Mathf.Clamp(day, 1, 5))
+        {
+            case 1: return 0;
+            case 2: return 1;
+            case 3: return 2;
+            case 4: return 3;
+            case 5: return (crewNow <= 3) ? 4 : 5;
+            default:
+                // 6일차 이상은 마지막 값을 유지하거나, 필요 시 규칙 확장
+                return (crewNow <= 3) ? 4 : 5;
+        }
+    }
 
-	public float TimeUntilNight()
-	{
-		if (IsDaytime) return Mathf.Max(0f, dayDuration - cycleTime);
-		else return 0f;
-	}
+    public float TimeUntilNight()
+    {
+        if (IsDaytime) return Mathf.Max(0f, dayDuration - cycleTime);
+        else return 0f;
+    }
 
-	public void CollectResource(string type)
-	{
-		Debug.Log($"자원 획득: {type}");
-	}
+    public void CollectResource(string type)
+    {
+        Debug.Log($"자원 획득: {type}");
+    }
     #endregion
-
 
     private void EnsureSpawnRoot()
     {
@@ -443,7 +451,6 @@ public class GameManager : MonoBehaviour, IBegin
         RefreshSpawnPointsFromFinder();
     }
 
-
     #region 하이어라키창에서 보기 쉽게 정리 (부모 보장)
     private void EnsureEnemyRoot()
     {
@@ -453,5 +460,37 @@ public class GameManager : MonoBehaviour, IBegin
             enemyRoot = (go != null) ? go.transform : new GameObject("__ENEMIES__").transform;
         }
     }
-	#endregion
+    #endregion
+
+    // ==========================
+    // 실제 승무원 생성 로직
+    // ==========================
+    private void SpawnCrew(int count)
+    {
+        if (count <= 0) return;
+
+        if (marinerPrefab == null)
+        {
+            Debug.LogWarning("[Crew] marinerPrefab이 비어 있습니다. 프리팹을 할당하세요.");
+            return;
+        }
+
+        // 스폰 기준 위치 = mast
+        Vector3 basePos = Vector3.zero;
+        if (mast != null) basePos = mast.position;
+        else if (ThisIsPlayer.Player != null) basePos = ThisIsPlayer.Player.transform.position; 
+
+        for (int i = 0; i < count; i++)
+        {
+            // 겹침 방지
+            Vector3 jitter = new Vector3(Random.Range(-0.6f, 0.6f), 0f, Random.Range(-0.6f, 0.6f));
+            Vector3 pos = basePos + crewSpawnOffset + jitter;
+
+            var go = Instantiate(marinerPrefab, pos, Quaternion.identity);
+            go.name = $"Mariner_Day{currentDay}_#{totalCrewMembers + 1}";
+
+            // 카운트 반영
+            AddCrewMember();
+        }
+    }
 }
