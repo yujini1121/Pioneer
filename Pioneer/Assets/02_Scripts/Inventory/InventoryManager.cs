@@ -34,7 +34,10 @@ public class InventoryManager : InventoryBase
             return;
         }
 
+        //Debug.Log("!!!");
+
         SItemStack temp = itemLists[index];
+
         itemLists[index] = mouseInventory;
         mouseInventory = temp;
     }
@@ -89,7 +92,8 @@ public class InventoryManager : InventoryBase
         {
             if (itemLists[index] == null)
             {
-                itemLists[index] = new SItemStack(mouseInventory.id, 1);
+                itemLists[index] = new SItemStack(mouseInventory);
+                itemLists[index].amount = 1;
             }
             else
             {
@@ -100,7 +104,8 @@ public class InventoryManager : InventoryBase
         }
         else if (itemLists[index] != null)
         {
-            mouseInventory = new SItemStack(itemLists[index].id, 1);
+            mouseInventory = new SItemStack(itemLists[index]);
+            mouseInventory.amount = 1;
             itemLists[index].amount--;
         }
 
