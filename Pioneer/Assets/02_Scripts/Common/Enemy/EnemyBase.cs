@@ -37,6 +37,7 @@ public class EnemyBase : CreatureBase, IBegin
     /// </summary>
     protected GameObject SetMastTarget()
     {
+        mast = GameObject.FindWithTag("Mast");
 		return mast;
     }
 

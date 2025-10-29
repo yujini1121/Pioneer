@@ -122,7 +122,8 @@ public class MinionAI : EnemyBase, IBegin
             && !isNestCreated
             && Time.time >= nestCreationTime
             && nestCreationTime != -1f
-            && !isAttackable;
+            && !isAttackable
+            && GameManager.Instance.LimitsNest();
     }
 
     private bool CanAttack(bool isTargetInAttackRange)
@@ -141,7 +142,9 @@ public class MinionAI : EnemyBase, IBegin
     void CreateNest()
     {
         Instantiate(nestPrefab, new Vector3(transform.position.x, 0, transform.position.z), Quaternion.identity);
-        isNestCreated = true;
+        Debug.Log("DespawnAllEnemies CreateNest µÕÁö ³ºÀ½");
+        GameManager.Instance.checkTotalNest++;
+		isNestCreated = true;
     }
 
     // =============================================================
@@ -158,6 +161,7 @@ public class MinionAI : EnemyBase, IBegin
         CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
         if(targetBase != null && !targetBase.IsDead)
         {
+            Debug.Log($"MinionAI targetBase : {targetBase.name}");
             targetBase.TakeDamage(attackDamage, this.gameObject);
             lastAttackTime = Time.time;
         }
