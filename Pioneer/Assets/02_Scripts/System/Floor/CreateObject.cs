@@ -1,13 +1,13 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
-using UnityEngine.UI; // UI ·¹ÀÌÄ³½ºÆ®¿ë
+using UnityEngine.UI; // UI ë ˆì´ìºìŠ¤íŠ¸ìš©
 
-#warning TODO : CreateObject ¼öÁ¤ÀÌ ÇÊ¿ä
-// ÇöÀç : ¸¶¿ì½º ½º³À -> °Ç¼³ °¡´É ¿©ºÎ -> ÀÌµ¿ -> ¹èÄ¡
-// ÇÊ¿ä : ·¹½ÃÇÇ¿¡¼­ Á¦ÀÛ ¿©ºÎ °¡´É -> Á¦ÀÛ ¹öÆ° ´­¸² -> Á¦ÀÛ UI ²ô±â -> °Ç¼³ UI ÀüÈ¯ -> ¸¶¿ì½º ½º³À -> °Ç¼³ °¡´É ¿©ºÎ -> ÀÌµ¿ -> ½Ã°£ ¼Ò¸ğ ¹× ¹æÇØ¹ŞÁö ¾Ê´ÂÁö Ç×»ó Ã¼Å© -> ¾ÆÀÌÅÛ ¼Ò¸ğ -> ¹èÄ¡
+#warning TODO : CreateObject ìˆ˜ì •ì´ í•„ìš”
+// í˜„ì¬ : ë§ˆìš°ìŠ¤ ìŠ¤ëƒ… -> ê±´ì„¤ ê°€ëŠ¥ ì—¬ë¶€ -> ì´ë™ -> ë°°ì¹˜
+// í•„ìš” : ë ˆì‹œí”¼ì—ì„œ ì œì‘ ì—¬ë¶€ ê°€ëŠ¥ -> ì œì‘ ë²„íŠ¼ ëˆŒë¦¼ -> ì œì‘ UI ë„ê¸° -> ê±´ì„¤ UI ì „í™˜ -> ë§ˆìš°ìŠ¤ ìŠ¤ëƒ… -> ê±´ì„¤ ê°€ëŠ¥ ì—¬ë¶€ -> ì´ë™ -> ì‹œê°„ ì†Œëª¨ ë° ë°©í•´ë°›ì§€ ì•ŠëŠ”ì§€ í•­ìƒ ì²´í¬ -> ì•„ì´í…œ ì†Œëª¨ -> ë°°ì¹˜
 
 public class CreateObject : MonoBehaviour, IBegin
 {
@@ -28,12 +28,12 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public static CreateObject instance;
 
-    [Header("±âº» ¼³Á¤")]
+    [Header("ê¸°ë³¸ ì„¤ì •")]
     [SerializeField] private Transform worldSpaceParent;
     private Transform playerTrans;
     private Camera mainCamera;
 
-    [Header("¼³Ä¡ ¿ÀºêÁ§Æ® ¼³Á¤")]
+    [Header("ì„¤ì¹˜ ì˜¤ë¸Œì íŠ¸ ì„¤ì •")]
     public CreationType creationType;
     [SerializeField] private float maxDistance = 5f;
     [SerializeField] private LayerMask platformLayer;
@@ -47,13 +47,20 @@ public class CreateObject : MonoBehaviour, IBegin
     private readonly Dictionary<CreationType, GameObject> creationDict = new Dictionary<CreationType, GameObject>();
     private int rotateN = 0;
 
-    [Header("³×ºê¸Ş½Ã ¼³Á¤")]
+    [Header("ë„¤ë¸Œë©”ì‹œ ì„¤ì •")]
     [SerializeField] private NavMeshSurface navMeshSurface;
     [SerializeField] private float stopDistance = 1.5f;
     private NavMeshAgent playerAgent;
 
-    [Header("UI ·¹ÀÌÄ³½ºÆ® ¼³Á¤")]
+    [Header("UI ë ˆì´ìºìŠ¤íŠ¸ ì„¤ì •")]
     [SerializeField] private GraphicRaycaster uiRaycaster;
+
+    [Header("ì´ë™ ì ê¸ˆ ì„¤ì •")]
+    [SerializeField] private bool lockMovementWhileOrienting = true;
+    [SerializeField] private bool alsoZeroPlayerSpeed = true;
+    private bool isOrienting = false;
+    private bool movementLocked = false;
+    private float originalPlayerSpeed = -1f;
 
 
 
@@ -66,7 +73,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
 
-        // ÇÁ¸®ÆÕ µñ¼Å³Ê¸® ºôµå (ÀÌ·¸°Ô ¾È ÇÏ¸é ¾ÈµÊ....)
+        // í”„ë¦¬íŒ¹ ë”•ì…”ë„ˆë¦¬ ë¹Œë“œ (ì´ë ‡ê²Œ ì•ˆ í•˜ë©´ ì•ˆë¨....)
         creationDict.Add(CreationType.Platform, creationList.platform);
         creationDict.Add(CreationType.Wall, creationList.wall);
         creationDict.Add(CreationType.Door, creationList.door);
@@ -81,18 +88,29 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Start()
     {
-        //ExitInstallMode(); // °ÔÀÓ ½ÃÀÛ ½Ã ¼³Ä¡ ¸ğµå OFF
+        ExitInstallMode(); // ê²Œì„ ì‹œì‘ ì‹œ ì„¤ì¹˜ ëª¨ë“œ OFF
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            ExitInstallMode();
+            return;
+        }
+
         if (onHand == null) return;
 
         CheckCreatable();
+        HandleOrientationInput();
         Trim();
 
-        if (tempObj != null && (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0))
+        if (tempObj != null
+            && !isOrienting
+            && (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0))
+        {
             CancelInstall();
+        }
     }
 
     public void CreateObjectInit()
@@ -109,7 +127,6 @@ public class CreateObject : MonoBehaviour, IBegin
         if (col != null) col.isTrigger = true;
     }
 
-    // ÁÂÇ¥ ½º³À
     private static Vector3 SnapToGrid(Vector3 worldPos)
     {
         const float cellSize = 1f;
@@ -118,7 +135,6 @@ public class CreateObject : MonoBehaviour, IBegin
         return new Vector3(x * cellSize, 0f, z * cellSize);
     }
 
-    // ¸¶¿ì½º -> Áö¸é(y = 0) ¿ùµå ÁÂÇ¥ ±¸ÇÏ±â
     private bool TryGetMouseGroundPoint(out Vector3 worldPoint)
     {
         worldPoint = default;
@@ -127,7 +143,6 @@ public class CreateObject : MonoBehaviour, IBegin
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
 
-        // ¸¶¿ì½º À§Ä¡·ÎºÎÅÍ y = 0ÀÎ ÁöÁ¡ ÁÂÇ¥ ±¸ÇÏ±â
         if (!groundPlane.Raycast(ray, out float enter)) return false;
 
         worldPoint = ray.GetPoint(enter);
@@ -137,7 +152,6 @@ public class CreateObject : MonoBehaviour, IBegin
     private void ApplyPreviewTransform(Vector3 localPos)
     {
         onHand.transform.localPosition = localPos;
-        // »ìÂ¦ ¶ç¿ì±â
         onHand.transform.position += Vector3.up * 0.01f;
     }
 
@@ -166,18 +180,17 @@ public class CreateObject : MonoBehaviour, IBegin
             MoveToCreate(worldPos, localPos);
     }
 
-    //¼³Ä¡ °¡´É À¯¹« ÆÇº°
     private void CheckCreatable()
     {
-        #region UI À§¿¡¼± ¼³Ä¡°¡´É ¿©ºÎ ÇÁ¸®ºäºÎÅÍ º¸ÀÌÁö ¾Ê°Ô Ã³¸®ÇÔ 
+        #region UI ìœ„ì—ì„  ì„¤ì¹˜ê°€ëŠ¥ ì—¬ë¶€ í”„ë¦¬ë·°ë¶€í„° ë³´ì´ì§€ ì•Šê²Œ ì²˜ë¦¬í•¨ 
         if (IsBlockedByUI())
         {
-            SetPreviewVisible(false);   // ÇÁ¸®ºä ¼û±è
-            return;                     // UI Å¬¸¯ ÁßÀÌ¸é ¼³Ä¡/ÀÌµ¿/È¸Àü ÀüºÎ ¹«½Ã
+            SetPreviewVisible(false);
+            return;
         }
         else
         {
-            SetPreviewVisible(true);    // UI¿¡¼­ ¹ş¾î³ª¸é ´Ù½Ã º¸ÀÌ°Ô
+            SetPreviewVisible(true);
         }
         #endregion
 
@@ -188,11 +201,35 @@ public class CreateObject : MonoBehaviour, IBegin
 
         Vector3 worldPos = onHand.transform.position;
         TryPlaceIfPermitted(worldPos, localPos);
+    }
 
-        if (Input.GetMouseButtonDown(1))
+    private void HandleOrientationInput()
+    {
+        int newIdx = -1;
+        if (Input.GetKeyDown(KeyCode.W)) newIdx = 0;
+        else if (Input.GetKeyDown(KeyCode.D)) newIdx = 1;
+        else if (Input.GetKeyDown(KeyCode.S)) newIdx = 2;
+        else if (Input.GetKeyDown(KeyCode.A)) newIdx = 3;
+
+        if (newIdx >= 0 && onHand != null)
         {
-            rotateN++;
-            onHand.transform.localRotation = Quaternion.Euler(new Vector3(0f, 90f * rotateN, 0f));
+            rotateN = newIdx;
+            onHand.transform.localRotation = Quaternion.Euler(0f, 90f * rotateN, 0f);
+        }
+
+        if (!lockMovementWhileOrienting || playerAgent == null) return;
+
+        bool holdingAny = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+
+        if (holdingAny && !isOrienting)
+        {
+            isOrienting = true;
+            LockPlayerMovement();
+        }
+        else if (!holdingAny && isOrienting)
+        {
+            isOrienting = false;
+            UnlockPlayerMovement();
         }
     }
 
@@ -207,15 +244,14 @@ public class CreateObject : MonoBehaviour, IBegin
         return false;
     }
 
-    //ÁÖº¯ °Ë»ç
     private bool CheckNear(Vector3 center)
     {
-        float[] xArr; //xÀ§Ä¡
-        float[] zArr; //yÀ§Ä¡
-        float[] xSign; //xºÎÈ£
-        float[] zSign; //yºÎÈ£
+        float[] xArr; //xìœ„ì¹˜
+        float[] zArr; //yìœ„ì¹˜
+        float[] xSign; //xë¶€í˜¸
+        float[] zSign; //yë¶€í˜¸
 
-        //maxDistanceº¸´Ù ¸Ö¸é ¼³Ä¡ ºÒ°¡´É
+        //maxDistanceë³´ë‹¤ ë©€ë©´ ì„¤ì¹˜ ë¶ˆê°€ëŠ¥
         if (Vector3.SqrMagnitude(center - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
         {
             return false;
@@ -224,39 +260,39 @@ public class CreateObject : MonoBehaviour, IBegin
         switch (creationType)
         {
             case CreationType.Platform:
-                // ÁÖÈÆ Ãß°¡
+                // ì£¼í›ˆ ì¶”ê°€
                 if (MastManager.Instance != null)
                 {
                     int currentDeckCount = MastManager.Instance.currentDeckCount;
-                    int maxDeckCount = 30; // 1·¹º§ ÃÖ´ë °¹¼ö
+                    int maxDeckCount = 30; // 1ë ˆë²¨ ìµœëŒ€ ê°¯ìˆ˜
 
-                    // µ¾´ë ·¹º§¿¡ µû¸¥ ÃÖ´ë °³¼ö È®ÀÎ
+                    // ë—ëŒ€ ë ˆë²¨ì— ë”°ë¥¸ ìµœëŒ€ ê°œìˆ˜ í™•ì¸
                     MastSystem[] masts = FindObjectsOfType<MastSystem>();
                     if (masts.Length > 0)
                     {
                         maxDeckCount = masts[0].GetMaxDeckCount();
                     }
 
-                    // ÃÖ´ë °³¼ö ÃÊ°ú ½Ã ¼³Ä¡ ºÒ°¡
+                    // ìµœëŒ€ ê°œìˆ˜ ì´ˆê³¼ ì‹œ ì„¤ì¹˜ ë¶ˆê°€
                     if (currentDeckCount >= maxDeckCount)
                     {
-                        Debug.Log($"°©ÆÇ ¼³Ä¡ ºÒ°¡: {currentDeckCount}/{maxDeckCount}°³ (ÃÖ´ë µµ´Ş)");
+                        Debug.Log($"ê°‘íŒ ì„¤ì¹˜ ë¶ˆê°€: {currentDeckCount}/{maxDeckCount}ê°œ (ìµœëŒ€ ë„ë‹¬)");
                         return false;
                     }
                 }
-                // ¿©±â±îÁö
+                // ì—¬ê¸°ê¹Œì§€
 
                 //1.414213 * 0.5
                 xArr = new float[] { 0.707106f, 0.707106f, -0.707106f, -0.707106f };
                 zArr = new float[] { 0.707106f, -0.707106f, -0.707106f, 0.707106f };
 
-                //¸¶¿ì½º À§Ä¡¿¡ ÇÃ·§Æû ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— í”Œë«í¼ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                 if (Physics.CheckBox(center, new Vector3(0.99f, 0.5f, 0.99f), Quaternion.Euler(new Vector3(0f, 45f, 0f)), platformLayer))
                 {
                     return false;
                 }
 
-                //¸¶¿ì½º À§Ä¡ ±âÁØ 4¹æÇâ¿¡ Á÷À°¸éÃ¼(1.98, 1, 0.48) ¹üÀ§¿¡ ÇÃ·§Æû ÀÖÀ¸¸é ¼³Ä¡ °¡´É
+                //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ ê¸°ì¤€ 4ë°©í–¥ì— ì§ìœ¡ë©´ì²´(1.98, 1, 0.48) ë²”ìœ„ì— í”Œë«í¼ ìˆìœ¼ë©´ ì„¤ì¹˜ ê°€ëŠ¥
                 for (int i = 0; i < 4; i++)
                 {
                     Vector3 offset = new Vector3(xArr[i], 0f, zArr[i]);
@@ -264,17 +300,45 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.99f, 0.5f, 0.249f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f * i + 45f, 0f));
 
-                    // ¿©±â¿¡¿ä ¿©±â!!!!!!!!!!!!!!!! ¹Ù´Ú³¢¸® ¶³¾îÁ®ÀÖÀ»¶§ Á¶°Ç¹®!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // ì—¬ê¸°ì—ìš” ì—¬ê¸°!!!!!!!!!!!!!!!! ë°”ë‹¥ë¼ë¦¬ ë–¨ì–´ì ¸ìˆì„ë•Œ ì¡°ê±´ë¬¸!!!!!!!!!!!!!!!!!!!!!!!!!
                     if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                         return true;
                     //else
                     //ItemDeckDisconnect.instance.DestroyDeck();
                 }
 
-                //±× ¿Ü ¼³Ä¡ ºÒ°¡
+                //ê·¸ ì™¸ ì„¤ì¹˜ ë¶ˆê°€
                 return false;
 
             case CreationType.Wall:
+                xArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
+                zArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
+
+                for (int i = 0; i < xArr.Length; i++)
+                {
+                    float angle = onHand.transform.rotation.y;
+                    int zIndex = rotateN % 2 == 0 ? i : xArr.Length - 1 - i;
+
+                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[zIndex]);
+                    Vector3 origin = center + offset;
+                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
+                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
+
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
+                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
+                    {
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
+                        return false;
+                    }
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
+                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
+                    {
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
+                        return false;
+                    }
+                }
+                return true;
+
             case CreationType.Barricade:
                 xArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
                 zArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
@@ -289,16 +353,16 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //¿ÀºêÁ§Æ®°¡ ¼³Ä¡µÉ À§Ä¡¿¡ ÇÃ·§ÆûÀÌ ¾øÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
-                        Debug.Log("ÇÃ·§Æû ¾øÀ½");
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
                         return false;
                     }
-                    //¸¶¿ì½º À§Ä¡¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
-                        Debug.Log("¿ÀºêÁ§Æ® ÀÖÀ½");
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
                         return false;
                     }
                 }
@@ -319,16 +383,16 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //¿ÀºêÁ§Æ®°¡ ¼³Ä¡µÉ À§Ä¡¿¡ ÇÃ·§ÆûÀÌ ¾øÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
-                        Debug.Log("ÇÃ·§Æû ¾øÀ½");
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
                         return false;
                     }
-                    //¸¶¿ì½º À§Ä¡¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
-                        Debug.Log("¿ÀºêÁ§Æ® ÀÖÀ½");
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
                         return false;
                     }
                 }
@@ -348,16 +412,16 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //¿ÀºêÁ§Æ®°¡ ¼³Ä¡µÉ À§Ä¡¿¡ ÇÃ·§ÆûÀÌ ¾øÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
-                        Debug.Log("ÇÃ·§Æû ¾øÀ½");
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
                         return false;
                     }
-                    //¸¶¿ì½º À§Ä¡¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
-                        Debug.Log("¿ÀºêÁ§Æ® ÀÖÀ½");
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
                         return false;
                     }
                 }
@@ -376,16 +440,16 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //¿ÀºêÁ§Æ®°¡ ¼³Ä¡µÉ À§Ä¡¿¡ ÇÃ·§ÆûÀÌ ¾øÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
-                        Debug.Log("ÇÃ·§Æû ¾øÀ½");
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
                         return false;
                     }
-                    //¸¶¿ì½º À§Ä¡¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
-                        Debug.Log("¿ÀºêÁ§Æ® ÀÖÀ½");
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
                         return false;
                     }
                 }
@@ -404,16 +468,16 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //¿ÀºêÁ§Æ®°¡ ¼³Ä¡µÉ À§Ä¡¿¡ ÇÃ·§ÆûÀÌ ¾øÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
-                        Debug.Log("ÇÃ·§Æû ¾øÀ½");
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
                         return false;
                     }
-                    //¸¶¿ì½º À§Ä¡¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
-                        Debug.Log("¿ÀºêÁ§Æ® ÀÖÀ½");
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
                         return false;
                     }
                 }
@@ -432,16 +496,16 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //¿ÀºêÁ§Æ®°¡ ¼³Ä¡µÉ À§Ä¡¿¡ ÇÃ·§ÆûÀÌ ¾øÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ì˜¤ë¸Œì íŠ¸ê°€ ì„¤ì¹˜ë  ìœ„ì¹˜ì— í”Œë«í¼ì´ ì—†ìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
-                        Debug.Log("ÇÃ·§Æû ¾øÀ½");
+                        Debug.Log("í”Œë«í¼ ì—†ìŒ");
                         return false;
                     }
-                    //¸¶¿ì½º À§Ä¡¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
+                    //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
-                        Debug.Log("¿ÀºêÁ§Æ® ÀÖÀ½");
+                        Debug.Log("ì˜¤ë¸Œì íŠ¸ ìˆìŒ");
                         return false;
                     }
                 }
@@ -452,7 +516,6 @@ public class CreateObject : MonoBehaviour, IBegin
         return false;
     }
 
-    //»ı¼ºÇÏ·¯ ÀÌµ¿
     private void MoveToCreate(Vector3 world, Vector3 local)
     {
         if (tempObj != null)
@@ -460,7 +523,6 @@ public class CreateObject : MonoBehaviour, IBegin
             Destroy(tempObj);
         }
 
-        //»ı¼º ÇÒ À§Ä¡ Ç¥½Ã
         tempObj = Instantiate(creationDict[creationType], worldSpaceParent);
         tempObj.transform.localPosition = new Vector3(local.x, 0f, local.z);
         tempObj.transform.rotation = onHand.transform.rotation;
@@ -474,11 +536,11 @@ public class CreateObject : MonoBehaviour, IBegin
         Vector3 dir = (world - playerTrans.position).normalized;
         Vector3 stopPos = world - dir * stopDistance;
 
+        UnlockPlayerMovement();
         playerAgent.isStopped = false;
         playerAgent.SetDestination(stopPos);
     }
 
-    //»ı¼º ¿Ï·á ÀıÂ÷
     private void Trim()
     {
         if (tempObj == null) return;
@@ -486,7 +548,7 @@ public class CreateObject : MonoBehaviour, IBegin
         float dist = Vector3.Distance(playerAgent.transform.position, tempObj.transform.position);
         if (dist < 2.0f)
         {
-            // ¿©±â¼­ ½Ã°£À» ¼Ò¸ğÇÑ µÚ ¹°°ÇÀ» »©¾Ñ¾Æ¾ß ÇÔ.
+            // ì—¬ê¸°ì„œ ì‹œê°„ì„ ì†Œëª¨í•œ ë’¤ ë¬¼ê±´ì„ ë¹¼ì•—ì•„ì•¼ í•¨.
 
             var col = tempObj.GetComponent<Collider>();
             if (col != null) col.isTrigger = false;
@@ -497,15 +559,15 @@ public class CreateObject : MonoBehaviour, IBegin
             navMeshSurface.BuildNavMesh();
             GameManager.Instance?.NotifyPlatformLayoutChanged();
 
-            //ÁÖÈÆ Ãß°¡
+            //ì£¼í›ˆ ì¶”ê°€
             if (creationType == CreationType.Platform && MastManager.Instance != null)
             {
                 MastManager.Instance.UpdateCurrentDeckCount();
-                Debug.Log($"ÇöÀç °©ÆÇ °¹¼ö: {MastManager.Instance.currentDeckCount}");
+                Debug.Log($"í˜„ì¬ ê°‘íŒ ê°¯ìˆ˜: {MastManager.Instance.currentDeckCount}");
             }
-            //¿©±â±îÁö
+            //ì—¬ê¸°ê¹Œì§€
 
-            Debug.Log($"[¼³Ä¡ ¿Ï·áµÊ] °Å¸®: {dist}");
+            Debug.Log($"[ì„¤ì¹˜ ì™„ë£Œë¨] ê±°ë¦¬: {dist}");
 
             playerAgent.ResetPath();
             playerAgent.isStopped = false;
@@ -514,7 +576,6 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-    //Á¶ÀÛÀ¸·Î ÀÎÇÑ ¿òÁ÷ÀÓ Äµ½½
     void CancelInstall()
     {
         playerAgent.isStopped = true;
@@ -534,34 +595,74 @@ public class CreateObject : MonoBehaviour, IBegin
         if (!playerAgent.enabled)
             playerAgent.enabled = true;
 
-        // ¼³Ä¡ Å¸ÀÔ ¼³Á¤
+        // ì„¤ì¹˜ íƒ€ì… ì„¤ì •
         creationType = (CreationType)(int)installableSO.installType;
 
-        Debug.Log($"[¼³Ä¡¸ğµå ÁøÀÔ] ¼±ÅÃµÈ ¿ÀºêÁ§Æ®: {installableSO.name}");
+        Debug.Log($"[ì„¤ì¹˜ëª¨ë“œ ì§„ì…] ì„ íƒëœ ì˜¤ë¸Œì íŠ¸: {installableSO.name}");
 
-        CreateObjectInit(); // »õ ÇÁ¸®ºä ¿ÀºêÁ§Æ® »ı¼º
+        CreateObjectInit(); // ìƒˆ í”„ë¦¬ë·° ì˜¤ë¸Œì íŠ¸ ìƒì„±
     }
 
     public void ExitInstallMode()
     {
-        // ÇÁ¸®ºä ¿ÀºêÁ§Æ® Á¦°Å
         if (onHand != null)
         {
             Destroy(onHand);
             onHand = null;
         }
 
-        // ÀÓ½Ã »ı¼º ¿ÀºêÁ§Æ® Á¦°Å (ÀÌµ¿ Áß ¼³Ä¡ ¿¹¾àµÈ ¿ÀºêÁ§Æ®)
         if (tempObj != null)
         {
             Destroy(tempObj);
             tempObj = null;
         }
 
-        // NavMeshAgent »óÅÂ ÃÊ±âÈ­
         playerAgent.ResetPath();
         playerAgent.isStopped = true;
 
-        Debug.Log("[¼³Ä¡ ¸ğµå Á¾·áµÊ]");
+        UnlockPlayerMovement();
+
+        Debug.Log("[ì„¤ì¹˜ ëª¨ë“œ ì¢…ë£Œë¨]");
+    }
+
+    private void LockPlayerMovement()
+    {
+        if (movementLocked) return;
+        movementLocked = true;
+
+        if (playerAgent != null)
+        {
+            playerAgent.isStopped = true;
+            playerAgent.ResetPath();
+            playerAgent.velocity = Vector3.zero;
+            playerAgent.updateRotation = false;
+        }
+
+        var rb = GetComponent<Rigidbody>();
+        if (rb != null) rb.velocity = Vector3.zero;
+
+        if (alsoZeroPlayerSpeed && PlayerCore.Instance != null)
+        {
+            originalPlayerSpeed = PlayerCore.Instance.speed;
+            PlayerCore.Instance.speed = 0f;
+        }
+    }
+
+    private void UnlockPlayerMovement()
+    {
+        if (!movementLocked) return;
+        movementLocked = false;
+
+        if (playerAgent != null)
+        {
+            playerAgent.updateRotation = true;
+            playerAgent.isStopped = false;
+        }
+
+        if (alsoZeroPlayerSpeed && PlayerCore.Instance != null && originalPlayerSpeed >= 0f)
+        {
+            PlayerCore.Instance.speed = originalPlayerSpeed;
+            originalPlayerSpeed = -1f;
+        }
     }
 }
