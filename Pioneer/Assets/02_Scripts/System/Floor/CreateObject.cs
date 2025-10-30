@@ -134,7 +134,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private static Vector3 SnapToGrid(Vector3 worldPos)
     {
-        const float cellSize = 1f;
+        const float cellSize = 2f;
         int x = Mathf.RoundToInt(worldPos.x / cellSize);
         int z = Mathf.RoundToInt(worldPos.z / cellSize);
         return new Vector3(x * cellSize, 0f, z * cellSize);
