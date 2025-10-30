@@ -699,11 +699,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3699081495408322261, guid: db05d61271fde834e974902e32167951,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7136111163052878715, guid: db05d61271fde834e974902e32167951,
         type: 3}
       propertyPath: m_Name
@@ -25693,7 +25688,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4010547727299399648}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0d124675bfc715041a7738d0935e7fbe, type: 3}
   m_Name: 
@@ -25725,6 +25720,7 @@ MonoBehaviour:
       type: 3}
   navMeshSurface: {fileID: 860495886}
   stopDistance: 1.5
+  uiRaycaster: {fileID: 0}
 --- !u!1001 &8526916259828762702
 PrefabInstance:
   m_ObjectHideFlags: 0

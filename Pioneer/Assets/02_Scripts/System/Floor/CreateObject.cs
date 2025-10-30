@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
-
+using UnityEngine.UI; // UI 레이캐스트용
 
 #warning TODO : CreateObject 수정이 필요
 // 현재 : 마우스 스냅 -> 건설 가능 여부 -> 이동 -> 배치
@@ -11,7 +11,7 @@ using UnityEngine.EventSystems;
 
 public class CreateObject : MonoBehaviour, IBegin
 {
-    public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable , Ballista, Trap, Lantern }
+    public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern }
 
     [System.Serializable]
     public class CreationList
@@ -52,23 +52,26 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float stopDistance = 1.5f;
     private NavMeshAgent playerAgent;
 
+    [Header("UI 레이캐스트 설정")]
+    [SerializeField] private GraphicRaycaster uiRaycaster;
+
     private void Awake()
     {
         Debug.Log($">> CreateObject : {gameObject.name}");
-		instance = this;
+        instance = this;
 
         mainCamera = Camera.main;
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
 
-        creationDict.Add(CreationType.Platform,         creationList.platform);
-        creationDict.Add(CreationType.Wall,             creationList.wall);
-        creationDict.Add(CreationType.Door,             creationList.door);
-        creationDict.Add(CreationType.Barricade,        creationList.barricade);
-        creationDict.Add(CreationType.CraftingTable,    creationList.craftingTable);
-        creationDict.Add(CreationType.Ballista,         creationList.ballista);
-        creationDict.Add(CreationType.Trap,             creationList.trap);
-        creationDict.Add(CreationType.Lantern,          creationList.lantern);
+        creationDict.Add(CreationType.Platform, creationList.platform);
+        creationDict.Add(CreationType.Wall, creationList.wall);
+        creationDict.Add(CreationType.Door, creationList.door);
+        creationDict.Add(CreationType.Barricade, creationList.barricade);
+        creationDict.Add(CreationType.CraftingTable, creationList.craftingTable);
+        creationDict.Add(CreationType.Ballista, creationList.ballista);
+        creationDict.Add(CreationType.Trap, creationList.trap);
+        creationDict.Add(CreationType.Lantern, creationList.lantern);
 
         CreateObjectInit();
     }
@@ -116,7 +119,7 @@ public class CreateObject : MonoBehaviour, IBegin
     private void CheckCreatable()
     {
         #region UI 위에선 설치가능 여부 프리뷰부터 보이지 않게 처리함 
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        if (IsBlockedByUI())
         {
             onHand.SetActive(false);    // 프리뷰 숨김
             return;                     // UI 클릭 중이면 설치/이동/회전 전부 무시
@@ -153,12 +156,24 @@ public class CreateObject : MonoBehaviour, IBegin
                 creationRender.material.color = rejectColor;
             }
         }
+        // ===== 여기까지 변경 끝 =====
 
         if (Input.GetMouseButtonDown(1))
         {
             rotateN++;
             onHand.transform.localRotation = Quaternion.Euler(new Vector3(0f, 90f * rotateN, 0f));
         }
+    }
+
+    private bool IsBlockedByUI()
+    {
+        if (EventSystem.current == null || uiRaycaster == null) return false;
+
+        var ped = new PointerEventData(EventSystem.current) { position = Input.mousePosition };
+        var results = new List<RaycastResult>();
+        uiRaycaster.Raycast(ped, results);
+
+        return false;
     }
 
     //주변 검사
@@ -201,8 +216,8 @@ public class CreateObject : MonoBehaviour, IBegin
                 // 여기까지
 
                 //1.414213 * 0.5
-                xArr = new float[]{ 0.707106f, 0.707106f, -0.707106f, -0.707106f };
-                zArr = new float[]{ 0.707106f, -0.707106f, -0.707106f, 0.707106f };
+                xArr = new float[] { 0.707106f, 0.707106f, -0.707106f, -0.707106f };
+                zArr = new float[] { 0.707106f, -0.707106f, -0.707106f, 0.707106f };
 
                 //마우스 위치에 플랫폼 있으면 설치 불가
                 if (Physics.CheckBox(center, new Vector3(0.99f, 0.5f, 0.99f), Quaternion.Euler(new Vector3(0f, 45f, 0f)), platformLayer))
@@ -218,11 +233,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.99f, 0.5f, 0.249f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f * i + 45f, 0f));
 
-					// 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어져있을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
-					if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
+                    // 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어져있을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
+                    if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                         return true;
                     //else
-                        //ItemDeckDisconnect.instance.DestroyDeck();
+                    //ItemDeckDisconnect.instance.DestroyDeck();
                 }
 
                 //그 외 설치 불가
@@ -460,7 +475,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
             tempObj = null;
         }
- 
+
     }
 
 
