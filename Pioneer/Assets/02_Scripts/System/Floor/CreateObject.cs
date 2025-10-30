@@ -53,7 +53,7 @@ public class CreateObject : MonoBehaviour, IBegin
     private NavMeshAgent playerAgent;
 
     [Header("UI 레이캐스트 설정")]
-    [SerializeField] private GraphicRaycaster uiRaycaster;
+    [SerializeField] private GraphicRaycaster uiRaycaster;  // null이어야 정상작동; 일부러 할당 안 해둠 ㅜㅜ..
 
     [Header("이동 잠금 설정")]
     [SerializeField] private bool lockMovementWhileOrienting = true;
@@ -61,6 +61,11 @@ public class CreateObject : MonoBehaviour, IBegin
     private bool isOrienting = false;
     private bool movementLocked = false;
     private float originalPlayerSpeed = -1f;
+
+    [Header("버그해결하고싶어요")]
+    [SerializeField] private float arrivedSpeedEps;   // 이 속도보다 느리면 "멈춤"으로 간주
+    [SerializeField] private float arrivedHoldTime;    // 멈춤이 이 시간 이상 지속되면 설치
+    private float arrivedTimer = 0f;
 
 
 
@@ -536,43 +541,61 @@ public class CreateObject : MonoBehaviour, IBegin
         Vector3 dir = (world - playerTrans.position).normalized;
         Vector3 stopPos = world - dir * stopDistance;
 
+        // 보정 : 도착 판정 !!
+        playerAgent.stoppingDistance = stopDistance;
+
         UnlockPlayerMovement();
         playerAgent.isStopped = false;
+        playerAgent.ResetPath();
         playerAgent.SetDestination(stopPos);
+
+        // 새 이동 시작이므로 타이머 리셋
+        arrivedTimer = 0f;
     }
 
     private void Trim()
     {
         if (tempObj == null) return;
 
-        float dist = Vector3.Distance(playerAgent.transform.position, tempObj.transform.position);
-        if (dist < 2.0f)
+        // 도착 판정 : 속도 느림이 잠깐동안 지속되면 도착지점에 거의 다 왔다는 것으로 간주하고 설치 확정~
+        bool almostStopped = playerAgent.velocity.sqrMagnitude <= arrivedSpeedEps * arrivedSpeedEps;
+        bool nearEnough = !playerAgent.pathPending &&
+                          playerAgent.remainingDistance <= playerAgent.stoppingDistance + 0.05f;
+
+        if (nearEnough || almostStopped)
         {
-            // 여기서 시간을 소모한 뒤 물건을 빼앗아야 함.
-
-            var col = tempObj.GetComponent<Collider>();
-            if (col != null) col.isTrigger = false;
-
-            var rend = tempObj.GetComponent<Renderer>();
-            if (rend != null && rend.material != null) rend.material.color = Color.white;
-
-            navMeshSurface.BuildNavMesh();
-            GameManager.Instance?.NotifyPlatformLayoutChanged();
-
-            //주훈 추가
-            if (creationType == CreationType.Platform && MastManager.Instance != null)
+            arrivedTimer += Time.deltaTime;
+            if (arrivedTimer >= arrivedHoldTime)
             {
-                MastManager.Instance.UpdateCurrentDeckCount();
-                Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
+                var col = tempObj.GetComponent<Collider>();
+                if (col != null) col.isTrigger = false;
+
+                var rend = tempObj.GetComponent<Renderer>();
+                if (rend != null && rend.material != null) rend.material.color = Color.white;
+
+                navMeshSurface.BuildNavMesh();
+                GameManager.Instance?.NotifyPlatformLayoutChanged();
+
+                //주훈 추가
+                if (creationType == CreationType.Platform && MastManager.Instance != null)
+                {
+                    MastManager.Instance.UpdateCurrentDeckCount();
+                    Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
+                }
+                //여기까지
+
+                Debug.Log("[설치 완료됨]");
+
+                playerAgent.ResetPath();
+                playerAgent.isStopped = false;
+
+                tempObj = null;
+                arrivedTimer = 0f;
             }
-            //여기까지
-
-            Debug.Log($"[설치 완료됨] 거리: {dist}");
-
-            playerAgent.ResetPath();
-            playerAgent.isStopped = false;
-
-            tempObj = null;
+        }
+        else
+        {
+            arrivedTimer = 0f;
         }
     }
 
@@ -582,6 +605,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerAgent.ResetPath();
         if (tempObj != null) Destroy(tempObj);
         tempObj = null;
+        arrivedTimer = 0f;
     }
 
     public void EnterInstallMode(SInstallableObjectDataSO installableSO)
