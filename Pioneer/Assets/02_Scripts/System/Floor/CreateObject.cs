@@ -35,16 +35,16 @@ public class CreateObject : MonoBehaviour, IBegin
 
     [Header("설치 오브젝트 설정")]
     public CreationType creationType;
-    [SerializeField] private float maxDistance;
+    [SerializeField] private float maxDistance = 5f;
     [SerializeField] private LayerMask platformLayer;
     [SerializeField] private LayerMask creationLayer;
-    [SerializeField] private Color rejectColor;
-    [SerializeField] private Color permitColor;
+    [SerializeField] private Color rejectColor = Color.red;
+    [SerializeField] private Color permitColor = Color.green;
     [SerializeField] private CreationList creationList;
     private GameObject onHand;
     private GameObject tempObj;
     private Renderer creationRender;
-    private Dictionary<CreationType, GameObject> creationDict = new Dictionary<CreationType, GameObject>();
+    private readonly Dictionary<CreationType, GameObject> creationDict = new Dictionary<CreationType, GameObject>();
     private int rotateN = 0;
 
     [Header("네브메시 설정")]
@@ -55,6 +55,8 @@ public class CreateObject : MonoBehaviour, IBegin
     [Header("UI 레이캐스트 설정")]
     [SerializeField] private GraphicRaycaster uiRaycaster;
 
+
+
     private void Awake()
     {
         Debug.Log($">> CreateObject : {gameObject.name}");
@@ -64,6 +66,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
 
+        // 프리팹 딕셔너리 빌드 (이렇게 안 하면 안됨....)
         creationDict.Add(CreationType.Platform, creationList.platform);
         creationDict.Add(CreationType.Wall, creationList.wall);
         creationDict.Add(CreationType.Door, creationList.door);
@@ -74,20 +77,6 @@ public class CreateObject : MonoBehaviour, IBegin
         creationDict.Add(CreationType.Lantern, creationList.lantern);
 
         CreateObjectInit();
-    }
-
-    //외부에서 'creationType' 수정 후 'Init'메서드 호출하여 초기화
-    public void CreateObjectInit()
-    {
-        rotateN = 0;
-
-        onHand = Instantiate(creationDict[creationType], worldSpaceParent);
-        onHand.transform.localRotation = Quaternion.identity;
-        onHand.transform.localPosition = Vector3.zero;
-        onHand.layer = 0;
-
-        creationRender = onHand.GetComponent<Renderer>();
-        onHand.GetComponent<Collider>().isTrigger = true;
     }
 
     private void Start()
@@ -106,13 +95,75 @@ public class CreateObject : MonoBehaviour, IBegin
             CancelInstall();
     }
 
-    //좌표 스냅
-    private Vector3 SnapToGrid(Vector3 worldPos)
+    public void CreateObjectInit()
     {
-        float cellSize = 1f;
+        rotateN = 0;
+
+        onHand = Instantiate(creationDict[creationType], worldSpaceParent);
+        onHand.transform.localRotation = Quaternion.identity;
+        onHand.transform.localPosition = Vector3.zero;
+        onHand.layer = 0;
+
+        creationRender = onHand.GetComponent<Renderer>();
+        var col = onHand.GetComponent<Collider>();
+        if (col != null) col.isTrigger = true;
+    }
+
+    // 좌표 스냅
+    private static Vector3 SnapToGrid(Vector3 worldPos)
+    {
+        const float cellSize = 1f;
         int x = Mathf.RoundToInt(worldPos.x / cellSize);
         int z = Mathf.RoundToInt(worldPos.z / cellSize);
         return new Vector3(x * cellSize, 0f, z * cellSize);
+    }
+
+    // 마우스 -> 지면(y = 0) 월드 좌표 구하기
+    private bool TryGetMouseGroundPoint(out Vector3 worldPoint)
+    {
+        worldPoint = default;
+        if (mainCamera == null) return false;
+
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+
+        // 마우스 위치로부터 y = 0인 지점 좌표 구하기
+        if (!groundPlane.Raycast(ray, out float enter)) return false;
+
+        worldPoint = ray.GetPoint(enter);
+        return true;
+    }
+
+    private void ApplyPreviewTransform(Vector3 localPos)
+    {
+        onHand.transform.localPosition = localPos;
+        // 살짝 띄우기
+        onHand.transform.position += Vector3.up * 0.01f;
+    }
+
+    private void SetPreviewVisible(bool visible)
+    {
+        if (onHand != null && onHand.activeSelf != visible)
+            onHand.SetActive(visible);
+    }
+
+    private void SetPreviewColor(Color c)
+    {
+        if (creationRender != null && creationRender.material != null)
+            creationRender.material.color = c;
+    }
+
+    private void TryPlaceIfPermitted(Vector3 worldPos, Vector3 localPos)
+    {
+        if (!CheckNear(worldPos))
+        {
+            SetPreviewColor(rejectColor);
+            return;
+        }
+
+        SetPreviewColor(permitColor);
+        if (Input.GetMouseButtonDown(0))
+            MoveToCreate(worldPos, localPos);
     }
 
     //설치 가능 유무 판별
@@ -121,42 +172,22 @@ public class CreateObject : MonoBehaviour, IBegin
         #region UI 위에선 설치가능 여부 프리뷰부터 보이지 않게 처리함 
         if (IsBlockedByUI())
         {
-            onHand.SetActive(false);    // 프리뷰 숨김
+            SetPreviewVisible(false);   // 프리뷰 숨김
             return;                     // UI 클릭 중이면 설치/이동/회전 전부 무시
         }
         else
         {
-            onHand.SetActive(true);     // UI에서 벗어나면 다시 보이게
+            SetPreviewVisible(true);    // UI에서 벗어나면 다시 보이게
         }
         #endregion
 
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+        if (!TryGetMouseGroundPoint(out var mouseWorldPos)) return;
 
-        //마우스 위치로부터 y = 0인 지점 좌표 구하기
-        if (groundPlane.Raycast(ray, out float enter))
-        {
-            Vector3 mouseWorldPos = ray.GetPoint(enter);
-            Vector3 localPos = SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos));
-            onHand.transform.localPosition = localPos;
-            Vector3 worldPos = onHand.transform.position;
-            onHand.transform.position += Vector3.up * 0.01f;
+        Vector3 localPos = SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos));
+        ApplyPreviewTransform(localPos);
 
-            if (CheckNear(worldPos))
-            {
-                creationRender.material.color = permitColor;
-
-                if (Input.GetMouseButtonDown(0))
-                {
-                    MoveToCreate(worldPos, localPos);
-                }
-            }
-            else
-            {
-                creationRender.material.color = rejectColor;
-            }
-        }
-        // ===== 여기까지 변경 끝 =====
+        Vector3 worldPos = onHand.transform.position;
+        TryPlaceIfPermitted(worldPos, localPos);
 
         if (Input.GetMouseButtonDown(1))
         {
@@ -185,7 +216,7 @@ public class CreateObject : MonoBehaviour, IBegin
         float[] zSign; //y부호
 
         //maxDistance보다 멀면 설치 불가능
-        if (Vector3.SqrMagnitude(center - SnapToGrid(playerTrans.position)) > Mathf.Pow(maxDistance, 2))
+        if (Vector3.SqrMagnitude(center - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
         {
             return false;
         }
@@ -433,8 +464,12 @@ public class CreateObject : MonoBehaviour, IBegin
         tempObj = Instantiate(creationDict[creationType], worldSpaceParent);
         tempObj.transform.localPosition = new Vector3(local.x, 0f, local.z);
         tempObj.transform.rotation = onHand.transform.rotation;
-        tempObj.GetComponent<Collider>().isTrigger = true;
-        tempObj.GetComponent<Renderer>().material.color = permitColor;
+
+        var col = tempObj.GetComponent<Collider>();
+        if (col != null) col.isTrigger = true;
+
+        var rend = tempObj.GetComponent<Renderer>();
+        if (rend != null && rend.material != null) rend.material.color = permitColor;
 
         Vector3 dir = (world - playerTrans.position).normalized;
         Vector3 stopPos = world - dir * stopDistance;
@@ -453,9 +488,11 @@ public class CreateObject : MonoBehaviour, IBegin
         {
             // 여기서 시간을 소모한 뒤 물건을 빼앗아야 함.
 
+            var col = tempObj.GetComponent<Collider>();
+            if (col != null) col.isTrigger = false;
 
-            tempObj.GetComponent<Collider>().isTrigger = false;
-            tempObj.GetComponent<Renderer>().material.color = Color.white;
+            var rend = tempObj.GetComponent<Renderer>();
+            if (rend != null && rend.material != null) rend.material.color = Color.white;
 
             navMeshSurface.BuildNavMesh();
             GameManager.Instance?.NotifyPlatformLayoutChanged();
@@ -475,17 +512,14 @@ public class CreateObject : MonoBehaviour, IBegin
 
             tempObj = null;
         }
-
     }
-
-
 
     //조작으로 인한 움직임 캔슬
     void CancelInstall()
     {
         playerAgent.isStopped = true;
         playerAgent.ResetPath();
-        Destroy(tempObj);
+        if (tempObj != null) Destroy(tempObj);
         tempObj = null;
     }
 
