@@ -13,10 +13,9 @@ GameObject:
   - component: {fileID: 1930413226580115704}
   - component: {fileID: 8480634719498701782}
   - component: {fileID: 7904728821678511056}
-  - component: {fileID: 764638535390293516}
   - component: {fileID: 3432821965893446996}
-  - component: {fileID: 3502504443317358122}
   - component: {fileID: 2151693467487321608}
+  - component: {fileID: 6619639927548977897}
   m_Layer: 11
   m_Name: Infected Mariner
   m_TagString: Untagged
@@ -143,34 +142,6 @@ MonoBehaviour:
   viewRadius: 10
   viewAngle: 360
   visibleTargets: []
---- !u!114 &764638535390293516
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1038291238442652822}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aff0571e6e3b3584e94c03ef2a170925, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 0
-  IsDead: 0
-  attacker: {fileID: 0}
-  fov: {fileID: 0}
-  speed: 0
-  attackDamage: 0
-  attackRange: 0
-  attackDelayTime: 0
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  isRepairing: 0
-  personalRayCount: 8
-  personalMaxDistance: 50
-  marinerId: 0
 --- !u!114 &3432821965893446996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,37 +170,6 @@ MonoBehaviour:
   personalRayCount: 8
   personalMaxDistance: 50
   marinerId: 0
---- !u!114 &3502504443317358122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1038291238442652822}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 149159ad205327244892f65d58408f9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 0
-  IsDead: 0
-  attacker: {fileID: 0}
-  fov: {fileID: 0}
-  speed: 0
-  attackDamage: 0
-  attackRange: 0
-  attackDelayTime: 0
-  targetLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  isRepairing: 0
-  personalRayCount: 8
-  personalMaxDistance: 50
-  marinerId: 0
-  spriteTransform: {fileID: 0}
-  spriteRenderer: {fileID: 0}
-  attackRangeObject: {fileID: 0}
 --- !u!114 &2151693467487321608
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,6 +187,33 @@ MonoBehaviour:
   storageThreshold: 7
   interactionRange: 4
   exclamationMarkImage: {fileID: 8448013369567587075}
+--- !u!54 &6619639927548977897
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038291238442652822}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 94
+  m_CollisionDetection: 0
 --- !u!1 &4688622703810975482
 GameObject:
   m_ObjectHideFlags: 0
