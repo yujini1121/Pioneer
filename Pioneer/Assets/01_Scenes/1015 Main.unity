@@ -1743,14 +1743,16 @@ MonoBehaviour:
     m_Bits: 114663
   m_UseGeometry: 0
   m_DefaultArea: 0
+  m_GenerateLinks: 0
   m_IgnoreNavMeshAgent: 1
   m_IgnoreNavMeshObstacle: 1
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
-  m_BuildHeightMesh: 0
+  m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &864062871
 GameObject:
   m_ObjectHideFlags: 0
@@ -19291,8 +19293,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 60
-  nightDuration: 30
+  dayDuration: 10
+  nightDuration: 15
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -26906,7 +26908,6 @@ MonoBehaviour:
     trap: {fileID: 6496894871947221018, guid: 2e1b17aa88865d14e832cfab90be1c1b, type: 3}
     lantern: {fileID: 8600612548437967184, guid: 48ada4cc6191cd944802c98adfe22c51,
       type: 3}
-  navMeshSurface: {fileID: 860495886}
   stopDistance: 1.5
   uiRaycaster: {fileID: 0}
   lockMovementWhileOrienting: 1

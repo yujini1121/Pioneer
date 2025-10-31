@@ -48,7 +48,7 @@ public class CreateObject : MonoBehaviour, IBegin
     private int rotateN = 0;
 
     [Header("네브메시 설정")]
-    [SerializeField] private NavMeshSurface navMeshSurface;
+    //[SerializeField] private NavMeshSurface navMeshSurface;
     [SerializeField] private float stopDistance = 1.5f;
     private NavMeshAgent playerAgent;
 
@@ -573,7 +573,7 @@ public class CreateObject : MonoBehaviour, IBegin
                 var rend = tempObj.GetComponent<Renderer>();
                 if (rend != null && rend.material != null) rend.material.color = Color.white;
 
-                navMeshSurface.BuildNavMesh();
+                //navMeshSurface.BuildNavMesh();
                 GameManager.Instance?.NotifyPlatformLayoutChanged();
 
                 //주훈 추가
