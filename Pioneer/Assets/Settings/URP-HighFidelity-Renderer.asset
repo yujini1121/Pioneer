@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8466562115350343722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 532a94f929bb7484f9f133de19e76224, type: 3}
+  m_Name: FogOfWarURPFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
 --- !u!114 &-5847548050074442680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45,8 +58,8 @@ MonoBehaviour:
       type: 3}
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
-  - {fileID: 3693699887085634009}
-  m_RendererFeatureMap: d9c1a32c7aa84233
+  - {fileID: -8466562115350343722}
+  m_RendererFeatureMap: d64fc3259dba808a
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
