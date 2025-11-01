@@ -9,6 +9,82 @@ public class AudioManager : MonoBehaviour, IBegin
 {
     public static AudioManager instance;
 
+    [System.Serializable]
+    public class SoundSFX
+    {
+        public AudioManager.SFX sfx;
+        public AudioClip sfxClips;
+    }       
+
+    /// <summary>
+    /// 배경 음악 종류 (인스펙터 창이랑 순서 꼭 맞추기)
+    /// </summary>
+    public enum BGM
+    {
+        MainTitle,
+        Morning,
+        Night,
+        MistOfTheDead
+    }
+
+    /// <summary>
+    /// 현재 효과음 종류 (인스펙터 창이랑 순서 꼭 맞추기)
+    /// </summary>
+    /// <returns></returns>
+    public enum SFX
+    {
+        GameStartButton,
+        SamshSound,
+        GameOver,
+        Die,
+        Click,
+        AfterAttack_Minion,
+        AfterAttack_Titan,
+        AfterAttack_Crawler,
+        BeforeAttack_Minion,
+        BeforeAttack_Titan,
+        BeforeAttack_Crawler,
+        Hunger,
+        Sanity29Down,
+        LevelUp,
+        SelectQuickSlot,
+        RemoveItem,
+        ArrayItem,
+        EatingFood,
+        Drink,
+        UseComsumpitem,
+        GetFishing,
+        OpenBox,
+        BeforeFishing,
+        SuccessCrafting,
+        GreatSuccessCrafting,
+        InstallingObject,
+        InstallObject,
+        RotateInstallTypeObject,
+        DestroyedObject,
+        BalistaAttack,
+        Hit_Object,
+        ActivatedSpiketrap,
+        BeforeAttack_BlackFog,
+        AfterAttack_BlackFog,
+        Scream2,
+        CantESCNoise,
+        LaughSaren,
+        Hurricane,
+        HeavyRain,
+        Thunder,
+        FortifyObject,
+        ItemGet,
+        To_Night,
+        MeetEnemy,
+        Punch1_Player
+    }
+
+    /*[Header("Vol UI")]
+    [SerializeField] private Slider masterVolSlider;
+    [SerializeField] private Slider bgmVolSlider;
+    [SerializeField] private Slider sfxVolSlider;*/
+
     [Header("Audio Mixer 설정")]
     public AudioMixer audioMixer;
     public AudioMixerGroup bgmMixer;
@@ -20,33 +96,14 @@ public class AudioManager : MonoBehaviour, IBegin
     private AudioSource bgmPlayer;
 
     [Header("SFX 설정")]
-    public AudioClip[] sfxClips;
+    //public AudioClip[] sfxClips;
+    public List<SoundSFX> sfxSoundList;
     public float sfxVolume;
     public int sfxChannels;
     private AudioSource[] sfxPlayers;
     private int sfxChannelIndex;
 
-    [Header("Vol UI")]
-    [SerializeField] private Slider masterVolSlider;
-    [SerializeField] private Slider bgmVolSlider;
-    [SerializeField] private Slider sfxVolSlider;
-
-    /// <summary>
-    /// 현재 효과음 종류 (인스펙터 창이랑 순서 꼭 맞추기)
-    /// </summary>
-    /// <returns></returns>
-    public enum SFX
-    {
-        // Main_SFX
-        BuyItem,
-        Coin,
-        NextDay,
-        // MiniGame_SFX
-        A_Cup,
-        Failed,
-        Finish
-    }
-
+    private Dictionary<SFX, AudioClip> sfxDictionary;
 
     void Awake()
     {
@@ -60,7 +117,7 @@ public class AudioManager : MonoBehaviour, IBegin
             Destroy(gameObject);
         }
 
-        Start();
+        Init();
     }
 
     void OnEnable()
@@ -78,7 +135,7 @@ public class AudioManager : MonoBehaviour, IBegin
         SetBgmForScene(scene.name);
     }
 
-    /// <summary>
+    /*/// <summary>
     /// 씬 이름에 따라 적절한 BGM 설정
     /// </summary>
     /// <param name="sceneName">현재 씬 이름</param>
@@ -86,13 +143,13 @@ public class AudioManager : MonoBehaviour, IBegin
     {
         AudioClip selectedBgm = null;
 
-        if (sceneName == "Joohun")
+        if (sceneName == "Title")
         {
-            selectedBgm = bgmClips[0];
+            selectedBgm = bgmClips[(int)BFX.MainTitle];
         }
-        else if (sceneName == "MiniGameTest")
+        else if (sceneName == "1015Main")
         {
-            selectedBgm = bgmClips[1];
+            selectedBgm = bgmClips[(int)BFX.Morning];
         }
         else
         {
@@ -104,14 +161,15 @@ public class AudioManager : MonoBehaviour, IBegin
             bgmPlayer.clip = selectedBgm;
             bgmPlayer.Play();
         }
-    }
-
+    }*/
 
     /// <summary>
-    /// BGM 및 SFX 사운드 플레이어 초기화
+    /// 오디오 플레이어 초기화
     /// </summary>
-    void Start()
+    /// <returns></returns>
+    void Init()
     {
+        // BGM Player 초기화
         GameObject bgmObject = new GameObject("BgmPlayer");
         bgmObject.transform.parent = transform;
         bgmPlayer = bgmObject.AddComponent<AudioSource>();
@@ -120,6 +178,7 @@ public class AudioManager : MonoBehaviour, IBegin
         bgmPlayer.volume = bgmVolume;
         bgmPlayer.outputAudioMixerGroup = bgmMixer;
 
+        // SFX Player 초기화
         GameObject sfxObject = new GameObject("SfxPlayer");
         sfxObject.transform.parent = transform;
         sfxPlayers = new AudioSource[sfxChannels];
@@ -130,31 +189,133 @@ public class AudioManager : MonoBehaviour, IBegin
             sfxPlayers[index].volume = sfxVolume;
             sfxPlayers[index].outputAudioMixerGroup = sfxMixer;
         }
-    }
 
-    /// <summary>
-    /// 효과음 플레이
-    /// </summary>
-    /// <param name="sfx"></param>
-    public void PlaySfx(SFX sfx)
-    {
-        for (int index = 0; index < sfxPlayers.Length; index++)
+        sfxDictionary = new Dictionary<SFX, AudioClip>();
+        foreach (SoundSFX pair in sfxSoundList)
         {
-            int loopIndex = (index + sfxChannelIndex) % sfxPlayers.Length;
-
-            if (sfxPlayers[loopIndex].isPlaying)
+            if (!sfxDictionary.ContainsKey(pair.sfx))
             {
-                continue;
+                sfxDictionary.Add(pair.sfx, pair.sfxClips);
             }
-
-            sfxChannelIndex = loopIndex;
-            sfxPlayers[loopIndex].clip = sfxClips[(int)sfx];
-            sfxPlayers[loopIndex].Play();
-            break;
+            else
+            {
+                Debug.LogWarning($"AudioManager: {pair.sfx} 키가 sfxSoundList에 중복으로 존재합니다.");
+            }
         }
     }
 
     /// <summary>
+    /// 씬 이름에 따라 적절한 BGM 설정
+    /// </summary>
+    /// <param name="sceneName">현재 씬 이름</param>
+    private void SetBgmForScene(string sceneName)
+    {
+        AudioClip selectedBgm = null;
+
+        switch (sceneName)
+        {
+            case "Title":
+                selectedBgm = bgmClips[(int)BGM.MainTitle];
+                break;
+            case "1015Main":
+                selectedBgm = bgmClips[(int)BGM.Morning];
+                break;
+            default:
+                return;
+        }
+
+        Debug.Log($"BGM : {selectedBgm.name}");
+
+        if (sceneName == null)
+        {
+            Debug.LogWarning($"'{sceneName}'에 대한 BGM 설정이 없습니다. 기본값을 사용합니다.");
+            selectedBgm = bgmClips[(int)BGM.Morning];
+        }
+
+        if (selectedBgm != null && bgmPlayer.clip != selectedBgm)
+        {
+            bgmPlayer.Stop();
+            bgmPlayer.clip = selectedBgm;
+            bgmPlayer.Play();
+        }
+    }
+
+    public void PlayBgm(BGM bgm)
+    {
+        int bgmIndex = (int)bgm;
+
+        if (bgmIndex < 0 || bgmIndex >= bgmClips.Length)
+        {
+            Debug.LogWarning($"PlayBgm: {bgm.ToString()}에 해당하는 bgmClip이 없습니다.");
+            return;
+        }
+
+        AudioClip newClip = bgmClips[bgmIndex];
+
+        if (bgmPlayer.clip != newClip)
+        {
+            bgmPlayer.Stop();
+            bgmPlayer.clip = newClip;
+            bgmPlayer.Play();
+        }
+    }
+
+    /// <summary>
+    /// 현재 재생 중인 BGM을 멈춥니다.
+    /// </summary>
+    public void StopBgm()
+    {
+        bgmPlayer.Stop();
+    }
+
+    /// <summary>
+    /// SFX 재생 
+    /// </summary>
+    /// <returns></returns>
+    public void PlaySfx(SFX sfx)
+    {
+        /*int sfxIndex = (int)sfx;
+
+        if (sfxIndex < 0 || sfxIndex >= sfxClips.Length)
+        {
+            return;
+        }
+
+        for (int index = 0; index < sfxPlayers.Length; index++)
+        {
+            int loopIndex = (index + sfxChannelIndex) % sfxPlayers.Length;
+
+            if (!sfxPlayers[loopIndex].isPlaying)
+            {
+                sfxChannelIndex = loopIndex;
+                sfxPlayers[loopIndex].clip = sfxClips[sfxIndex];
+                sfxPlayers[loopIndex].Play();
+                break;
+            }
+        }*/
+
+        if (!sfxDictionary.ContainsKey(sfx) || sfxDictionary[sfx] == null)
+            return;
+
+        AudioClip clipToPlay = sfxDictionary[sfx];
+
+        for(int index = 0; index <sfxPlayers.Length; index++)
+        {
+            int loopIndex = (index + sfxChannelIndex) % sfxPlayers.Length;
+
+            if(!sfxPlayers[loopIndex].isPlaying)
+            {
+                sfxChannelIndex = loopIndex;
+
+                sfxPlayers[loopIndex].clip = clipToPlay;
+                sfxPlayers[loopIndex].Play();
+
+                break;
+            }
+        }
+    }
+
+    /*/// <summary>
     ///  볼륨 믹서 셋팅 및 저장
     /// </summary>
     /// <param name="volume"></param>
@@ -184,6 +345,6 @@ public class AudioManager : MonoBehaviour, IBegin
     {
         audioMixer.GetFloat(volumeName, out float value);
         return Mathf.Pow(10, value / 20);
-    }
+    }*/
 
 }
