@@ -124,15 +124,16 @@ public class WeaponUseUtils
             }
 
             // 인벤토리 업데이트 
-            InventoryUiMain.instance.IconRefresh();            
-
-            // 공격 딜레이
-            yield return new WaitForSeconds(data.weaponDelay);
+            InventoryUiMain.instance.IconRefresh();
+		    
         }
-        finally
+		finally
         {
             // 플레이어 속도 복구
             PlayerCore.Instance.speed = originalSpeed;
         }
+        
+        // 공격 딜레이
+        yield return new WaitForSeconds(data.weaponDelay);
     }
 }
