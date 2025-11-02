@@ -24,7 +24,9 @@ public class AudioManager : MonoBehaviour, IBegin
         MainTitle,
         Morning,
         Night,
-        MistOfTheDead
+        MistOfTheDead,
+        Siren,
+        Thunderstorm,
     }
 
     /// <summary>
@@ -53,17 +55,17 @@ public class AudioManager : MonoBehaviour, IBegin
         EatingFood,
         Drink,
         UseComsumpitem,
+        BeforeFishing,
         GetFishing,
         OpenBox,
-        BeforeFishing,
         SuccessCrafting,
         GreatSuccessCrafting,
         InstallingObject,
         InstallObject,
         RotateInstallTypeObject,
         DestroyedObject,
-        BalistaAttack,
         Hit_Object,
+        BalistaAttack,
         ActivatedSpiketrap,
         BeforeAttack_BlackFog,
         AfterAttack_BlackFog,
@@ -75,10 +77,11 @@ public class AudioManager : MonoBehaviour, IBegin
         Thunder,
         FortifyObject,
         ItemGet,
-        To_Night,
+        ToNight,
         MeetEnemy,
         Punch1_Player,
-        Hit
+        Hit,
+        Take
     }
 
     /*[Header("Vol UI")]
