@@ -6,6 +6,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(FOVController))]
 public class MarinerAI : MarinerBase, IBegin
 {
+    private Coroutine nightRoamRoutine;
+    private bool isNightRoaming;
     public bool isCharmed = false;
     public NavMeshAgent Agent => agent;
 
@@ -170,6 +172,9 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void TransitionToDaytime()
     {
+        if (nightRoamRoutine != null) { StopCoroutine(nightRoamRoutine); nightRoamRoutine = null; }
+        isNightRoaming = false;
+
         isSecondPriorityStarted = false;
         CancelCurrentRepair();
         Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 전환");
@@ -189,6 +194,12 @@ public class MarinerAI : MarinerBase, IBegin
     private void HandleDaytimeBehavior()
     {
         if (IsDead) return;
+
+        if (GameManager.Instance.TimeUntilNight() <= 30f && !isNightRoaming)
+        {
+            OnNightApproaching();
+            return;
+        }
 
         // 전투 중이 아닐 때만 타겟 탐지
         if (!isChasing && target == null)
@@ -227,7 +238,11 @@ public class MarinerAI : MarinerBase, IBegin
         }
         else
         {
-            if (!isRepairing && !isSecondPriorityStarted)
+            if (GameManager.Instance.TimeUntilNight() <= 30f)
+            {
+                OnNightApproaching();
+            }
+            else
             {
                 StartRepair();
             }
@@ -374,6 +389,12 @@ public class MarinerAI : MarinerBase, IBegin
 
     public override IEnumerator StartSecondPriorityAction()
     {
+        if (!GameManager.Instance.IsDaytime || GameManager.Instance.TimeUntilNight() <= 30f)
+        {
+            isSecondPriorityStarted = false;
+            OnNightApproaching();
+            yield break;
+        }
         // 인벤토리 체크 - 7개 이상이면 보관함으로 이동
         MarinerInventory inventory = GetComponent<MarinerInventory>();
         if (inventory != null && inventory.ShouldMoveToStorage())
@@ -455,21 +476,18 @@ public class MarinerAI : MarinerBase, IBegin
         }
         else
         {
-            // 기존 파밍 시스템
             Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
             var needRepairList = MarinerManager.Instance.GetNeedsRepair();
+            isSecondPriorityStarted = false;
+
             if (needRepairList.Count > 0)
-            {
-                isSecondPriorityStarted = false;
                 StartRepair();
-            }
-            else
-            {
-                StartCoroutine(StartSecondPriorityAction());
-            }
+
+            yield break;
         }
+
     }
 
     protected override float GetRepairSuccessRate()
@@ -479,12 +497,18 @@ public class MarinerAI : MarinerBase, IBegin
 
     protected override void OnNightApproaching()
     {
-        MarinerManager.Instance.StoreItemsAndReturnToBase(this);
+        // 이미 돌고 있으면 재시작 금지
+        if (nightRoamRoutine != null) return;
+        nightRoamRoutine = StartCoroutine(NightApproachRoutine());
     }
+
+
+
 
     public override void WhenDestroy()
     {
         GameManager.Instance.MarinerDiedCount();
+        PlayerCore.Instance.ReduceMentalOnMarinerDie();
         base.WhenDestroy();
     }
 
@@ -545,4 +569,94 @@ public class MarinerAI : MarinerBase, IBegin
             StartCoroutine(StartSecondPriorityAction());
         }
     }
+
+    private IEnumerator NightApproachRoutine()
+    {
+        if (isNightRoaming) yield break;
+        isNightRoaming = true;
+        Debug.Log($"승무원 {marinerId}: 야간 루틴 시작 - 수납 시도 후 랜덤 이동");
+
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+
+        // 즉시 모든 작업 중단
+        isSecondPriorityStarted = false;
+        isRepairing = false;
+        isChasing = false;
+        target = null;
+
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+            isShowingAttackBox = false;
+        }
+
+        // 수납 로직 (필요 시)
+        var inventory = GetComponent<MarinerInventory>();
+        if (inventory != null && inventory.GetAllItem() > 0)
+        {
+            var storage = GameObject.FindWithTag("Engine");
+            if (storage != null && agent != null && agent.isOnNavMesh)
+            {
+                agent.SetDestination(storage.transform.position);
+                while (!IsArrived())
+                {
+                    if (target != null || isChasing)
+                    {   // 적 만나면 전투로
+                        isNightRoaming = false;
+                        nightRoamRoutine = null;
+                        yield break;
+                    }
+                    yield return null;
+                }
+
+                var storageInventory = storage.GetComponent<InventoryBase>();
+                if (storageInventory != null)
+                {
+                    inventory.TransferAllItemsToStorage(storageInventory);
+                    Debug.Log($"승무원 {marinerId}: 보관함 도착 및 수납 완료");
+                }
+                else
+                {
+                    // 보관함에 InventoryBase 없음 → 제거 후 이동
+                    var itemsToRemove = new List<SItemStack>();
+                    for (int i = 0; i < inventory.itemLists.Count; i++)
+                        if (inventory.itemLists[i] != null)
+                            itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
+                    if (itemsToRemove.Count > 0) inventory.Remove(itemsToRemove.ToArray());
+                }
+            }
+            else
+            {
+                // 보관함 없거나 agent 불가 → 일단 이동 시작
+                if (agent != null && agent.isOnNavMesh) SetRandomDestination();
+                yield return new WaitForSeconds(0.5f);
+            }
+        }
+        else
+        {
+            // 아이템 없음 → 바로 이동 시작
+            if (agent != null && agent.isOnNavMesh) SetRandomDestination();
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        //  낮의 마지막 30초 + 밤 동안 계속 배회
+        while (GameManager.Instance != null &&
+               (GameManager.Instance.TimeUntilNight() <= 30f || !GameManager.Instance.IsDaytime))
+        {
+            if (target != null || isChasing) break;    // 적 만나면 전투로 전환
+            if (agent != null && agent.isOnNavMesh)
+            {
+                if (!agent.hasPath || agent.remainingDistance < 0.5f)
+                    SetRandomDestination();
+            }
+            yield return new WaitForSeconds(3f);
+        }
+
+        isNightRoaming = false;
+        nightRoamRoutine = null;
+        Debug.Log($"승무원 {marinerId}: 야간 루틴 종료");
+    }
+
+
 }
