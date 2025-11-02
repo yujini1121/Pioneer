@@ -109,6 +109,7 @@ public class MarinerBase : CreatureBase
 
     protected virtual void EnterWanderingState()
     {
+        Debug.Log("base nterWanderingState 실행");
         SetRandomDirection();
         currentState = CrewState.Wandering;
         stateTimer = moveDuration;
@@ -135,6 +136,7 @@ public class MarinerBase : CreatureBase
 
     protected void SetRandomDirection()
     {
+        Debug.Log("base SetRandomDirection 실행");
         float angle = Random.Range(0f, 360f);
         moveDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
     }

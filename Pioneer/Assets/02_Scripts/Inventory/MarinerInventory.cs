@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class MarinerInventory : InventoryBase
     [SerializeField] private float interactionRange = 4f;
 
     [Header("UI")]
-    [SerializeField] private GameObject exclamationMarkImage;
+    [SerializeField] private SpriteRenderer exclamationMarkSprite;
 
     private Transform playerTransform;
 
@@ -47,15 +48,14 @@ public class MarinerInventory : InventoryBase
     /// </summary>
     private void CheckForExclamationMark()
     {
-        if (exclamationMarkImage == null) return;
+        if (exclamationMarkSprite == null) return;
 
         int totalItems = GetAllItem();
-
         bool shouldShowExclamation = totalItems > 0;
 
-        if (exclamationMarkImage.activeSelf != shouldShowExclamation)
+        if (exclamationMarkSprite.enabled != shouldShowExclamation)
         {
-            exclamationMarkImage.SetActive(shouldShowExclamation);
+            exclamationMarkSprite.enabled = shouldShowExclamation;
         }
     }
 
