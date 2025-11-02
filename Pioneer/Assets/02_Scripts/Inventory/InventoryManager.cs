@@ -232,8 +232,10 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(101, 100));
         Add(new SItemStack(102, 100));
         Add(new SItemStack(103, 100));
-        Add(new SItemStack(30001, 200));
+        Add(new SItemStack(30001, 99999));
+        Add(new SItemStack(30003, 99999));
         Add(new SItemStack(20001, 1, 100));
         Add(new SItemStack(40001, 200));
+        Add(new SItemStack(40009, 50));
     }
 }

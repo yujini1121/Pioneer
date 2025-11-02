@@ -1302,6 +1302,158 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1946448377}
   m_CullTransparentMesh: 1
+--- !u!1 &2052874923
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2052874925}
+  - component: {fileID: 2052874924}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2052874924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2052874923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd3492c49b5cded4a9b1ae1aace4df28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioMixer: {fileID: 24100000, guid: 137f23854aa20134cb87ead5fce4fffc, type: 2}
+  bgmMixer: {fileID: -7324082347854527624, guid: 137f23854aa20134cb87ead5fce4fffc,
+    type: 2}
+  sfxMixer: {fileID: -2851685100006189842, guid: 137f23854aa20134cb87ead5fce4fffc,
+    type: 2}
+  bgmClips:
+  - {fileID: 8300000, guid: 067256d65754c2b4ca7d7efa22fadd87, type: 3}
+  - {fileID: 8300000, guid: f5d3a3421dc5a4e478607ecd24f2a81d, type: 3}
+  - {fileID: 8300000, guid: 300dbcbb3472ca6458bd97633488dda2, type: 3}
+  - {fileID: 8300000, guid: b2574f05ffe75d444838085e7f9a71b8, type: 3}
+  - {fileID: 8300000, guid: 8d49b1afaba867e47b91eeb6f505d1e5, type: 3}
+  - {fileID: 8300000, guid: 25098ccf32cadaf4db578448256e7bed, type: 3}
+  bgmVolume: 0.1
+  sfxSoundList:
+  - sfx: 0
+    sfxClips: {fileID: 8300000, guid: 9aa669456cdeb2846b43e44075680bbf, type: 3}
+  - sfx: 4
+    sfxClips: {fileID: 8300000, guid: 26b45df119f8232489b74cdbd9a57cae, type: 3}
+  - sfx: 3
+    sfxClips: {fileID: 8300000, guid: 148e840eb7f51a84986cb2a3a54a623b, type: 3}
+  - sfx: 2
+    sfxClips: {fileID: 8300000, guid: 7ac8a34f63b904244bcc6c2baac92101, type: 3}
+  - sfx: 1
+    sfxClips: {fileID: 8300000, guid: ccf24004624e27042ba1782d1358bb72, type: 3}
+  - sfx: 5
+    sfxClips: {fileID: 8300000, guid: f75bcad01e7ca1744af736620209feed, type: 3}
+  - sfx: 8
+    sfxClips: {fileID: 8300000, guid: 9ead0d0913da9a74dac18af2a010968d, type: 3}
+  - sfx: 6
+    sfxClips: {fileID: 8300000, guid: b855800b8a36f6d4c9bd86b1ba3072a9, type: 3}
+  - sfx: 9
+    sfxClips: {fileID: 8300000, guid: 409390142dd74f14498cbf6dc92903b9, type: 3}
+  - sfx: 7
+    sfxClips: {fileID: 8300000, guid: fba3c96d8985b1044a2d64493bba5f11, type: 3}
+  - sfx: 10
+    sfxClips: {fileID: 8300000, guid: 12c0f0dc2d878e449b993503e9853e6e, type: 3}
+  - sfx: 11
+    sfxClips: {fileID: 8300000, guid: 412c5285db4c11b48b32531fdb6d4d18, type: 3}
+  - sfx: 12
+    sfxClips: {fileID: 8300000, guid: 13e427040a5542a4c9e605770a419418, type: 3}
+  - sfx: 13
+    sfxClips: {fileID: 8300000, guid: cb37f416678a391438dabf294639ca8c, type: 3}
+  - sfx: 14
+    sfxClips: {fileID: 8300000, guid: 0318cd137d428844f82cba6483ff0016, type: 3}
+  - sfx: 15
+    sfxClips: {fileID: 8300000, guid: 6edf3bfd24a0d9a458ddafd872ad796c, type: 3}
+  - sfx: 16
+    sfxClips: {fileID: 8300000, guid: ec1513b200de26e428d4918dbd77c7af, type: 3}
+  - sfx: 17
+    sfxClips: {fileID: 8300000, guid: 040c6eaa9e94ff341a31d14971fdf410, type: 3}
+  - sfx: 18
+    sfxClips: {fileID: 8300000, guid: 7c6e00bbfa914e242a4f949c92f281be, type: 3}
+  - sfx: 19
+    sfxClips: {fileID: 8300000, guid: 2cf01325072426544b0ca0cd9ddb0690, type: 3}
+  - sfx: 20
+    sfxClips: {fileID: 8300000, guid: ee7ea18085c36ee4c8cb581e4556473c, type: 3}
+  - sfx: 21
+    sfxClips: {fileID: 8300000, guid: a4a0956ebc28a0744ab9a058213352e8, type: 3}
+  - sfx: 22
+    sfxClips: {fileID: 8300000, guid: 5c9209ab90229e241b5a7e26307f2df6, type: 3}
+  - sfx: 23
+    sfxClips: {fileID: 8300000, guid: de77c70270e9f324a848d691f813df31, type: 3}
+  - sfx: 24
+    sfxClips: {fileID: 8300000, guid: 6cf904fecb8141d419ca99e4e35d07bb, type: 3}
+  - sfx: 25
+    sfxClips: {fileID: 8300000, guid: 910117ad7e17ace4480a0891fde50b9a, type: 3}
+  - sfx: 26
+    sfxClips: {fileID: 8300000, guid: 945dbb25c8225c34885df7b87867d23d, type: 3}
+  - sfx: 27
+    sfxClips: {fileID: 8300000, guid: 1699a5b93d0f1104b9cf58505c279f67, type: 3}
+  - sfx: 28
+    sfxClips: {fileID: 8300000, guid: 3073c953cadfd6d4695e5ace8a793fa9, type: 3}
+  - sfx: 29
+    sfxClips: {fileID: 8300000, guid: c6da5205bf41a9d4aad7386d7d07bf9a, type: 3}
+  - sfx: 30
+    sfxClips: {fileID: 8300000, guid: 84ef50baff2e3494fa0acc1ca6528c2d, type: 3}
+  - sfx: 31
+    sfxClips: {fileID: 8300000, guid: 7131f1302973dc54f845041a1e460d26, type: 3}
+  - sfx: 32
+    sfxClips: {fileID: 8300000, guid: 91abf2ff42c6a4043b64b11880cc320a, type: 3}
+  - sfx: 33
+    sfxClips: {fileID: 8300000, guid: 8bbbae9ff07bad4478908a3264b0b4c2, type: 3}
+  - sfx: 34
+    sfxClips: {fileID: 8300000, guid: 599825f4c4bf6244289e55558497da8f, type: 3}
+  - sfx: 35
+    sfxClips: {fileID: 8300000, guid: 6ddfdeda3a4b2334d81fc3cffbb8363c, type: 3}
+  - sfx: 36
+    sfxClips: {fileID: 8300000, guid: b8ce9be04d4f7bc449b97a478dad1732, type: 3}
+  - sfx: 37
+    sfxClips: {fileID: 8300000, guid: 1e740c23138c4e341a1d18bda16918b0, type: 3}
+  - sfx: 38
+    sfxClips: {fileID: 8300000, guid: 06461ee527b100b48bf8f198f271cdc8, type: 3}
+  - sfx: 39
+    sfxClips: {fileID: 8300000, guid: ebda3dbcf4ef84d41a9b1ef4638a43b0, type: 3}
+  - sfx: 40
+    sfxClips: {fileID: 8300000, guid: ece27ff559c2dac41a130710396641f1, type: 3}
+  - sfx: 41
+    sfxClips: {fileID: 8300000, guid: 48a363a0741f2084ca8206e120479f09, type: 3}
+  - sfx: 42
+    sfxClips: {fileID: 8300000, guid: 0f6efb63129dd6f44a8dd301ed1fd016, type: 3}
+  - sfx: 43
+    sfxClips: {fileID: 8300000, guid: 2cf42e191209777439cad0e3292acae6, type: 3}
+  - sfx: 44
+    sfxClips: {fileID: 8300000, guid: 3f3efedfcd83c15438e8f08cdfcd4fe2, type: 3}
+  - sfx: 45
+    sfxClips: {fileID: 8300000, guid: c2f62577c494f304b8fe26ca034755cc, type: 3}
+  sfxVolume: 0.2
+  sfxChannels: 10
+--- !u!4 &2052874925
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2052874923}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1312,3 +1464,4 @@ SceneRoots:
   - {fileID: 1938937676}
   - {fileID: 105226884}
   - {fileID: 36224259}
+  - {fileID: 2052874925}

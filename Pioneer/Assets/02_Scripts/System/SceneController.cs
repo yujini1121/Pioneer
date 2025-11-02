@@ -39,6 +39,13 @@ public class SceneController : MonoBehaviour, IBegin
             SceneManager.GetActiveScene().name != sceneToLoad &&
             Input.GetKeyDown(KeyCode.Space))
         {
+            AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
+        }
+        if (!isLoading &&
+            SceneManager.GetActiveScene().name != sceneToLoad &&
+            Input.GetKeyUp(KeyCode.Space))
+        {
+            AudioManager.instance.PlaySfx(AudioManager.SFX.GetFishing);
             LoadScene(sceneToLoad);
         }
     }

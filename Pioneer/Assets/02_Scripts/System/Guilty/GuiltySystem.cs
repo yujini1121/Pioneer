@@ -12,7 +12,15 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
     public bool canUseESC = false;
 
-    
+    public int GuiltyLevel
+    {
+        get
+        {
+            return Mathf.Clamp(level + (PlayerCore.Instance.IsMentalDebuff() ? 1 : 0), 0, 4);
+        }
+    }
+
+
 
     [Header("Dark Object")]
     public Vector3 forwardVector; // 카메라가 사선으로 배치된 경우, 이는 중요합니다.
@@ -46,7 +54,6 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
     public void ChangeWeight(int value)
     {
-
         currentAttackWeight += value;
         currentAttackWeight = Mathf.Clamp(currentAttackWeight, 0, maxAttackWeight);
 
@@ -62,7 +69,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
 
         
-        if (level >= 4)
+        if (GuiltyLevel >= 4)
         {
             canUseESC = false;
         }
@@ -70,7 +77,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
         {
             canUseESC = true;
         }
-        if (level >= 3)
+        if (GuiltyLevel >= 3)
         {
             if (darkFogCoroutine == null)
             {
@@ -86,7 +93,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
             }
         }
 
-        if (level >= 2)
+        if (GuiltyLevel >= 2)
         {
             volumeScreenTransformation.enabled = true;
 
@@ -104,7 +111,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
                 
             volumeScreenTransformation.enabled = false;
         }
-        if (level >= 1)
+        if (GuiltyLevel >= 1)
         {
             if (darkObjectCoroutine == null)
             {
