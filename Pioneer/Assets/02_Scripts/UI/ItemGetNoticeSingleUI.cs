@@ -9,6 +9,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
     public Coroutine myCoroutine;
     public Image icon;
     public TextMeshProUGUI text;
+    public int index;
 
     public void Show(SItemStack target)
     {
@@ -21,7 +22,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
         IEnumerator mCoroutine()
         {
             yield return new WaitForSeconds(5);
-            Destroy(gameObject);
+            ItemGetNoticeUI.Instance.RemoveUI(index, this);
         }
         myCoroutine = StartCoroutine(mCoroutine());
     }

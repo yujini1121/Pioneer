@@ -124,6 +124,10 @@ public class InventoryManager : InventoryBase
         {
             ItemDropManager.instance.Drop(item, positionDrop.transform.position);
         }
+        else
+        {
+            ItemGetNoticeUI.Instance.Add(item);
+        }
         
         InventoryUiMain.instance.IconRefresh();
     }
