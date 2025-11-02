@@ -46,7 +46,7 @@ public class PlayerStatUI : MonoBehaviour
 
     void Update()
     {
-        
+        UpdateUI();
     }
 
 #warning 버그 터지면 수정해야할 부분
@@ -66,6 +66,18 @@ public class PlayerStatUI : MonoBehaviour
         PlayerCore.PlayerMentalChanged -= UpdateMentalUI;
     }
 
+    void UpdateUI()
+    {
+        UpdateHpUI(PlayerCore.Instance.hp);
+        UpdateFullnessUI(PlayerCore.Instance.currentFullness);
+        UpdateMentalUI(PlayerCore.Instance.CurrentMental);
+        UpdateBasicStatUI();
+        UpdatePlayerGrowStatUI(GrowStatType.Combat);
+        UpdatePlayerGrowStatUI(GrowStatType.Crafting);
+        UpdatePlayerGrowStatUI(GrowStatType.Fishing);
+    }
+    
+
     void InitUi()
     {
         hpBar.maxValue = PlayerCore.Instance.maxHp;
@@ -74,7 +86,7 @@ public class PlayerStatUI : MonoBehaviour
 
         UpdateHpUI(PlayerCore.Instance.hp);
         UpdateFullnessUI(PlayerCore.Instance.currentFullness);
-        UpdateMentalUI(PlayerCore.Instance.currentMental);
+        UpdateMentalUI(PlayerCore.Instance.CurrentMental);
         UpdateBasicStatUI();
         UpdatePlayerGrowStatUI(GrowStatType.Combat);
         UpdatePlayerGrowStatUI(GrowStatType.Crafting);
@@ -99,8 +111,6 @@ public class PlayerStatUI : MonoBehaviour
 
     public void UpdateBasicStatUI()
     {
-
-
         SItemStack selectedItem = InventoryManager.Instance.SelectedSlotInventory;
         SItemWeaponTypeSO weaponOrNull = null;
 

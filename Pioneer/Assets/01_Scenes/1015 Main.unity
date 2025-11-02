@@ -7655,8 +7655,8 @@ MonoBehaviour:
   additionFishing_TreasureChest: {fileID: 525013884302910974}
   additionFishing_AddIngredients: {fileID: 4472624296474266024}
   hpBar: {fileID: 1469611485}
-  fullnessBar: {fileID: 96295163}
-  mentalBar: {fileID: 1859603818}
+  fullnessBar: {fileID: 1859603818}
+  mentalBar: {fileID: 96295163}
 --- !u!114 &959569056050453425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12540,14 +12540,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dropItemTable:
   - itemData: {fileID: 11400000, guid: 2f3e674e1365bec4e8cb2a25e0f18762, type: 2}
-    dropProbability: 0.2
+    dropProbability: 0.3
   - itemData: {fileID: 11400000, guid: 870d647744a32dd4f93441c5aea4e8eb, type: 2}
     dropProbability: 0.15
   - itemData: {fileID: 11400000, guid: f32955ee9c05fff46ba275e6367a87e1, type: 2}
     dropProbability: 0.15
   - itemData: {fileID: 11400000, guid: 732df024ec85cec488bca87b76650e61, type: 2}
-    dropProbability: 0.1
-  - itemData: {fileID: 11400000, guid: aec89c3cbea9cc543925b6f42a8c6e71, type: 2}
     dropProbability: 0.1
   - itemData: {fileID: 11400000, guid: b2d74b7b5e01fc643924cc0e8448b2c7, type: 2}
     dropProbability: 0.075
@@ -19312,12 +19310,12 @@ MonoBehaviour:
   spawnLiftY: 0.05
   spawnRootName: __SPAWNPOINTS__
   enemySpawnTable:
-  - total: 4
-    minion: 4
-    crawler: 0
+  - total: 2
+    minion: 0
+    crawler: 2
     titan: 0
-  - total: 7
-    minion: 4
+  - total: 3
+    minion: 0
     crawler: 3
     titan: 0
   - total: 10

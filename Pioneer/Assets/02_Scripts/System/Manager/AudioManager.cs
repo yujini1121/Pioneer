@@ -77,7 +77,8 @@ public class AudioManager : MonoBehaviour, IBegin
         ItemGet,
         To_Night,
         MeetEnemy,
-        Punch1_Player
+        Punch1_Player,
+        Hit
     }
 
     /*[Header("Vol UI")]
@@ -274,6 +275,7 @@ public class AudioManager : MonoBehaviour, IBegin
     /// <returns></returns>
     public void PlaySfx(SFX sfx)
     {
+
         /*int sfxIndex = (int)sfx;
 
         if (sfxIndex < 0 || sfxIndex >= sfxClips.Length)
