@@ -20,6 +20,21 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         InitZombieStats();
         InitZombieVisuals();
 
+        if (attackRangeObject == null)
+        {
+            // 자식 중 이름이 "AttackRange"인 오브젝트를 탐색
+            Transform found = transform.Find("AttackRange");
+            if (found != null)
+            {
+                attackRangeObject = found.gameObject;
+                Debug.Log($"[ZombieMarinerAI] AttackRange 자동 연결 성공: {attackRangeObject.name}");
+            }
+            else
+            {
+                Debug.LogWarning("[ZombieMarinerAI] AttackRange 오브젝트를 찾지 못했습니다!");
+            }
+        }
+
         gameObject.layer = LayerMask.NameToLayer("Enemy");
         targetLayer = LayerMask.GetMask("Mariner", "Player");
     }
