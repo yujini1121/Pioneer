@@ -2381,8 +2381,11 @@ MonoBehaviour:
   angle: 180
   texture: {fileID: 0}
   mesh: {fileID: 0}
+  _lastMesh: {fileID: 0}
+  _meshVertices: []
+  _meshIndices: 
+  _meshSize: {x: 0, y: 0}
   lineOfSightMask:
-    serializedVersion: 2
     m_Bits: 128
   lineOfSightRaycastCount: 24
   lineOfSightPenetration: 0
@@ -2392,6 +2395,9 @@ MonoBehaviour:
   multithreading: 0
   cellBased: 0
   cellTestPoint: 1
+  _distances: []
+  _visibleCells: []
+  _transform: {fileID: 0}
 --- !u!1001 &1189123427
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3032,6 +3038,7 @@ MonoBehaviour:
   updateUnits: 1
   updateAutomatically: 1
   outputToTexture: 1
+  _isPerformingManualUpdate: 0
   fadeDuration: 0.2
   blurType: -1
   blurIterations: 1
@@ -3041,6 +3048,20 @@ MonoBehaviour:
   threads: 2
   maxMillisecondsPerFrame: 2
   cpuFogValues: 0
+  _currentUnitProcessing: 0
+  _timeSinceLastUpdate: 0
+  <fogTexture>k__BackingField: {fileID: 0}
+  <fogValues>k__BackingField: []
+  _cachedFogValues: []
+  _drawThreadTaskPoolCount: 0
+  <onFogTextureChanged>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+    m_CallsDirty: 1
+  <onRenderFogTexture>k__BackingField:
+    m_PersistentCalls:
+      m_Calls: []
+    m_CallsDirty: 1
   _textureReadShader: {fileID: 7200000, guid: 9a0959a7677d7fc488418a729a5a81c0, type: 3}
 --- !u!4 &1448947049
 Transform:
@@ -27822,8 +27843,11 @@ MonoBehaviour:
   angle: 180
   texture: {fileID: 0}
   mesh: {fileID: 0}
+  _lastMesh: {fileID: 0}
+  _meshVertices: []
+  _meshIndices: 
+  _meshSize: {x: 0, y: 0}
   lineOfSightMask:
-    serializedVersion: 2
     m_Bits: 128
   lineOfSightRaycastCount: 24
   lineOfSightPenetration: 0
@@ -27833,6 +27857,9 @@ MonoBehaviour:
   multithreading: 0
   cellBased: 0
   cellTestPoint: 1
+  _distances: []
+  _visibleCells: []
+  _transform: {fileID: 0}
 --- !u!23 &8573141634702029874
 MeshRenderer:
   m_ObjectHideFlags: 0
