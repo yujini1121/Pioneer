@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour, IBegin
 {
@@ -84,10 +82,10 @@ public class AudioManager : MonoBehaviour, IBegin
         Take
     }
 
-    /*[Header("Vol UI")]
-    [SerializeField] private Slider masterVolSlider;
-    [SerializeField] private Slider bgmVolSlider;
-    [SerializeField] private Slider sfxVolSlider;*/
+    [Header("Vol UI")]
+    // public Slider masterVolSlider;
+    public Slider bgmVolSlider;
+    public Slider sfxVolSlider;
 
     [Header("Audio Mixer 설정")]
     public AudioMixer audioMixer;
@@ -99,7 +97,7 @@ public class AudioManager : MonoBehaviour, IBegin
     public float bgmVolume;
     private AudioSource bgmPlayer;
 
-    [Header("SFX 설정")]
+    [Header("SFX 설정 !! 사운드 추가는 인스펙터와 SFX Enum에 둘 다 추가해야합니다 !!")]
     //public AudioClip[] sfxClips;
     public List<SoundSFX> sfxSoundList;
     public float sfxVolume;
@@ -124,48 +122,10 @@ public class AudioManager : MonoBehaviour, IBegin
         Init();
     }
 
-    void OnEnable()
+    void Start()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        PlayBgm(BGM.MainTitle);
     }
-
-    void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        SetBgmForScene(scene.name);
-    }
-
-    /*/// <summary>
-    /// 씬 이름에 따라 적절한 BGM 설정
-    /// </summary>
-    /// <param name="sceneName">현재 씬 이름</param>
-    private void SetBgmForScene(string sceneName)
-    {
-        AudioClip selectedBgm = null;
-
-        if (sceneName == "Title")
-        {
-            selectedBgm = bgmClips[(int)BFX.MainTitle];
-        }
-        else if (sceneName == "1015Main")
-        {
-            selectedBgm = bgmClips[(int)BFX.Morning];
-        }
-        else
-        {
-            Debug.LogWarning($"'{sceneName}'에 대한 BGM 설정이 없습니다. 기본값을 사용합니다.");
-        }
-
-        if (selectedBgm != null && bgmPlayer.clip != selectedBgm)
-        {
-            bgmPlayer.clip = selectedBgm;
-            bgmPlayer.Play();
-        }
-    }*/
 
     /// <summary>
     /// 오디오 플레이어 초기화
@@ -209,39 +169,29 @@ public class AudioManager : MonoBehaviour, IBegin
     }
 
     /// <summary>
-    /// 씬 이름에 따라 적절한 BGM 설정
+    /// 슬라이더 초기화 (오디오 믹서의 현재 값 반영)
     /// </summary>
-    /// <param name="sceneName">현재 씬 이름</param>
-    private void SetBgmForScene(string sceneName)
+    /// <returns></returns>
+    public void InitSliders()
     {
-        AudioClip selectedBgm = null;
+        float volume;
 
-        switch (sceneName)
+        if (audioMixer.GetFloat("BGMVol", out volume))
         {
-            case "Title":
-                selectedBgm = bgmClips[(int)BGM.MainTitle];
-                break;
-            case "1015Main":
-                selectedBgm = bgmClips[(int)BGM.Morning];
-                break;
-            default:
-                return;
+            bgmVolSlider.value = Mathf.Pow(10, volume / 20);
         }
 
-        Debug.Log($"BGM : {selectedBgm.name}");
-
-        if (sceneName == null)
+        if (audioMixer.GetFloat("SFXVol", out volume))
         {
-            Debug.LogWarning($"'{sceneName}'에 대한 BGM 설정이 없습니다. 기본값을 사용합니다.");
-            selectedBgm = bgmClips[(int)BGM.Morning];
+            sfxVolSlider.value = Mathf.Pow(10, volume / 20);
         }
+    }
 
-        if (selectedBgm != null && bgmPlayer.clip != selectedBgm)
-        {
-            bgmPlayer.Stop();
-            bgmPlayer.clip = selectedBgm;
-            bgmPlayer.Play();
-        }
+    public void InitListenerVolSliders()
+    {
+        // masterVolSlider.onValueChanged.AddListener(SetMasterVolume);
+        bgmVolSlider.onValueChanged.AddListener(SetBgmVolume);
+        sfxVolSlider.onValueChanged.AddListener(SetSfxVolume);
     }
 
     public void PlayBgm(BGM bgm)
@@ -278,27 +228,6 @@ public class AudioManager : MonoBehaviour, IBegin
     /// <returns></returns>
     public void PlaySfx(SFX sfx)
     {
-
-        /*int sfxIndex = (int)sfx;
-
-        if (sfxIndex < 0 || sfxIndex >= sfxClips.Length)
-        {
-            return;
-        }
-
-        for (int index = 0; index < sfxPlayers.Length; index++)
-        {
-            int loopIndex = (index + sfxChannelIndex) % sfxPlayers.Length;
-
-            if (!sfxPlayers[loopIndex].isPlaying)
-            {
-                sfxChannelIndex = loopIndex;
-                sfxPlayers[loopIndex].clip = sfxClips[sfxIndex];
-                sfxPlayers[loopIndex].Play();
-                break;
-            }
-        }*/
-
         if (!sfxDictionary.ContainsKey(sfx) || sfxDictionary[sfx] == null)
             return;
 
@@ -320,36 +249,33 @@ public class AudioManager : MonoBehaviour, IBegin
         }
     }
 
-    /*/// <summary>
-    ///  볼륨 믹서 셋팅 및 저장
+    /// <summary>
+    ///  슬라이더 값을 데시벨로 변경 및 저장
     /// </summary>
     /// <param name="volume"></param>
-    public void SetMasterVolume(float volume)
+    public void SetVolume(string volumeName, float volume)
     {
         volume = Mathf.Clamp(volume, 0.001f, 1f);
-        audioMixer.SetFloat("MasterVol", Mathf.Log10(volume) * 20);
-        PlayerPrefs.SetFloat("MasterVol", volume);
+        audioMixer.SetFloat(volumeName, Mathf.Log10(volume) * 20);
+        PlayerPrefs.SetFloat(volumeName, volume);
+        PlayerPrefs.Save();
     }
 
-    public void SetBgmVolume(float volume)
+    public void SetBgmVolume(float volume) => SetVolume("BGMVol", volume);
+    public void SetSfxVolume(float volume) => SetVolume("SFXVol", volume);
+
+    public void LoadVolumes()
     {
-        volume = Mathf.Clamp(volume, 0.001f, 1f);
-        audioMixer.SetFloat("BGMVol", Mathf.Log10(volume) * 20);
-        PlayerPrefs.SetFloat("BGMVol", volume);
-        Debug.Log("BGM Volume Set: " + volume);
+        float masterVol = PlayerPrefs.GetFloat("MasterVol", 1f);
+        float bgmVol = PlayerPrefs.GetFloat("BGMVol", 1f);
+        float sfxVol = PlayerPrefs.GetFloat("SFXVol", 1f);
+
+        // if (masterVolSlider != null) masterVolSlider.value = masterVol;
+        if (bgmVolSlider != null) bgmVolSlider.value = bgmVol;
+        if (sfxVolSlider != null) sfxVolSlider.value = sfxVol;
+
+        // SetMasterVolume(masterVol);
+        SetBgmVolume(bgmVol);
+        SetSfxVolume(sfxVol);
     }
-
-    public void SetSfxVolume(float volume)
-    {
-        volume = Mathf.Clamp(volume, 0.001f, 1f);
-        audioMixer.SetFloat("SFXVol", Mathf.Log10(volume) * 20);
-        PlayerPrefs.SetFloat("SFXVol", volume);
-    }
-
-    public float GetVolume(string volumeName)
-    {
-        audioMixer.GetFloat(volumeName, out float value);
-        return Mathf.Pow(10, value / 20);
-    }*/
-
 }
