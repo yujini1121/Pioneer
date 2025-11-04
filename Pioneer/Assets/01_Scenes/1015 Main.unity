@@ -2249,7 +2249,7 @@ MonoBehaviour:
   m_LayerMask:
     serializedVersion: 2
     m_Bits: 114663
-  m_UseGeometry: 0
+  m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0
   m_IgnoreNavMeshAgent: 1
@@ -2257,7 +2257,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.083333336
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
   m_BuildHeightMesh: 0
@@ -7388,7 +7388,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 1.1
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 7
   m_ObstacleAvoidanceType: 4
 --- !u!114 &79225216837330220
 MonoBehaviour:
@@ -22428,8 +22428,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 3000
-  nightDuration: 3000
+  dayDuration: 10
+  nightDuration: 10
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -22447,10 +22447,10 @@ MonoBehaviour:
   spawnLiftY: 0.05
   spawnRootName: __SPAWNPOINTS__
   enemySpawnTable:
-  - total: 2
-    minion: 0
+  - total: 5
+    minion: 2
     crawler: 2
-    titan: 0
+    titan: 1
   - total: 3
     minion: 0
     crawler: 3
