@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +6,7 @@ public class MarinerManager : MonoBehaviour
 {
     public static MarinerManager Instance;
 
-    [Header("°¨¿° ¼³Á¤(¼öÁ¤ ÇÊ¿ä)")]
+    [Header("ê°ì—¼ ì„¤ì •(ìˆ˜ì • í•„ìš”)")]
     public float infectionStartTime = 180f;
     public float infectionInterval = 10f;
     private bool infectionStarted = false;
@@ -37,11 +37,11 @@ public class MarinerManager : MonoBehaviour
 
 
     /// <summary>
-    /// ½Â¹«¿øµéÀ» ÇÏ³ª¾¿ °¨¿°½ÃÅ°´Â ÄÚ·çÆ¾
+    /// ìŠ¹ë¬´ì›ë“¤ì„ í•˜ë‚˜ì”© ê°ì—¼ì‹œí‚¤ëŠ” ì½”ë£¨í‹´
     /// </summary>
     private IEnumerator InfectMarinersOneByOne()
     {
-        Debug.Log("°¨¿° ÇÁ·Î¼¼½º ½ÃÀÛµÊ");
+        Debug.Log("ê°ì—¼ í”„ë¡œì„¸ìŠ¤ ì‹œì‘ë¨");
 
         var marinerQueue = new List<MarinerAI>(allMariners);
 
@@ -54,40 +54,41 @@ public class MarinerManager : MonoBehaviour
             }
         }
 
-        Debug.Log("¸ğµç ½Â¹«¿ø °¨¿° ¿Ï·á");
+        Debug.Log("ëª¨ë“  ìŠ¹ë¬´ì› ê°ì—¼ ì™„ë£Œ");
     }
 
     /// <summary>
-    /// °³º° ½Â¹«¿øÀ» °¨¿°½ÃÅ°´Â ÇÔ¼ö
+    /// ê°œë³„ ìŠ¹ë¬´ì›ì„ ê°ì—¼ì‹œí‚¤ëŠ” í•¨ìˆ˜
     /// </summary>
     private void InfectMariner(MarinerAI mariner)
     {
         if (mariner == null) return;
 
-        Debug.Log($"°¨¿° ¹ß»ı: ½Â¹«¿ø {mariner.marinerId}");
+        Debug.Log($"ê°ì—¼ ë°œìƒ: ìŠ¹ë¬´ì› {mariner.marinerId}");
 
         int id = mariner.marinerId;
-        Transform marinerTransform = mariner.transform;
+        GameObject obj = mariner.gameObject;
 
-        // MarinerAI ½ºÅ©¸³Æ®¸¸ Á¦°Å
-        Destroy(mariner);
+        DestroyImmediate(mariner);
 
-        // ´ÙÀ½ ÇÁ·¹ÀÓ¿¡ InfectedMarinerAI ºÎÂø
-        StartCoroutine(AttachInfectedAI(marinerTransform, id));
+        InfectedMarinerAI infected = obj.AddComponent<InfectedMarinerAI>();
+        infected.marinerId = id;
+
+        Debug.Log($"ìŠ¹ë¬´ì› {id}: ê°ì—¼ ìƒíƒœë¡œ ì „í™˜ ì™„ë£Œ (InfectedMarinerAI í™œì„±í™”)");
     }
 
     private IEnumerator AttachInfectedAI(Transform marinerTransform, int id)
     {
-        yield return null; // ÇÑ ÇÁ·¹ÀÓ ´ë±â (Destroy ¹İ¿µ ´ë±â)
+        yield return null; // í•œ í”„ë ˆì„ ëŒ€ê¸° (Destroy ë°˜ì˜ ëŒ€ê¸°)
 
         InfectedMarinerAI infected = marinerTransform.gameObject.AddComponent<InfectedMarinerAI>();
         infected.marinerId = id;
 
-        Debug.Log($"½Â¹«¿ø {id}: °¨¿° »óÅÂ·Î ÀüÈ¯ ¿Ï·á (InfectedMarinerAI È°¼ºÈ­)");
+        Debug.Log($"ìŠ¹ë¬´ì› {id}: ê°ì—¼ ìƒíƒœë¡œ ì „í™˜ ì™„ë£Œ (InfectedMarinerAI í™œì„±í™”)");
     }
 
     /// <summary>
-    /// ½Â¹«¿øÀ» µî·ÏÇÏ´Â ÇÔ¼ö
+    /// ìŠ¹ë¬´ì›ì„ ë“±ë¡í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public void RegisterMariner(MarinerAI mariner)
     {
@@ -98,7 +99,7 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ö¸® ´ë»ó ¸ñ·ÏÀ» ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
+    /// ìˆ˜ë¦¬ ëŒ€ìƒ ëª©ë¡ì„ ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public void UpdateRepairTargets()
     {
@@ -110,13 +111,13 @@ public class MarinerManager : MonoBehaviour
             if (obj.currentHP < obj.maxHP * 0.5f)
             {
                 repairTargets.Add(obj);
-                Debug.Log($"¼ö¸® ´ë»ó Ãß°¡: {obj.name}/ HP: {obj.currentHP}/{obj.maxHP}");
+                Debug.Log($"ìˆ˜ë¦¬ ëŒ€ìƒ ì¶”ê°€: {obj.name}/ HP: {obj.currentHP}/{obj.maxHP}");
             }
         }
     }
 
     /// <summary>
-    /// ¼ö¸®°¡ ÇÊ¿äÇÑ ¿ÀºêÁ§Æ® ¸ñ·ÏÀ» ¹İÈ¯ÇÏ´Â ÇÔ¼ö
+    /// ìˆ˜ë¦¬ê°€ í•„ìš”í•œ ì˜¤ë¸Œì íŠ¸ ëª©ë¡ì„ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public List<DefenseObject> GetNeedsRepair()
     {
@@ -130,7 +131,7 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½Â¹«¿øÀÌ ¼ö¸®ÇÒ ¼ö ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    /// ìŠ¹ë¬´ì›ì´ ìˆ˜ë¦¬í•  ìˆ˜ ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public bool CanMarinerRepair(int marinerId, DefenseObject target)
     {
@@ -138,26 +139,26 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½Â¹«¿øÀÌ ¾ÆÀÌÅÛÀ» ÀúÀåÇÏ°í ¼÷¼Ò·Î µ¹¾Æ°¡´Â ÇÔ¼ö
+    /// ìŠ¹ë¬´ì›ì´ ì•„ì´í…œì„ ì €ì¥í•˜ê³  ìˆ™ì†Œë¡œ ëŒì•„ê°€ëŠ” í•¨ìˆ˜
     /// </summary>
     /*public void StoreItemsAndReturnToBase(MarinerAI mariner)
     {
-        Debug.Log($"½Â¹«¿ø [{mariner.marinerId}] ¾ÆÀÌÅÛ ÀúÀå ÈÄ ¼÷¼Ò º¹±Í");
+        Debug.Log($"ìŠ¹ë¬´ì› [{mariner.marinerId}] ì•„ì´í…œ ì €ì¥ í›„ ìˆ™ì†Œ ë³µê·€");
 
         if (HasStorage())
         {
-            Vector3 dormPosition = new Vector3(0f, 0f, 0f); // ¿¹½Ã
+            Vector3 dormPosition = new Vector3(0f, 0f, 0f); // ì˜ˆì‹œ
             mariner.StartCoroutine(mariner.MoveToThenReset(dormPosition));
         }
         else
         {
-            Debug.Log("º¸°üÇÔ ¾øÀ½ ");
+            Debug.Log("ë³´ê´€í•¨ ì—†ìŒ ");
             mariner.StartCoroutine(mariner.StartSecondPriorityAction());
         }
     }*/
 
     /// <summary>
-    /// ÀúÀå¼Ò°¡ ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    /// ì €ì¥ì†Œê°€ ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public bool HasStorage()
     {
@@ -165,7 +166,7 @@ public class MarinerManager : MonoBehaviour
     }
 
    /* /// <summary>
-    /// ½ºÆ÷³Ê°¡ Á¡À¯µÇ¾î ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    /// ìŠ¤í¬ë„ˆê°€ ì ìœ ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public bool IsSpawnerOccupied(int index)
     {
@@ -173,7 +174,7 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½ºÆ÷³Ê¸¦ Á¡À¯ÇÏ´Â ÇÔ¼ö
+    /// ìŠ¤í¬ë„ˆë¥¼ ì ìœ í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public void OccupySpawner(int index)
     {
@@ -181,7 +182,7 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½ºÆ÷³Ê Á¡À¯¸¦ ÇØÁ¦ÇÏ´Â ÇÔ¼ö
+    /// ìŠ¤í¬ë„ˆ ì ìœ ë¥¼ í•´ì œí•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public void ReleaseSpawner(int index)
     {
@@ -189,7 +190,7 @@ public class MarinerManager : MonoBehaviour
     }*/
 
     /// <summary>
-    /// ¼ö¸® ¿ÀºêÁ§Æ®°¡ Á¡À¯µÇ¾î ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    /// ìˆ˜ë¦¬ ì˜¤ë¸Œì íŠ¸ê°€ ì ìœ ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public bool IsRepairObjectOccupied(DefenseObject obj)
     {
@@ -197,7 +198,7 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ö¸® ¿ÀºêÁ§Æ® Á¡À¯¸¦ ½ÃµµÇÏ´Â ÇÔ¼ö
+    /// ìˆ˜ë¦¬ ì˜¤ë¸Œì íŠ¸ ì ìœ ë¥¼ ì‹œë„í•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public bool TryOccupyRepairObject(DefenseObject obj, int marinerId)
     {
@@ -211,7 +212,7 @@ public class MarinerManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ö¸® ¿ÀºêÁ§Æ® Á¡À¯¸¦ ÇØÁ¦ÇÏ´Â ÇÔ¼ö
+    /// ìˆ˜ë¦¬ ì˜¤ë¸Œì íŠ¸ ì ìœ ë¥¼ í•´ì œí•˜ëŠ” í•¨ìˆ˜
     /// </summary>
     public void ReleaseRepairObject(DefenseObject obj)
     {

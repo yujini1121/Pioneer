@@ -6,12 +6,16 @@ using UnityEngine.AI;
 public class InfectedMarinerAI : MarinerBase, IBegin
 {
     [System.Serializable]
+
+
     public struct ItemDrop
     {
         public int itemID;
         public float probability;
     }
 
+
+    // 고정 드랍 테이블 (확률 합은 1.0 근처 권장)
     private static readonly ItemDrop[] FixedItemDrops = new ItemDrop[]
     {
         new ItemDrop { itemID = 30001, probability = 0.20f },
@@ -26,15 +30,32 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         new ItemDrop { itemID = 40009, probability = 0.06f }
     };
 
-
     // 감염된 승무원 고유 설정
     public int marinerId;
+    private bool hasTransformedToZombie = false; // 중복 전환 가드
 
     // 밤 혼란 관련
-    private float nightConfusionTime; // 랜덤 혼란 시간
+    private float nightConfusionTime; // 혼란 유지 시간(초)
     private bool isNight = false;
     private bool isConfused = false;
     private bool isNightBehaviorStarted = false;
+
+    // 프리-나이트(밤 30초 전) 루틴 관리
+    private Coroutine nightRoamRoutine = null;
+    private bool isNightRoaming = false;
+
+    // 2순위 루틴 핸들(자기 재시작/중복 방지용)
+    private Coroutine secondPriorityRoutine = null;
+
+    // 유틸 가드
+    private bool IsPreNightActive =>
+        GameManager.Instance != null &&
+        GameManager.Instance.IsDaytime &&
+        GameManager.Instance.TimeUntilNight() <= 30f;
+
+    private bool IsNightPhaseActive =>
+        GameManager.Instance != null &&
+        !GameManager.Instance.IsDaytime;
 
     private void Awake()
     {
@@ -46,71 +67,94 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         attackDelayTime = 1f;
 
         fov = GetComponent<FOVController>();
-
         gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
     public override void Start()
     {
-        base.Start();  // 먼저 호출
+        base.Start(); 
+        if (fov != null) fov.Start();
 
-        if (fov != null)
-        {
-            fov.Start();
-        }
-         
-        nightConfusionTime = 10f; // 변신 시간
-    }
+        nightConfusionTime = 5f; // 혼란 유지 시간(필요 시 20f 등으로 조정)
 
-    private void Update()
-    {
-        if (IsDead) return;
-
-        if (GameManager.Instance.IsDaytime && !isNightBehaviorStarted)
-        {
-            isNight = false;
-
-            if (!isRepairing)
-            {
-                StartRepair();
-            }
-        }
-        else if (!isNight)
+        if (GameManager.Instance != null && !GameManager.Instance.IsDaytime && !isNightBehaviorStarted && !isConfused)
         {
             isNight = true;
             StartCoroutine(NightBehaviorRoutine());
         }
     }
 
-    /// <summary>
-    /// 감염된 승무원의 2순위 행동 (가짜 파밍)
-    /// </summary>
+    private void Update()
+    {
+        if (IsDead) return;
+
+        // 프리-나이트: 다른 낮 로직을 모두 막고, 프리-나이트 루틴만 돌림
+        if (IsPreNightActive)
+        {
+            if (!isNightRoaming && !isNightBehaviorStarted && !isConfused)
+            {
+                OnNightApproaching(); // 프리-나이트 루틴 시작
+            }
+            return; // 낮 로직(수리/파밍 재기동) 차단
+        }
+
+        // 밤 시작 감지 및 혼란→좀비 전환 루틴 트리거
+        if (GameManager.Instance != null && GameManager.Instance.IsDaytime && !isNightBehaviorStarted)
+        {
+            isNight = false;
+
+            // 낮이고 프리-나이트도 아니면: 평상시 루틴(수리 등)
+            if (!isRepairing && !IsPreNightActive)
+            {
+                StartRepair();
+            }
+        }
+        else if (!isNight) // 낮→밤 전환 시점
+        {
+            isNight = true;
+            StartCoroutine(NightBehaviorRoutine());
+        }
+    }
+
+    // ========= 2순위(가짜 파밍) =========
     public override IEnumerator StartSecondPriorityAction()
     {
-        // 인벤토리 체크 - 7개 이상이면 보관함으로 이동 (또는 버리기)
+        //프리-나이트/야간/야간 혼란/프리-나이트 배회 중이면 시작 자체를 금지
+        if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused)
+        {
+            Debug.Log($"감염승무원 {marinerId}: 파밍 시작 거부 (프리-나이트/야간 상태)");
+            yield break;
+        }
+
+        secondPriorityRoutine = StartCoroutine(SecondPriorityBody());
+        yield return secondPriorityRoutine;
+        secondPriorityRoutine = null;
+    }
+
+    private IEnumerator SecondPriorityBody()
+    {
+        // 인벤토리 가득 시: 보관함으로 이동(감염자는 결국 버림)
         MarinerInventory inventory = GetComponent<MarinerInventory>();
         if (inventory != null && inventory.ShouldMoveToStorage())
         {
             Debug.Log($"감염된 승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 아이템 처리");
 
-            // 보관함 찾기
             GameObject storage = GameObject.FindWithTag("Engine");
             if (storage != null)
             {
-                // 감염된 승무원은 보관함으로 이동하지만 아이템을 버림
                 if (agent != null && agent.isOnNavMesh)
                 {
                     agent.SetDestination(storage.transform.position);
 
                     while (!IsArrived())
                     {
-                        if (!isSecondPriorityStarted)
-                        {
-                            yield break;
-                        }
+                        // 다른 곳에서 중단되면 즉시 종료
+                        if (!isSecondPriorityStarted) yield break;
 
-                        if (GameManager.Instance.TimeUntilNight() <= 30f)
+                        //프리-나이트 진입 시 즉시 이탈
+                        if (IsPreNightActive)
                         {
+                            Debug.Log("감염된 승무원 밤되기 30초전 작동 → 2순위 즉시 중단");
                             OnNightApproaching();
                             yield break;
                         }
@@ -119,20 +163,14 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
                     Debug.Log($"감염된 승무원 {marinerId}: 보관함 도착 - 아이템 버림");
 
-                    // 감염된 승무원은 아이템을 저장하지 않고 버림
+                    // 감염자는 저장하지 않고 버림
                     List<SItemStack> itemsToRemove = new List<SItemStack>();
                     for (int i = 0; i < inventory.itemLists.Count; i++)
-                    {
                         if (inventory.itemLists[i] != null)
-                        {
                             itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
-                        }
-                    }
 
                     if (itemsToRemove.Count > 0)
-                    {
                         inventory.Remove(itemsToRemove.ToArray());
-                    }
 
                     Debug.Log($"감염된 승무원 {marinerId}: 아이템 버림 완료 - 1순위 행동 재확인");
 
@@ -145,7 +183,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             {
                 Debug.LogWarning($"감염된 승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
 
-                SetRandomDestination();
+                if (agent != null && agent.isOnNavMesh)
+                    SetRandomDestination();
                 yield return new WaitForSeconds(3f);
 
                 isSecondPriorityStarted = false;
@@ -155,9 +194,15 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
         else
         {
-            // 기존 가짜 파밍 시스템 유지
+            // 가짜 파밍
             Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍");
+
+            // 파밍 도중에도 프리-나이트/야간 진입 시 즉시 중단되도록 내부에서 체크 필요
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
+
+            // 파밍 완료 후에도 프리-나이트면 재시작 금지
+            if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused)
+                yield break;
 
             var needRepairList = MarinerManager.Instance.GetNeedsRepair();
             if (needRepairList.Count > 0)
@@ -167,33 +212,151 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             }
             else
             {
-                StartCoroutine(StartSecondPriorityAction());
+                // 자기 재시작도 가드
+                if (!(IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused))
+                    StartCoroutine(StartSecondPriorityAction());
             }
         }
     }
 
-    /// <summary>
-    /// 감염된 승무원 아이템 처리 (아이템 버림)
-    /// </summary>
-    private void StoreItemsAndReturnToBase()
+    private IEnumerator MoveToMyEdgeAndFarm_WithGuards()
     {
-        Debug.Log("승무원이 감염됨으로 아이템 없음, 버림?");
-        // TODO: 감염된 승무원 아이템 버리는 행동 추가 가능
+
+        float t = 0f;
+        while (t < 3f)
+        {
+            if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused)
+            {
+                Debug.Log($"감염승무원 {marinerId}: 파밍 중단 (프리-나이트/야간 상태)");
+                yield break;
+            }
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        // 파밍 종료 콜백
+        OnPersonalFarmingCompleted();
     }
 
-    /// <summary>
-    /// 밤 혼란 행동
-    /// </summary>
-    /// <summary>
-    /// 밤 혼란 행동 - NavMesh로 한 방향 이동
-    /// </summary>
+    // ========= 프리-나이트(밤 30초 전) =========
+    protected override void OnNightApproaching()
+    {
+        // 좀비 변신 루틴이 이미 시작되었거나 혼란 중이면 프리-나이트 불필요
+        if (isNightBehaviorStarted || isConfused) return;
+
+        if (nightRoamRoutine == null)
+            nightRoamRoutine = StartCoroutine(NightApproachRoutine_Infected());
+    }
+
+    private IEnumerator NightApproachRoutine_Infected()
+    {
+        if (isNightRoaming) yield break;
+        isNightRoaming = true;
+        Debug.Log($"감염 승무원 {marinerId}: 프리-나이트 루틴 시작 (공격 금지, 수납 후 랜덤 이동)");
+
+        // 경로 초기화
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+
+        // 모든 작업/전투 상태 즉시 중단 (교전 금지)
+        isSecondPriorityStarted = false;
+        isRepairing = false;
+        isChasing = false;
+        target = null;
+
+        if (attackRoutine != null) { StopCoroutine(attackRoutine); attackRoutine = null; }
+        isShowingAttackBox = false;
+
+        if (secondPriorityRoutine != null) { StopCoroutine(secondPriorityRoutine); secondPriorityRoutine = null; }
+
+        // 아이템 수납 시도 (보관함 없거나 접근 불가면 전량 버림)
+        var inventory = GetComponent<MarinerInventory>();
+        if (inventory != null && inventory.GetAllItem() > 0)
+        {
+            var storage = GameObject.FindWithTag("Engine");
+            if (storage != null && agent != null && agent.isOnNavMesh)
+            {
+                agent.SetDestination(storage.transform.position);
+
+                // 프리-나이트 동안만 이동 (교전 금지)
+                while (GameManager.Instance != null &&
+                       GameManager.Instance.IsDaytime &&
+                       GameManager.Instance.TimeUntilNight() > 0f &&
+                       !IsArrived())
+                {
+                    target = null;   // 교전 금지
+                    isChasing = false;
+                    yield return null;
+                }
+
+                // 밤 시작되면 프리-나이트 종료
+                if (GameManager.Instance != null && !GameManager.Instance.IsDaytime) goto END;
+
+                var storageInventory = storage.GetComponent<InventoryBase>();
+                if (storageInventory != null)
+                {
+                    inventory.TransferAllItemsToStorage(storageInventory);
+                    Debug.Log($"감염 승무원 {marinerId}: 보관함 수납 완료");
+                }
+                else
+                {
+                    // 보관함에 인벤토리 없음 → 전량 제거(버리기)
+                    var itemsToRemove = new List<SItemStack>();
+                    for (int i = 0; i < inventory.itemLists.Count; i++)
+                        if (inventory.itemLists[i] != null)
+                            itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
+                    if (itemsToRemove.Count > 0) inventory.Remove(itemsToRemove.ToArray());
+                    Debug.Log($"감염 승무원 {marinerId}: 보관함 인벤토리 없음 → 아이템 버림");
+                }
+            }
+            else
+            {
+                // 접근 불가 → 전량 제거(버리기)
+                var itemsToRemove = new List<SItemStack>();
+                for (int i = 0; i < inventory.itemLists.Count; i++)
+                    if (inventory.itemLists[i] != null)
+                        itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
+                if (itemsToRemove.Count > 0) inventory.Remove(itemsToRemove.ToArray());
+                Debug.Log($"감염 승무원 {marinerId}: 보관함 접근 불가 → 아이템 버림");
+            }
+        }
+
+        // 수납/버리기 이후 밤 시작 전까지 랜덤 배회(교전 금지)
+        if (agent != null && agent.isOnNavMesh)
+        {
+            SetRandomDestination();
+            yield return new WaitForSeconds(0.25f);
+
+            while (GameManager.Instance != null &&
+                   GameManager.Instance.IsDaytime &&
+                   GameManager.Instance.TimeUntilNight() > 0f)
+            {
+                target = null; // 교전 금지 유지
+                isChasing = false;
+
+                if (!agent.hasPath || agent.remainingDistance < 0.5f)
+                    SetRandomDestination();
+
+                yield return new WaitForSeconds(2.5f);
+            }
+        }
+
+    END:
+        isNightRoaming = false;
+        nightRoamRoutine = null;
+        Debug.Log($"감염 승무원 {marinerId}: 프리-나이트 루틴 종료 (밤 시작 또는 완료)");
+
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+        ChangeToZombieAI();
+    }
+
+    // ========= 밤 혼란 → 좀비 전환 =========
     private IEnumerator NightBehaviorRoutine()
     {
         isNightBehaviorStarted = true;
         isConfused = true;
         Debug.Log("혼란 상태 시작 - NavMesh로 이동");
 
-        float escapedTime = 0;
+        float escapedTime = 0f;
 
         float angle = Random.Range(0f, 360f);
         Vector3 direction = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0f, Mathf.Sin(angle * Mathf.Deg2Rad)).normalized;
@@ -205,11 +368,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             while (escapedTime < nightConfusionTime)
             {
                 escapedTime += Time.deltaTime;
-
-                Vector3 targetPosition = transform.position + direction * 10f; 
+                Vector3 targetPosition = transform.position + direction * 10f;
                 agent.SetDestination(targetPosition);
-
-                yield return new WaitForSeconds(0.1f); 
+                yield return new WaitForSeconds(0.1f);
             }
 
             agent.isStopped = true;
@@ -227,31 +388,44 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         isConfused = false;
         Debug.Log("혼란 종료 후 좀비 AI로 변경");
 
-        if (agent != null)
-            agent.ResetPath();
+        if (agent != null) agent.ResetPath();
 
         ChangeToZombieAI();
     }
 
-    /// <summary>
-    /// 좀비 AI로 전환
-    /// </summary>
     private void ChangeToZombieAI()
     {
+        if (hasTransformedToZombie) return;
+        hasTransformedToZombie = true;
+
+        Debug.Log("좀비 변신 전 랜덤 이동 시작");
+
+        SetRandomDestination();
+
+        StartCoroutine(TransformAfterDelay());
+    }
+
+    private IEnumerator TransformAfterDelay()
+    {
+        yield return new WaitForSeconds(5f);
+
+        if (agent != null && agent.isOnNavMesh)
+            agent.ResetPath();
+
         Debug.Log("좀비 AI전환");
 
-        // 좀비 AI 추가
         ZombieMarinerAI zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
         zombieAI.marinerId = marinerId;
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");
 
-        // 공격 범위 활성화
         if (zombieAI.attackRangeObject != null)
             zombieAI.attackRangeObject.SetActive(true);
 
         StartCoroutine(DestroyNextFrame());
     }
+
+
 
     private IEnumerator DestroyNextFrame()
     {
@@ -259,43 +433,28 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         Destroy(this);
     }
 
+    // ========= 기타 오버라이드/유틸 =========
 
-    /// <summary>
-    /// 감염된 승무원은 30% 수리 성공률 (70% 실패)
-    /// </summary>
-    protected override float GetRepairSuccessRate()
-    {
-        return 0.3f; // 30% 성공률
-    }
+    // 감염된 승무원은 30% 수리 성공
+    protected override float GetRepairSuccessRate() => 0.3f;
 
-    /// <summary>
-    /// 승무원 ID 반환
-    /// </summary>
-    protected override int GetMarinerId()
-    {
-        return marinerId;
-    }
+    protected override int GetMarinerId() => marinerId;
 
-    /// <summary>
-    /// 승무원 타입 이름 반환
-    /// </summary>
-    protected override string GetCrewTypeName()
-    {
-        return "감염승무원";
-    }
+    protected override string GetCrewTypeName() => "감염승무원";
 
-    /// <summary>
-    /// 밤이 다가올 때 처리 (감염된 승무원 전용)
-    /// </summary>
-    protected override void OnNightApproaching()
+    // 기존 호출 경로가 남아있어도 혼동 방지를 위해 안내 로그만
+    private void StoreItemsAndReturnToBase()
     {
-        StoreItemsAndReturnToBase();
+        Debug.Log("감염 승무원: StoreItemsAndReturnToBase는 사용하지 않음. 프리-나이트 루틴이 처리합니다.");
     }
 
     protected override void OnPersonalFarmingCompleted()
     {
-        int acquiredItemID = GetRandomItemIDByProbability(FixedItemDrops);
+        // 프리-나이트/야간 중이면 보상 지급만 하고 재시작 금지
+        if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused)
+            return;
 
+        int acquiredItemID = GetRandomItemIDByProbability(FixedItemDrops);
         MarinerInventory inventory = GetComponent<MarinerInventory>();
         if (inventory != null)
         {
@@ -303,26 +462,21 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
         Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
-
     }
 
     private int GetRandomItemIDByProbability(ItemDrop[] dropList)
     {
-        float randomValue = Random.value; // 0.0에서 1.0 사이의 무작위 값
+        float randomValue = Random.value; // [0,1)
         float cumulativeProbability = 0f;
 
         foreach (var drop in dropList)
         {
             cumulativeProbability += drop.probability;
-
             if (randomValue <= cumulativeProbability)
-            {
                 return drop.itemID;
-            }
         }
 
-        Debug.LogError("확률 계산 오류: 첫 번째 아이템 반환.");
+        Debug.LogError("확률 합 불일치: 첫 번째 아이템 반환.");
         return dropList.Length > 0 ? dropList[0].itemID : 0;
     }
-
 }
