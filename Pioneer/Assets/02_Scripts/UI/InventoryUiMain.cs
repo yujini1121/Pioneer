@@ -16,15 +16,15 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     [SerializeField] List<GameObject> slotGameObjects;
     [SerializeField] List<GameObject> inventorySlot;
     [SerializeField] List<GameObject> quickSlot;
-    [SerializeField] GameObject imageMouseHoldingItem;
-    [SerializeField] GameObject windowMouse;
+    [SerializeField] GameObject imageMouseHoldingItem; // 마우스
+    [SerializeField] GameObject windowMouse; // 마우스
     [SerializeField] Canvas canvas;
     [SerializeField] TextMeshProUGUI windowMouseText;
     [SerializeField] Button trashButton;
     [SerializeField] Sprite trashOpen;
     [SerializeField] Sprite trashClose;
-    RectTransform followUiRect1;
-    RectTransform followUiRect2;
+    RectTransform followUiRect1; // 마우스
+    RectTransform followUiRect2; // 마우스
     ItemSlotUI[] itemSlotUIs;
     ItemSlotUI mCurrentSelectedHotbarSlot;
 
@@ -32,7 +32,13 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         foreach (GameObject i in inventorySlot)
         {
-            i.SetActive(value);
+            CanvasGroup cg = i.GetComponent<CanvasGroup>();
+            cg.alpha = value ? 1f : 0f;
+            cg.blocksRaycasts = value;
+            cg.interactable = value;
+
+
+            //i.SetActive(value);
         }
     }
 
@@ -60,7 +66,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         //Debug.Log($">> 아이템 스택 : {currentSelectedSlot[0].index} / {mItemStack.id} {mItemStack.amount}");
 
-        windowMouseText.text = GetInfomation(mItemStack);
+        windowMouseText.text = GetInfomation(mItemStack); // 마우스
     }
 
     public void ClickSlot(int index)

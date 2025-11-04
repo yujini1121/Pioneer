@@ -221,6 +221,7 @@ public class InGameUI : MonoBehaviour, IBegin
         {
             g.SetActive(isPannelExpand);
         }
+        InventoryUiMain.instance.InventoryExpand(isPannelExpand);
         if (isPannelExpand == false)
         {
             if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
