@@ -84,10 +84,10 @@ public class CrawlerAI : EnemyBase, IBegin
         hp = maxHp;
         attackDamage = 10;
         speed = 1;
-        fov.viewRadius = 6;
+        fov.viewRadius = 4;
         attackRange = 2;
         attackDelayTime = 3;
-        currentAttackTarget = SetMastTarget();
+        // currentAttackTarget = SetMastTarget();
     }
 
     private bool CanMove()
@@ -117,7 +117,7 @@ public class CrawlerAI : EnemyBase, IBegin
         }
 
         Vector3 destination = currentAttackTarget.GetComponent<Collider>().ClosestPoint(transform.position);
-        if (Vector3.Distance(agent.destination, destination) > 0.5f)
+        if (Vector3.Distance(agent.destination, destination) > 0.1f)
         {
             agent.SetDestination(destination);
         }

@@ -201,7 +201,7 @@ public class PlayerController : MonoBehaviour
     {
         isCharging = false;
         currentChargeTime = 0f;
-
+        playerFishing.StopFishingLoop();
         if (chargeSlider != null) 
             chargeSlider.value = 0f;
         if (cencleChargeSlider != null)

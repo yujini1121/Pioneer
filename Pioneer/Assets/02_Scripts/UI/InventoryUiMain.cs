@@ -117,50 +117,52 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 			return;
         }
 
-        // 플레이어 아이템 핸들
-        Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
-        if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
+        if(PlayerCore.Instance.currentState != PlayerCore.PlayerState.ActionFishing)
         {
-            // 빈 아이템 주먹 공격
+            // 플레이어 아이템 핸들
+            Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
+            if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
+            {
+                // 빈 아이템 주먹 공격
 
-            PlayerCore.Instance.BeginCoroutine(WeaponUseUtils.AttackCoroutine(
-                PlayerCore.Instance,
-                PlayerCore.Instance.dummyHandAttackItem,
-                PlayerCore.Instance.CalculatedHandAttack));
+                PlayerCore.Instance.BeginCoroutine(WeaponUseUtils.AttackCoroutine(
+                    PlayerCore.Instance,
+                    PlayerCore.Instance.dummyHandAttackItem,
+                    PlayerCore.Instance.CalculatedHandAttack));
+            }
+            else
+            {
+                PlayerCore.Instance.BeginCoroutine(
+                    ItemTypeManager.Instance.itemTypeSearch[
+                        InventoryManager.Instance.SelectedSlotInventory.id].Use(
+                                PlayerCore.Instance,
+                                InventoryManager.Instance.SelectedSlotInventory
+                            )
+                    );
+            }
+
+            InventoryUiMain.instance.IconRefresh();
+            PlayerStatUI.Instance.UpdateBasicStatUI();
+
+            //if (InventoryManager.Instance.SelectedSlotInventory != null)
+            //{
+            //    SItemTypeSO receved = ItemTypeManager.
+            //                            Instance.
+            //                            types[InventoryManager.Instance.SelectedSlotInventory.id];
+            //    // 만약 무기다 && 내구도가 있다
+            //    SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
+            //    if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
+            //    {
+            //        PlayerCore.Instance.BeginCoroutine()
+            //        PlayerCore.Instance.Attack(weaponObject);
+            //        return;
+            //    }
+            //    // 소비형 아이템이다
+            //    SItemConsumeTypeSO consumeObject = receved as SItemConsumeTypeSO;
+            //}
+            // 내구도가 만료된 무기 혹은 맨손
         }
-        else
-        {
-            PlayerCore.Instance.BeginCoroutine(
-                ItemTypeManager.Instance.itemTypeSearch[
-                    InventoryManager.Instance.SelectedSlotInventory.id].Use(
-                            PlayerCore.Instance,
-                            InventoryManager.Instance.SelectedSlotInventory
-                        )
-                );
-        }
-
-        InventoryUiMain.instance.IconRefresh();
-		PlayerStatUI.Instance.UpdateBasicStatUI();
-
-		//if (InventoryManager.Instance.SelectedSlotInventory != null)
-		//{
-		//    SItemTypeSO receved = ItemTypeManager.
-		//                            Instance.
-		//                            types[InventoryManager.Instance.SelectedSlotInventory.id];
-		//    // 만약 무기다 && 내구도가 있다
-		//    SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
-		//    if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
-		//    {
-		//        PlayerCore.Instance.BeginCoroutine()
-		//        PlayerCore.Instance.Attack(weaponObject);
-		//        return;
-		//    }
-		//    // 소비형 아이템이다
-		//    SItemConsumeTypeSO consumeObject = receved as SItemConsumeTypeSO;
-		//}
-		// 내구도가 만료된 무기 혹은 맨손
-
-	}
+    }
 
     public void Sort()
     {

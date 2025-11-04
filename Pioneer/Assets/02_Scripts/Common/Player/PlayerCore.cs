@@ -70,7 +70,13 @@ public class PlayerCore : CreatureBase, IBegin
             }
         }
     }
-        // [ 포만감 변수 ]  
+    public bool IsAttackDamageDebuff
+    {
+        get => IsMentalDebuff();
+    }
+
+    [Header("포만감 변수")]
+    // [ 포만감 변수 ]  
     public int currentFullness;                                            // 현재 포만감 값
     public int maxFullness = 100;                                          // 최대 포만감 값
     int minFullness = 0;                                            // 최소 포만감 값
@@ -82,8 +88,10 @@ public class PlayerCore : CreatureBase, IBegin
     [SerializeField] private float fullnessDecreaseTime = 5f;       // 포만감 기본 감소 속도(시간)
     [SerializeField] private float fullnessModifier = 1.3f;         // 포만감 감소 속도 증가값 => 30%
 
-        // [ 정신력 변수 ]
+    [Header("정신력 변수")]
+    //[ 정신력 변수 ]
     public int currentMental;                                              // 현재 정신력 값
+    public int CurrentMental => currentMental;
     public int maxMental = 100;                                            // 최대 정신력 값
     int minMental = 0;                                              // 최소 정신력 값
     bool isDrunk = false;                                           // 만취 상태 여부
@@ -106,10 +114,12 @@ public class PlayerCore : CreatureBase, IBegin
     private bool isattacked = false;
     public float duabilityReducePrevent = 0f;
     public int DuabilityReducePrevent => Mathf.RoundToInt(duabilityReducePrevent);
+    int currentAttackDamage = 0;
 
 
 
-	public PlayerAttack PlayerAttack => playerAttack;
+
+    public PlayerAttack PlayerAttack => playerAttack;
     public float AttackHeight => attackHeight;
     public LayerMask EnemyLayer => enemyLayer;
 
@@ -178,7 +188,11 @@ public class PlayerCore : CreatureBase, IBegin
 
 
         fov.DetectTargets(enemyLayer);
+        if(!isDrunk)
+        { 
+        }
         NearEnemy();
+        //MentalState();
         // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
     }
     public override void WhenDestroy()
@@ -227,12 +241,6 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     // 공격
     // =============================================================
-    //public void Attack(SItemWeaponTypeSO weapon)
-    //{
-    //    if (currentState != PlayerState.Default) return;
-    //    if (isAttacking) return;
-    //    StartCoroutine(AttackCoroutine(weapon, InventoryManager.Instance.SelectedSlotInventory));
-    //}
 
     public bool IsMentalDebuff()
     {
@@ -252,48 +260,6 @@ public class PlayerCore : CreatureBase, IBegin
         yield return coroutine;
         isRunningCoroutineItem = false;
     }
-
-    //private IEnumerator AttackCoroutine(SItemWeaponTypeSO weapon, SItemStack itemWithState)
-    //{
-    //    isAttacking = true;
-
-    //    yield return new WaitForSeconds(weapon.weaponAnimation);
-
-    //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-    //    RaycastHit hit;
-    //    if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-    //    {
-    //        Vector3 dir = (hit.point - transform.position).normalized;
-    //        dir.y = 0f;
-    //        transform.rotation = Quaternion.LookRotation(dir);
-
-    //        Vector3 position = transform.position + dir * 0.5f;
-    //        position.y = attackHeight;
-    //        playerAttack.transform.position = position;
-    //        playerAttack.transform.rotation = Quaternion.LookRotation(dir);
-
-    //        // TODO: 공격 애니메이션 시작 시간 추가해야 함!!!!!!!!!!! (0.6초)
-    //        // playerAttack.gameObject.SetActive(true);
-    //        playerAttack.EnableAttackCollider();
-    //        playerAttack.damage = (int)(weapon.weaponDamage) + this.attackDamage;
-
-    //        if (itemWithState != null)
-    //        {
-    //            itemWithState.duability -= weapon.duabilityRedutionPerHit;
-    //        }
-
-    //        InventoryUiMain.instance.IconRefresh();
-    //    }
-
-    //    // 공격 애니메이션 이후 지연 시간 (0.4초)
-    //    //yield return new WaitForSeconds(attackDelayTime);
-    //    yield return new WaitForSeconds(weapon.weaponDelay);
-
-    //    // playerAttack.gameObject.SetActive(false);
-    //    playerAttack.DisableAttackCollider();
-    //    isAttacking = false;
-    //}
 
     public override void TakeDamage(int damage, GameObject attacker)
     {
@@ -349,7 +315,7 @@ public class PlayerCore : CreatureBase, IBegin
 
             yield return new WaitForSeconds(currentDecreaseTime);
 
-            if(currentFullness > 0)
+            if(currentFullness >= 0)
             {
                 currentFullness--;
                 currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
@@ -383,6 +349,7 @@ public class PlayerCore : CreatureBase, IBegin
                 speed = defaultSpeed * 1.2f;
                 break;
             case FullnessState.Hungry:
+            case FullnessState.Starving:
                 speed = defaultSpeed * 0.7f;
                 break;
             default:
@@ -420,7 +387,10 @@ public class PlayerCore : CreatureBase, IBegin
         for(int i = 0; i < fullnessStarvingMax; i++)
         {
             yield return new WaitForSeconds(1f);
-            TakeDamage(1, this.gameObject);
+            //TakeDamage(1, this.gameObject);
+            hp -= 1;
+            hp = Mathf.Clamp(hp, 0, maxHp);
+            PlayerHpChanged?.Invoke(hp);
         }        
     }
 
@@ -473,49 +443,11 @@ public class PlayerCore : CreatureBase, IBegin
     TODO : 
     ============================================================= */
 
-
-
-    //// 여기 보세요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //void MentalState() // 호출 시점 -> update()
-    //{
-    //    currentAttackDamage = attackDamage;
-    //    if (currentMental < 40 && isApplyDebuff == false)
-    //    {
-    //        // 공격력(5%), 설치 작업 대성공 확률(40%)은 감소, 죄책감 시스템 레벨 증가(1Lv) => 정신력이 40이상이 되면 원래 레벨로 돌아감    
-    //    }
-    //    else
-    //    {
-    //        RemoveMentalDebuff();
-    //    }
-    //}
-
-    //// TODO : 정신력 디버프 (0 ~ 39 사이 값일 때)  구현해야함..
-    //void ApplyMentalDebuff()
-    //{
-    //    isApplyDebuff = true;
-    //    // [[ 공격력 감소 ]]
-
-    //    float debuffAttackDamage = attackDamage * 0.5f; // 현재 공격력의 5% 계산하기 전에 원래 공격력 저장
-    //    attackDamage -= Mathf.RoundToInt(debuffAttackDamage); // 공격력 float형으로 바꿔도 되는지 물어봐야됨.. 지금은 반올림 해서 감소
-
-    //    // [[ 설치 작업 대성공 확률 감소 ]] => 어떻게 할지 생각 좀 해보고.. 지금 확률 관리하는 스크립트가 PlayerCore 스크립트 참조하고 있음
-
-    //    // 죄책감 시스템 레벨 1증가, 
-    //}
-
-    //// TODO : 정신력 디버프 해제
-    //void RemoveMentalDebuff()
-    //{
-    //    attackDamage = currentAttackDamage;
-
-    //}
-    // 여기 까지!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     /// <summary>
     /// 정신력 계산 ? 메서드 
     /// </summary>
     /// <param name="increase"></param>
-    void UpdateMental(int increase)
+    public void UpdateMental(int increase)
     {
         if(isDrunk)
             return;
@@ -526,23 +458,6 @@ public class PlayerCore : CreatureBase, IBegin
         PlayerMentalChanged?.Invoke(currentMental);
 
         // 수치에 따라 디버프 부여,,
-    }
-
-    /// <summary>
-    /// 정신력 올리는 아이템 사용시 호출, 
-    /// </summary>
-    /// <param name="increase"></param>
-    public void UseMentalItem(int increase)
-    {
-        UpdateMental(increase);
-    }
-
-    /// <summary>
-    /// 음식 섭취시 호출, 음식 종류 상관없이 10씩 증가..
-    /// </summary>
-    public void EatFoodMental()
-    {
-        UpdateMental(eatFoodincreaseMental);
     }
 
     /// <summary>
@@ -560,6 +475,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         float reduce = currentMental * reduceMentalOnMarinerDie;
         UpdateMental(Mathf.RoundToInt(-reduce)); // 반올림하고 았는데 그냥 . 아래 수 버릴거면 수정 가능
+        GuiltySystem.instance.CrewDead();
     }
 
     /// <summary>
@@ -594,6 +510,12 @@ public class PlayerCore : CreatureBase, IBegin
     public bool IsDrunk() // 만취상태인지만 리턴하는 메서드 
     {
         return isDrunk;
+    }
+
+    public void StartDrunk()
+    {
+
+        StartCoroutine(Drunk());
     }
 
     // 술 아이템 사용시 호출

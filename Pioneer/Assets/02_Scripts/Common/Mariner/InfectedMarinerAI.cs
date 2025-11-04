@@ -240,27 +240,25 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         Debug.Log("좀비 AI전환");
 
-        // 좀비 AI 활성화
-        ZombieMarinerAI zombieAI = GetComponent<ZombieMarinerAI>();
-        if (zombieAI != null)
-        {
-            zombieAI.enabled = true;
-            zombieAI.marinerId = this.marinerId;
+        // 좀비 AI 추가
+        ZombieMarinerAI zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
+        zombieAI.marinerId = marinerId;
+        zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
+        gameObject.layer = LayerMask.NameToLayer("Enemy");
 
-            // 공격 박스 활성화
-            if (zombieAI.attackRangeObject != null)
-                zombieAI.attackRangeObject.SetActive(true);
+        // 공격 범위 활성화
+        if (zombieAI.attackRangeObject != null)
+            zombieAI.attackRangeObject.SetActive(true);
 
-            // 레이어 변경
-            gameObject.layer = LayerMask.NameToLayer("Enemy");
-
-            // 타겟 레이어 변경
-            zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
-        }
-
-        // 자신(감염된 승무원) 비활성화
-        this.enabled = false;
+        StartCoroutine(DestroyNextFrame());
     }
+
+    private IEnumerator DestroyNextFrame()
+    {
+        yield return null;
+        Destroy(this);
+    }
+
 
     /// <summary>
     /// 감염된 승무원은 30% 수리 성공률 (70% 실패)

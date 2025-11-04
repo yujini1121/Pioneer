@@ -66,14 +66,24 @@ public class MarinerManager : MonoBehaviour
 
         Debug.Log($"감염 발생: 승무원 {mariner.marinerId}");
 
-        InfectedMarinerAI infected = mariner.GetComponent<InfectedMarinerAI>();
-        if (infected != null)
-        {
-            infected.enabled = true;
-            infected.marinerId = mariner.marinerId;
-        }
+        int id = mariner.marinerId;
+        Transform marinerTransform = mariner.transform;
 
-        mariner.enabled = false;
+        // MarinerAI 스크립트만 제거
+        Destroy(mariner);
+
+        // 다음 프레임에 InfectedMarinerAI 부착
+        StartCoroutine(AttachInfectedAI(marinerTransform, id));
+    }
+
+    private IEnumerator AttachInfectedAI(Transform marinerTransform, int id)
+    {
+        yield return null; // 한 프레임 대기 (Destroy 반영 대기)
+
+        InfectedMarinerAI infected = marinerTransform.gameObject.AddComponent<InfectedMarinerAI>();
+        infected.marinerId = id;
+
+        Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
     }
 
     /// <summary>
@@ -130,7 +140,7 @@ public class MarinerManager : MonoBehaviour
     /// <summary>
     /// 승무원이 아이템을 저장하고 숙소로 돌아가는 함수
     /// </summary>
-    public void StoreItemsAndReturnToBase(MarinerAI mariner)
+    /*public void StoreItemsAndReturnToBase(MarinerAI mariner)
     {
         Debug.Log($"승무원 [{mariner.marinerId}] 아이템 저장 후 숙소 복귀");
 
@@ -144,7 +154,7 @@ public class MarinerManager : MonoBehaviour
             Debug.Log("보관함 없음 ");
             mariner.StartCoroutine(mariner.StartSecondPriorityAction());
         }
-    }
+    }*/
 
     /// <summary>
     /// 저장소가 있는지 확인하는 함수

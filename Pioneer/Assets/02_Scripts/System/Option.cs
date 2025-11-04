@@ -7,7 +7,7 @@ using UnityEngine.Audio;
 
 public class Option : MonoBehaviour, IBegin
 {
-    [Header("Vol Slider")]
+    /*[Header("Vol Slider")]
     [SerializeField] private Slider masterVolSlider;
     [SerializeField] private Slider bgmVolSlider;
     [SerializeField] private Slider sfxVolSlider;
@@ -57,5 +57,5 @@ public class Option : MonoBehaviour, IBegin
         masterVolSlider.value = AudioManager.instance.GetVolume("MasterVol");
         bgmVolSlider.value = AudioManager.instance.GetVolume("BGMVol");
         sfxVolSlider.value = AudioManager.instance.GetVolume("SFXVol");
-    }
+    }*/
 }

@@ -8,10 +8,10 @@ public class SceneController : MonoBehaviour, IBegin
 
     [SerializeField] private CanvasGroup fadeCanvasGroup;
     [SerializeField] private float fadeDuration = 1f;
-    [SerializeField] private string sceneToLoad;
+    [SerializeField] public string sceneToLoad;
     [SerializeField] private string allowedSceneName = "Title";
 
-    private bool isLoading = false;
+    public bool isLoading = false;
     private string currentSceneName;
 
     private void Awake()
@@ -35,12 +35,19 @@ public class SceneController : MonoBehaviour, IBegin
 
     private void Update()
     {
-        if (!isLoading &&
+        /*if (!isLoading &&
             SceneManager.GetActiveScene().name != sceneToLoad &&
             Input.GetKeyDown(KeyCode.Space))
         {
-            LoadScene(sceneToLoad);
+            AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
         }
+        if (!isLoading &&
+            SceneManager.GetActiveScene().name != sceneToLoad &&
+            Input.GetKeyUp(KeyCode.Space))
+        {
+            AudioManager.instance.PlaySfx(AudioManager.SFX.GetFishing);
+            LoadScene(sceneToLoad);
+        }*/
     }
 
     public void LoadScene(string sceneName)
@@ -51,6 +58,8 @@ public class SceneController : MonoBehaviour, IBegin
     private IEnumerator Transition(string sceneName)
     {
         isLoading = true;
+
+        // AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
         yield return Fade(0, 1);
         yield return SceneManager.LoadSceneAsync(sceneName);

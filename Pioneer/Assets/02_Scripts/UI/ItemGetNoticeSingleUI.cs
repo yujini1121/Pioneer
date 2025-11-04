@@ -15,7 +15,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
     public void Show(SItemStack target)
     {
         icon.sprite = target.itemBaseType.image;
-        text.text = $"{target.itemBaseType.typeName} {target.amount}°³ È¹µæ";
+        text.text = $"{target.itemBaseType.typeName} {target.amount}Â°Â³ ÃˆÂ¹ÂµÃ¦";
     }
 
     public void Begin()
@@ -36,8 +36,6 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
                 canvasGroup.alpha = Mathf.Lerp(1.0f, 0.0f, t / 0.5f);
                 yield return null;
             }
-
-
             ItemGetNoticeUI.Instance.RemoveUI(index, this);
         }
         myCoroutine = StartCoroutine(mCoroutine());
