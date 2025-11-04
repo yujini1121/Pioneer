@@ -263,7 +263,8 @@ public class CreateObject : MonoBehaviour, IBegin
             return false;
         }
 
-        switch (creationType)
+		#region 오브젝트에 따른 옵션 설정
+		switch (creationType)
         {
             case CreationType.Platform:
                 // 주훈 추가
@@ -516,10 +517,10 @@ public class CreateObject : MonoBehaviour, IBegin
                     }
                 }
                 return true;
+		}
+		#endregion
 
-        }
-
-        return false;
+		return false;
     }
 
     private void MoveToCreate(Vector3 world, Vector3 local)
