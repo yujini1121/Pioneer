@@ -87,7 +87,7 @@ public class CrawlerAI : EnemyBase, IBegin
         fov.viewRadius = 4;
         attackRange = 2;
         attackDelayTime = 3;
-        currentAttackTarget = SetMastTarget();
+        // currentAttackTarget = SetMastTarget();
     }
 
     private bool CanMove()
