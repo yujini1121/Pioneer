@@ -19,7 +19,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     [SerializeField] GameObject imageMouseHoldingItem; // 마우스
     [SerializeField] GameObject windowMouse; // 마우스
     [SerializeField] Canvas canvas;
-    [SerializeField] TextMeshProUGUI windowMouseText;
+    [SerializeField] TextMeshProUGUI windowMouseTextType;
+    [SerializeField] TextMeshProUGUI windowMouseTextCategory;
+    [SerializeField] TextMeshProUGUI windowMouseTextInfo;
     [SerializeField] Button trashButton;
     [SerializeField] Sprite trashOpen;
     [SerializeField] Sprite trashClose;
@@ -66,7 +68,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         //Debug.Log($">> 아이템 스택 : {currentSelectedSlot[0].index} / {mItemStack.id} {mItemStack.amount}");
 
-        windowMouseText.text = GetInfomation(mItemStack); // 마우스
+        // windowMouseText.text = 
+        (windowMouseTextType.text, windowMouseTextCategory.text, windowMouseTextInfo.text) = GetInfomation(mItemStack); // 마우스
     }
 
     public void ClickSlot(int index)
@@ -244,7 +247,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         // ~~종료~~ 인벤토리 핫키 선택 시작
     }
 
-    string GetInfomation(SItemStack target)
+    (string outTypeName, string outCategoriesName, string outInfomation) GetInfomation(SItemStack target)
     {
         SItemTypeSO info = ItemTypeManager.Instance.itemTypeSearch[target.id];
 
@@ -261,7 +264,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             default: break;
         }
 
-        return $"{info.typeName}\n{categoriesName}\n{info.infomation}";
+
+        // return $"{info.typeName}\n{categoriesName}\n{info.infomation}";
+        return (info.typeName, categoriesName, info.infomation);
     }
 
     public void IconRefresh()
