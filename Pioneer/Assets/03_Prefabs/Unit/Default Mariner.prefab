@@ -303,6 +303,8 @@ GameObject:
   - component: {fileID: 1611188805888511943}
   - component: {fileID: -2158088053475900180}
   - component: {fileID: -5526518313908064534}
+  - component: {fileID: -6943291221528661387}
+  - component: {fileID: -8069143574915022562}
   m_Layer: 11
   m_Name: Default Mariner
   m_TagString: Untagged
@@ -502,3 +504,43 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!95 &-6943291221528661387
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5261718270079172171}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 296f2c6ef2012dd45ab03d81fe80807d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-8069143574915022562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5261718270079172171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63ba27b1104a1df4598a980bb6db97aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 9040290924793373641}
+  animator: {fileID: -6943291221528661387}
+  sprite: {fileID: 2680221196759778759}
+  idleThreshold: 0.05
+  damp: 0.08
+  invertX: 0
+  invertZ: 0
