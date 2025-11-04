@@ -520,6 +520,18 @@ public class MarinerAI : MarinerBase, IBegin
 
         if (inventory != null)
         {
+            // 만약 acquiredItemID -> 보물상자가 아님 -> 그냥 받음
+            // 만약 acquiredItemID -> 보물상자가 맞음 ->  TreasureBoxManager SItemStack GetReward()
+
+            //int amount = 1; // 기본 1개
+
+            if (acquiredItemID == 30009)
+            {
+                SItemStack treasure = TreasureBoxManager.instance.GetReward();
+                acquiredItemID = treasure.id;
+                //amount = treasure.amount;
+            }
+
             bool result = inventory.AddItem(acquiredItemID, 1);
 
             // 바디이벤트 녹조로 얻는 추가 아이템 획득 

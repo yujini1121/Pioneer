@@ -25,7 +25,7 @@ public class TreasureBoxManager : MonoBehaviour
 
     }
 
-    SItemStack GetReward()
+    public SItemStack GetReward()
     {
         float max = 0.0f;
         foreach (RandomBox one in reward) max += one.weight;
