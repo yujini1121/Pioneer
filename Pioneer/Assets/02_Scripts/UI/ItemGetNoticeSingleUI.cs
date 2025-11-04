@@ -15,7 +15,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
     public void Show(SItemStack target)
     {
         icon.sprite = target.itemBaseType.image;
-        text.text = $"{target.itemBaseType.typeName} {target.amount}°³ È¹µæ";
+        text.text = $"{target.itemBaseType.typeName} {target.amount}개 획득";
     }
 
     public void Begin()

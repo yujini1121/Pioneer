@@ -37,7 +37,7 @@ public class ItemGetNoticeUI : MonoBehaviour
             }
         }
         Debug.Assert(newUi != null);
-        newUi.transform.localPosition = new Vector3(0, 100, 0);
+        newUi.transform.localPosition = new Vector3(0, 80, 0);
         
 
         Debug.Assert(newUi != null, "!! ItemGetNoticeUI: Object Pool is full!");
@@ -62,7 +62,7 @@ public class ItemGetNoticeUI : MonoBehaviour
                 RemoveUI(one.index, uiList[3]);
                 continue;
             }
-            objectPool[one.index].transform.localPosition += new Vector3(0, -100, 0);
+            objectPool[one.index].transform.localPosition += new Vector3(0, -80, 0);
             Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : Áß°£ - {objectPool[one.index].transform.localPosition}");
         }
 
