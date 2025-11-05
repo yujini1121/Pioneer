@@ -27,6 +27,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         new ItemDrop { itemID = 40009, probability = 0.06f }
     };
 
+    public Animator animator;
+
     // 감염된 승무원 고유 설정
     public int marinerId;
     private bool hasTransformedToZombie = false; // 중복 전환 가드
@@ -402,13 +404,17 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (zombieAI.attackRangeObject != null)
             zombieAI.attackRangeObject.SetActive(true);
 
-        StartCoroutine(DestroyNextFrame());
+        animator.SetBool("isZombie", true);
+
+        yield return null;
+
+        Destroy(GetComponent<InfectedMarinerAI>());
     }
 
     private IEnumerator DestroyNextFrame()
     {
         yield return null;
-        Destroy(this);
+        Destroy(GetComponent<InfectedMarinerAI>());
     }
 
     /// <summary>
