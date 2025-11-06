@@ -236,10 +236,10 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void OnEnable()
     {
-        Debug.Log($"좀비 승무원 {marinerId} 활성화됨");
-
+        Debug.Log("ZombieMariner에서 attack box 활성화");
         if (attackRangeObject != null)
             attackRangeObject.SetActive(false);
+
     }
 
 }

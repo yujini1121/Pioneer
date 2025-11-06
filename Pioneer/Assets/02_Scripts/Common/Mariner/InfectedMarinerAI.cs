@@ -47,6 +47,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     private Coroutine secondPriorityRoutine = null;
 
     // 유틸 가드
+    private bool _shuttingDown;
     private bool IsPreNightActive =>
         GameManager.Instance != null &&
         GameManager.Instance.IsDaytime &&
@@ -86,6 +87,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     private void Update()
     {
         if (IsDead) return;
+        if (_shuttingDown || IsDead) return;
 
         // 프리-나이트: 다른 낮 로직을 모두 막고, 프리-나이트 루틴만 돌림
         if (IsPreNightActive)
@@ -391,30 +393,36 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         yield return new WaitForSeconds(5f);
 
+        _shuttingDown = true;
+
         if (agent != null && agent.isOnNavMesh)
             agent.ResetPath();
 
-        Debug.Log("좀비 AI전환");
+        if (attackRoutine != null) { StopCoroutine(attackRoutine); attackRoutine = null; }
+        if (secondPriorityRoutine != null) { StopCoroutine(secondPriorityRoutine); secondPriorityRoutine = null; }
+        if (nightRoamRoutine != null) { StopCoroutine(nightRoamRoutine); nightRoamRoutine = null; }
+        isSecondPriorityStarted = false;
+        isRepairing = false;
+        isChasing = false;
+        target = null;
 
-        ZombieMarinerAI zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
+        var zombieAI = GetComponent<ZombieMarinerAI>();
+        if (zombieAI == null)
+            zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
+
         zombieAI.marinerId = marinerId;
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");
+        if (animator != null) animator.SetBool("isZombie", true);
+
+        yield return null;
 
         if (zombieAI.attackRangeObject != null)
             zombieAI.attackRangeObject.SetActive(true);
 
-        animator.SetBool("isZombie", true);
-
-        yield return null;
-
-        Destroy(GetComponent<InfectedMarinerAI>());
-    }
-
-    private IEnumerator DestroyNextFrame()
-    {
-        yield return null;
-        Destroy(GetComponent<InfectedMarinerAI>());
+        var oldAI = this;            // 자기 자신
+        oldAI.enabled = false;       // 여기서 비활성화
+        Destroy(oldAI);              // 그리고 제거
     }
 
     /// <summary>
