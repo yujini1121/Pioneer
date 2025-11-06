@@ -67,12 +67,24 @@ public class MarinerManager : MonoBehaviour
         Debug.Log($"감염 발생: 승무원 {mariner.marinerId}");
 
         int id = mariner.marinerId;
-        GameObject obj = mariner.gameObject;
+        var go = mariner.gameObject;
 
-        DestroyImmediate(mariner);
+        mariner.enabled = false;
+        mariner.StopAllCoroutines();
 
-        InfectedMarinerAI infected = obj.AddComponent<InfectedMarinerAI>();
+        var agent = go.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null && agent.isOnNavMesh)
+            agent.ResetPath();
+
+        var infected = go.GetComponent<InfectedMarinerAI>();
+        if (infected == null)
+            infected = go.AddComponent<InfectedMarinerAI>();
+
         infected.marinerId = id;
+
+        var animator = go.GetComponent<Animator>();
+
+        Destroy(mariner);
 
         Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
     }
