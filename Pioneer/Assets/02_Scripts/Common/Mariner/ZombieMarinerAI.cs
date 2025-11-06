@@ -17,8 +17,15 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
+        if (animator == null)
+            animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
+        if (sprite == null)
+            sprite = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>(true);
+        if (fov == null)
+            fov = GetComponent<FOVController>() ?? GetComponentInChildren<FOVController>(true);
+
         InitZombieStats();
-        InitZombieVisuals();
+        //InitZombieVisuals();
 
         if (attackRangeObject == null)
         {
@@ -53,7 +60,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         fov = GetComponent<FOVController>();
     }
 
-    private void InitZombieVisuals()
+    /*private void InitZombieVisuals()
     {
         spriteTransform = transform.GetChild(0);
         spriteRenderer = spriteTransform.GetComponent<SpriteRenderer>();
@@ -64,7 +71,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             spriteTransform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
             spriteRenderer.sprite = gm.marinerSprites[1];
         }
-    }
+    }*/
 
     public override void Start()
     {

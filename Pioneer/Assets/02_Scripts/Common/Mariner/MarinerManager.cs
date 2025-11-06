@@ -113,6 +113,9 @@ public class MarinerManager : MonoBehaviour
 
         infected.marinerId = id;
 
+        var anim = go.GetComponent<Animator>() ?? go.GetComponentInChildren<Animator>(true);
+        infected.SetAnimator(anim);
+
         // 기존 AI는 프레임 끝에서 제거
         Destroy(mariner);
 

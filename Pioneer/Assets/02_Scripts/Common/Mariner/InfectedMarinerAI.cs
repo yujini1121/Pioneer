@@ -27,8 +27,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         new ItemDrop { itemID = 40009, probability = 0.06f }
     };
 
-    public Animator animator;
-
     // 감염된 승무원 고유 설정
     public int marinerId;
     private bool hasTransformedToZombie = false; // 중복 전환 가드
@@ -59,6 +57,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
+        base.Awake();
         maxHp = 100;
         hp = 100;
         speed = 1f;
@@ -391,6 +390,15 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     private IEnumerator TransformAfterDelay()
     {
+        // 로컬 함수: 파라미터 존재 확인
+        bool HasParam(Animator a, string n, AnimatorControllerParameterType t)
+        {
+            if (a == null) return false;
+            foreach (var p in a.parameters)
+                if (p.name == n && p.type == t) return true;
+            return false;
+        }
+
         yield return new WaitForSeconds(5f);
 
         _shuttingDown = true;
@@ -406,6 +414,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         isChasing = false;
         target = null;
 
+        // 좀비 AI 부착/캐싱
         var zombieAI = GetComponent<ZombieMarinerAI>();
         if (zombieAI == null)
             zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
@@ -413,17 +422,40 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         zombieAI.marinerId = marinerId;
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");
-        if (animator != null) animator.SetBool("isZombie", true);
 
+        // Animator 방어적 캐싱 + 전이 파라미터 세팅
+        var anim = animator ?? GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
+
+        if (anim == null)
+        {
+            Debug.LogError($"[{name}] Animator가 없습니다. 프리팹의 Animator에 컨트롤러를 연결하세요.");
+        }
+        else if (anim.runtimeAnimatorController == null)
+        {
+            Debug.LogError($"[{name}] Animator Controller가 비어있습니다. AC_DefaultMariner 등을 연결하세요.");
+        }
+        else if (!HasParam(anim, "isZombie", AnimatorControllerParameterType.Bool))
+        {
+            Debug.LogError($"[{name}] Animator에 Bool 파라미터 'isZombie'가 없습니다. 파라미터명을 확인하세요.");
+        }
+        else
+        {
+            Debug.Log("여기서 iszombie 트리거 작동");
+            anim.SetBool("isZombie", true); // 서브 스테이트 머신 전이
+        }
+
+        // 좀비 Awake/Start에서 레퍼런스 재캐싱하도록 한 프레임 양보
         yield return null;
 
         if (zombieAI.attackRangeObject != null)
             zombieAI.attackRangeObject.SetActive(true);
 
-        var oldAI = this;            // 자기 자신
-        oldAI.enabled = false;       // 여기서 비활성화
-        Destroy(oldAI);              // 그리고 제거
+        // 자기 자신 제거
+        enabled = false;
+        Destroy(this);
     }
+
+
 
     /// <summary>
     /// 파밍 완료시

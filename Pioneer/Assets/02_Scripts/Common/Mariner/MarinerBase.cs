@@ -47,6 +47,25 @@ public class MarinerBase : CreatureBase
     // NavMeshAgent 공통 사용
     protected NavMeshAgent agent;
 
+    [SerializeField] protected Animator animator;
+    [SerializeField] protected SpriteRenderer sprite;
+    [SerializeField] protected FOVController fov;
+
+    public void SetAnimator(Animator a)
+    {
+        animator = a;
+    }
+    // MarinerBase에 Awake 추가(또는 기존 Awake가 있으면 거기에 병합)
+    protected virtual void Awake()
+    {
+        if (animator == null)
+            animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
+        if (sprite == null)
+            sprite = GetComponentInChildren<SpriteRenderer>(true);
+        if (fov == null)
+            fov = GetComponent<FOVController>() ?? GetComponentInChildren<FOVController>(true);
+    }
+
     public virtual void Start()
     {
         base.Start();
