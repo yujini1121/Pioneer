@@ -57,6 +57,14 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         GameManager.Instance != null &&
         !GameManager.Instance.IsDaytime;
 
+    private void EnsureAnimator()
+    {
+        if (animator == null)
+            animator = GetComponent<Animator>();
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>(true);
+    }
+
     private void Awake()
     {
         maxHp = 100;
@@ -406,6 +414,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         isChasing = false;
         target = null;
 
+
         var zombieAI = GetComponent<ZombieMarinerAI>();
         if (zombieAI == null)
             zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
@@ -413,14 +422,16 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         zombieAI.marinerId = marinerId;
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");
-        if (animator != null) animator.SetTrigger("TriggerZombie");
 
-        yield return null;
+        //yield return null;
 
-        if (zombieAI.attackRangeObject != null)
-            zombieAI.attackRangeObject.SetActive(true);
+        EnsureAnimator();
 
-        var oldAI = this;            // 자기 자신
+        var animCtrl = GetComponent<MarinerAnimControll>();
+        if (animCtrl != null) animCtrl.SetZombieModeTrigger();
+        else Debug.Log("setzombiemode불가");
+
+            var oldAI = this;            // 자기 자신
         oldAI.enabled = false;       // 여기서 비활성화
         Destroy(oldAI);              // 그리고 제거
     }
