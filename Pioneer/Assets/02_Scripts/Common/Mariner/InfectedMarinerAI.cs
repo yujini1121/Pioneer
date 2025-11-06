@@ -413,7 +413,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         zombieAI.marinerId = marinerId;
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");
-        if (animator != null) animator.SetBool("isZombie", true);
+        if (animator != null) animator.SetTrigger("TriggerZombie");
 
         yield return null;
 
