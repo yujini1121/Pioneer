@@ -57,8 +57,8 @@ public class GameManager : MonoBehaviour, IBegin
     public GameObject titan;
 
     [Header("게임오버 관리")]
-    public int totalCrewMembers = 0;
-    public int deadCrewMembers = 0;
+    public int totalMarinerMembers = 0;
+    public int deadMarinerMembers = 0;
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
 
@@ -101,7 +101,7 @@ public class GameManager : MonoBehaviour, IBegin
     [Header("승무원 스폰")]
     [SerializeField] private GameObject marinerPrefab;   
     [SerializeField] private Transform mast;            
-    [SerializeField] private Vector3 crewSpawnOffset = Vector3.zero;
+    [SerializeField] private Vector3 marinerSpawnOffset = Vector3.zero;
 
     [Header("전체 둥지 개수 체크")]
     public int checkTotalNest;
@@ -187,7 +187,7 @@ public class GameManager : MonoBehaviour, IBegin
     private void OnNightEnd()
     {
         DespawnAllEnemies();
-        ApplyCrewEmbarkRule();
+        ApplyMarinerEmbarkRule();
     }
 
     public void GetGameTimeInfo(out int days, out int hours)
@@ -197,8 +197,8 @@ public class GameManager : MonoBehaviour, IBegin
         hours = Mathf.FloorToInt((remainingTime / oneDayDuration) * 24f);
     }
 
-    public void AddCrewMember() { totalCrewMembers++; }
-    public void MarinerDiedCount() { deadCrewMembers++; }
+    public void AddMarinerMember() { totalMarinerMembers++; }
+    public void MarinerDiedCount() { deadMarinerMembers++; }
 
     public void TriggerGameOver()
     {
@@ -218,7 +218,7 @@ public class GameManager : MonoBehaviour, IBegin
         HideAllUI();
 
         if (gameOverUI != null)
-            gameOverUI.ShowGameOverScreen(totalCrewMembers, deadCrewMembers);
+            gameOverUI.ShowGameOverScreen(totalMarinerMembers, deadMarinerMembers);
     }
 
     void HideAllUI()
@@ -336,24 +336,24 @@ public class GameManager : MonoBehaviour, IBegin
     }
 
     // ==========================
-    // [교체] 아침 승무원 스폰 규칙 적용
+    // 아침 승무원 스폰 규칙 적용
     // ==========================
-    private void ApplyCrewEmbarkRule()
+    private void ApplyMarinerEmbarkRule()
     {
-        int add = CalcCrewEmbarkCount(currentDay, totalCrewMembers);
+        int add = CalcMarinerEmbarkCount(currentDay, totalMarinerMembers);
         if (add <= 0)
         {
-            Debug.Log($"[Crew] Day {currentDay} 아침: 승선 0명 → 총 {totalCrewMembers}명");
+            Debug.Log($"[Mariner] Day {currentDay} 아침: 승선 0명 → 총 {totalMarinerMembers}명");
             return;
         }
 
-        SpawnCrew(add);
-        Debug.Log($"[Crew] Day {currentDay} 아침: 승선 {add}명 → 총 {totalCrewMembers}명");
+        SpawnMariner(add);
+        Debug.Log($"[Mariner] Day {currentDay} 아침: 승선 {add}명 → 총 {totalMarinerMembers}명");
     }
 
     // 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
     // 5일차: 현재 승무원 수 ≤3 → 4명, 현재 승무원 수 ≥4 → 5명
-    private int CalcCrewEmbarkCount(int day, int crewNow)
+    private int CalcMarinerEmbarkCount(int day, int marinerNow)
     {
         switch (Mathf.Clamp(day, 1, 5))
         {
@@ -361,10 +361,10 @@ public class GameManager : MonoBehaviour, IBegin
             case 2: return 1;
             case 3: return 2;
             case 4: return 3;
-            case 5: return (crewNow <= 3) ? 4 : 5;
+            case 5: return (marinerNow <= 3) ? 4 : 5;
             default:
                 // 6일차 이상은 마지막 값을 유지하거나, 필요 시 규칙 확장
-                return (crewNow <= 3) ? 4 : 5;
+                return (marinerNow <= 3) ? 4 : 5;
         }
     }
 
@@ -479,13 +479,13 @@ public class GameManager : MonoBehaviour, IBegin
     // ==========================
     // 실제 승무원 생성 로직
     // ==========================
-    private void SpawnCrew(int count)
+    private void SpawnMariner(int count)
     {
         if (count <= 0) return;
 
         if (marinerPrefab == null)
         {
-            Debug.LogWarning("[Crew] marinerPrefab이 비어 있습니다. 프리팹을 할당하세요.");
+            Debug.LogWarning("[Mariner] marinerPrefab이 비어 있습니다. 프리팹을 할당하세요.");
             return;
         }
 
@@ -498,13 +498,13 @@ public class GameManager : MonoBehaviour, IBegin
         {
             // 겹침 방지
             Vector3 jitter = new Vector3(Random.Range(-0.6f, 0.6f), 0f, Random.Range(-0.6f, 0.6f));
-            Vector3 pos = basePos + crewSpawnOffset + jitter;
+            Vector3 pos = basePos + marinerSpawnOffset + jitter;
 
             var go = Instantiate(marinerPrefab, pos, Quaternion.identity);
-            go.name = $"Mariner_Day{currentDay}_#{totalCrewMembers + 1}";
+            go.name = $"Mariner_Day{currentDay}_#{totalMarinerMembers + 1}";
 
             // 카운트 반영
-            AddCrewMember();
+            AddMarinerMember();
         }
     }
 
