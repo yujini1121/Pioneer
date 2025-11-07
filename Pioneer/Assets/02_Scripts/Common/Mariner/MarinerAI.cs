@@ -318,90 +318,97 @@ public class MarinerAI : MarinerBase, IBegin
     {
         currentState = CrewState.Attacking;
 
-        var animCtrl = GetComponent<MarinerAnimControll>();
+        var animCtrl = GetComponentInChildren<MarinerAnimControll>(true);
 
-        if (target == null)
+        // 항상 정리 보장
+        try
         {
-            attackRoutine = null;
-            isChasing = false;
-
-            if (animCtrl != null) animCtrl.EndAttack();
-
-            HandlePostCombatAction();
-            yield break;
-        }
-
-        ResetAgentPath();
-        LookAtTarget();
-
-        if (animCtrl != null) animCtrl.PlayAttackOnce();
-
-        // 선딜/텔레그래프(공격 상자 표시)
-        isShowingAttackBox = true;
-        yield return new WaitForSeconds(attackDelayTime);
-        isShowingAttackBox = false;
-
-        // 실제 타격
-        PerformMarinerAttack();
-        attackCooldown = attackInterval;
-
-        if (target != null)
-        {
-            CommonBase targetBase = target.GetComponent<CommonBase>();
-            if (targetBase != null && !targetBase.IsDead)
+            if (target == null)
             {
-                Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
-
-                if (animCtrl != null) animCtrl.EndAttack();
-
-                EnterChasingState();
                 attackRoutine = null;
+                isChasing = false;
                 yield break;
+            }
+
+            ResetAgentPath();
+            LookAtTarget(); // 루트 회전(선택)
+
+            // ★ 타겟 바라보게 DirX/DirZ 스냅 + 공격 트리거
+            animCtrl?.AimAtTarget(target.position, transform);
+            animCtrl?.PlayAttackOnce();
+
+            // 선딜(텔레그래프)
+            isShowingAttackBox = true;
+            yield return new WaitForSeconds(attackDelayTime);
+            isShowingAttackBox = false;
+
+            // 실제 타격
+            PerformMarinerAttack();
+            attackCooldown = attackInterval;
+
+            // 타겟 상태 확인 후 분기
+            if (target != null)
+            {
+                CommonBase targetBase = target.GetComponent<CommonBase>();
+                if (targetBase != null && !targetBase.IsDead)
+                {
+                    Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
+                    EnterChasingState();
+                    yield break;
+                }
+                else
+                {
+                    Debug.Log($"승무원 {marinerId}: 적 처치 완료");
+                    target = null;
+                    isChasing = false;
+                    HandlePostCombatAction();
+                    yield break;
+                }
             }
             else
             {
-                Debug.Log($"승무원 {marinerId}: 적 처치 완료");
-                target = null;
+                Debug.Log($"승무원 {marinerId}: 적 소실");
                 isChasing = false;
-                attackRoutine = null;
-
-                if (animCtrl != null) animCtrl.EndAttack();
-
                 HandlePostCombatAction();
                 yield break;
             }
         }
-        else
+        finally
         {
-            Debug.Log($"승무원 {marinerId}: 적 소실");
-            isChasing = false;
+            // 어떤 경로로 끝나든 공격 상태 정리
+            animCtrl?.EndAttack();   // IsAttacking=false → Idle 전이 허용
+            animCtrl?.ClearAim();    // 이동 기반 Dir 업데이트 복귀
             attackRoutine = null;
-
-            if (animCtrl != null) animCtrl.EndAttack();
-
-            HandlePostCombatAction();
-            yield break;
         }
     }
+
 
 
     private void PerformMarinerAttack()
     {
-        Vector3 boxCenter = transform.position + transform.forward * 1f;
-        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 1f, 1f), transform.rotation, targetLayer);
+        // 전방 박스 중심과 반경(반쪽 크기) 계산
+        float half = Mathf.Max(0.5f, attackRange * 0.5f);
+        Vector3 boxCenter = transform.position + transform.forward * half;
+        Vector3 halfExtents = new Vector3(half, 1f, half);
+
+        Collider[] hits = Physics.OverlapBox(
+            boxCenter,
+            halfExtents,
+            transform.rotation,
+            targetLayer
+        );
 
         foreach (var hit in hits)
         {
-            Debug.Log($"승무원이 {hit.name} 공격 범위 내 감지");
-
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
                 targetBase.TakeDamage(attackDamage, this.gameObject);
-                Debug.Log($"승무원이 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
+                Debug.Log($"승무원이 {hit.name}에게 {attackDamage} 데미지");
             }
         }
     }
+
 
     public override IEnumerator StartSecondPriorityAction()
     {
