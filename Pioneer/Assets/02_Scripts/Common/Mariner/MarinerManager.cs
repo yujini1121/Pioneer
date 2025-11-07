@@ -1,15 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MarinerManager : MonoBehaviour
 {
     public static MarinerManager Instance;
 
-    [Header("감염 설정(수정 필요)")]
-    public float infectionStartTime = 180f;
-    public float infectionInterval = 10f;
-    private bool infectionStarted = false;
+    [Header("감염 설정")]
+    public int firstInfectionDay = 4;          // 4일차 이후부터 감염 시작 왜 4일차에 3명이 소환되지?
+    public float infectionDelayWithinDay = 5f; // 낮 시작 후 감염까지 지연
+
+    private int lastInfectedDay = -1;          // 하루 1회 감염 제한
+    private bool infectionRoutineRunning = false; // 중복 실행 방지
 
     private List<MarinerAI> allMariners = new List<MarinerAI>();
     private List<DefenseObject> repairTargets = new List<DefenseObject>();
@@ -18,48 +21,73 @@ public class MarinerManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
         UpdateRepairTargets();
     }
 
     private void Update()
     {
-        if (!infectionStarted && GameManager.Instance.currentGameTime >= infectionStartTime)
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+
+        if (allMariners.Count > 0)
+            allMariners.RemoveAll(m => m == null);
+
+        if (gm.IsDaytime && gm.currentDay >= firstInfectionDay
+            && gm.currentDay != lastInfectedDay
+            && !infectionRoutineRunning)
         {
-            infectionStarted = true;
-            StartCoroutine(InfectMarinersOneByOne());
+            infectionRoutineRunning = true;
+            StartCoroutine(InfectOneRandomMarinerAtDaytime());
         }
     }
 
-
-    /// <summary>
-    /// 승무원들을 하나씩 감염시키는 코루틴
-    /// </summary>
-    private IEnumerator InfectMarinersOneByOne()
+    private IEnumerator InfectOneRandomMarinerAtDaytime()
     {
-        Debug.Log("감염 프로세스 시작됨");
+        var gm = GameManager.Instance;
+        if (gm == null) { infectionRoutineRunning = false; yield break; }
 
-        var marinerQueue = new List<MarinerAI>(allMariners);
+        // 혹시 시작 시점이 밤이면 낮까지 대기
+        while (!gm.IsDaytime) yield return null;
 
-        foreach (var mariner in marinerQueue)
+        int dayAtStart = gm.currentDay;
+
+        // 지연
+        if (infectionDelayWithinDay > 0f)
+            yield return new WaitForSeconds(infectionDelayWithinDay);
+
+        if (!gm.IsDaytime || gm.currentDay != dayAtStart)
         {
-            if (mariner != null)
-            {
-                InfectMariner(mariner);
-                yield return new WaitForSeconds(infectionInterval);
-            }
+            infectionRoutineRunning = false;
+            yield break;
         }
 
-        Debug.Log("모든 승무원 감염 완료");
+        // 후보 수집
+        var candidates = new List<MarinerAI>();
+        foreach (var m in allMariners)
+            if (m != null && m.GetComponent<InfectedMarinerAI>() == null)
+                candidates.Add(m);
+
+        if (candidates.Count > 0)
+        {
+            var pick = candidates[Random.Range(0, candidates.Count)];
+            InfectMariner(pick);
+            Debug.Log("낮 시간 랜덤 1명 감염 완료");
+        }
+        else
+        {
+            Debug.Log("감염 가능한 승무원이 없습니다.");
+        }
+        lastInfectedDay = dayAtStart;
+        infectionRoutineRunning = false;
     }
 
     /// <summary>
-    /// 개별 승무원을 감염시키는 함수
+    /// 감염 전환 mariner -> infected
     /// </summary>
+    /// <param name="mariner"></param>
     private void InfectMariner(MarinerAI mariner)
     {
         if (mariner == null) return;
@@ -67,17 +95,31 @@ public class MarinerManager : MonoBehaviour
         Debug.Log($"감염 발생: 승무원 {mariner.marinerId}");
 
         int id = mariner.marinerId;
-        GameObject obj = mariner.gameObject;
+        var go = mariner.gameObject;
 
-        DestroyImmediate(mariner);
+        // 기존 AI 즉시 중지
+        mariner.enabled = false;
+        mariner.StopAllCoroutines();
 
-        InfectedMarinerAI infected = obj.AddComponent<InfectedMarinerAI>();
+        // 이동 중이면 멈춤
+        var agent = go.GetComponent<NavMeshAgent>();
+        if (agent != null && agent.isOnNavMesh)
+            agent.ResetPath();
+
+        // 새 감염 AI 부착(중복 방지)
+        var infected = go.GetComponent<InfectedMarinerAI>();
+        if (infected == null)
+            infected = go.AddComponent<InfectedMarinerAI>();
+
         infected.marinerId = id;
+
+        // 기존 AI는 프레임 끝에서 제거
+        Destroy(mariner);
 
         Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
     }
 
-    private IEnumerator AttachInfectedAI(Transform marinerTransform, int id)
+    /*private IEnumerator AttachInfectedAI(Transform marinerTransform, int id)
     {
         yield return null; // 한 프레임 대기 (Destroy 반영 대기)
 
@@ -85,7 +127,7 @@ public class MarinerManager : MonoBehaviour
         infected.marinerId = id;
 
         Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
-    }
+    }*/
 
     /// <summary>
     /// 승무원을 등록하는 함수
