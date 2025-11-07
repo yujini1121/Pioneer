@@ -431,7 +431,15 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (animCtrl != null) animCtrl.SetZombieModeTrigger();
         else Debug.Log("setzombiemode불가");
 
-            var oldAI = this;            // 자기 자신
+        var inv = GetComponent<MarinerInventory>();
+        if (inv == null) inv = GetComponentInChildren<MarinerInventory>(true);
+        if (inv != null)
+        {
+            inv.ShutdownUI();
+            inv.enabled = false;
+        }
+
+        var oldAI = this;            // 자기 자신
         oldAI.enabled = false;       // 여기서 비활성화
         Destroy(oldAI);              // 그리고 제거
     }
