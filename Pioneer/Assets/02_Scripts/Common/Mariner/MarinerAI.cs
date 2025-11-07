@@ -47,7 +47,7 @@ public class MarinerAI : MarinerBase, IBegin
         hp = 100;
         speed = 2f;
         attackDamage = 6;
-        attackRange = 4f;
+        attackRange = 1.5f;
         attackDelayTime = 1f;
 
         fov = GetComponent<FOVController>();
@@ -318,10 +318,15 @@ public class MarinerAI : MarinerBase, IBegin
     {
         currentState = CrewState.Attacking;
 
+        var animCtrl = GetComponent<MarinerAnimControll>();
+
         if (target == null)
         {
             attackRoutine = null;
             isChasing = false;
+
+            if (animCtrl != null) animCtrl.EndAttack();
+
             HandlePostCombatAction();
             yield break;
         }
@@ -329,50 +334,61 @@ public class MarinerAI : MarinerBase, IBegin
         ResetAgentPath();
         LookAtTarget();
 
+        if (animCtrl != null) animCtrl.PlayAttackOnce();
+
+        // 선딜/텔레그래프(공격 상자 표시)
         isShowingAttackBox = true;
         yield return new WaitForSeconds(attackDelayTime);
         isShowingAttackBox = false;
 
+        // 실제 타격
         PerformMarinerAttack();
         attackCooldown = attackInterval;
 
-        // 공격 후 타겟 상태 확인
         if (target != null)
         {
             CommonBase targetBase = target.GetComponent<CommonBase>();
             if (targetBase != null && !targetBase.IsDead)
             {
                 Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
+
+                if (animCtrl != null) animCtrl.EndAttack();
+
                 EnterChasingState();
+                attackRoutine = null;
+                yield break;
             }
             else
             {
-                // 적이 죽었으므로 즉시 1순위 행동으로 전환
                 Debug.Log($"승무원 {marinerId}: 적 처치 완료");
                 target = null;
                 isChasing = false;
                 attackRoutine = null;
+
+                if (animCtrl != null) animCtrl.EndAttack();
+
                 HandlePostCombatAction();
                 yield break;
             }
         }
         else
         {
-            // 적이 없어졌으므로 즉시 1순위 행동으로 전환
             Debug.Log($"승무원 {marinerId}: 적 소실");
             isChasing = false;
             attackRoutine = null;
+
+            if (animCtrl != null) animCtrl.EndAttack();
+
             HandlePostCombatAction();
             yield break;
         }
-
-        attackRoutine = null;
     }
+
 
     private void PerformMarinerAttack()
     {
         Vector3 boxCenter = transform.position + transform.forward * 1f;
-        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
+        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 1f, 1f), transform.rotation, targetLayer);
 
         foreach (var hit in hits)
         {
