@@ -695,5 +695,45 @@ public class MarinerAI : MarinerBase, IBegin
         Debug.Log($"승무원 {marinerId}: 야간 루틴 종료");
     }
 
+    protected override IEnumerator PerformPersonalEdgeFarming()
+    {
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [마리너] 파밍 시작");
+
+        var anim = GetComponentInChildren<MarinerAnimControll>(true);
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        // 좌/우 방향 스냅해서 낚시 시작 (원하면 위치/방향 바꿔도 됨)
+        if (anim != null) anim.StartFishing(transform.position + transform.right, transform);
+
+        float endTime = Time.time + 10f;
+        try
+        {
+            while (Time.time < endTime)
+            {
+                if (!isSecondPriorityStarted) yield break;
+
+                if (GameManager.Instance.TimeUntilNight() <= 30f)
+                {
+                    OnNightApproaching();
+                    yield break;
+                }
+                yield return null;
+            }
+
+            OnPersonalFarmingCompleted();
+            hasFoundPersonalEdge = false;
+        }
+        finally
+        {
+            anim?.StopFishing();
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
+        }
+    }
 
 }
