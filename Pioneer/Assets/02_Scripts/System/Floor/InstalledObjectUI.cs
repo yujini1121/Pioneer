@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 /// <summary>
 /// 우클릭으로 설치된 오브젝트를 선택하고,
@@ -27,6 +28,9 @@ public class InstalledObjectUI : MonoBehaviour
     [Header("회전 키")]
     [SerializeField] KeyCode keyRotateCCW = KeyCode.A; // -90
     [SerializeField] KeyCode keyRotateCW = KeyCode.D; // +90
+
+    [Header("아웃라인")]
+    [SerializeField] Material outlineMat;
 
     private enum Mode { Idle, Rotate, Move }
     private Mode mode = Mode.Idle;
@@ -72,6 +76,10 @@ public class InstalledObjectUI : MonoBehaviour
             {
                 SetSelection(obj);
                 ShowAt(current.transform.position);   // ★ 활성화 + 위치 지정
+
+                List<Material> materials = new List<Material>(obj.GetComponent<MeshRenderer>().sharedMaterials);
+                materials.Add(outlineMat);
+                obj.GetComponent<MeshRenderer>().sharedMaterials = materials.ToArray();
             }
             else Hide();
         }
@@ -105,7 +113,9 @@ public class InstalledObjectUI : MonoBehaviour
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(panel, Input.mousePosition, null) &&
                 !EventSystem.current.IsPointerOverGameObject())
+            {
                 Hide();
+            }
         }
         if (IsPanelVisible() && Input.GetKeyDown(KeyCode.Escape)) Hide();
     }
@@ -174,6 +184,7 @@ public class InstalledObjectUI : MonoBehaviour
 
     public void Hide()
     {
+
         current = null;
         mode = Mode.Idle;
 

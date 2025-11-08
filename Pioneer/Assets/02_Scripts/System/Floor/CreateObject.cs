@@ -44,7 +44,7 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private CreationList creationList;
     private GameObject onHand;
     private GameObject tempObj;
-    private Renderer creationRender;
+    private Renderer creationRender;  // MeshRenderer 관련 변경사항 유지
     private readonly Dictionary<CreationType, GameObject> creationDict = new Dictionary<CreationType, GameObject>();
     private int rotateN = 0;
 
@@ -67,9 +67,8 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float arrivedSpeedEps;   // 이 속도보다 느리면 "멈춤"으로 간주
     [SerializeField] private float arrivedHoldTime;    // 멈춤이 이 시간 이상 지속되면 설치
     private float arrivedTimer = 0f;
-    
-    private GameObject _evalDummy;
 
+    private GameObject _evalDummy;
 
     private void Awake()
     {
@@ -129,7 +128,7 @@ public class CreateObject : MonoBehaviour, IBegin
         onHand.transform.localPosition = Vector3.zero;
         onHand.layer = 0;
 
-        creationRender = onHand.GetComponent<Renderer>();
+        creationRender = onHand.GetComponent<Renderer>(); // MeshRenderer 사용
         var col = onHand.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
@@ -264,10 +263,16 @@ public class CreateObject : MonoBehaviour, IBegin
             return false;
         }
 
-		#region 오브젝트에 따른 옵션 설정
-		switch (creationType)
+        #region 오브젝트에 따른 옵션 설정
+        switch (creationType)
         {
             case CreationType.Platform:
+                // (중략) — 프로젝트에 반영하신 MeshRenderer/갑판 개수 로직 포함, 기존 그대로 유지
+                // 1) MastManager / MastSystem 최대 개수 체크
+                // 2) 주변 박스 체크 조건
+                // 3) 설치 가능/불가 반환
+                // ---- 아래는 업로드본 그대로 유지 ----
+
                 // 주훈 추가
                 if (MastManager.Instance != null)
                 {
@@ -308,14 +313,10 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.99f, 0.5f, 0.249f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f * i + 45f, 0f));
 
-                    // 여기에요 여기!!!!!!!!!!!!!!!! 바닥끼리 떨어져있을때 조건문!!!!!!!!!!!!!!!!!!!!!!!!!
                     if (Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                         return true;
-                    //else
-                    //ItemDeckDisconnect.instance.DestroyDeck();
                 }
 
-                //그 외 설치 불가
                 return false;
 
             case CreationType.Wall:
@@ -332,13 +333,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -361,13 +360,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -391,13 +388,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -420,13 +415,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -448,13 +441,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -476,13 +467,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -504,13 +493,11 @@ public class CreateObject : MonoBehaviour, IBegin
                     Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
                     Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
 
-                    //오브젝트가 설치될 위치에 플랫폼이 없으면 설치 불가
                     if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
                     {
                         Debug.Log("플랫폼 없음");
                         return false;
                     }
-                    //마우스 위치에 오브젝트가 있으면 설치 불가
                     if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
                     {
                         Debug.Log("오브젝트 있음");
@@ -518,10 +505,10 @@ public class CreateObject : MonoBehaviour, IBegin
                     }
                 }
                 return true;
-		}
-		#endregion
+        }
+        #endregion
 
-		return false;
+        return false;
     }
 
     private void MoveToCreate(Vector3 world, Vector3 local)
@@ -579,13 +566,13 @@ public class CreateObject : MonoBehaviour, IBegin
                 navMeshSurface.BuildNavMesh();
                 GameManager.Instance?.NotifyPlatformLayoutChanged();
 
-                //주훈 추가
+                // 주훈 추가: 갑판 개수 갱신
                 if (creationType == CreationType.Platform && MastManager.Instance != null)
                 {
                     MastManager.Instance.UpdateCurrentDeckCount();
                     Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
                 }
-                //여기까지
+
                 tempObj.GetComponent<InstalledObject>()?.OnPlaced();
                 Debug.Log("[설치 완료됨]");
 
@@ -695,7 +682,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public bool EvaluatePlacement(CreationType type, Vector3 worldPos, Quaternion rot)
     {
-        // 백업
+        // onHand/rotateN을 잠시 빌려 쓰므로 백업-복원
         var bakType = creationType;
         var bakOnHand = onHand;
         var bakRotateN = rotateN;
