@@ -71,7 +71,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         hp = 100;
         speed = 1f;
         attackDamage = 6;
-        attackRange = 3f;
+        attackRange = 1.5f;
         attackDelayTime = 1f;
 
         fov = GetComponent<FOVController>();

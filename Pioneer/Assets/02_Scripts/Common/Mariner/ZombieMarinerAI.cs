@@ -46,10 +46,10 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         hp = 40;
         speed = 2f;
         attackDamage = 6;
-        attackRange = 4f;
-        attackDelayTime = 1f;
+        attackRange = 1.5f;
+        attackDelayTime = 1.5f;
 
-        chaseRange = 10f; 
+        chaseRange = 3f; 
 
         fov = GetComponent<FOVController>();
     }
