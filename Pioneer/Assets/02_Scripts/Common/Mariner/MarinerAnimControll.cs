@@ -20,7 +20,7 @@ public class MarinerAnimControll : MonoBehaviour
     private bool aimOverride = false;
     private Vector2 aimDir;
 
-    // ===== Animator Hashes =====
+    //Animator Hashes
     static readonly int H_Attack = Animator.StringToHash("Attack");
     static readonly int H_IsAttacking = Animator.StringToHash("IsAttacking");
     static readonly int H_DirX = Animator.StringToHash("DirX");
@@ -46,7 +46,7 @@ public class MarinerAnimControll : MonoBehaviour
         }
     }
 
-    // ===== Zombie 그대로 유지 =====
+    //Zombie 그대로 유지 
     public void SetZombieModeTrigger()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
@@ -61,7 +61,7 @@ public class MarinerAnimControll : MonoBehaviour
         zombieMode = true;
     }
 
-    // ===== 공격 조준 =====
+    //공격 조준
     public void AimAtTarget(Vector3 targetPos, Transform self)
     {
         Vector3 w = (targetPos - self.position);
@@ -85,7 +85,7 @@ public class MarinerAnimControll : MonoBehaviour
 
     public void ClearAim() => aimOverride = false;
 
-    // ===== 공격 트리거 =====
+    //공격 트리거
     public void PlayAttackOnce()
     {
         if (animator.GetBool(H_IsAttacking)) return;
@@ -96,7 +96,7 @@ public class MarinerAnimControll : MonoBehaviour
     public void EndAttack() => animator.SetBool(H_IsAttacking, false);
     public void AttackEnd() { EndAttack(); ClearAim(); }
 
-    // ===== ★ 낚시 시작/종료 =====
+    // 낚시 시작/종료
     public void StartFishing(Vector3 lookPoint, Transform self)
     {
         if (animator == null) return;

@@ -695,12 +695,13 @@ public class MarinerAI : MarinerBase, IBegin
         Debug.Log($"승무원 {marinerId}: 야간 루틴 종료");
     }
 
-    protected override IEnumerator PerformPersonalEdgeFarming()
+    protected override IEnumerator PerformPersonalEdgeFarming() // 애니메이션을 위한 오버라이드
     {
         Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [마리너] 파밍 시작");
 
         var anim = GetComponentInChildren<MarinerAnimControll>(true);
 
+        // 이동 정지
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
@@ -708,10 +709,19 @@ public class MarinerAI : MarinerBase, IBegin
             agent.velocity = Vector3.zero;
         }
 
-        // 좌/우 방향 스냅해서 낚시 시작 (원하면 위치/방향 바꿔도 됨)
-        if (anim != null) anim.StartFishing(transform.position + transform.right, transform);
+        Vector3 dir = Vector3.zero;
+        if (agent != null)
+            dir = agent.desiredVelocity.sqrMagnitude > 0.0001f ? agent.desiredVelocity : agent.velocity;
+
+        if (dir.sqrMagnitude < 0.0001f) dir = transform.forward; // 거의 정지면 바라보는 방향 사용
+        dir.y = 0f;
+
+        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
+
+        if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
 
         float endTime = Time.time + 10f;
+
         try
         {
             while (Time.time < endTime)
@@ -723,7 +733,8 @@ public class MarinerAI : MarinerBase, IBegin
                     OnNightApproaching();
                     yield break;
                 }
-                yield return null;
+
+                yield return null; // 프레임 대기
             }
 
             OnPersonalFarmingCompleted();
@@ -731,9 +742,11 @@ public class MarinerAI : MarinerBase, IBegin
         }
         finally
         {
+            // 정리
             anim?.StopFishing();
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
     }
+
 
 }
