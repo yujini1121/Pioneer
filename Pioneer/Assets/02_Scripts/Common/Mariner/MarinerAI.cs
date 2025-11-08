@@ -48,7 +48,7 @@ public class MarinerAI : MarinerBase, IBegin
         speed = 2f;
         attackDamage = 6;
         attackRange = 1.5f;
-        attackDelayTime = 1f;
+        attackDelayTime = 1.5f;
 
         fov = GetComponent<FOVController>();
 
@@ -412,6 +412,7 @@ public class MarinerAI : MarinerBase, IBegin
 
     public override IEnumerator StartSecondPriorityAction()
     {
+        isSecondPriorityStarted = true;
         if (!GameManager.Instance.IsDaytime || GameManager.Instance.TimeUntilNight() <= 30f)
         {
             isSecondPriorityStarted = false;
@@ -500,6 +501,7 @@ public class MarinerAI : MarinerBase, IBegin
         else
         {
             Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
+            isSecondPriorityStarted = true;
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
             var needRepairList = MarinerManager.Instance.GetNeedsRepair();

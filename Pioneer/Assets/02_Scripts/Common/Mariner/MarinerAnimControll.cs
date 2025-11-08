@@ -108,7 +108,7 @@ public class MarinerAnimControll : MonoBehaviour
     public void EndAttack() => animator.SetBool(H_IsAttacking, false);
 
     // ★ 애니메이션 이벤트에서 호출
-    public void AttackEndFromEvent()
+    public void AttackEnd()
     {
         EndAttack();
         ClearAim();
@@ -121,7 +121,7 @@ public class MarinerAnimControll : MonoBehaviour
     {
         if (zombieMode) return;     // 좀비 전환시 이동 애니메이션 멈춤
         if (aimOverride) return;    // 공격 중에는 방향 유지
-
+        if (animator != null && animator.GetBool(H_IsAttacking)) return;
         if (animator == null) return;
 
         Vector3 v = agent ? agent.velocity : Vector3.zero;
