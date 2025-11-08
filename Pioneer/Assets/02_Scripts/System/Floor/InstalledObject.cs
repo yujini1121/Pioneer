@@ -80,7 +80,7 @@ public class InstalledObject : MonoBehaviour
 
         // 3) 현재 회전을 90도 단위로 정리(이동 중엔 회전값 유지)
         float y = Mathf.Round(transform.eulerAngles.y / 90f) * 90f;
-        var rot = Quaternion.Euler(0f, y, 0f);
+        var rot = Quaternion.Euler(0f, y+45f, 0f);
 
         // 4) 설치 가능 여부 평가(초록/빨강) — CreateObject의 체크 재사용
         bool permitted = false;

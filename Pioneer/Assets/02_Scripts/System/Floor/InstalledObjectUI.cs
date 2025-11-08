@@ -115,6 +115,9 @@ public class InstalledObjectUI : MonoBehaviour
                 !EventSystem.current.IsPointerOverGameObject())
             {
                 Hide();
+                List<Material> materials = new List<Material>(current.GetComponent<MeshRenderer>().sharedMaterials);
+                materials.RemoveAt(materials.Count - 1);
+                current.GetComponent<MeshRenderer>().sharedMaterials = materials.ToArray();
             }
         }
         if (IsPanelVisible() && Input.GetKeyDown(KeyCode.Escape)) Hide();
