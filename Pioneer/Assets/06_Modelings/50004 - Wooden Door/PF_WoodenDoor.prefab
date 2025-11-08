@@ -76,7 +76,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 24b87cb5407cc54449ecaa767c8d3312,
         type: 3}
       propertyPath: m_TagString
-      value: Lantern
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -86,6 +86,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3554532195823372472}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 24b87cb5407cc54449ecaa767c8d3312,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5870144879312399036}
   m_SourcePrefab: {fileID: 100100000, guid: 24b87cb5407cc54449ecaa767c8d3312, type: 3}
 --- !u!1 &1948554532445798079 stripped
 GameObject:
@@ -114,3 +118,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.49999997, y: 3, z: 2}
   m_Center: {x: -0.016608134, y: 1.5051358, z: -0.9382261}
+--- !u!114 &-5870144879312399036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1948554532445798079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bfd9fa210570be48ac227680d64ccb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canRotate: 1
+  canMove: 1
+  refundPercent: 70
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8192
+  grid: 1

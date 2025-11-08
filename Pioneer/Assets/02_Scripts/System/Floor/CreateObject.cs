@@ -67,7 +67,8 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float arrivedSpeedEps;   // 이 속도보다 느리면 "멈춤"으로 간주
     [SerializeField] private float arrivedHoldTime;    // 멈춤이 이 시간 이상 지속되면 설치
     private float arrivedTimer = 0f;
-
+    
+    private GameObject _evalDummy;
 
 
     private void Awake()
@@ -585,7 +586,7 @@ public class CreateObject : MonoBehaviour, IBegin
                     Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
                 }
                 //여기까지
-
+                tempObj.GetComponent<InstalledObject>()?.OnPlaced();
                 Debug.Log("[설치 완료됨]");
 
                 playerAgent.ResetPath();
@@ -689,6 +690,37 @@ public class CreateObject : MonoBehaviour, IBegin
         {
             PlayerCore.Instance.speed = originalPlayerSpeed;
             originalPlayerSpeed = -1f;
+        }
+    }
+
+    public bool EvaluatePlacement(CreationType type, Vector3 worldPos, Quaternion rot)
+    {
+        // 백업
+        var bakType = creationType;
+        var bakOnHand = onHand;
+        var bakRotateN = rotateN;
+
+        try
+        {
+            creationType = type;
+
+            // onHand 대체용 더미 트랜스폼
+            if (_evalDummy == null) _evalDummy = new GameObject("~EvalDummy");
+            onHand = _evalDummy;
+            onHand.transform.rotation = rot;
+
+            // rotateN은 90도 단위 회전 지표
+            rotateN = Mathf.RoundToInt(rot.eulerAngles.y / 90f) % 4;
+
+            // 기존 설치 검증 로직 그대로 사용
+            return CheckNear(worldPos);
+        }
+        finally
+        {
+            // 복원
+            creationType = bakType;
+            onHand = bakOnHand;
+            rotateN = bakRotateN;
         }
     }
 }

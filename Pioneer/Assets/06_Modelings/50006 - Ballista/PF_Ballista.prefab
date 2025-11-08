@@ -550,6 +550,7 @@ GameObject:
   - component: {fileID: 188546946053221935}
   - component: {fileID: 4419991302466445333}
   - component: {fileID: 8446833636355452162}
+  - component: {fileID: 5615259743701811320}
   m_Layer: 7
   m_Name: PF_Ballista
   m_TagString: Untagged
@@ -683,6 +684,25 @@ MonoBehaviour:
   enemyDetect: 0
   colliders: []
   nearestTrans: {fileID: 0}
+--- !u!114 &5615259743701811320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4900776315296722742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bfd9fa210570be48ac227680d64ccb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canRotate: 1
+  canMove: 1
+  refundPercent: 70
+  installType: 0
+  grid: 1
+  permitColor: {r: 0, g: 1, b: 0, a: 1}
+  rejectColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &5171196859541829659
 GameObject:
   m_ObjectHideFlags: 0
