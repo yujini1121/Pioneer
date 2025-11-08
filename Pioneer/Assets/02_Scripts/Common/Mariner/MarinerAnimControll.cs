@@ -13,11 +13,9 @@ public class MarinerAnimControll : MonoBehaviour
     public bool invertX = false;
     public bool invertZ = false;
 
-    // ===== Zombie Mode =====
     private bool zombieMode = false;
     private bool firedZombieTrigger = false;
 
-    // ===== Attack Aim Override =====
     private bool aimOverride = false;
     private Vector2 aimDir;
 
@@ -44,9 +42,8 @@ public class MarinerAnimControll : MonoBehaviour
         }
     }
 
-    // =======================
-    // ★ 기존 좀비 전환 기능 유지
-    // =======================
+    //기존 좀비 전환 기능 유지
+
     public void SetZombieModeTrigger()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
@@ -62,10 +59,8 @@ public class MarinerAnimControll : MonoBehaviour
         // 이동 파라미터 업데이트 중단
         zombieMode = true;
     }
+    // 공격 방향 스냅
 
-    // =======================
-    // ★ 공격 방향 스냅
-    // =======================
     public void AimAtTarget(Vector3 targetPos, Transform self)
     {
         Vector3 w = (targetPos - self.position);
@@ -93,9 +88,8 @@ public class MarinerAnimControll : MonoBehaviour
 
     public void ClearAim() => aimOverride = false;
 
-    // =======================
-    // ★ 공격 트리거 + 상태 플래그
-    // =======================
+    // 공격 트리거 + 상태 플래그
+
     public void PlayAttackOnce()
     {
         if (animator.GetBool(H_IsAttacking)) return; // 재트리거 방지
@@ -107,16 +101,14 @@ public class MarinerAnimControll : MonoBehaviour
 
     public void EndAttack() => animator.SetBool(H_IsAttacking, false);
 
-    // ★ 애니메이션 이벤트에서 호출
+    // 애니메이션 이벤트에서 호출
     public void AttackEnd()
     {
         EndAttack();
         ClearAim();
     }
 
-    // =======================
     // 이동/Idle 애니메이션 업데이트
-    // =======================
     void Update()
     {
         if (zombieMode) return;     // 좀비 전환시 이동 애니메이션 멈춤
