@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6931784451536395334}
   - component: {fileID: 8377747341352904870}
   - component: {fileID: 3332194825813813543}
+  - component: {fileID: 1291212250473278826}
   m_Layer: 11
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -120,6 +121,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1291212250473278826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045622705763640814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63ba27b1104a1df4598a980bb6db97aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 7697847138534704942}
+  animator: {fileID: 3332194825813813543}
+  sprite: {fileID: 6931784451536395334}
+  idleThreshold: 0.05
+  damp: 0.08
+  invertX: 0
+  invertZ: 0
 --- !u!1 &3339714784095837873
 GameObject:
   m_ObjectHideFlags: 0
@@ -136,7 +156,6 @@ GameObject:
   - component: {fileID: 2438752510854210654}
   - component: {fileID: 6011470044640431841}
   - component: {fileID: 3173450985402245456}
-  - component: {fileID: 3644727558711323154}
   m_Layer: 11
   m_Name: Default Mariner 1
   m_TagString: Untagged
@@ -246,7 +265,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 1
-  m_WalkableMask: 7
+  m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &1067817375811682228
 MonoBehaviour:
@@ -336,25 +355,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &3644727558711323154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3339714784095837873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63ba27b1104a1df4598a980bb6db97aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agent: {fileID: 7697847138534704942}
-  animator: {fileID: 3332194825813813543}
-  sprite: {fileID: 6931784451536395334}
-  idleThreshold: 0.05
-  damp: 0.08
-  invertX: 0
-  invertZ: 0
 --- !u!1 &6443592185576329262
 GameObject:
   m_ObjectHideFlags: 0
