@@ -487,6 +487,51 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         return dropList.Length > 0 ? dropList[0].itemID : 0;
     }
 
+    protected override IEnumerator PerformPersonalEdgeFarming()
+    {
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [감염] 가짜 파밍(낚시) 시작");
+
+        var anim = GetComponentInChildren<MarinerAnimControll>(true);
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        Vector3 dir = agent != null && agent.desiredVelocity.sqrMagnitude > 0.1f
+            ? agent.desiredVelocity
+            : transform.forward;
+        dir.y = 0f;
+
+        Vector3 side = (dir.x >= 0f) ? transform.right : -transform.right;
+
+        // ★ 낚시 애니메이션 ON
+        anim?.StartFishing(transform.position + side, transform);
+
+        float endTime = Time.time + 10f;
+        try
+        {
+            while (Time.time < endTime)
+            {
+                if (!isSecondPriorityStarted) yield break;
+                if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused) yield break;
+                yield return null;
+            }
+
+            OnPersonalFarmingCompleted();
+            hasFoundPersonalEdge = false;
+        }
+        finally
+        {
+            // ★ 낚시 애니메이션 OFF
+            anim?.StopFishing();
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
+        }
+    }
+
+
 
     /// <summary>
     /// 기타
