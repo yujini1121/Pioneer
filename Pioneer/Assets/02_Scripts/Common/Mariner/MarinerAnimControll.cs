@@ -30,6 +30,33 @@ public class MarinerAnimControll : MonoBehaviour
     static readonly int H_FishingTrigger = Animator.StringToHash("FishingTrigger");
     static readonly int H_IsFishing = Animator.StringToHash("IsFishing");
 
+    static readonly int H_IsZombie = Animator.StringToHash("isZombie");
+    static readonly int H_ZombieAttack = Animator.StringToHash("ZombieAttack");
+    static readonly int H_ZombieIsAttacking = Animator.StringToHash("ZombieIsAttacking");
+
+    public void SetZombieMode()
+    {
+        if (animator == null) animator = GetComponentInChildren<Animator>(true);
+        if (animator == null) return;
+
+        animator.SetBool(H_IsZombie, true);
+    }
+
+    public void PlayZombieAttackOnce()
+    {
+        if (animator == null) return;
+        if (animator.GetBool(H_ZombieIsAttacking)) return;
+
+        animator.ResetTrigger(H_ZombieAttack);
+        animator.SetTrigger(H_ZombieAttack);
+        animator.SetBool(H_ZombieIsAttacking, true);
+    }
+
+    public void EndZombieAttack()
+    {
+        if (animator == null) return;
+        animator.SetBool(H_ZombieIsAttacking, false);
+    }
     void Reset()
     {
         agent = GetComponent<NavMeshAgent>();

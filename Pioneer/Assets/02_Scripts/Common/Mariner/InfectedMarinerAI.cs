@@ -414,6 +414,21 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         isChasing = false;
         target = null;
 
+        EnsureAnimator();
+        var animCtrl = GetComponentInChildren<MarinerAnimControll>(true);
+        if (animCtrl != null)
+        {
+            animCtrl.EndAttack();      // IsAttacking=false
+            animCtrl.StopFishing();    // IsFishing=false
+            animCtrl.ClearAim();
+
+            animCtrl.SetZombieModeTrigger();  
+
+        }
+        else
+        {
+            Debug.Log("setzombiemode불가");
+        }
 
         var zombieAI = GetComponent<ZombieMarinerAI>();
         if (zombieAI == null)
@@ -423,14 +438,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");
 
-        //yield return null;
-
-        EnsureAnimator();
-
-        var animCtrl = GetComponent<MarinerAnimControll>();
-        if (animCtrl != null) animCtrl.SetZombieModeTrigger();
-        else Debug.Log("setzombiemode불가");
-
         var inv = GetComponent<MarinerInventory>();
         if (inv == null) inv = GetComponentInChildren<MarinerInventory>(true);
         if (inv != null)
@@ -439,10 +446,12 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             inv.enabled = false;
         }
 
-        var oldAI = this;            // 자기 자신
-        oldAI.enabled = false;       // 여기서 비활성화
-        Destroy(oldAI);              // 그리고 제거
+        // 자신(감염 전 AI) 정리
+        var oldAI = this;
+        oldAI.enabled = false;
+        Destroy(oldAI);
     }
+
 
     /// <summary>
     /// 파밍 완료시
