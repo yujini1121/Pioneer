@@ -363,9 +363,10 @@ public class CommonUI : MonoBehaviour, IBegin
                 Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
             }
 
-			// 대성공 발생
+            // 대성공 발생
+            PlayerCore.Instance.creatureEffect.Effects[7].Play();
             // 아이템 하나 더 추가
-			InventoryManager.Instance.Add(recipe.result);
+            InventoryManager.Instance.Add(recipe.result);
 
             // 아이템 페이백
             foreach (SItemStack one in recipe.input)

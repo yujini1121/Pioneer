@@ -78,6 +78,7 @@ GameObject:
   - component: {fileID: 5768762475559848083}
   - component: {fileID: 2524180883447383586}
   - component: {fileID: 5686995413484302855}
+  - component: {fileID: 1962218922320015197}
   m_Layer: 0
   m_Name: DefaultGameManager
   m_TagString: Untagged
@@ -189,10 +190,13 @@ MonoBehaviour:
   minion: {fileID: 0}
   crawler: {fileID: 0}
   titan: {fileID: 0}
-  totalCrewMembers: 0
-  deadCrewMembers: 0
+  totalMarinerMembers: 0
+  deadMarinerMembers: 0
   gameOverUI: {fileID: 0}
   allUICanvas: []
+  spawnerFinder: {fileID: 0}
+  spawnLiftY: 0.05
+  spawnRootName: __SPAWNPOINTS__
   enemySpawnTable:
   - total: 0
     minion: 0
@@ -225,6 +229,10 @@ MonoBehaviour:
     hpPercent: 0
   - attackPercent: 0
     hpPercent: 0
+  marinerPrefab: {fileID: 0}
+  mast: {fileID: 0}
+  marinerSpawnOffset: {x: 0, y: 0, z: 0}
+  checkTotalNest: 0
 --- !u!114 &2524180883447383586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,8 +245,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6cb61862b182b747bfef9687f56fc43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  infectionStartTime: 180
-  infectionInterval: 10
+  firstInfectionDay: 4
+  infectionDelayWithinDay: 5
 --- !u!114 &5686995413484302855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -257,6 +265,21 @@ MonoBehaviour:
     m_Bits: 64
   woodItemID: 30001
   clothItemID: 30003
+--- !u!114 &1962218922320015197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8063884484373130190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d477c28ba4f6614dbbb3aca3ad2951f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerEffects: []
+  EnvironmentEffects: []
+  Die: {fileID: 0}
 --- !u!1001 &480823030009369033
 PrefabInstance:
   m_ObjectHideFlags: 0
