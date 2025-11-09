@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Reflection;
 
 /// <summary>
-/// 구조체만 들어갈 수 있는 기능이 생길 수도 있으니까 일단 넣어둠, 근데 일단 지금은 비어있긴 함 ㅋㅋ 
+/// 구조체만 들어갈 수 있는 기능이 생길 수도 있으니까 일단 넣어둠, 근데 일단 지금은 비어있긴 함 ㅜㅜ
 /// </summary>
 public class StructureBase : CommonBase
 {

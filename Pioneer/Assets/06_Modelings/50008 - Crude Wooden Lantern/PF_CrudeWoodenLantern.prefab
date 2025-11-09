@@ -207,6 +207,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -5762918325511636058}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 94ddc5dd5f197f74798b740db939cf42,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 442126138053426266}
   m_SourcePrefab: {fileID: 100100000, guid: 94ddc5dd5f197f74798b740db939cf42, type: 3}
 --- !u!1 &8600612548437967184 stripped
 GameObject:
@@ -250,10 +254,27 @@ MonoBehaviour:
   canRotate: 1
   canMove: 1
   refundPercent: 70
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 8192
+  installType: 0
   grid: 1
+  permitColor: {r: 0, g: 1, b: 0, a: 1}
+  rejectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &442126138053426266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8600612548437967184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 457acd1cb28d16b4c81a7c6a8c57271a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  <isUsing>k__BackingField: 0
 --- !u!4 &8939736691105192938 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 94ddc5dd5f197f74798b740db939cf42,
