@@ -164,7 +164,6 @@ public class MarinerAnimControll : MonoBehaviour
 
     void Update()
     {
-        if (zombieMode) return;
         if (animator == null) return;
 
         // 공격/낚시 중에는 이동 파라미터 갱신 금지
