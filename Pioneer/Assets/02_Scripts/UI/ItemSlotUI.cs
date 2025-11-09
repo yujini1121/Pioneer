@@ -75,6 +75,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         if (isSlot) InventoryUiMain.instance.currentSelectedSlot.Remove(this);
     }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (isSlot)

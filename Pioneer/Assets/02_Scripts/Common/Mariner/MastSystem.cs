@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class MastSystem : CommonBase
@@ -36,6 +38,13 @@ public class MastSystem : CommonBase
     private bool isUpgradeMenuOpen = false;
     private Coroutine messageCoroutine;
     private Coroutine warningCoroutine;
+
+    public static MastSystem Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {
@@ -129,6 +138,7 @@ public class MastSystem : CommonBase
 
     public void CloseAllUI()
     {
+        Debug.Log("MastUI : CloseAllUI");
         isUIOpen = false;
         isUpgradeMenuOpen = false;
         if (mastUI) mastUI.SetActive(false);
