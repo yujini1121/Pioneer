@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "InstallableObject", menuName = "ScriptableObjects/Installables/InstallableObjects")]
 public class SInstallableObjectDataSO : SItemTypeSO
 {
-    public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern }
+    public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern, Storage }
 
     [Header("설치 타입")]
     public CreationType installType;

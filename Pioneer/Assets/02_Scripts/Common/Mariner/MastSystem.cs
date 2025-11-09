@@ -127,7 +127,7 @@ public class MastSystem : CommonBase
         if (upgradeUI) upgradeUI.SetActive(false);
     }
 
-    void CloseAllUI()
+    public void CloseAllUI()
     {
         isUIOpen = false;
         isUpgradeMenuOpen = false;
