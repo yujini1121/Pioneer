@@ -389,30 +389,47 @@ public class MarinerBase : CreatureBase
     {
         Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계에서 파밍 시작");
 
-        float farmingTime = 0f;
-        float totalFarmingTime = 10f;
+        var anim = GetComponentInChildren<MarinerAnimControll>(true);
 
-        while (farmingTime < totalFarmingTime)
+        // 이동 정지
+        if (agent != null && agent.isOnNavMesh)
         {
-            if (!isSecondPriorityStarted)
-            {
-                yield break;
-            }
-
-            if (GameManager.Instance.TimeUntilNight() <= 30f)
-            {
-                Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 밤이 가까워 파밍 중단");
-                OnNightApproaching();
-                yield break;
-            }
-
-            yield return new WaitForSeconds(1f);
-            farmingTime += 1f;
+            agent.ResetPath();
+            agent.isStopped = true;   // ← 멈춰서 파밍
+            agent.velocity = Vector3.zero; // 관성 제거
         }
 
-        OnPersonalFarmingCompleted();
-        hasFoundPersonalEdge = false;
+        if (anim != null) anim.StartFishing(transform.position + transform.right, transform);
+
+        float endTime = Time.time + 10f;
+
+        try
+        {
+            while (Time.time < endTime)
+            {
+                if (!isSecondPriorityStarted) yield break;
+
+                if (GameManager.Instance.TimeUntilNight() <= 30f)
+                {
+                    Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 밤이 가까워 파밍 중단");
+                    OnNightApproaching();
+                    yield break;
+                }
+
+                yield return null; // 1초 단위가 필요없으면 매 프레임 대기
+            }
+
+            OnPersonalFarmingCompleted();
+            hasFoundPersonalEdge = false;
+        }
+        finally
+        {
+            // 정리: 낚시 종료 + 이동 재개
+            anim?.StopFishing();
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
+        }
     }
+
 
     protected virtual void OnPersonalFarmingCompleted()
     {

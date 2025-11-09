@@ -16,16 +16,47 @@ public class MarinerAnimControll : MonoBehaviour
     private bool zombieMode = false;
     private bool firedZombieTrigger = false;
 
+    // 공격 조준 고정
     private bool aimOverride = false;
     private Vector2 aimDir;
 
-    // Animator Hashes
+    //Animator Hashes
     static readonly int H_Attack = Animator.StringToHash("Attack");
     static readonly int H_IsAttacking = Animator.StringToHash("IsAttacking");
     static readonly int H_DirX = Animator.StringToHash("DirX");
     static readonly int H_DirZ = Animator.StringToHash("DirZ");
     static readonly int H_Speed = Animator.StringToHash("Speed");
+    // ★ Fishing
+    static readonly int H_FishingTrigger = Animator.StringToHash("FishingTrigger");
+    static readonly int H_IsFishing = Animator.StringToHash("IsFishing");
 
+    static readonly int H_IsZombie = Animator.StringToHash("isZombie");
+    static readonly int H_ZombieAttack = Animator.StringToHash("ZombieAttack");
+    static readonly int H_ZombieIsAttacking = Animator.StringToHash("ZombieIsAttacking");
+
+    public void SetZombieMode()
+    {
+        if (animator == null) animator = GetComponentInChildren<Animator>(true);
+        if (animator == null) return;
+
+        animator.SetBool(H_IsZombie, true);
+    }
+
+    public void PlayZombieAttackOnce()
+    {
+        if (animator == null) return;
+        if (animator.GetBool(H_ZombieIsAttacking)) return;
+
+        animator.ResetTrigger(H_ZombieAttack);
+        animator.SetTrigger(H_ZombieAttack);
+        animator.SetBool(H_ZombieIsAttacking, true);
+    }
+
+    public void EndZombieAttack()
+    {
+        if (animator == null) return;
+        animator.SetBool(H_ZombieIsAttacking, false);
+    }
     void Reset()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -42,8 +73,7 @@ public class MarinerAnimControll : MonoBehaviour
         }
     }
 
-    //기존 좀비 전환 기능 유지
-
+    //Zombie 그대로 유지 
     public void SetZombieModeTrigger()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
@@ -55,12 +85,10 @@ public class MarinerAnimControll : MonoBehaviour
             animator.ResetTrigger("TriggerZombie");
             animator.SetTrigger("TriggerZombie");
         }
-
-        // 이동 파라미터 업데이트 중단
         zombieMode = true;
     }
-    // 공격 방향 스냅
 
+    //공격 조준
     public void AimAtTarget(Vector3 targetPos, Transform self)
     {
         Vector3 w = (targetPos - self.position);
@@ -68,12 +96,8 @@ public class MarinerAnimControll : MonoBehaviour
         if (w.sqrMagnitude < 0.0001f) w = self.forward;
 
         Vector2 d = new Vector2(w.x, w.z).normalized;
-
-        // Axis Snap (대각선 → 큰 축 방향으로 고정)
-        if (Mathf.Abs(d.x) > Mathf.Abs(d.y))
-            d = new Vector2(Mathf.Sign(d.x), 0);
-        else
-            d = new Vector2(0, Mathf.Sign(d.y));
+        if (Mathf.Abs(d.x) > Mathf.Abs(d.y)) d = new Vector2(Mathf.Sign(d.x), 0);
+        else d = new Vector2(0, Mathf.Sign(d.y));
 
         aimDir = d;
         aimOverride = true;
@@ -88,33 +112,65 @@ public class MarinerAnimControll : MonoBehaviour
 
     public void ClearAim() => aimOverride = false;
 
-    // 공격 트리거 + 상태 플래그
-
+    //공격 트리거
     public void PlayAttackOnce()
     {
-        if (animator.GetBool(H_IsAttacking)) return; // 재트리거 방지
-
+        if (animator.GetBool(H_IsAttacking)) return;
         animator.ResetTrigger(H_Attack);
         animator.SetTrigger(H_Attack);
         animator.SetBool(H_IsAttacking, true);
     }
-
     public void EndAttack() => animator.SetBool(H_IsAttacking, false);
+    public void AttackEnd() { EndAttack(); ClearAim(); }
 
-    // 애니메이션 이벤트에서 호출
-    public void AttackEnd()
+    // 낚시 시작/종료
+    public void StartFishing(Vector3 lookPoint, Transform self)
     {
-        EndAttack();
-        ClearAim();
+        if (animator == null) return;
+
+        // 바라볼 방향 스냅(L/R/Front/Back)
+        Vector3 w = (lookPoint - self.position); w.y = 0f;
+        if (w.sqrMagnitude < 0.0001f) w = self.right; // 기본 오른쪽
+        Vector2 d = new Vector2(w.x, w.z).normalized;
+        if (Mathf.Abs(d.x) > Mathf.Abs(d.y)) d = new Vector2(Mathf.Sign(d.x), 0);
+        else d = new Vector2(0, Mathf.Sign(d.y));
+
+        aimDir = d;
+        aimOverride = true;
+
+        animator.SetFloat(H_DirX, aimDir.x);
+        animator.SetFloat(H_DirZ, aimDir.y);
+        animator.SetFloat(H_Speed, 0f);
+
+        if (sprite && Mathf.Abs(aimDir.x) > Mathf.Abs(aimDir.y))
+            sprite.flipX = (aimDir.x < 0);
+
+        // 상태 진입
+        animator.ResetTrigger(H_FishingTrigger);
+        animator.SetTrigger(H_FishingTrigger);
+        animator.SetBool(H_IsFishing, true);
     }
 
-    // 이동/Idle 애니메이션 업데이트
+    public void StopFishing()
+    {
+        if (animator == null) return;
+        animator.SetBool(H_IsFishing, false); // 종료 조건 해제 → Idle로 복귀
+        ClearAim();
+    }
+    public void EndFishingFromEvent()  // 애니메이션 이벤트에서 호출
+    {
+        StopFishing();
+    }
+
     void Update()
     {
-        if (zombieMode) return;     // 좀비 전환시 이동 애니메이션 멈춤
-        if (aimOverride) return;    // 공격 중에는 방향 유지
-        if (animator != null && animator.GetBool(H_IsAttacking)) return;
+        if (zombieMode) return;
         if (animator == null) return;
+
+        // 공격/낚시 중에는 이동 파라미터 갱신 금지
+        if (aimOverride) return;
+        if (animator.GetBool(H_IsAttacking)) return;
+        if (animator.GetBool(H_IsFishing)) return;
 
         Vector3 v = agent ? agent.velocity : Vector3.zero;
         float dirX = invertX ? -v.x : v.x;
