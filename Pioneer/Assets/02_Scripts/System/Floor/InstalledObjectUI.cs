@@ -26,8 +26,8 @@ public class InstalledObjectUI : MonoBehaviour
     [SerializeField] LayerMask interactableMask; // 설치 오브젝트 레이어
 
     [Header("회전 키")]
-    [SerializeField] KeyCode keyRotateCCW = KeyCode.A; // -90
-    [SerializeField] KeyCode keyRotateCW = KeyCode.D; // +90
+    [SerializeField] KeyCode keyRotateLeft = KeyCode.A; // -90
+    [SerializeField] KeyCode keyRotateRight = KeyCode.D; // +90
 
     [Header("아웃라인")]
     [SerializeField] Material outlineMat;
@@ -59,7 +59,7 @@ public class InstalledObjectUI : MonoBehaviour
         // 버튼 리스너
         rotationButton.onClick.AddListener(() => { if (current) mode = Mode.Rotate; });
         moveButton.onClick.AddListener(() => { if (current) { current.BeginMove(); mode = Mode.Move; } });
-        removeButton.onClick.AddListener(() => { if (current) { current.RemoveWithRefund(); Hide(); } });
+        removeButton.onClick.AddListener(() => { if (current) { current.Remove(); Hide(); } });
         closeButton.onClick.AddListener(Hide);
 
         Hide(); // 시작 시 패널은 숨김(루트는 활성 상태 유지)
@@ -93,8 +93,8 @@ public class InstalledObjectUI : MonoBehaviour
         switch (mode)
         {
             case Mode.Rotate:
-                if (Input.GetKeyDown(keyRotateCCW)) current.RotateCCW();
-                if (Input.GetKeyDown(keyRotateCW)) current.RotateCW();
+                if (Input.GetKeyDown(keyRotateLeft)) current.RotateLeft();
+                if (Input.GetKeyDown(keyRotateRight)) current.RotateRight();
                 break;
 
             case Mode.Move:

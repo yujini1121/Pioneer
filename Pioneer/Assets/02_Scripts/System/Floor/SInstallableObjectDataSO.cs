@@ -14,6 +14,6 @@ public class SInstallableObjectDataSO : SItemTypeSO
 	public Vector3 size = Vector3.one;         // 설치 판정용 Overlap 크기
 
     [Header("기능 확장")]
-	public float maxHp = 20f;                  // 내구도
+	public int maxHp = 20;                     // 내구도
 	public float buildTime = 2f;               // 설치 시간
 }

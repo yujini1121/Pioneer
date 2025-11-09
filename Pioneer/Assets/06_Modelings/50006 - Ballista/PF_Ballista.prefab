@@ -551,7 +551,6 @@ GameObject:
   - component: {fileID: 4419991302466445333}
   - component: {fileID: 8446833636355452162}
   - component: {fileID: 5615259743701811320}
-  - component: {fileID: 2877785703232957130}
   m_Layer: 7
   m_Name: PF_Ballista
   m_TagString: Untagged
@@ -664,24 +663,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f1ee1cbea1a86349a1cb691f63ba220, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  <isUsing>k__BackingField: 0
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  detectRange: 1.5
+  detectedEnemies: []
   objectData: {fileID: 0}
   smoothRotate: 1
   rotationSpeed: 50
   detectType: 0
   currentHP: 80
   attackPower: 25
-  attackRange: 8
+  attackRange: 3
   attackHalfBound: {x: 6, y: 1, z: 12}
   attackCooldown: 2
   attackSpeed: 4
   boltHalfSize: {x: 0.5, y: 0.5, z: 1}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 256
   gunnerPos: {fileID: 7667971923933810913}
   boltPool: {fileID: 7619030109788409699}
   drawGizmos: 1
-  isUsing: 0
   enemyDetect: 0
   colliders: []
   nearestTrans: {fileID: 0}
@@ -704,23 +709,6 @@ MonoBehaviour:
   grid: 1
   permitColor: {r: 0, g: 1, b: 0, a: 1}
   rejectColor: {r: 1, g: 0, b: 0, a: 1}
---- !u!114 &2877785703232957130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4900776315296722742}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 457acd1cb28d16b4c81a7c6a8c57271a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 0
-  IsDead: 0
-  attacker: {fileID: 0}
-  <isUsing>k__BackingField: 0
 --- !u!1 &5171196859541829659
 GameObject:
   m_ObjectHideFlags: 0

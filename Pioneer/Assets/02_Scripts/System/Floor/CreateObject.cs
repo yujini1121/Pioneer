@@ -49,7 +49,7 @@ public class CreateObject : MonoBehaviour, IBegin
     private int rotateN = 0;
 
     [Header("네브메시 설정")]
-    [SerializeField] private NavMeshSurface navMeshSurface;
+    [SerializeField] public NavMeshSurface navMeshSurface;
     [SerializeField] private float stopDistance = 1.5f;
     private NavMeshAgent playerAgent;
 
