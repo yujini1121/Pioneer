@@ -8,11 +8,9 @@ public class MarinerBase : CreatureBase
     // 승무원 공통 설정
     public LayerMask targetLayer;
 
-    // 상태 관리
     public enum CrewState { Wandering, Idle, Attacking, Chasing }
     protected CrewState currentState = CrewState.Wandering;
 
-    // 이동 및 대기 시간
     protected float moveDuration = 2f;
     protected float idleDuration = 4f;
     protected float stateTimer = 0f;
@@ -23,7 +21,7 @@ public class MarinerBase : CreatureBase
     protected bool isShowingAttackBox = false;
     protected Coroutine attackRoutine;
 
-    // 추격 시스템 관련 변수
+    // 추격 시스템
     protected float chaseRange = 8f;
     protected bool isChasing = false;
     protected float chaseUpdateInterval = 0.2f;
@@ -32,19 +30,22 @@ public class MarinerBase : CreatureBase
     // 수리 관련 공통 변수
     [Header("수리 설정")]
     public bool isRepairing = false;
-    protected DefenseObject targetRepairObject;
+
+    //DefenseObject -> StructureBase
+    protected StructureBase targetRepairObject;
     protected int repairAmount = 30;
     protected bool isSecondPriorityStarted = false;
+    protected Coroutine secondPriorityRoutine;   // 2순위 코루틴 추적
 
     // 개별 경계 탐색 설정
     [Header("개별 경계 탐색 설정")]
-    public int personalRayCount = 8; // 개인별 Ray 개수 (45도씩)
-    public float personalMaxDistance = 50f; // 개인별 최대 탐색 거리
+    public int personalRayCount = 8;
+    public float personalMaxDistance = 50f;
 
     protected Vector3 personalEdgePoint;
     protected bool hasFoundPersonalEdge = false;
 
-    // NavMeshAgent 공통 사용
+    // NavMeshAgent 공통
     protected NavMeshAgent agent;
 
     public virtual void Start()
@@ -271,17 +272,10 @@ public class MarinerBase : CreatureBase
         }
     }
 
-    protected virtual float GetAttackCooldown()
-    {
-        return 0f;
-    }
+    protected virtual float GetAttackCooldown() => 0f;
+    protected virtual IEnumerator GetAttackSequence() { yield return null; }
 
-    protected virtual IEnumerator GetAttackSequence()
-    {
-        yield return null;
-    }
-
-    // ===== 파밍시스템 y축 관련으로 해결법 찾아야할듯?=====
+    // 경계 탐색 & 파밍 
     protected Vector3 FindMyOwnEdgePoint()
     {
         List<Vector3> candidatePoints = new List<Vector3>();
@@ -391,12 +385,11 @@ public class MarinerBase : CreatureBase
 
         var anim = GetComponentInChildren<MarinerAnimControll>(true);
 
-        // 이동 정지
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
-            agent.isStopped = true;   // ← 멈춰서 파밍
-            agent.velocity = Vector3.zero; // 관성 제거
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
         }
 
         if (anim != null) anim.StartFishing(transform.position + transform.right, transform);
@@ -416,7 +409,7 @@ public class MarinerBase : CreatureBase
                     yield break;
                 }
 
-                yield return null; // 1초 단위가 필요없으면 매 프레임 대기
+                yield return null;
             }
 
             OnPersonalFarmingCompleted();
@@ -424,33 +417,41 @@ public class MarinerBase : CreatureBase
         }
         finally
         {
-            // 정리: 낚시 종료 + 이동 재개
             anim?.StopFishing();
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
     }
 
-
-    protected virtual void OnPersonalFarmingCompleted()
+    protected void CancelSecondPriorityAction()
     {
-        // 각 AI에서 오버라이드
-        //감염된 승무원은 파밍 x
-        // 그냥 승무원은 파밍 ㅇㅇ
+        if (!isSecondPriorityStarted) return;
+        isSecondPriorityStarted = false;
+        if (secondPriorityRoutine != null)
+        {
+            StopCoroutine(secondPriorityRoutine);
+            secondPriorityRoutine = null;
+        }
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
     }
 
-    // ===== 수리 관련 함수들 =====
+    protected virtual void OnPersonalFarmingCompleted() { /* 각 AI에서 오버라이드 */ }
+
+    // 수리 관련 로직 (StructureBase 기반)
     protected virtual void StartRepair()
     {
-        Debug.Log($"승무원 {GetMarinerId()}: StartRepair() 호출됨");
+        // 이미 수리 중이면 재진입 방지
+        if (isRepairing || isSecondPriorityStarted) return;
+
+        // 파밍(2순위) 중이면 즉시 취소하고 수리 우선
+        if (isSecondPriorityStarted) CancelSecondPriorityAction();
 
         MarinerManager.Instance.UpdateRepairTargets();
-        List<DefenseObject> needRepairList = MarinerManager.Instance.GetNeedsRepair();
+        List<StructureBase> needRepairList = MarinerManager.Instance.GetNeedsRepair();
         Debug.Log($"승무원 {GetMarinerId()}: 수리 대상 개수: {needRepairList.Count}");
 
-        for (int i = 0; i < needRepairList.Count; i++)
+        foreach (var obj in needRepairList)
         {
-            DefenseObject obj = needRepairList[i];
-
             if (MarinerManager.Instance.TryOccupyRepairObject(obj, GetMarinerId()))
             {
                 targetRepairObject = obj;
@@ -459,6 +460,12 @@ public class MarinerBase : CreatureBase
                 {
                     Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 시작: {targetRepairObject.name}");
                     isRepairing = true;
+
+                    // 이동 시작 전 공격/추격 끊기(의도치 않은 전환 방지)
+                    isChasing = false;
+                    target = null;
+                    if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+
                     StartCoroutine(MoveToRepairObject(targetRepairObject.transform.position));
                     return;
                 }
@@ -469,13 +476,14 @@ public class MarinerBase : CreatureBase
             }
         }
 
+        // 여기까지 왔다 = 현재 수리할 게 없음 → 그때만 2순위 시작
         if (!isSecondPriorityStarted)
         {
             Debug.Log($"{GetCrewTypeName()} 수리 대상 없음 -> 2순위 행동 시작");
-            isSecondPriorityStarted = true;
-            StartCoroutine(StartSecondPriorityAction());
+            secondPriorityRoutine = StartCoroutine(StartSecondPriorityAction());
         }
     }
+
 
     protected IEnumerator MoveToRepairObject(Vector3 targetPosition)
     {
@@ -485,6 +493,9 @@ public class MarinerBase : CreatureBase
 
             while (!IsArrived())
             {
+                // 누군가 다시 2순위를 켰다면(안전망)
+                if (!isRepairing) yield break;
+                if (isSecondPriorityStarted) { isRepairing = false; yield break; }
                 yield return null;
             }
         }
@@ -492,26 +503,37 @@ public class MarinerBase : CreatureBase
         StartCoroutine(RepairProcess());
     }
 
+
     protected virtual IEnumerator RepairProcess()
     {
         float repairDuration = 10f;
         float elapsedTime = 0f;
 
+        // 10초 동안 그 자리 유지(수리 중단 조건 체크)
         while (elapsedTime < repairDuration)
         {
+            // 공격/밤 전환 등의 외적 요인으로 수리 취소되면 탈출
+            if (!isRepairing) yield break;
+            if (isSecondPriorityStarted) { isRepairing = false; yield break; }
+
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
+        // StructureBase는 Heal() 사용
         bool repairSuccess = GetRepairSuccessRate() > Random.value;
         int actualRepairAmount = repairSuccess ? repairAmount : 0;
 
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 {(repairSuccess ? "성공" : "실패")}: {targetRepairObject.name}/ 수리량: {actualRepairAmount}");
-        targetRepairObject.Repair(actualRepairAmount);
+        if (targetRepairObject != null)
+        {
+            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 {(repairSuccess ? "성공" : "실패")}: {targetRepairObject.name}/ 수리량: {actualRepairAmount}");
+            targetRepairObject.Heal(actualRepairAmount);
+            MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
+        }
 
         isRepairing = false;
-        MarinerManager.Instance.UpdateRepairTargets();
 
+        // 밤 임박 시 분기
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
             Debug.Log($"{GetCrewTypeName()} 밤 도달 예외행동 시작");
@@ -519,9 +541,10 @@ public class MarinerBase : CreatureBase
             yield break;
         }
 
+        // 다음 수리 재시도
         StartRepair();
-        MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
     }
+
 
     public virtual IEnumerator StartSecondPriorityAction()
     {
@@ -529,13 +552,11 @@ public class MarinerBase : CreatureBase
         yield return StartCoroutine(MoveToMyEdgeAndFarm());
     }
 
-    // ===== NavMeshAgent 관련 공통 함수들 =====
+    // ===== NavMeshAgent 공통 =====
     public void MoveTo(Vector3 destination)
     {
         if (agent != null && agent.isOnNavMesh)
-        {
             agent.SetDestination(destination);
-        }
     }
 
     public bool IsArrived()
@@ -543,7 +564,7 @@ public class MarinerBase : CreatureBase
         if (agent == null || !agent.isOnNavMesh) return true;
 
         bool navMeshCondition = !agent.pathPending &&
-                              agent.remainingDistance <= (agent.stoppingDistance + 1f);
+                                agent.remainingDistance <= (agent.stoppingDistance + 1f);
 
         if (agent.destination != Vector3.zero)
         {
@@ -561,36 +582,19 @@ public class MarinerBase : CreatureBase
         MoveTo(destination);
 
         while (!IsArrived())
-        {
             yield return null;
-        }
 
         if (agent != null && agent.isOnNavMesh)
-        {
             agent.ResetPath();
-        }
+
         Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
     }
 
-    protected virtual float GetRepairSuccessRate()
-    {
-        return 1.0f;
-    }
 
-    protected virtual int GetMarinerId()
-    {
-        return 0;
-    }
-
-    protected virtual string GetCrewTypeName()
-    {
-        return "승무원";
-    }
-
-    protected virtual void OnNightApproaching()
-    {
-        Debug.Log($"{GetCrewTypeName()} 기본 밤 처리");
-    }
+    protected virtual float GetRepairSuccessRate() => 1.0f;
+    protected virtual int GetMarinerId() => 0;
+    protected virtual string GetCrewTypeName() => "승무원";
+    protected virtual void OnNightApproaching() { Debug.Log($"{GetCrewTypeName()} 기본 밤 처리"); }
 
     protected virtual void OnDrawGizmos()
     {
@@ -602,7 +606,6 @@ public class MarinerBase : CreatureBase
             Gizmos.DrawWireCube(Vector3.zero, new Vector3(2f, 1f, 2f));
         }
 
-        // 개인 경계 지점 표시
         if (hasFoundPersonalEdge && personalEdgePoint != Vector3.zero)
         {
             Gizmos.color = Color.green;
