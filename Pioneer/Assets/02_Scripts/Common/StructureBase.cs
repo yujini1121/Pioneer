@@ -73,16 +73,18 @@ public class StructureBase : CommonBase
 
     #region 상호작용
     public virtual void Interactive() { }
-    public virtual void Use() { isUsing = true; }
+    public virtual void Use() {
+        Debug.Log(">> StructureBase.Use()");
+        isUsing = true; }
     public virtual void UnUse() { isUsing = false; }
 
-    public virtual bool CanInteract
-    {
-        get
-        {
-            return (transform.position - ThisIsPlayer.Player.transform.position).sqrMagnitude < interactRange * interactRange;
-        }
-    }
+    //public virtual bool CanInteract
+    //{
+    //    get
+    //    {
+    //        return (transform.position - ThisIsPlayer.Player.transform.position).sqrMagnitude < interactRange * interactRange;
+    //    }
+    //}
     #endregion
 
 #if UNITY_EDITOR

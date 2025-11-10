@@ -24,6 +24,8 @@ public class PlayerInteract : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.R))
 			{
+				Debug.Log("PlayerInteract");
+
 				// 가장 가까운 애 선택
 
 				StructureBase closest = null;
