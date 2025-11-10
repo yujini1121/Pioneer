@@ -218,11 +218,18 @@ public class InventoryManager : InventoryBase
 
     private void Start()
     {
-        Demo();
         InventoryUiMain.instance.IconRefresh();
     }
 
-    private void Demo()
+	private void Update()
+	{
+        if (Input.GetKeyDown(KeyCode.F11))
+        {
+            Demo();
+        }
+	}
+
+	private void Demo()
     {
         //Add(new SItemStack(30001, 10));
         //Add(new SItemStack(30002, 10));

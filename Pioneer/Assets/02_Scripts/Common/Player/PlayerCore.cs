@@ -125,6 +125,8 @@ public class PlayerCore : CreatureBase, IBegin
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
 
+    public Transform mast;
+
 	public SItemWeaponTypeSO CalculatedHandAttack
     {
         get
@@ -183,6 +185,11 @@ public class PlayerCore : CreatureBase, IBegin
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            transform.position = mast.position;
+        }
+
         UnityEngine.Debug.Assert(fov != null);
         UnityEngine.Debug.Assert(enemyLayer != null);
 
