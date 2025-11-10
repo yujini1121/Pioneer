@@ -719,9 +719,8 @@ public class MarinerAI : MarinerBase, IBegin
         if (dir.sqrMagnitude < 0.0001f) dir = transform.forward; // 거의 정지면 바라보는 방향 사용
         dir.y = 0f;
 
-        Vector3 sideDir = (dir.x >= 0f) ? Vector3.right : Vector3.left;
+        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
         if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
-
 
         float endTime = Time.time + 10f;
 
