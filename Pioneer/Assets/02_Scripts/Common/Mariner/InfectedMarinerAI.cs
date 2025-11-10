@@ -28,6 +28,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     };
 
     public Animator animator;
+    Quaternion initialRot;
+
 
     // 감염된 승무원 고유 설정
     public int marinerId;
@@ -75,6 +77,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         attackDelayTime = 1f;
 
         fov = GetComponent<FOVController>();
+        initialRot = transform.rotation;
+
         gameObject.layer = LayerMask.NameToLayer("Mariner");
     }
 
@@ -505,10 +509,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             : transform.forward;
         dir.y = 0f;
 
-        Vector3 side = (dir.x >= 0f) ? transform.right : -transform.right;
-
-        // ★ 낚시 애니메이션 ON
-        anim?.StartFishing(transform.position + side, transform);
+        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
+        if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
 
         float endTime = Time.time + 10f;
         try
@@ -525,7 +527,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
         finally
         {
-            // ★ 낚시 애니메이션 OFF
             anim?.StopFishing();
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
