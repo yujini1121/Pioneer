@@ -667,20 +667,16 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  objectData: {fileID: 11400000, guid: ac880c82d9423e245a56ddc237748984, type: 2}
   <isUsing>k__BackingField: 0
+  interactRange: 1.5
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
-  detectRange: 1.5
   detectedEnemies: []
-  objectData: {fileID: 0}
-  smoothRotate: 1
   rotationSpeed: 50
-  detectType: 0
-  currentHP: 80
   attackPower: 25
   attackRange: 3
-  attackHalfBound: {x: 6, y: 1, z: 12}
   attackCooldown: 2
   attackSpeed: 4
   boltHalfSize: {x: 0.5, y: 0.5, z: 1}
