@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6121865070135299285
 Transform:
   m_ObjectHideFlags: 0
@@ -118,6 +118,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32e9c56eb66f4bd42ad5333a766e052b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  objectData: {fileID: 0}
+  <isUsing>k__BackingField: 0
+  interactRange: 1.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  detectedEnemies: []
 --- !u!1001 &1488439447146214750
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -221,6 +232,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -7787403997891664023}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 22f3e16222495f34faa2eaeea92d4462,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 356224834255969956}
   m_SourcePrefab: {fileID: 100100000, guid: 22f3e16222495f34faa2eaeea92d4462, type: 3}
 --- !u!4 &1381838416666776245 stripped
 Transform:
@@ -291,6 +306,29 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   objectData: {fileID: 11400000, guid: ce4fa41622f264f4fa6aefe9811e7955, type: 2}
+  <isUsing>k__BackingField: 0
+  interactRange: 1.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  detectedEnemies: []
+--- !u!114 &356224834255969956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758257748867876879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32e9c56eb66f4bd42ad5333a766e052b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  objectData: {fileID: 0}
   <isUsing>k__BackingField: 0
   interactRange: 1.5
   enemyLayer:
