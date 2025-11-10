@@ -43,8 +43,13 @@ public class StructureBase : CommonBase
         // 전투/탐지는 자식에서 처리
     }
 
-    #region HP 세팅
-    public void Heal(int amount)
+	private void LateUpdate()
+	{
+        PlayerInteract.Add(this);
+	}
+
+	#region HP 세팅
+	public void Heal(int amount)
     {
         if (amount <= 0) return;
         hp = Mathf.Min(maxHp, hp + amount);
@@ -70,6 +75,14 @@ public class StructureBase : CommonBase
     public virtual void Interactive() { }
     public virtual void Use() { isUsing = true; }
     public virtual void UnUse() { isUsing = false; }
+
+    public virtual bool CanInteract
+    {
+        get
+        {
+            return (transform.position - ThisIsPlayer.Player.transform.position).sqrMagnitude < interactRange * interactRange;
+        }
+    }
     #endregion
 
 #if UNITY_EDITOR
