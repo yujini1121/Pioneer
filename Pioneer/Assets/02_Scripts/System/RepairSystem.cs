@@ -7,6 +7,7 @@ public class RepairSystem : MonoBehaviour
     public static RepairSystem instance;
 
     public InventoryBase slot;
+    public int remainRepairCount = 0;
 
     private void Awake()
     {
@@ -24,7 +25,8 @@ public class RepairSystem : MonoBehaviour
             Debug.Log("수리가 필요하지 않습니다.");
             return;
         }
-        if (InventoryManager.Instance.Get(40007) < 1)
+        //if (InventoryManager.Instance.Get(40007) < 1)
+        if (remainRepairCount < 1)
         {
             Debug.Log("수리 도구가 부족합니다.");
             return;
@@ -33,8 +35,10 @@ public class RepairSystem : MonoBehaviour
         slot.itemLists[1] = slot.itemLists[0];
         slot.itemLists[1].duability += 50;
         slot.itemLists[0] = null;
-        InventoryManager.Instance.Remove(new SItemStack(40007, 1));
-    }
+
+        remainRepairCount--;
+		//InventoryManager.Instance.Remove(new SItemStack(40007, 1));
+	}
 
     public void Collect()
     {

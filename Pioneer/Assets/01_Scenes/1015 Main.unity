@@ -825,6 +825,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 85331745}
   m_CullTransparentMesh: 1
+--- !u!1 &86821284
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 86821285}
+  m_Layer: 5
+  m_Name: RepairUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &86821285
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86821284}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3401060059445474158}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &92761778
 GameObject:
   m_ObjectHideFlags: 0
@@ -19843,6 +19878,7 @@ RectTransform:
   - {fileID: 406737943}
   - {fileID: 1523561410}
   - {fileID: 414858959}
+  - {fileID: 86821285}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -21083,6 +21119,7 @@ GameObject:
   - component: {fileID: 8573141634702029874}
   - component: {fileID: 8573141634702029875}
   - component: {fileID: 8573141634702029876}
+  - component: {fileID: 8573141634702029877}
   m_Layer: 10
   m_Name: Player
   m_TagString: Untagged
@@ -21625,6 +21662,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32e9c56eb66f4bd42ad5333a766e052b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  objectData: {fileID: 0}
+  <isUsing>k__BackingField: 0
+  interactRange: 1.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  detectedEnemies: []
 --- !u!114 &4457611043879590724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34818,6 +34866,18 @@ MonoBehaviour:
   ringImage: {fileID: 1517500650}
   effect: {fileID: 1163333883}
   repairTime: 3
+--- !u!114 &8573141634702029877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4010547727299399648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e04a1f43ca97c94e94d5ac541ac4be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!222 &8589906816938256841
 CanvasRenderer:
   m_ObjectHideFlags: 0
