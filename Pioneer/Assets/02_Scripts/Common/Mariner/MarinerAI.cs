@@ -47,8 +47,8 @@ public class MarinerAI : MarinerBase, IBegin
         hp = 100;
         speed = 2f;
         attackDamage = 6;
-        attackRange = 4f;
-        attackDelayTime = 1f;
+        attackRange = 1.5f;
+        attackDelayTime = 1.5f;
 
         fov = GetComponent<FOVController>();
 
@@ -318,77 +318,101 @@ public class MarinerAI : MarinerBase, IBegin
     {
         currentState = CrewState.Attacking;
 
-        if (target == null)
+        var animCtrl = GetComponentInChildren<MarinerAnimControll>(true);
+
+        // 항상 정리 보장
+        try
         {
-            attackRoutine = null;
-            isChasing = false;
-            HandlePostCombatAction();
-            yield break;
-        }
-
-        ResetAgentPath();
-        LookAtTarget();
-
-        isShowingAttackBox = true;
-        yield return new WaitForSeconds(attackDelayTime);
-        isShowingAttackBox = false;
-
-        PerformMarinerAttack();
-        attackCooldown = attackInterval;
-
-        // 공격 후 타겟 상태 확인
-        if (target != null)
-        {
-            CommonBase targetBase = target.GetComponent<CommonBase>();
-            if (targetBase != null && !targetBase.IsDead)
+            if (target == null)
             {
-                Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
-                EnterChasingState();
+                attackRoutine = null;
+                isChasing = false;
+                yield break;
+            }
+
+            ResetAgentPath();
+            LookAtTarget(); // 루트 회전(선택)
+
+            // ★ 타겟 바라보게 DirX/DirZ 스냅 + 공격 트리거
+            animCtrl?.AimAtTarget(target.position, transform);
+            animCtrl?.PlayAttackOnce();
+
+            // 선딜(텔레그래프)
+            isShowingAttackBox = true;
+            yield return new WaitForSeconds(attackDelayTime);
+            isShowingAttackBox = false;
+
+            // 실제 타격
+            PerformMarinerAttack();
+            attackCooldown = attackInterval;
+
+            // 타겟 상태 확인 후 분기
+            if (target != null)
+            {
+                CommonBase targetBase = target.GetComponent<CommonBase>();
+                if (targetBase != null && !targetBase.IsDead)
+                {
+                    Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
+                    EnterChasingState();
+                    yield break;
+                }
+                else
+                {
+                    Debug.Log($"승무원 {marinerId}: 적 처치 완료");
+                    target = null;
+                    isChasing = false;
+                    HandlePostCombatAction();
+                    yield break;
+                }
             }
             else
             {
-                // 적이 죽었으므로 즉시 1순위 행동으로 전환
-                Debug.Log($"승무원 {marinerId}: 적 처치 완료");
-                target = null;
+                Debug.Log($"승무원 {marinerId}: 적 소실");
                 isChasing = false;
-                attackRoutine = null;
                 HandlePostCombatAction();
                 yield break;
             }
         }
-        else
+        finally
         {
-            // 적이 없어졌으므로 즉시 1순위 행동으로 전환
-            Debug.Log($"승무원 {marinerId}: 적 소실");
-            isChasing = false;
+            // 어떤 경로로 끝나든 공격 상태 정리
+            animCtrl?.EndAttack();   // IsAttacking=false → Idle 전이 허용
+            animCtrl?.ClearAim();    // 이동 기반 Dir 업데이트 복귀
             attackRoutine = null;
-            HandlePostCombatAction();
-            yield break;
         }
-
-        attackRoutine = null;
     }
+
+
 
     private void PerformMarinerAttack()
     {
-        Vector3 boxCenter = transform.position + transform.forward * 1f;
-        Collider[] hits = Physics.OverlapBox(boxCenter, new Vector3(1f, 0.5f, 1f), transform.rotation, targetLayer);
+        // 전방 박스 중심과 반경(반쪽 크기) 계산
+        float half = Mathf.Max(0.5f, attackRange * 0.5f);
+        Vector3 boxCenter = transform.position + transform.forward * half;
+        Vector3 halfExtents = new Vector3(half, 1f, half);
+
+        Collider[] hits = Physics.OverlapBox(
+            boxCenter,
+            halfExtents,
+            transform.rotation,
+            targetLayer
+        );
 
         foreach (var hit in hits)
         {
-            Debug.Log($"승무원이 {hit.name} 공격 범위 내 감지");
-
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
                 targetBase.TakeDamage(attackDamage, this.gameObject);
-                Debug.Log($"승무원이 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
+                Debug.Log($"승무원이 {hit.name}에게 {attackDamage} 데미지");
             }
         }
     }
 
+
     public override IEnumerator StartSecondPriorityAction()
     {
+        isSecondPriorityStarted = true;
         if (!GameManager.Instance.IsDaytime || GameManager.Instance.TimeUntilNight() <= 30f)
         {
             isSecondPriorityStarted = false;
@@ -477,6 +501,7 @@ public class MarinerAI : MarinerBase, IBegin
         else
         {
             Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
+            isSecondPriorityStarted = true;
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
             var needRepairList = MarinerManager.Instance.GetNeedsRepair();
@@ -668,6 +693,59 @@ public class MarinerAI : MarinerBase, IBegin
         isNightRoaming = false;
         nightRoamRoutine = null;
         Debug.Log($"승무원 {marinerId}: 야간 루틴 종료");
+    }
+
+    protected override IEnumerator PerformPersonalEdgeFarming() // 애니메이션을 위한 오버라이드
+    {
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [마리너] 파밍 시작");
+
+        var anim = GetComponentInChildren<MarinerAnimControll>(true);
+
+        // 이동 정지
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        Vector3 dir = Vector3.zero;
+        if (agent != null)
+            dir = agent.desiredVelocity.sqrMagnitude > 0.0001f ? agent.desiredVelocity : agent.velocity;
+
+        if (dir.sqrMagnitude < 0.0001f) dir = transform.forward; // 거의 정지면 바라보는 방향 사용
+        dir.y = 0f;
+
+        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
+
+        if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
+
+        float endTime = Time.time + 10f;
+
+        try
+        {
+            while (Time.time < endTime)
+            {
+                if (!isSecondPriorityStarted) yield break;
+
+                if (GameManager.Instance.TimeUntilNight() <= 30f)
+                {
+                    OnNightApproaching();
+                    yield break;
+                }
+
+                yield return null; // 프레임 대기
+            }
+
+            OnPersonalFarmingCompleted();
+            hasFoundPersonalEdge = false;
+        }
+        finally
+        {
+            // 정리
+            anim?.StopFishing();
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
+        }
     }
 
 

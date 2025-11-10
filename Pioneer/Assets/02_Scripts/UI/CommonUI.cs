@@ -74,7 +74,7 @@ public class CommonUI : MonoBehaviour, IBegin
             ui.materialEachText[rIndex].enabled = false;
             //ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
             ui.materialIconImage[rIndex].enabled = false;
-        }
+        } 
 
         Vector3 mPositionPivot = Vector3.zero;
         switch (recipe.input.Length)
@@ -140,6 +140,8 @@ public class CommonUI : MonoBehaviour, IBegin
                 // 방해 없으면 계속 개발
 
                 // 여기서 건축물 선택
+                CloseTab(ui);
+                InGameUI.instance.UseTab();
                 CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull);
 
 
@@ -363,9 +365,10 @@ public class CommonUI : MonoBehaviour, IBegin
                 Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
             }
 
-			// 대성공 발생
+            // 대성공 발생
+            PlayerCore.Instance.creatureEffect.Effects[7].Play();
             // 아이템 하나 더 추가
-			InventoryManager.Instance.Add(recipe.result);
+            InventoryManager.Instance.Add(recipe.result);
 
             // 아이템 페이백
             foreach (SItemStack one in recipe.input)

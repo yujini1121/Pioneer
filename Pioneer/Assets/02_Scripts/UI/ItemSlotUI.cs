@@ -62,7 +62,7 @@ public class ItemSlotUI : MonoBehaviour,
     }
     public void Clear()
     {
-        Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : »£√‚µ ");
+        //Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : »£√‚µ ");
         
         image.enabled = false;
         count.text = "";
@@ -77,6 +77,7 @@ public class ItemSlotUI : MonoBehaviour,
     {
         if (isSlot) InventoryUiMain.instance.currentSelectedSlot.Remove(this);
     }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (isSlot)

@@ -43,6 +43,11 @@ public class MarinerInventory : InventoryBase
         }
     }
 
+    public void ShutdownUI()
+    {
+        if (exclamationMarkSprite != null)
+            exclamationMarkSprite.enabled = false;
+    }
     /// <summary>
     /// 인벤토리에 아이템이 있는지 확인하고 느낌표 이미지를 제어합니다.
     /// </summary>

@@ -23,9 +23,11 @@ public class PlayerFishing : MonoBehaviour
 
     private int fishingExp = 5;
 
+    private CreatureEffect creatureEffect;
     private void Awake()
     {
         instance = this;
+        creatureEffect = PlayerCore.Instance.GetComponent<CreatureEffect>();
     }
 
     public void StartFishingLoop()
@@ -40,6 +42,8 @@ public class PlayerFishing : MonoBehaviour
     {
         if (fishingLoopCoroutine != null)
         {
+            creatureEffect.Effects[5].Stop();
+            creatureEffect.Effects[3].Stop();
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
             Debug.Log("≥¨Ω√ ¡ﬂ¥‹");
@@ -51,6 +55,7 @@ public class PlayerFishing : MonoBehaviour
         while (true)
         {
             Debug.Log("≥¨Ω√ Ω√¿€");
+            creatureEffect.Effects[5].Play();
             yield return new WaitForSeconds(2f);
 
             SItemTypeSO caughtItem = GetItem();
@@ -112,6 +117,8 @@ public class PlayerFishing : MonoBehaviour
                         InventoryManager.Instance.Add(waterBloombonusItemStack);
                     }
                 }
+
+                creatureEffect.Effects[3].Play();
             }
             else
             {

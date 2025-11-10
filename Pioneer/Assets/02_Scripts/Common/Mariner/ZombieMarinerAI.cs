@@ -19,7 +19,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
     {
         InitZombieStats();
         InitZombieVisuals();
-
+        var anim = GetComponentInChildren<MarinerAnimControll>(true);
+        anim?.SetZombieMode();
         if (attackRangeObject == null)
         {
             // 자식 중 이름이 "AttackRange"인 오브젝트를 탐색
@@ -45,10 +46,10 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         hp = 40;
         speed = 2f;
         attackDamage = 6;
-        attackRange = 4f;
-        attackDelayTime = 1f;
+        attackRange = 1.5f;
+        attackDelayTime = 1.5f;
 
-        chaseRange = 10f; 
+        chaseRange = 3f; 
 
         fov = GetComponent<FOVController>();
     }
@@ -129,10 +130,16 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         if (agent != null && agent.isOnNavMesh)
         {
             agent.ResetPath();
+            agent.isStopped = true;   
         }
 
         LookAtTarget();
 
+        var anim = GetComponentInChildren<MarinerAnimControll>(true);
+        anim?.AimAtTarget(target.position, transform);  // 방향 스냅
+        anim?.PlayZombieAttackOnce();
+
+        // 히트박스 선딜 표시
         if (attackRangeObject != null)
         {
             attackRangeObject.SetActive(true);
@@ -148,15 +155,14 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
 
         PerformZombieAttack();
-
         attackCooldown = attackInterval;
 
+        // 타겟 생존 여부 확인
         if (target != null)
         {
             CommonBase targetBase = target.GetComponent<CommonBase>();
             if (targetBase != null && !targetBase.IsDead)
             {
-                Debug.Log($"좀비 {marinerId}: 공격 완료, 추격 재개");
                 EnterChasingState();
             }
             else
@@ -172,8 +178,14 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             EnterWanderingState();
         }
 
+        anim?.EndZombieAttack();
+        anim?.ClearAim();
         attackRoutine = null;
+
+        if (agent != null && agent.isOnNavMesh)
+            agent.isStopped = false;
     }
+
 
     private void PerformZombieAttack()
     {
@@ -236,10 +248,10 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void OnEnable()
     {
-        Debug.Log($"좀비 승무원 {marinerId} 활성화됨");
-
+        Debug.Log("ZombieMariner에서 attack box 활성화");
         if (attackRangeObject != null)
             attackRangeObject.SetActive(false);
+
     }
 
 }

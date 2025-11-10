@@ -116,8 +116,7 @@ public class PlayerCore : CreatureBase, IBegin
     public int DuabilityReducePrevent => Mathf.RoundToInt(duabilityReducePrevent);
     int currentAttackDamage = 0;
 
-
-
+    public CreatureEffect creatureEffect;
 
     public PlayerAttack PlayerAttack => playerAttack;
     public float AttackHeight => attackHeight;
@@ -167,6 +166,7 @@ public class PlayerCore : CreatureBase, IBegin
         Instance = this;
         playerController = GetComponent<PlayerController>();
         playerRb = GetComponent<Rigidbody>();
+        creatureEffect = GetComponent<CreatureEffect>();
         SetSetAttribute();
 
         handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
@@ -196,7 +196,7 @@ public class PlayerCore : CreatureBase, IBegin
         // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
     }
     public override void WhenDestroy()
-    {
+    {        
         if (GameManager.Instance != null)
         {
             GameManager.Instance.TriggerGameOver();
@@ -278,6 +278,11 @@ public class PlayerCore : CreatureBase, IBegin
                 playerController.CancelFishing();
             }
             UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
+        }
+
+        if(hp <= 0)
+        {
+            // creatureEffect.Effects[3].Play();
         }
     }
     #endregion
@@ -451,6 +456,15 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if(isDrunk)
             return;
+
+        if(increase <= 0)
+        {
+            creatureEffect.Effects[1].Play();
+        }
+        else if (increase > 0)
+        {
+            creatureEffect.Effects[2].Play();
+        }
 
         currentMental += increase;
         currentMental = Mathf.Clamp(currentMental, minMental, maxMental);

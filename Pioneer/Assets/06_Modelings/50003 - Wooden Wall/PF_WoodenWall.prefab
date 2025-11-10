@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 6399657583846727120}
   - component: {fileID: 9166181916695685402}
   - component: {fileID: 8341233066174425059}
-  m_Layer: 0
+  - component: {fileID: 7865616011556500020}
+  - component: {fileID: -1069939353206171248}
+  m_Layer: 7
   m_Name: PF_WoodenWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,3 +107,39 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.6322728, y: 1.8617721, z: 0.14687657}
   m_Center: {x: -3.9424552e-22, y: 0.9308859, z: 0.0000000037252903}
+--- !u!114 &7865616011556500020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7220446215017515215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bfd9fa210570be48ac227680d64ccb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canRotate: 1
+  canMove: 1
+  refundPercent: 70
+  installType: 0
+  grid: 1
+  permitColor: {r: 0, g: 1, b: 0, a: 1}
+  rejectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &-1069939353206171248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7220446215017515215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 457acd1cb28d16b4c81a7c6a8c57271a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  <isUsing>k__BackingField: 0

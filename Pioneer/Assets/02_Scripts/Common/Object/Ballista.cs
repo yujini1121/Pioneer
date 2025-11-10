@@ -6,101 +6,81 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class Ballista : MonoBehaviour, IBegin
+public class Ballista : StructureBase, IBegin
 {
-    private enum DetectType { Circle, Rectangle }
-
-    [SerializeField] private SInstallableObjectDataSO objectData;
-
-    [Header("부드러운 회전")]
-    [Tooltip("체크 시 부드럽게 회전")] [SerializeField] private bool smoothRotate;
-    [Tooltip("회전 속도")] [SerializeField] private float rotationSpeed;
+    [Header("회전")]
+    [SerializeField] private float rotationSpeed = 50f; // 항상 부드러운 회전
 
     [Header("발리스타 옵션")]
-    [Tooltip("탐지 방식")] [SerializeField] private DetectType detectType;
-    [Tooltip("현재 체력")] [SerializeField] private float currentHP;
-    [Tooltip("공격력")] [SerializeField] private float attackPower;
-    [Tooltip("공격 사거리")] [SerializeField] private float attackRange;
-    [Tooltip("공격 범위(½)")] [SerializeField] private Vector3 attackHalfBound;
-    [Tooltip("공격 쿨타임")] [SerializeField] private float attackCooldown;
-    [Tooltip("발사 속도")] [SerializeField] private float attackSpeed;
-    [Tooltip("화살 크기(½)")] [SerializeField] private Vector3 boltHalfSize;
-    [Tooltip("적 레이어")] [SerializeField] private LayerMask enemyLayer;
-    [Tooltip("사수 위치")] [SerializeField] private Transform gunnerPos;
-    [Tooltip("화살 풀")] [SerializeField] private Transform boltPool;
+    [SerializeField] private float attackPower = 25f;
+    [SerializeField] private float attackRange = 8f;   // 원형 탐지 고정
+    [SerializeField] private float attackCooldown = 2f;
+    [SerializeField] private float attackSpeed = 4f;
+    [SerializeField] private Vector3 boltHalfSize = new Vector3(0.5f, 0.5f, 1f);
+    [SerializeField] private Transform gunnerPos;
+    [SerializeField] private Transform boltPool;
 
     [Header("디버그")]
-    [Tooltip("체크 시 기즈모 출력")] [SerializeField] private bool drawGizmos;
-    [Tooltip("사용 중")] [SerializeField] private bool isUsing;
-    [Tooltip("적 감지")] [SerializeField] private bool enemyDetect;
-    [Tooltip("감지한 적 목록")] [SerializeField] private Collider[] colliders;
-    [Tooltip("가장 가까운 적")] [SerializeField] private Transform nearestTrans;
+    [SerializeField] private bool drawGizmos = true;
+    [SerializeField] private bool enemyDetect;
+    [SerializeField] private Collider[] colliders;
+    [SerializeField] private Transform nearestTrans;
 
-    private List<GameObject> bolts = new List<GameObject>();
-    private Vector3 centerVec;
+    private readonly List<GameObject> bolts = new List<GameObject>();
     private GameObject gunner;
     private float centerVecY;
     private int poolIndex = 0;
-    private float curCooldown;
+    private float curCooldown = 0f;
 
     private void Start()
     {
-        centerVecY = GetComponent<SphereCollider>().center.y;
+        var sc = GetComponent<SphereCollider>();
+        centerVecY = sc ? sc.center.y : transform.position.y;
 
         for (int i = 0; i < boltPool.childCount; i++)
-        {
             bolts.Add(boltPool.GetChild(i).gameObject);
-        }
-
-        //currentHP = objectData.maxHp;
     }
 
     private void Update()
     {
-        centerVec = transform.position;
-        centerVec.y = centerVecY;
+        if (!isUsing) return;
 
-        if (isUsing)
+        // ▼ 변경: 베이스 HP 사용
+        if (CurrentHp <= 0f)
         {
-            if (currentHP <= 0)
+            if (gunner)
             {
                 gunner.transform.parent = null;
-
-                foreach (Behaviour component in gunner.GetComponents<Behaviour>())
+                foreach (var component in gunner.GetComponents<Behaviour>())
                 {
                     if (component is MeshFilter || component is MeshRenderer || component is Transform || component == null)
                         continue;
-
                     component.enabled = true;
                 }
-                gunner.GetComponent<CapsuleCollider>().enabled = true;
-
-                Destroy(gameObject);
+                var cap = gunner.GetComponent<CapsuleCollider>();
+                if (cap) cap.enabled = true;
             }
-
-            if (detectType == DetectType.Rectangle)
-            {
-                colliders = Physics.OverlapBox(centerVec, attackHalfBound, transform.rotation, enemyLayer, QueryTriggerInteraction.Ignore);
-            }
-            else if (detectType == DetectType.Circle)
-            {
-                colliders = Physics.OverlapSphere(centerVec, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
-            }
-
-            enemyDetect = colliders.Length > 0;
-            if (enemyDetect)
-            {
-                LookAt();
-                Fire();
-            }
+            Destroy(gameObject);
+            return;
         }
+
+        Vector3 center = transform.position; center.y = centerVecY;
+
+        // 원형 탐지 고정
+        colliders = Physics.OverlapSphere(center, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
+
+        enemyDetect = colliders != null && colliders.Length > 0;
+        if (!enemyDetect) return;
+
+        LookAt();
+        Fire();
     }
 
     public void Use(GameObject _gunner)
     {
         if (isUsing) return;
+        base.Use();
 
-        isUsing = true;
         gunner = _gunner;
         gunner.transform.SetParent(gunnerPos);
         gunner.transform.localPosition = Vector3.zero;
@@ -109,41 +89,32 @@ public class Ballista : MonoBehaviour, IBegin
     private void LookAt()
     {
         nearestTrans = colliders[0].transform;
-        float minDistance = Mathf.Infinity;
+        float minSqr = Mathf.Infinity;
+        Vector3 selfPos = transform.position;
+
         foreach (var col in colliders)
         {
-            float distance = Vector3.SqrMagnitude(transform.position - col.transform.position);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                nearestTrans = col.transform;
-            }
+            float d = (selfPos - col.transform.position).sqrMagnitude;
+            if (d < minSqr) { minSqr = d; nearestTrans = col.transform; }
         }
 
-        if (smoothRotate)
+        Vector3 dir = nearestTrans.position - transform.position;
+        dir.y = 0;
+        if (dir.sqrMagnitude > 0.0001f)
         {
-            Vector3 direction = nearestTrans.position - transform.position;
-            direction.y = 0;
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-        else
-        {
-            Vector3 direction = nearestTrans.position - transform.position;
-            direction.y = 0;
-            transform.rotation = Quaternion.LookRotation(direction);
+            Quaternion targetRot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
         }
     }
 
     private void Fire()
     {
-        if (curCooldown < 0)
+        if (curCooldown <= 0f)
         {
             curCooldown = attackCooldown;
             StartCoroutine(FireBolt(boltPool.GetChild(poolIndex).gameObject, nearestTrans));
 
-            poolIndex++;
-            poolIndex %= boltPool.childCount;
+            poolIndex = (poolIndex + 1) % boltPool.childCount;
         }
         else
         {
@@ -156,24 +127,23 @@ public class Ballista : MonoBehaviour, IBegin
         bolt.SetActive(true);
         bolt.transform.parent = null;
 
-        Vector3 targetPos = bolt.transform.position + bolt.transform.forward * attackRange;
         Vector3 prevPos = bolt.transform.position;
         Vector3 dir = bolt.transform.forward;
         float traveled = 0f;
 
         while (traveled < attackRange)
         {
-            float moveStep = attackSpeed * Time.deltaTime;
-            Vector3 nextPos = bolt.transform.position + dir * moveStep;
+            float step = attackSpeed * Time.deltaTime;
+            Vector3 nextPos = bolt.transform.position + dir * step;
 
-            if (Physics.BoxCast(prevPos, boltHalfSize, dir, out RaycastHit hit, Quaternion.LookRotation(dir), moveStep, enemyLayer))
+            if (Physics.BoxCast(prevPos, boltHalfSize, dir, out RaycastHit hit, Quaternion.LookRotation(dir), step, enemyLayer))
             {
                 Debug.Log("Hit: " + hit.collider.name);
                 break;
             }
 
             bolt.transform.position = nextPos;
-            traveled += moveStep;
+            traveled += step;
             prevPos = nextPos;
 
             yield return null;
@@ -185,43 +155,20 @@ public class Ballista : MonoBehaviour, IBegin
         bolt.SetActive(false);
     }
 
-    private void OnDrawGizmos()
-    {
-        if (drawGizmos && isUsing)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(centerVec, centerVec + transform.forward * attackRange);
-
-            foreach (GameObject bolt in bolts)
-            {
-                if (!bolt.activeSelf) continue;
-
-                Gizmos.color = Color.green;
-                Gizmos.matrix = Matrix4x4.TRS(bolt.transform.position, bolt.transform.rotation, Vector3.one);
-                Gizmos.DrawWireCube(Vector3.zero, boltHalfSize * 2f);
-                Gizmos.matrix = Matrix4x4.identity;
-            }
-
-            foreach (var collider in colliders)
-            {
-                Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
-                Gizmos.DrawSphere(collider.transform.position, 1.1f);
-            }
-
-            if (detectType == DetectType.Rectangle)
-            {
-                Gizmos.color = Color.white;
-                Gizmos.matrix = Matrix4x4.TRS(centerVec, transform.rotation, Vector3.one);
-                Gizmos.DrawWireCube(Vector3.zero, attackHalfBound * 2f);
-                Gizmos.matrix = Matrix4x4.identity;
-            }
 #if UNITY_EDITOR
-            else if (detectType == DetectType.Circle)
-            {
-                Handles.color = Color.white;
-                Handles.DrawWireDisc(centerVec, Vector3.up, attackRange);
-            }
-#endif
-        }
+    protected override void OnDrawGizmos()
+    {
+        // 베이스: 상호작용 반경
+        base.OnDrawGizmos();
+        if (!drawGizmos) return;
+
+        // 공격 사거리(원)
+        Vector3 center = GetComponent<Collider>() ? GetComponent<Collider>().bounds.center : transform.position;
+        Handles.color = Color.cyan;
+        Handles.DrawWireDisc(center, Vector3.up, attackRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(center, center + transform.forward * attackRange);
     }
+#endif
 }
