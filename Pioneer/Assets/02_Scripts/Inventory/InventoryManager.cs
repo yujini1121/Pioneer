@@ -24,7 +24,7 @@ public class InventoryManager : InventoryBase
     [SerializeField] bool isDebuggingAdd;
     bool IsDebuggingAdd => isDebugging && isDebuggingAdd;
 
-    public void MouseSwitch(int index)
+    public new void MouseSwitch(int index)
     {
         if (mouseInventory != null && itemLists[index] != null && mouseInventory.id == itemLists[index].id)
         {
@@ -136,8 +136,7 @@ public class InventoryManager : InventoryBase
     {
         // 완전히 합침
         // 그뒤 아이템 추가
-
-        for (int index = 9; index < inventoryCount; index++)
+        for (int index = 0; index < inventoryCount; index++)
         {
             if (itemLists[index] == null) continue;
 
@@ -154,19 +153,22 @@ public class InventoryManager : InventoryBase
         }
         SafeClean();
         List<SItemStack> list = new List<SItemStack>();
-        for (int index = 9; index < inventoryCount; index++)
+        for (int index = 0; index < inventoryCount; index++)
         {
             if (itemLists[index] == null) continue;
             list.Add(itemLists[index]);
             itemLists[index] = null;
         }
+
+        // 여기서부터 정렬
+
         list = list
             .OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].categories)
             .ThenBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].typeName, StringComparer.Create(
             new CultureInfo("ko-KR"), ignoreCase: false)).ToList();
         for (int index = 0; index < list.Count; index++)
         {
-            itemLists[index + 9] = (list[index]);
+            itemLists[index] = (list[index]);
         }
         SafeClean();
     }
@@ -237,5 +239,6 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(20001, 1, 100));
         Add(new SItemStack(40001, 200));
         Add(new SItemStack(40009, 50));
+        Add(new SItemStack(40007, 50));
     }
 }

@@ -13,6 +13,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     
     public List<ItemSlotUI> currentSelectedSlot;
     [SerializeField] ItemSlotUI mouseUI;
+    public ItemSlotUI MouseUI => mouseUI;
     [SerializeField] List<GameObject> slotGameObjects;
     [SerializeField] List<GameObject> inventorySlot;
     [SerializeField] List<GameObject> quickSlot;

@@ -6,6 +6,25 @@ public class InventoryBase : MonoBehaviour
 {
     public List<SItemStack> itemLists;
 
+    public void MouseSwitch(int index)
+    {
+        if (InventoryManager.Instance.mouseInventory != null &&
+            itemLists[index] != null &&
+            InventoryManager.Instance.mouseInventory.id == itemLists[index].id)
+        {
+            itemLists[index].amount += InventoryManager.Instance.mouseInventory.amount;
+            InventoryManager.Instance.mouseInventory = null;
+            SafeClean();
+            return;
+        }
+
+        //Debug.Log("!!!");
+
+        SItemStack temp = itemLists[index];
+        itemLists[index] = InventoryManager.Instance.mouseInventory;
+        InventoryManager.Instance.mouseInventory = temp;
+    }
+
     public int Get(int id)
     {
         int sum = 0;

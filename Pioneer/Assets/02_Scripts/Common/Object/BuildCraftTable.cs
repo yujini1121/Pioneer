@@ -6,7 +6,7 @@ public class BuildCraftTable : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.name == "Player")
+        if (ThisIsPlayer.IsThisPlayer(other))
         {
             InGameUI.instance.ShowDefaultCraftUI();
         }
@@ -14,7 +14,7 @@ public class BuildCraftTable : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name == "Player")
+        if (ThisIsPlayer.IsThisPlayer(other))
         {
             InGameUI.instance.CloseDefaultCraftUI();
         }

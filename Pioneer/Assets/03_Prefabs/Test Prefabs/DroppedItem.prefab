@@ -101,7 +101,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -119,9 +119,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6874125936afc245948eef98d7e317d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isCanPickUp: 0
   itemValue:
     id: 0
     amount: 0
+    duability: 0
+    isUseCoroutineEnd: 0
   transformCanvas: {fileID: 0}
   slotUI: {fileID: 1721629407507353583}
 --- !u!1 &9112289759406644886

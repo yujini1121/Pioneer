@@ -5,8 +5,8 @@ using UnityEngine;
 public enum EDataType
 {
     none,
-    CommonResource,
     WeaponItem,
+    CommonResource,
     NormalItem,
     ConsumeItem,
     BuildObject,

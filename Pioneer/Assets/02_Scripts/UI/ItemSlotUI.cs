@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 
-public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class ItemSlotUI : MonoBehaviour, 
+    IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public int index;
     public UnityEngine.UI.Image image;
@@ -14,6 +15,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public TextMeshProUGUI count;
     public TextMeshProUGUI durability;
     public bool isSlot;
+    public bool isRepairSlot;
 
     public void Show(SItemStack item,
         [CallerFilePath] string file = "",
@@ -80,6 +82,10 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (isSlot)
         {
             InventoryUiMain.instance.ClickSlot(index);
+        }
+        else if (isRepairSlot)
+        {
+            RepairUI.instance.ClickSlot(index);
         }
     }
 }
