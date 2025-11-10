@@ -6,6 +6,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(FOVController))]
 public class MarinerAI : MarinerBase, IBegin
 {
+    Quaternion initialRot;
+
     private Coroutine nightRoamRoutine;
     private bool isNightRoaming;
     public bool isCharmed = false;
@@ -51,6 +53,7 @@ public class MarinerAI : MarinerBase, IBegin
         attackDelayTime = 1.5f;
 
         fov = GetComponent<FOVController>();
+        initialRot = transform.rotation;
 
         gameObject.layer = LayerMask.NameToLayer("Mariner");
         targetLayer = LayerMask.GetMask("Enemy");
@@ -174,7 +177,7 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (nightRoamRoutine != null) { StopCoroutine(nightRoamRoutine); nightRoamRoutine = null; }
         isNightRoaming = false;
-
+        transform.rotation = initialRot;
         isSecondPriorityStarted = false;
         CancelCurrentRepair();
         Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 전환");
@@ -716,9 +719,9 @@ public class MarinerAI : MarinerBase, IBegin
         if (dir.sqrMagnitude < 0.0001f) dir = transform.forward; // 거의 정지면 바라보는 방향 사용
         dir.y = 0f;
 
-        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
-
+        Vector3 sideDir = (dir.x >= 0f) ? Vector3.right : Vector3.left;
         if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
+
 
         float endTime = Time.time + 10f;
 
