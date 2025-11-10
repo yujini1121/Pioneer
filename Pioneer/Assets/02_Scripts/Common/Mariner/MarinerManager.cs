@@ -8,15 +8,21 @@ public class MarinerManager : MonoBehaviour
     public static MarinerManager Instance;
 
     [Header("감염 설정")]
-    public int firstInfectionDay = 4;          // 4일차 이후부터 감염 시작 왜 4일차에 3명이 소환되지?
-    public float infectionDelayWithinDay = 5f; // 낮 시작 후 감염까지 지연
+    public int firstInfectionDay = 4;
+    public float infectionDelayWithinDay = 5f;
 
-    private int lastInfectedDay = -1;          // 하루 1회 감염 제한
-    private bool infectionRoutineRunning = false; // 중복 실행 방지
+    private int lastInfectedDay = -1;
+    private bool infectionRoutineRunning = false;
 
     private List<MarinerAI> allMariners = new List<MarinerAI>();
-    private List<DefenseObject> repairTargets = new List<DefenseObject>();
+
+    // 리 타깃 컨테이너 
+    // DefenseObject -> StructureBase
+    private List<StructureBase> repairTargets = new List<StructureBase>();
+
     private HashSet<int> occupiedSpawners = new HashSet<int>();
+
+    // 키는 StructureBase 인스턴스 ID
     private Dictionary<int, int> repairOccupancy = new Dictionary<int, int>();
 
     private void Awake()
@@ -49,12 +55,10 @@ public class MarinerManager : MonoBehaviour
         var gm = GameManager.Instance;
         if (gm == null) { infectionRoutineRunning = false; yield break; }
 
-        // 혹시 시작 시점이 밤이면 낮까지 대기
         while (!gm.IsDaytime) yield return null;
 
         int dayAtStart = gm.currentDay;
 
-        // 지연
         if (infectionDelayWithinDay > 0f)
             yield return new WaitForSeconds(infectionDelayWithinDay);
 
@@ -64,7 +68,6 @@ public class MarinerManager : MonoBehaviour
             yield break;
         }
 
-        // 후보 수집
         var candidates = new List<MarinerAI>();
         foreach (var m in allMariners)
             if (m != null && m.GetComponent<InfectedMarinerAI>() == null)
@@ -84,10 +87,6 @@ public class MarinerManager : MonoBehaviour
         infectionRoutineRunning = false;
     }
 
-    /// <summary>
-    /// 감염 전환 mariner -> infected
-    /// </summary>
-    /// <param name="mariner"></param>
     private void InfectMariner(MarinerAI mariner)
     {
         if (mariner == null) return;
@@ -97,153 +96,87 @@ public class MarinerManager : MonoBehaviour
         int id = mariner.marinerId;
         var go = mariner.gameObject;
 
-        // 기존 AI 즉시 중지
         mariner.enabled = false;
         mariner.StopAllCoroutines();
 
-        // 이동 중이면 멈춤
         var agent = go.GetComponent<NavMeshAgent>();
         if (agent != null && agent.isOnNavMesh)
             agent.ResetPath();
 
-        // 새 감염 AI 부착(중복 방지)
         var infected = go.GetComponent<InfectedMarinerAI>();
         if (infected == null)
             infected = go.AddComponent<InfectedMarinerAI>();
 
         infected.marinerId = id;
 
-        // 기존 AI는 프레임 끝에서 제거
         Destroy(mariner);
 
         Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
     }
 
-    /*private IEnumerator AttachInfectedAI(Transform marinerTransform, int id)
-    {
-        yield return null; // 한 프레임 대기 (Destroy 반영 대기)
-
-        InfectedMarinerAI infected = marinerTransform.gameObject.AddComponent<InfectedMarinerAI>();
-        infected.marinerId = id;
-
-        Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
-    }*/
-
-    /// <summary>
-    /// 승무원을 등록하는 함수
-    /// </summary>
+    // ===== 승무원 등록 =====
     public void RegisterMariner(MarinerAI mariner)
     {
         if (!allMariners.Contains(mariner))
-        {
             allMariners.Add(mariner);
-        }
     }
 
-    /// <summary>
-    /// 수리 대상 목록을 업데이트하는 함수
-    /// </summary>
+    // 수리 대상 스캔
     public void UpdateRepairTargets()
     {
         repairTargets.Clear();
-        DefenseObject[] defenseObjects = FindObjectsOfType<DefenseObject>();
 
-        foreach (var obj in defenseObjects)
+        // StructureBase를 전부 스캔
+        StructureBase[] structures = FindObjectsOfType<StructureBase>();
+
+        foreach (var obj in structures)
         {
-            if (obj.currentHP < obj.maxHP * 0.5f)
+            if (obj == null) continue;
+            if (obj.IsDead) continue;
+
+            // CommonBase 기반 체력 접근
+            if (obj.CurrentHp < obj.maxHp * 0.5f)
             {
                 repairTargets.Add(obj);
-                Debug.Log($"수리 대상 추가: {obj.name}/ HP: {obj.currentHP}/{obj.maxHP}");
+                Debug.Log($"수리 대상 추가: {obj.name} / HP: {obj.CurrentHp}/{obj.maxHp}");
             }
         }
     }
 
-    /// <summary>
-    /// 수리가 필요한 오브젝트 목록을 반환하는 함수
-    /// </summary>
-    public List<DefenseObject> GetNeedsRepair()
+    // 수리 필요 목록 반환 
+    public List<StructureBase> GetNeedsRepair()
     {
-        List<DefenseObject> needRepair = new List<DefenseObject>();
+        List<StructureBase> needRepair = new List<StructureBase>();
         foreach (var obj in repairTargets)
         {
-            if (obj.currentHP < obj.maxHP * 0.5f)
+            if (obj == null) continue;
+            if (obj.IsDead) continue;
+
+            if (obj.CurrentHp < obj.maxHp * 0.5f)
                 needRepair.Add(obj);
         }
         return needRepair;
     }
 
-    /// <summary>
-    /// 승무원이 수리할 수 있는지 확인하는 함수
-    /// </summary>
-    public bool CanMarinerRepair(int marinerId, DefenseObject target)
+    // 수리 가능 체크
+    public bool CanMarinerRepair(int marinerId, StructureBase target)
     {
+        if (target == null || target.IsDead) return false;
+        // 필요하면 여기서 타입/거리/권한 등 추가 조건
         return true;
     }
 
-    /// <summary>
-    /// 승무원이 아이템을 저장하고 숙소로 돌아가는 함수
-    /// </summary>
-    /*public void StoreItemsAndReturnToBase(MarinerAI mariner)
+    // 점유 관리 (StructureBase)
+    public bool IsRepairObjectOccupied(StructureBase obj)
     {
-        Debug.Log($"승무원 [{mariner.marinerId}] 아이템 저장 후 숙소 복귀");
-
-        if (HasStorage())
-        {
-            Vector3 dormPosition = new Vector3(0f, 0f, 0f); // 예시
-            mariner.StartCoroutine(mariner.MoveToThenReset(dormPosition));
-        }
-        else
-        {
-            Debug.Log("보관함 없음 ");
-            mariner.StartCoroutine(mariner.StartSecondPriorityAction());
-        }
-    }*/
-
-    /// <summary>
-    /// 저장소가 있는지 확인하는 함수
-    /// </summary>
-    public bool HasStorage()
-    {
-        return true;
-    }
-
-   /* /// <summary>
-    /// 스포너가 점유되어 있는지 확인하는 함수
-    /// </summary>
-    public bool IsSpawnerOccupied(int index)
-    {
-        return occupiedSpawners.Contains(index);
-    }
-
-    /// <summary>
-    /// 스포너를 점유하는 함수
-    /// </summary>
-    public void OccupySpawner(int index)
-    {
-        occupiedSpawners.Add(index);
-    }
-
-    /// <summary>
-    /// 스포너 점유를 해제하는 함수
-    /// </summary>
-    public void ReleaseSpawner(int index)
-    {
-        occupiedSpawners.Remove(index);
-    }*/
-
-    /// <summary>
-    /// 수리 오브젝트가 점유되어 있는지 확인하는 함수
-    /// </summary>
-    public bool IsRepairObjectOccupied(DefenseObject obj)
-    {
+        if (obj == null) return false;
         return repairOccupancy.ContainsKey(obj.GetInstanceID());
     }
 
-    /// <summary>
-    /// 수리 오브젝트 점유를 시도하는 함수
-    /// </summary>
-    public bool TryOccupyRepairObject(DefenseObject obj, int marinerId)
+    public bool TryOccupyRepairObject(StructureBase obj, int marinerId)
     {
+        if (obj == null) return false;
+
         int id = obj.GetInstanceID();
         if (!repairOccupancy.ContainsKey(id))
         {
@@ -253,11 +186,10 @@ public class MarinerManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// 수리 오브젝트 점유를 해제하는 함수
-    /// </summary>
-    public void ReleaseRepairObject(DefenseObject obj)
+    public void ReleaseRepairObject(StructureBase obj)
     {
+        if (obj == null) return;
+
         int id = obj.GetInstanceID();
         if (repairOccupancy.ContainsKey(id))
             repairOccupancy.Remove(id);

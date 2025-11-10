@@ -254,32 +254,37 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void CancelCurrentRepair()
     {
+        isSecondPriorityStarted = false;
         if (isRepairing)
         {
             isRepairing = false;
-            StopAllCoroutines();
-
+            
             if (targetRepairObject != null)
             {
                 MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
                 targetRepairObject = null;
             }
 
+            StopAllCoroutines();
+
             ResetAgentPath();
             Debug.Log($"승무원 {marinerId}: 수리 취소");
         }
     }
 
-    private void CancelSecondPriorityAction()
+    protected void CancelSecondPriorityAction()
     {
-        if (isSecondPriorityStarted)
+        if (!isSecondPriorityStarted) return;
+        isSecondPriorityStarted = false;
+        if (secondPriorityRoutine != null)
         {
-            isSecondPriorityStarted = false;
-            StopAllCoroutines();
-            ResetAgentPath();
-            Debug.Log($"승무원 {marinerId}: 2순위 작업 취소");
+            StopCoroutine(secondPriorityRoutine);
+            secondPriorityRoutine = null;
         }
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
     }
+
 
     private void HandleNightCombat()
     {
@@ -415,7 +420,9 @@ public class MarinerAI : MarinerBase, IBegin
 
     public override IEnumerator StartSecondPriorityAction()
     {
+        if (isSecondPriorityStarted) yield break;
         isSecondPriorityStarted = true;
+
         if (!GameManager.Instance.IsDaytime || GameManager.Instance.TimeUntilNight() <= 30f)
         {
             isSecondPriorityStarted = false;
@@ -529,8 +536,6 @@ public class MarinerAI : MarinerBase, IBegin
         if (nightRoamRoutine != null) return;
         nightRoamRoutine = StartCoroutine(NightApproachRoutine());
     }
-
-
 
 
     public override void WhenDestroy()
