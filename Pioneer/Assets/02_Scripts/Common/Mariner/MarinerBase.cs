@@ -519,10 +519,8 @@ public class MarinerBase : CreatureBase
         float repairDuration = 10f;
         float elapsedTime = 0f;
 
-        // 10초 동안 그 자리 유지(수리 중단 조건 체크)
         while (elapsedTime < repairDuration)
         {
-            // 공격/밤 전환 등의 외적 요인으로 수리 취소되면 탈출
             if (!isRepairing) yield break;
             if (isSecondPriorityStarted) { isRepairing = false; yield break; }
 
@@ -530,30 +528,30 @@ public class MarinerBase : CreatureBase
             yield return null;
         }
 
-        // StructureBase는 Heal() 사용
         bool repairSuccess = GetRepairSuccessRate() > Random.value;
         int actualRepairAmount = repairSuccess ? repairAmount : 0;
 
         if (targetRepairObject != null)
         {
             Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 {(repairSuccess ? "성공" : "실패")}: {targetRepairObject.name}/ 수리량: {actualRepairAmount}");
+
             targetRepairObject.Heal(actualRepairAmount);
+
             MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
+            targetRepairObject = null;
         }
 
         isRepairing = false;
 
-        // 밤 임박 시 분기
         if (GameManager.Instance.TimeUntilNight() <= 30f)
         {
-            Debug.Log($"{GetCrewTypeName()} 밤 도달 예외행동 시작");
             OnNightApproaching();
             yield break;
         }
 
-        // 다음 수리 재시도
         StartRepair();
     }
+
 
 
     public virtual IEnumerator StartSecondPriorityAction()

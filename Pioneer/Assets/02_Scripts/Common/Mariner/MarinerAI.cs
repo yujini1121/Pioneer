@@ -258,13 +258,14 @@ public class MarinerAI : MarinerBase, IBegin
         if (isRepairing)
         {
             isRepairing = false;
-            StopAllCoroutines();
-
+            
             if (targetRepairObject != null)
             {
                 MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
                 targetRepairObject = null;
             }
+
+            StopAllCoroutines();
 
             ResetAgentPath();
             Debug.Log($"승무원 {marinerId}: 수리 취소");
