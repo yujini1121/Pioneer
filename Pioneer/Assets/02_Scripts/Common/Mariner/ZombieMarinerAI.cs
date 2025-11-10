@@ -128,7 +128,10 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
 
         if (agent != null && agent.isOnNavMesh)
+        {
             agent.ResetPath();
+            agent.isStopped = true;   
+        }
 
         LookAtTarget();
 
@@ -178,6 +181,9 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         anim?.EndZombieAttack();
         anim?.ClearAim();
         attackRoutine = null;
+
+        if (agent != null && agent.isOnNavMesh)
+            agent.isStopped = false;
     }
 
 
