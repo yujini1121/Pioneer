@@ -15,7 +15,7 @@ public class StructureBase : CommonBase
     [field: SerializeField] public bool isUsing { get; private set; }
 
     [Header("플레이어 상호작용 감지")]
-    [SerializeField] protected float interactRange = 1.5f;
+    [SerializeField] protected float interactRange = 3f;
 
     [Header("적 감지")]
     [SerializeField] protected LayerMask enemyLayer;
@@ -45,7 +45,7 @@ public class StructureBase : CommonBase
 
 	private void LateUpdate()
 	{
-        PlayerInteract.Add(this);
+        if (CanInteract) PlayerInteract.Add(this);
 	}
 
 	#region HP 세팅
@@ -73,7 +73,9 @@ public class StructureBase : CommonBase
 
     #region 상호작용
     public virtual void Interactive() { }
-    public virtual void Use() { isUsing = true; }
+    public virtual void Use() {
+        Debug.Log(">> StructureBase.Use()");
+        isUsing = true; }
     public virtual void UnUse() { isUsing = false; }
 
     public virtual bool CanInteract

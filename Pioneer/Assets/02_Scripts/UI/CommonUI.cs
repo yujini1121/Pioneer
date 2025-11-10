@@ -165,13 +165,18 @@ public class CommonUI : MonoBehaviour, IBegin
         ArgumentGeometry geometryCraftSelectButton,
         List<GameObject> prevCraftSelectButton)
     {
-        // 1. 카테고리 이미지 버튼
+		if (IsDebuggingCraft)
+		{
+			Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 함수 호출됨");
+		}
 
-        // 레시피는 스텐다드매니저 뜯어봐서 해당 항목의 모든 카테고리속 레시피를 가져옴
-        // 버튼을 누르면, ShowItemButton와 프리펩 호출함
+		// 1. 카테고리 이미지 버튼
 
-        // 버튼 배치
-        GameObject categoryButtonObject = Instantiate(prefabItemCategoryButton, parent.transform);
+		// 레시피는 스텐다드매니저 뜯어봐서 해당 항목의 모든 카테고리속 레시피를 가져옴
+		// 버튼을 누르면, ShowItemButton와 프리펩 호출함
+
+		// 버튼 배치
+		GameObject categoryButtonObject = Instantiate(prefabItemCategoryButton, parent.transform);
         RectTransform rectTransform = categoryButtonObject.GetComponent<RectTransform>();
         //rectTransform.sizeDelta = size;
         SetPosition(
@@ -230,7 +235,10 @@ public class CommonUI : MonoBehaviour, IBegin
                 //Button craftSelectItemButtons = categoryButtonObject.GetComponent<Button>();
                 m_oneUi.button.onClick.AddListener(() =>
                 {
-                    ui.gameObject.SetActive(true);
+					Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 버튼 클릭됨!");
+
+
+					ui.gameObject.SetActive(true);
                     UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { m_one });
                 });
             }

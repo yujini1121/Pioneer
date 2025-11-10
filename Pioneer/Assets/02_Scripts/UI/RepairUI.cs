@@ -33,7 +33,7 @@ public class RepairUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        remainRepairToolAmount.text = $":{RepairSystem.instance.remainRepairCount}";
     }
 
     public void ClickRepairButton()

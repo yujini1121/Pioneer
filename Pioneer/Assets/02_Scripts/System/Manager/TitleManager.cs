@@ -34,12 +34,12 @@ public class TitleManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
+            AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
         }
         if (Input.GetKeyUp(KeyCode.Space))
         {
             SetActiveTitleButton();
-            // SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
+            SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
         }
     }
 

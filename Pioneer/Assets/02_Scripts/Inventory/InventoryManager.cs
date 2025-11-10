@@ -119,6 +119,12 @@ public class InventoryManager : InventoryBase
             Debug.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
 
+        if (item.id == 40007)
+        {
+            RepairSystem.instance.remainRepairCount += item.amount;
+            return;
+        }
+
         Debug.Assert(InventoryUiMain.instance != null);
         if (TryAdd(item) == false)
         {
@@ -212,11 +218,18 @@ public class InventoryManager : InventoryBase
 
     private void Start()
     {
-        Demo();
         InventoryUiMain.instance.IconRefresh();
     }
 
-    private void Demo()
+	private void Update()
+	{
+        if (Input.GetKeyDown(KeyCode.F11))
+        {
+            Demo();
+        }
+	}
+
+	private void Demo()
     {
         //Add(new SItemStack(30001, 10));
         //Add(new SItemStack(30002, 10));

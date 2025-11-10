@@ -118,6 +118,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32e9c56eb66f4bd42ad5333a766e052b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 0
+  maxHp: 0
+  IsDead: 0
+  attacker: {fileID: 0}
+  objectData: {fileID: 0}
+  <isUsing>k__BackingField: 0
+  interactRange: 5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  detectedEnemies: []
 --- !u!1001 &1488439447146214750
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -220,7 +231,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 22f3e16222495f34faa2eaeea92d4462,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -7787403997891664023}
+      addedObject: {fileID: 7923159467517202640}
   m_SourcePrefab: {fileID: 100100000, guid: 22f3e16222495f34faa2eaeea92d4462, type: 3}
 --- !u!4 &1381838416666776245 stripped
 Transform:
@@ -274,7 +285,7 @@ MonoBehaviour:
   grid: 1
   permitColor: {r: 0, g: 1, b: 0, a: 1}
   rejectColor: {r: 1, g: 0, b: 0, a: 1}
---- !u!114 &-7787403997891664023
+--- !u!114 &7923159467517202640
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -283,16 +294,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1758257748867876879}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 457acd1cb28d16b4c81a7c6a8c57271a, type: 3}
+  m_Script: {fileID: 11500000, guid: 32e9c56eb66f4bd42ad5333a766e052b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 0
-  maxHp: 0
+  hp: 30
+  maxHp: 30
   IsDead: 0
   attacker: {fileID: 0}
   objectData: {fileID: 11400000, guid: ce4fa41622f264f4fa6aefe9811e7955, type: 2}
   <isUsing>k__BackingField: 0
-  interactRange: 1.5
+  interactRange: 3
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0

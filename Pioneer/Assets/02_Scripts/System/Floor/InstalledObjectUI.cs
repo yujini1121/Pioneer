@@ -227,7 +227,7 @@ public class InstalledObjectUI : MonoBehaviour
 
     private void Repair()
     {
-        if (InventoryManager.Instance.Get(40007) <= 0) return;
+        if (RepairSystem.instance.remainRepairCount <= 0) return;
 
         Debug.Log($"수리 버튼 눌림");
 
@@ -244,8 +244,8 @@ public class InstalledObjectUI : MonoBehaviour
 
     private void UpdateDurability()
     {
-        repairImage1.color = (InventoryManager.Instance.Get(40007) > 0) ? Color.white : Color.red;
-        repairImage2.color = (InventoryManager.Instance.Get(40007) > 0) ? Color.white : Color.red;
+        repairImage1.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
+        repairImage2.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
 
         durabilityText.text = $"{(structure.hp * 100) / structure.maxHp}%";
     }
