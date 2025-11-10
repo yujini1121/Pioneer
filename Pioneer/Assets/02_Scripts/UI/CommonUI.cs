@@ -142,8 +142,9 @@ public class CommonUI : MonoBehaviour, IBegin
                 // 여기서 건축물 선택
                 CloseTab(ui);
                 InGameUI.instance.UseTab();
-                CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull);
 
+                CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull, recipe.input);
+                //asdasdads
 
             }
         });
