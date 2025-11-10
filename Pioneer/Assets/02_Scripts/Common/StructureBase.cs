@@ -15,7 +15,7 @@ public class StructureBase : CommonBase
     [field: SerializeField] public bool isUsing { get; private set; }
 
     [Header("플레이어 상호작용 감지")]
-    [SerializeField] protected float interactRange = 1.5f;
+    [SerializeField] protected float interactRange = 3f;
 
     [Header("적 감지")]
     [SerializeField] protected LayerMask enemyLayer;
