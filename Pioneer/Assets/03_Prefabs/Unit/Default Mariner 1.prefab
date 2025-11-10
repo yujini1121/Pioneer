@@ -155,14 +155,14 @@ GameObject:
   - component: {fileID: 1067817375811682228}
   - component: {fileID: 2438752510854210654}
   - component: {fileID: 6011470044640431841}
-  - component: {fileID: 3173450985402245456}
+  - component: {fileID: 3697614416380895211}
   m_Layer: 11
   m_Name: Default Mariner 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8208183312568327220
 Transform:
   m_ObjectHideFlags: 0
@@ -328,33 +328,20 @@ MonoBehaviour:
   storageThreshold: 7
   interactionRange: 4
   exclamationMarkSprite: {fileID: 8148705426844294494}
---- !u!54 &3173450985402245456
-Rigidbody:
+--- !u!114 &3697614416380895211
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3339714784095837873}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d477c28ba4f6614dbbb3aca3ad2951f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Effects:
+  - {fileID: 0}
 --- !u!1 &6443592185576329262
 GameObject:
   m_ObjectHideFlags: 0

@@ -78,7 +78,9 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private GameObject _evalDummy;
 
-    private void Awake()
+    private SItemStack[] cost;
+
+	private void Awake()
     {
         Debug.Log($">> CreateObject : {gameObject.name}");
         instance = this;
@@ -578,8 +580,11 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-    private IEnumerator InstallCountdownRoutine()
+	// EnterInstallMode(SInstallableObjectDataSO installableSO)가 호출되었을거라고 가정하고 호출합니다.
+	private IEnumerator InstallCountdownRoutine()
     {
+        Debug.Assert(cost != null);
+
         isCountingDown = true;
         arrivedTimer = 0f;
         // UI 시작
@@ -630,7 +635,12 @@ public class CreateObject : MonoBehaviour, IBegin
         tempObj.GetComponent<InstalledObject>()?.OnPlaced();
         Debug.Log("[설치 완료됨]");
 
-        playerAgent.ResetPath();
+        // <<여기서 재료를 빼는 로직
+        InventoryManager.Instance.Remove(cost);
+        InventoryUiMain.instance.IconRefresh();
+
+
+		playerAgent.ResetPath();
         playerAgent.isStopped = false;
 
         tempObj = null;
@@ -663,10 +673,15 @@ public class CreateObject : MonoBehaviour, IBegin
         arrivedTimer = 0f;
     }
 
-    public void EnterInstallMode(SInstallableObjectDataSO installableSO)
+    public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
-        // 진행 중 카운트다운 정리
-        if (installRoutine != null) CancelInstallCountdown();
+
+        cost = mCost;
+
+		Debug.Assert(cost.Length > 0);
+
+		// 진행 중 카운트다운 정리
+		if (installRoutine != null) CancelInstallCountdown();
 
         // 기존 프리뷰/임시 오브젝트 정리
         if (onHand != null) { Destroy(onHand); onHand = null; }
