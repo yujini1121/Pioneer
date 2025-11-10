@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class AnimationBase : MonoBehaviour
+public class AnimationSlot
 {
     [Header("공통")]
     public List<AnimationClip> idle;
@@ -17,5 +17,5 @@ public class AnimationBase : MonoBehaviour
     public List<AnimationClip> ironSword;
 
     [Header("제발잘되게해주세요제발")]
-    public AnimationBase animList;
+    public AnimationSlot animList;
 }

@@ -30,6 +30,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float fishingCancelDelay = 1.0f;
     private float cancelDelayTimer;
 
+    [Header("애니메이션 클립")]
+    public AnimationSlot animSlots;
 
     void Awake()
     {
@@ -38,11 +40,6 @@ public class PlayerController : MonoBehaviour
         gameManager = GetComponent<GameManager>();
 
         combinedMask = seaLayer | groundLayer;
-    }
-
-    private void Start()
-    {
-        
     }
 
     void Update()

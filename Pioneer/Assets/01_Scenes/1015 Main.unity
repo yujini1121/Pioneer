@@ -21991,7 +21991,6 @@ GameObject:
   - component: {fileID: 8510462437680402279}
   - component: {fileID: 8573141634702029873}
   - component: {fileID: 8573141634702029874}
-  - component: {fileID: 8573141634702029875}
   m_Layer: 10
   m_Name: Player
   m_TagString: Untagged
@@ -25201,6 +25200,18 @@ MonoBehaviour:
   chargeSlider: {fileID: 2047960136193040263}
   cencleChargeSlider: {fileID: 6787170501584182469}
   fishingCancelDelay: 1
+  animSlots:
+    idle: []
+    run:
+    - {fileID: 7400000, guid: c25097aee445c194087234cc8655cb54, type: 2}
+    - {fileID: 7400000, guid: 674bb0a3d3bcaeb4ebea8467dd4b3b3d, type: 2}
+    - {fileID: 0}
+    - {fileID: 0}
+    fising: []
+    attack: []
+    woodSword: []
+    conchSword: []
+    ironSword: []
 --- !u!224 &5585528651446411730
 RectTransform:
   m_ObjectHideFlags: 0
@@ -35681,36 +35692,6 @@ MonoBehaviour:
   - {fileID: 2003899022}
   - {fileID: 362411069}
   - {fileID: 1652654322}
---- !u!114 &8573141634702029875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4010547727299399648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ade4ba7070cc61428f44a844cdf5782, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  idle: []
-  run:
-  - {fileID: 7400000, guid: c25097aee445c194087234cc8655cb54, type: 2}
-  - {fileID: 7400000, guid: 674bb0a3d3bcaeb4ebea8467dd4b3b3d, type: 2}
-  - {fileID: 7400000, guid: db8aad137e1564f43b641f982666e0bf, type: 2}
-  - {fileID: 7400000, guid: 994b58853aeabf44ca94bd72195ee324, type: 2}
-  fising:
-  - {fileID: 7400000, guid: 2f93acdb7de48394bab38ceaa505ebb8, type: 2}
-  - {fileID: 7400000, guid: df828e6f3cd6e814190e96ed875219f6, type: 2}
-  attack:
-  - {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
-  - {fileID: 7400000, guid: 6c10e85f0cab3a94caa9c849169d9c65, type: 2}
-  - {fileID: 7400000, guid: 16a966f395b80d44c9233f10a9d052d0, type: 2}
-  - {fileID: 7400000, guid: 6b00c26e3ba514b4cbe7b67308714084, type: 2}
-  woodSword: []
-  conchSword: []
-  ironSword: []
-  animList: {fileID: 8573141634702029875}
 --- !u!222 &8589906816938256841
 CanvasRenderer:
   m_ObjectHideFlags: 0
