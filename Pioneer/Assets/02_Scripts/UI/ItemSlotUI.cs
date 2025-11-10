@@ -60,7 +60,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     }
     public void Clear()
     {
-        Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : »£√‚µ ");
+        //Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : »£√‚µ ");
         
         image.enabled = false;
         count.text = "";

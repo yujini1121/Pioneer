@@ -74,7 +74,7 @@ public class CommonUI : MonoBehaviour, IBegin
             ui.materialEachText[rIndex].enabled = false;
             //ui.materialIconImage[rIndex].sprite = instance.imageEmpty;
             ui.materialIconImage[rIndex].enabled = false;
-        }
+        } 
 
         Vector3 mPositionPivot = Vector3.zero;
         switch (recipe.input.Length)
@@ -140,6 +140,8 @@ public class CommonUI : MonoBehaviour, IBegin
                 // 방해 없으면 계속 개발
 
                 // 여기서 건축물 선택
+                CloseTab(ui);
+                InGameUI.instance.UseTab();
                 CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull);
 
 

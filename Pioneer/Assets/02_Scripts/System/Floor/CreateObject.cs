@@ -68,6 +68,14 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float arrivedHoldTime;    // 멈춤이 이 시간 이상 지속되면 설치
     private float arrivedTimer = 0f;
 
+    [Header("제작 대기")]
+    [SerializeField] private float installTimeSec = 2f; // Installable SO에서 주입시키기
+    [SerializeField] private Image ringBackground;
+    [SerializeField] private Image ringFill;
+    
+    private Coroutine installRoutine;
+    private bool isCountingDown = false;
+
     private GameObject _evalDummy;
 
     private void Awake()
@@ -547,50 +555,107 @@ public class CreateObject : MonoBehaviour, IBegin
     {
         if (tempObj == null) return;
 
-        // 도착 판정 : 속도 느림이 잠깐동안 지속되면 도착지점에 거의 다 왔다는 것으로 간주하고 설치 확정~
         bool almostStopped = playerAgent.velocity.sqrMagnitude <= arrivedSpeedEps * arrivedSpeedEps;
         bool nearEnough = !playerAgent.pathPending &&
                           playerAgent.remainingDistance <= playerAgent.stoppingDistance + 0.05f;
 
         if (nearEnough || almostStopped)
         {
-            arrivedTimer += Time.deltaTime;
-            if (arrivedTimer >= arrivedHoldTime)
+            // 도착: 기존 타이머 대신 제작시간 코루틴 1회 시작
+            if (!isCountingDown && installRoutine == null)
             {
-                var col = tempObj.GetComponent<Collider>();
-                if (col != null) col.isTrigger = false;
-
-                var rend = tempObj.GetComponent<Renderer>();
-                if (rend != null && rend.material != null) rend.material.color = Color.white;
-
-                navMeshSurface.BuildNavMesh();
-                GameManager.Instance?.NotifyPlatformLayoutChanged();
-
-                // 주훈 추가: 갑판 개수 갱신
-                if (creationType == CreationType.Platform && MastManager.Instance != null)
-                {
-                    MastManager.Instance.UpdateCurrentDeckCount();
-                    Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
-                }
-
-                tempObj.GetComponent<InstalledObject>()?.OnPlaced();
-                Debug.Log("[설치 완료됨]");
-
-                playerAgent.ResetPath();
-                playerAgent.isStopped = false;
-
-                tempObj = null;
-                arrivedTimer = 0f;
+                installRoutine = StartCoroutine(InstallCountdownRoutine());
             }
         }
         else
         {
             arrivedTimer = 0f;
+            // 이동 재개: 진행 중이면 취소
+            if (installRoutine != null)
+            {
+                CancelInstallCountdown();
+            }
         }
+    }
+
+    private IEnumerator InstallCountdownRoutine()
+    {
+        isCountingDown = true;
+        arrivedTimer = 0f;
+        // UI 시작
+        if (ringFill != null)
+        {
+            ringFill.fillAmount = 0f;
+            ringBackground.gameObject.SetActive(true);
+        }
+
+        float t = 0f;
+        while (t < installTimeSec)
+        {
+            // 취소 입력: 우클릭/ F
+            if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.F))
+            {
+                CancelInstallCountdown();
+                yield break;
+            }
+
+            //// 이동 입력으로도 취소
+            //if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            //{
+            //    CancelInstallCountdown();
+            //    yield break;
+            //}
+
+            t += Time.deltaTime;
+            if (ringFill != null) ringFill.fillAmount = Mathf.Clamp01(t / Mathf.Max(0.001f, installTimeSec));
+            yield return null;
+        }
+
+        var col = tempObj.GetComponent<Collider>();
+        if (col != null) col.isTrigger = false;
+
+        var rend = tempObj.GetComponent<Renderer>();
+        if (rend != null && rend.material != null) rend.material.color = Color.white;
+
+        navMeshSurface.BuildNavMesh();
+        GameManager.Instance?.NotifyPlatformLayoutChanged();
+
+        // 주훈 추가: 갑판 개수 갱신
+        if (creationType == CreationType.Platform && MastManager.Instance != null)
+        {
+            MastManager.Instance.UpdateCurrentDeckCount();
+            Debug.Log($"현재 갑판 갯수: {MastManager.Instance.currentDeckCount}");
+        }
+
+        tempObj.GetComponent<InstalledObject>()?.OnPlaced();
+        Debug.Log("[설치 완료됨]");
+
+        playerAgent.ResetPath();
+        playerAgent.isStopped = false;
+
+        tempObj = null;
+        arrivedTimer = 0f;
+
+        if (ringFill != null) { ringBackground.gameObject.SetActive(false); ringFill.fillAmount = 0f; }
+
+        installRoutine = null;
+        isCountingDown = false;
+    }
+
+    private void CancelInstallCountdown()
+    {
+        if (installRoutine != null)
+        {
+            StopCoroutine(installRoutine);
+            installRoutine = null;
+        }
+        isCountingDown = false;
+        if (ringFill != null) { ringBackground.gameObject.SetActive(false); ringFill.fillAmount = 0f; }
     }
 
     void CancelInstall()
     {
+        if (installRoutine != null) CancelInstallCountdown();
         playerAgent.isStopped = true;
         playerAgent.ResetPath();
         if (tempObj != null) Destroy(tempObj);
@@ -600,25 +665,45 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public void EnterInstallMode(SInstallableObjectDataSO installableSO)
     {
-        if (onHand != null)
+        // 진행 중 카운트다운 정리
+        if (installRoutine != null) CancelInstallCountdown();
+
+        // 기존 프리뷰/임시 오브젝트 정리
+        if (onHand != null) { Destroy(onHand); onHand = null; }
+        if (tempObj != null) { Destroy(tempObj); tempObj = null; }
+
+        // NavMeshAgent 보장
+        if (playerAgent == null) playerAgent = GetComponent<NavMeshAgent>();
+        if (playerAgent != null && !playerAgent.enabled) playerAgent.enabled = true;
+
+        // 설치 타입/제작시간 세팅(SO 기준)
+        if (installableSO != null)
         {
-            Destroy(onHand);
-            onHand = null;
+            creationType = (CreationType)(int)installableSO.installType;
+            installTimeSec = Mathf.Max(0.1f, installableSO.buildTime);
         }
 
-        if (!playerAgent.enabled)
-            playerAgent.enabled = true;
+        // UI/상태 초기화
+        if (ringFill != null)
+        {
+            ringFill.fillAmount = 0f;
+            ringBackground.gameObject.SetActive(false);
+        }
+        isCountingDown = false;
+        arrivedTimer = 0f;
+        rotateN = 0;
 
-        // 설치 타입 설정
-        creationType = (CreationType)(int)installableSO.installType;
+        // 프리뷰 생성 및 기타 초기화(기존 로직)
+        CreateObjectInit();
 
-        Debug.Log($"[설치모드 진입] 선택된 오브젝트: {installableSO.name}");
-
-        CreateObjectInit(); // 새 프리뷰 오브젝트 생성
+        Debug.Log($"[설치모드 진입] {creationType}, 제작 {installTimeSec:F2}s");
     }
 
     public void ExitInstallMode()
     {
+        if (installRoutine != null) CancelInstallCountdown();
+        ringBackground.gameObject.SetActive (false);
+
         if (onHand != null)
         {
             Destroy(onHand);
