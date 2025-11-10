@@ -7,6 +7,7 @@ public class PlayerInteract : MonoBehaviour
 	public static PlayerInteract instance;
 
 	List<StructureBase> ready;
+	StructureBase closestOne;
 
 	public static void Add(StructureBase one)
 	{
@@ -40,10 +41,28 @@ public class PlayerInteract : MonoBehaviour
 					}
 				}
 
+
+				if (closestOne != null &&
+					closestOne == closest)
+				{
+					closestOne.UnUse();
+				}
 				closest.Use();
+
+				
+
+				closestOne = closest;
 			}
 		}
 
 		ready = new List<StructureBase>();
+		
+		if (closestOne != null &&
+			closestOne.CanInteract == false)
+		{
+			closestOne.UnUse();
+			closestOne = null;
+		}
+
 	}
 }

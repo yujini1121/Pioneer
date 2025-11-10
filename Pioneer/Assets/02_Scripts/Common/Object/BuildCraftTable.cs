@@ -25,4 +25,10 @@ public class BuildCraftTable : StructureBase
 		base.Use();
 		InGameUI.instance.ShowDefaultCraftUI();
 	}
+
+	public override void UnUse()
+	{
+		base.UnUse();
+		InGameUI.instance.CloseDefaultCraftUI();
+	}
 }

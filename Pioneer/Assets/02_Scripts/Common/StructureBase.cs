@@ -45,7 +45,7 @@ public class StructureBase : CommonBase
 
 	private void LateUpdate()
 	{
-        PlayerInteract.Add(this);
+        if (CanInteract) PlayerInteract.Add(this);
 	}
 
 	#region HP ¼¼ÆÃ
@@ -78,13 +78,13 @@ public class StructureBase : CommonBase
         isUsing = true; }
     public virtual void UnUse() { isUsing = false; }
 
-    //public virtual bool CanInteract
-    //{
-    //    get
-    //    {
-    //        return (transform.position - ThisIsPlayer.Player.transform.position).sqrMagnitude < interactRange * interactRange;
-    //    }
-    //}
+    public virtual bool CanInteract
+    {
+        get
+        {
+            return (transform.position - ThisIsPlayer.Player.transform.position).sqrMagnitude < interactRange * interactRange;
+        }
+    }
     #endregion
 
 #if UNITY_EDITOR
