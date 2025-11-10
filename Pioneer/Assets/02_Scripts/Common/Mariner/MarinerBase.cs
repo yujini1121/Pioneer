@@ -598,7 +598,6 @@ public class MarinerBase : CreatureBase
         Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
     }
 
-    // MarinerBase 내부에 유틸 추가
     protected Vector3 GetRepairApproachPoint(Transform t, float approachRadius = 0.5f)
     {
         Vector3 target = t.position;
