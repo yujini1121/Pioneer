@@ -484,24 +484,34 @@ public class MarinerBase : CreatureBase
         }
     }
 
-
-    protected IEnumerator MoveToRepairObject(Vector3 targetPosition)
+    protected IEnumerator MoveToRepairObject(Vector3 _)
     {
-        if (agent != null && agent.isOnNavMesh)
+        if (agent != null && agent.isOnNavMesh && targetRepairObject != null)
         {
-            agent.SetDestination(targetPosition);
+            Vector3 approach = GetRepairApproachPoint(targetRepairObject.transform, 0.5f);
+            agent.SetDestination(approach);
 
-            while (!IsArrived())
+            while (!IsArrivedWithRadius(0.5f))
             {
-                // 누군가 다시 2순위를 켰다면(안전망)
                 if (!isRepairing) yield break;
                 if (isSecondPriorityStarted) { isRepairing = false; yield break; }
                 yield return null;
             }
         }
 
-        StartCoroutine(RepairProcess());
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        yield return StartCoroutine(RepairProcess());
+
+        if (agent != null && agent.isOnNavMesh)
+            agent.isStopped = false;
     }
+
 
 
     protected virtual IEnumerator RepairProcess()
@@ -590,6 +600,50 @@ public class MarinerBase : CreatureBase
         Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
     }
 
+    // MarinerBase 내부에 유틸 추가
+    protected Vector3 GetRepairApproachPoint(Transform t, float approachRadius = 0.5f)
+    {
+        Vector3 target = t.position;
+
+        // 표면 기준으로 접근점 계산
+        var col = t.GetComponent<Collider>();
+        if (col != null)
+        {
+            // 내 현재 위치에서 본 가장 가까운 표면점
+            Vector3 surface = col.ClosestPoint(transform.position);
+            target = surface;
+
+            // 약간 물러서서(접근 반경만큼) NavMesh 위 점을 다시 샘플
+            Vector3 back = (transform.position - surface);
+            back.y = 0f;
+            if (back.sqrMagnitude > 0.0001f)
+                target = surface + back.normalized * Mathf.Clamp(approachRadius, 0.2f, 1.0f);
+        }
+
+        // NavMesh 보정
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(target, out hit, 1.0f, NavMesh.AllAreas))
+            return hit.position;
+
+        return target; // 실패해도 원점 리턴
+    }
+
+    // 도착 판정 보강: 남은거리 + 여유 반경
+    protected bool IsArrivedWithRadius(float extraRadius = 0.5f)
+    {
+        if (agent == null || !agent.isOnNavMesh) return true;
+
+        if (agent.pathPending) return false;
+
+        float thresh = Mathf.Max(agent.stoppingDistance, 0.0f) + Mathf.Clamp(extraRadius, 0f, 1.5f);
+        if (agent.remainingDistance <= thresh) return true;
+
+        // 안전망: 실제 좌표 거리
+        if (agent.destination != Vector3.zero)
+            return Vector3.Distance(transform.position, agent.destination) <= thresh;
+
+        return false;
+    }
 
     protected virtual float GetRepairSuccessRate() => 1.0f;
     protected virtual int GetMarinerId() => 0;
