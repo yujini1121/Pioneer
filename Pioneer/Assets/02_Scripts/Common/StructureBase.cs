@@ -10,6 +10,7 @@ public class StructureBase : CommonBase
 {
     [Header("설치 데이터")]
     [SerializeField] protected SInstallableObjectDataSO objectData;
+    public SInstallableObjectDataSO ObjectData => objectData;
 
     [field: SerializeField] public bool isUsing { get; private set; }
 

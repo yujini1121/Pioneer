@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 
 /// <summary>
 /// 우클릭으로 설치된 오브젝트를 선택하고,
@@ -20,7 +22,11 @@ public class InstalledObjectUI : MonoBehaviour
     [SerializeField] Button moveButton;
     [SerializeField] Button removeButton;
     [SerializeField] Button closeButton;
+    [SerializeField] Button repairButton;
     [SerializeField] GameObject durabilityUI;  // 필요시 연결(표시만)
+    [SerializeField] TextMeshProUGUI durabilityText;
+    [SerializeField] Image repairImage1;
+    [SerializeField] Image repairImage2;
 
     [Header("선택/레이캐스트")]
     [SerializeField] LayerMask interactableMask; // 설치 오브젝트 레이어
@@ -37,10 +43,13 @@ public class InstalledObjectUI : MonoBehaviour
 
     Camera cam;
     InstalledObject current;
+    StructureBase structure;
 
     // 패널이 루트인 경우를 위한 가시성 토글용
     CanvasGroup panelCg;
     bool panelIsRoot => panel && panel.gameObject == gameObject;
+
+    
 
     void Awake()
     {
@@ -61,6 +70,7 @@ public class InstalledObjectUI : MonoBehaviour
         moveButton.onClick.AddListener(() => { if (current) { current.BeginMove(); mode = Mode.Move; } });
         removeButton.onClick.AddListener(() => { if (current) { current.Remove(); Hide(); } });
         closeButton.onClick.AddListener(Hide);
+        repairButton.onClick.AddListener(Repair);
 
         Hide(); // 시작 시 패널은 숨김(루트는 활성 상태 유지)
     }
@@ -80,6 +90,9 @@ public class InstalledObjectUI : MonoBehaviour
                 List<Material> materials = new List<Material>(obj.GetComponent<MeshRenderer>().sharedMaterials);
                 materials.Add(outlineMat);
                 obj.GetComponent<MeshRenderer>().sharedMaterials = materials.ToArray();
+
+                structure = current.gameObject.GetComponent<StructureBase>();
+                UpdateDurability();
             }
             else Hide();
         }
@@ -121,6 +134,8 @@ public class InstalledObjectUI : MonoBehaviour
             }
         }
         if (IsPanelVisible() && Input.GetKeyDown(KeyCode.Escape)) Hide();
+
+        UpdateDurability();
     }
 
 
@@ -161,7 +176,7 @@ public class InstalledObjectUI : MonoBehaviour
         removeButton.gameObject.SetActive(true);
         closeButton.gameObject.SetActive(true);
         if (durabilityUI) durabilityUI.SetActive(true);
-
+        repairButton.gameObject.SetActive(true);
         Reposition(worldPos);
     }
 
@@ -208,5 +223,30 @@ public class InstalledObjectUI : MonoBehaviour
     bool IsPanelVisible()
     {
         return panelIsRoot ? panelCg.alpha > 0.0001f : panel.gameObject.activeSelf;
+    }
+
+    private void Repair()
+    {
+        if (InventoryManager.Instance.Get(40007) <= 0) return;
+
+        Debug.Log($"수리 버튼 눌림");
+
+        if (structure.ObjectData.id == 50005)
+        {
+            RepairUI.instance.Open();
+        }
+        else
+        {
+            PlayerRepair.instance.Repair(structure);
+        }
+
+    }
+
+    private void UpdateDurability()
+    {
+        repairImage1.color = (InventoryManager.Instance.Get(40007) > 0) ? Color.white : Color.red;
+        repairImage2.color = (InventoryManager.Instance.Get(40007) > 0) ? Color.white : Color.red;
+
+        durabilityText.text = $"{(structure.hp * 100) / structure.maxHp}%";
     }
 }

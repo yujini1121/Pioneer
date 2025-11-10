@@ -26,7 +26,8 @@ public class RepairUI : MonoBehaviour
         {
             itemSlotUIs[index] = slotGameObjects[index].GetComponent<ItemSlotUI>();
         }
-        IconRefresh();
+        //IconRefresh();
+        ClickClose();
     }
 
     // Update is called once per frame
@@ -53,6 +54,8 @@ public class RepairUI : MonoBehaviour
         cg.alpha = 1f;
         cg.interactable = true;
         cg.blocksRaycasts = true;
+
+        IconRefresh();
     }
 
     public void ClickSlot(int index)
