@@ -114,6 +114,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         // 밤 시작 감지 및 혼란→좀비 전환 루틴 트리거
         if (GameManager.Instance != null && GameManager.Instance.IsDaytime && !isNightBehaviorStarted)
         {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.ToNight);
+
             isNight = false;
 
             // 낮이고 프리-나이트도 아니면: 평상시 루틴
@@ -495,6 +498,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [감염] 가짜 파밍(낚시) 시작");
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
+
         var anim = GetComponentInChildren<MarinerAnimControll>(true);
 
         if (agent != null && agent.isOnNavMesh)
@@ -530,6 +536,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             anim?.StopFishing();
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.GetFishing);
     }
 
 

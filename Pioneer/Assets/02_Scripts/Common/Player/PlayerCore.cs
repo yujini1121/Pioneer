@@ -203,7 +203,10 @@ public class PlayerCore : CreatureBase, IBegin
         // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
     }
     public override void WhenDestroy()
-    {        
+    {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.TriggerGameOver();

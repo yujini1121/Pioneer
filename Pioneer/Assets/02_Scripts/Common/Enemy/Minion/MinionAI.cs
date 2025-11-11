@@ -72,6 +72,9 @@ public class MinionAI : EnemyBase, IBegin
 
         if (attacker != null && !IsDead)
         {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
+
             revengeTarget = attacker;
             Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
         }

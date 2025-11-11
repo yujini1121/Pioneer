@@ -383,6 +383,9 @@ public class MarinerBase : CreatureBase
     {
         Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계에서 파밍 시작");
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
+
         var anim = GetComponentInChildren<MarinerAnimControll>(true);
 
         if (agent != null && agent.isOnNavMesh)
@@ -418,6 +421,8 @@ public class MarinerBase : CreatureBase
         finally
         {
             anim?.StopFishing();
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.GetFishing);
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
     }

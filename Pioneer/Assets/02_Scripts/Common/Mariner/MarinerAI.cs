@@ -328,6 +328,9 @@ public class MarinerAI : MarinerBase, IBegin
 
         var animCtrl = GetComponentInChildren<MarinerAnimControll>(true);
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
+
         // 항상 정리 보장
         try
         {
@@ -339,13 +342,12 @@ public class MarinerAI : MarinerBase, IBegin
             }
 
             ResetAgentPath();
-            LookAtTarget(); // 루트 회전(선택)
+            LookAtTarget(); 
 
-            // ★ 타겟 바라보게 DirX/DirZ 스냅 + 공격 트리거
+            // 타겟 바라보게 DirX/DirZ 스냅 + 공격 트리거
             animCtrl?.AimAtTarget(target.position, transform);
             animCtrl?.PlayAttackOnce();
 
-            // 선딜(텔레그래프)
             isShowingAttackBox = true;
             yield return new WaitForSeconds(attackDelayTime);
             isShowingAttackBox = false;
@@ -540,6 +542,9 @@ public class MarinerAI : MarinerBase, IBegin
 
     public override void WhenDestroy()
     {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.Die);
+
         GameManager.Instance.MarinerDiedCount();
         PlayerCore.Instance.ReduceMentalOnMarinerDie();
         base.WhenDestroy();
@@ -582,6 +587,8 @@ public class MarinerAI : MarinerBase, IBegin
 
             Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.ItemGet);
 
         Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
     }
@@ -707,6 +714,9 @@ public class MarinerAI : MarinerBase, IBegin
     {
         Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [마리너] 파밍 시작");
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
+
         var anim = GetComponentInChildren<MarinerAnimControll>(true);
 
         // 이동 정지
@@ -751,6 +761,8 @@ public class MarinerAI : MarinerBase, IBegin
         {
             // 정리
             anim?.StopFishing();
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.GetFishing);
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
     }

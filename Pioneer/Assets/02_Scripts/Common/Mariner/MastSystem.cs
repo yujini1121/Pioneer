@@ -269,6 +269,9 @@ public class MastSystem : CommonBase
         SetMastLevel(mastLevel + 1);
         hp = maxHp;
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.FortifyObject);
+
         ShowMessage("돛대가 강화되었습니다.", 3f);
         InventoryUiMain.instance?.IconRefresh();
         UpdateUI();
@@ -293,6 +296,9 @@ public class MastSystem : CommonBase
 
     public override void WhenDestroy()
     {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.Die);
+
         Debug.Log("[MastSystem] WhenDestroy() → 게임오버 호출");
         GameManager.Instance?.TriggerGameOver();
     }
