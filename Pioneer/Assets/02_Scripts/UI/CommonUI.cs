@@ -7,6 +7,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditorInternal.ReorderableList;
 
 /// <summary>
 ///     해당 클래스는 공통적인 로직을 퍼블릭 정적 메서드로 바꿔놓은 것입니다. 코드 반복을 피하기 위한 클래스입니다.
@@ -112,6 +113,9 @@ public class CommonUI : MonoBehaviour, IBegin
         ui.craftButton.onClick.RemoveAllListeners();
         ui.craftButton.onClick.AddListener(() =>
         {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
+
             if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
             if (currentCraftCoroutine != null)
             {
@@ -194,6 +198,9 @@ public class CommonUI : MonoBehaviour, IBegin
         Button categoryButton = categoryButtonObject.GetComponent<Button>();
         categoryButton.onClick.AddListener(() =>
         {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
+
             // 2. 제작 선택 버튼들
             // 해당 버튼을 누르면 제작 선택 UI가 뜸
             // 기존 제작 선택을 싹 제거함
@@ -236,9 +243,10 @@ public class CommonUI : MonoBehaviour, IBegin
                 m_oneUi.button.onClick.AddListener(() =>
                 {
 					Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 버튼 클릭됨!");
+                    if (AudioManager.instance != null)
+                        AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
 
-
-					ui.gameObject.SetActive(true);
+                    ui.gameObject.SetActive(true);
                     UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { m_one });
                 });
             }
@@ -274,6 +282,8 @@ public class CommonUI : MonoBehaviour, IBegin
 
         itemButton.onClick.AddListener(() => // 버튼 클릭 시
         {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
             ui.gameObject.SetActive(true);
             UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { itemButtonGameObject });
         });
