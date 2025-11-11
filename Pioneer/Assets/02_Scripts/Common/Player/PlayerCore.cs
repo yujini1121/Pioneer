@@ -122,6 +122,14 @@ public class PlayerCore : CreatureBase, IBegin
     public float AttackHeight => attackHeight;
     public LayerMask EnemyLayer => enemyLayer;
 
+    [Header("애니메이션 설정")]
+    [SerializeField] private PlayerController controller;
+    private AnimationSlot slots;
+    private Animator animator;
+
+    private Vector3 currentDirection;
+    private int _curRunIdx = -1; // 0:F, 1:B, 2:L, 3:R
+
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
 
@@ -182,6 +190,17 @@ public class PlayerCore : CreatureBase, IBegin
 
         handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
         dummyHandAttackItem = new SItemStack(-1, -1);
+
+        if (controller == null)
+            controller = GetComponentInParent<PlayerController>();
+        if (controller == null)
+            controller = PlayerController.instance; // 최후의 수단
+
+        // 애니메이션
+        slots = controller.animSlots;
+        animator = controller.animator;
+        playerRb = GetComponent<Rigidbody>();
+
     }
     
     new void Start()
@@ -245,6 +264,28 @@ public class PlayerCore : CreatureBase, IBegin
         UnityEngine.Debug.Log("Player State Changed to: " + state);
     }
 
+    static int Get4DirIndexXZ(in Vector3 v)
+    {
+        if (v.sqrMagnitude < 1e-6f) return -1;
+        float ax = Mathf.Abs(v.x);
+        float az = Mathf.Abs(v.z);
+        if (ax >= az) return (v.x >= 0f) ? 3 : 2; // Right : Left
+        else return (v.z <= 0f) ? 0 : 1; // Front : Back
+    }
+
+    void ChangeRunByIndex(int idx)
+    {
+        if (idx < 0) return;
+        var target = slots.run[idx];
+        //if (slots.curRunClip == target) return;
+
+        controller.ChangeAnimationClip(slots.curRunClip, target);
+        //slots.curRunClip = target;
+
+        animator.SetTrigger("SetRun");
+    }
+
+
     // =============================================================
     // 이동
     // =============================================================
@@ -252,9 +293,17 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (currentState != PlayerState.Default) return;
 
-        Vector3 moveVelocity = moveInput.normalized * speed;
+        int idx = Get4DirIndexXZ(moveInput);
+        if (idx != _curRunIdx)
+        {
+            ChangeRunByIndex(idx);
+            _curRunIdx = idx;
 
-        playerRb.velocity = new Vector3(moveVelocity.x, playerRb.velocity.y, moveVelocity.z);
+            UnityEngine.Debug.LogError(idx);
+        }
+
+        var v = moveInput.normalized * speed;
+        playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
     }
 
     // =============================================================
