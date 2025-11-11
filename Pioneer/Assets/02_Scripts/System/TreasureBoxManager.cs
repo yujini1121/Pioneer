@@ -44,6 +44,8 @@ public class TreasureBoxManager : MonoBehaviour
 
     public void Accept()
     {
+
+
         InventoryManager.Instance.Add(rewardStack[0]);
 
         rewardStack.RemoveAt(0);

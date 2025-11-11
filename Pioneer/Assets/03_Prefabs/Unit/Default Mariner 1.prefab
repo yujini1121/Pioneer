@@ -265,7 +265,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 1
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 7
   m_ObstacleAvoidanceType: 4
 --- !u!114 &1067817375811682228
 MonoBehaviour:
@@ -298,6 +298,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   fov: {fileID: 0}
   speed: 0
   attackDamage: 0

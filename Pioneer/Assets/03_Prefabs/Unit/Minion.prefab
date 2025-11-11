@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1546079290981050899}
   - component: {fileID: 2853514008745676546}
   - component: {fileID: -4521112962048500382}
+  - component: {fileID: 3389865324444553730}
   m_Layer: 8
   m_Name: Minion
   m_TagString: Enemy
@@ -184,6 +185,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: -0.4, z: 0}
   fov: {fileID: 1546079290981050899}
   speed: 0
   attackDamage: 0
@@ -216,6 +218,37 @@ MonoBehaviour:
   fadeDuration: 2
   playOnEnable: 1
   stopAgentDuringIntro: 1
+--- !u!114 &3389865324444553730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646136597593253128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2fe9fe95f5656544b87a8f2ec91d6a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropElements:
+  - item:
+      id: 30010
+      amount: 1
+      duability: 0
+      isUseCoroutineEnd: 0
+    weight: 0.3
+  - item:
+      id: 30016
+      amount: 1
+      duability: 0
+      isUseCoroutineEnd: 0
+    weight: 0.3
+  - item:
+      id: 30017
+      amount: 1
+      duability: 0
+      isUseCoroutineEnd: 0
+    weight: 0.4
 --- !u!1 &4659406265448088296
 GameObject:
   m_ObjectHideFlags: 0
