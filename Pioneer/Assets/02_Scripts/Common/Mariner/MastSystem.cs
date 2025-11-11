@@ -8,7 +8,7 @@ public class MastSystem : CommonBase
 {
     [Header("돛대 설정")]
     public int mastLevel = 1;
-    public float interactionRange = 10f;
+    public float interactionRange = 1.5f;
     public LayerMask playerLayer;
 
     [Header("첫 번째 UI - 기본 정보")]
