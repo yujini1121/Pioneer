@@ -7,55 +7,63 @@ using UnityEngine.Audio;
 
 public class Option : MonoBehaviour, IBegin
 {
-    /*[Header("Vol Slider")]
-    [SerializeField] private Slider masterVolSlider;
-    [SerializeField] private Slider bgmVolSlider;
-    [SerializeField] private Slider sfxVolSlider;
-
-    [Header("Audio Mixer ¼³Á¤")]
-    public AudioMixer audioMixer;
-    public AudioMixerGroup bgmMixer;
-    public AudioMixerGroup sfxMixer;
-
-    [Header("Option UI")]
-    [SerializeField] private Button optionButton;
-    [SerializeField] private Button xButton;
     [SerializeField] private GameObject optionUI;
 
-    private void Start()
+    public Slider bgmVolSlider;
+    public Slider sfxVolSlider;
+
+    private static Option instance;
+
+    private void Awake()
     {
-        if (optionButton != null && xButton != null)
+        if (instance == null)
         {
-            optionButton.onClick.AddListener(OnOptionButtonClicked);
-            xButton.onClick.AddListener(OnXButtonClicked);
+            instance = this;
+            DontDestroyOnLoad(gameObject);
         }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    void Start()
+    {
+        SetDeactivateOption();
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.bgmVolSlider = bgmVolSlider;
+            AudioManager.instance.sfxVolSlider = sfxVolSlider;
 
-        InitSliders();
-
-        masterVolSlider.onValueChanged.AddListener(AudioManager.instance.SetMasterVolume);
-        bgmVolSlider.onValueChanged.AddListener(AudioManager.instance.SetBgmVolume);
-        sfxVolSlider.onValueChanged.AddListener(AudioManager.instance.SetSfxVolume);
+            AudioManager.instance.InitSliders();
+            AudioManager.instance.InitListenerVolSliders();
+            AudioManager.instance.LoadVolumes();
+        }
+        else
+        {
+            UnityEngine.Debug.Log("Screen Controller Instance Error");
+        }
     }
 
-    private void OnOptionButtonClicked()
+    private void Update()
     {
-        optionUI.SetActive(true);
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            bool isActive = optionUI.activeInHierarchy;
 
-        Time.timeScale = 0;
-
-        optionUI.transform.SetAsLastSibling();
+            if (isActive)
+            {
+                SetDeactivateOption();
+            }
+            else
+            {
+                SetActivateOption();
+            }
+        }
     }
 
-    private void OnXButtonClicked()
+    public void SetActivateOption() => optionUI.SetActive(true);
+    public void SetDeactivateOption()
     {
-        Time.timeScale = 1;
         optionUI.SetActive(false);
     }
-
-    void InitSliders()
-    {
-        masterVolSlider.value = AudioManager.instance.GetVolume("MasterVol");
-        bgmVolSlider.value = AudioManager.instance.GetVolume("BGMVol");
-        sfxVolSlider.value = AudioManager.instance.GetVolume("SFXVol");
-    }*/
 }
