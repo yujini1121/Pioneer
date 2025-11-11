@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1046565447451161677}
   - component: {fileID: 4204305878952056583}
   - component: {fileID: 828154716369138294}
+  - component: {fileID: 8840491359272126029}
   m_Layer: 8
   m_Name: Nest
   m_TagString: Enemy
@@ -101,6 +102,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0.2, z: 0}
   fov: {fileID: 0}
   speed: 0
   attackDamage: 0
@@ -140,3 +142,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.74, y: 0.32, z: 0.8874589}
   m_Center: {x: 0.022342026, y: 0.1, z: 0.29776686}
+--- !u!114 &8840491359272126029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9198897501529124499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2fe9fe95f5656544b87a8f2ec91d6a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropElements:
+  - item:
+      id: 40010
+      amount: 1
+      duability: 0
+      isUseCoroutineEnd: 0
+    weight: 1

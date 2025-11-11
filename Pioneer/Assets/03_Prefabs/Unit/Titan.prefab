@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3611879626036163164}
   - component: {fileID: 9053531323269981545}
   - component: {fileID: 7595422899972394721}
+  - component: {fileID: 6703011301650058167}
   m_Layer: 8
   m_Name: Titan
   m_TagString: Enemy
@@ -184,6 +185,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: -0.7, z: 0}
   fov: {fileID: 3611879626036163164}
   speed: 0
   attackDamage: 0
@@ -213,6 +215,37 @@ MonoBehaviour:
   fadeDuration: 2
   playOnEnable: 1
   stopAgentDuringIntro: 1
+--- !u!114 &6703011301650058167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4926383961205332390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2fe9fe95f5656544b87a8f2ec91d6a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropElements:
+  - item:
+      id: 30013
+      amount: 1
+      duability: 0
+      isUseCoroutineEnd: 0
+    weight: 0.2
+  - item:
+      id: 20003
+      amount: 1
+      duability: 100
+      isUseCoroutineEnd: 0
+    weight: 0.15
+  - item:
+      id: 30015
+      amount: 5
+      duability: 0
+      isUseCoroutineEnd: 0
+    weight: 0.65
 --- !u!1 &6042525674292446187
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,6 +9,7 @@ public class CommonBase : MonoBehaviour, IBegin
     public int maxHp;
     public bool IsDead = false;
     public GameObject attacker = null;
+    public Vector3 dropOffset;
 
     public int CurrentHp => hp;
 
@@ -50,6 +51,13 @@ public class CommonBase : MonoBehaviour, IBegin
     public virtual void WhenDestroy()
     {
         Debug.Log($"{gameObject.name} 오브젝트 파괴");
+
+        ItemDropper dropper = GetComponent<ItemDropper>();
+        if (dropper != null)
+        {
+            ItemDropManager.instance.Drop(dropper.GetDroppedItems(), transform.position + dropOffset);
+        }
+
         Destroy(gameObject);
     }
 }

@@ -243,6 +243,17 @@ public class InventoryManager : InventoryBase
 
 	private void Update()
 	{
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad1))
+        {
+            Add(new SItemStack(20001, 1, 100));
+            Add(new SItemStack(20002, 1, 100));
+            Add(new SItemStack(20003, 1, 100));
+            Add(new SItemStack(20003, 1, int.MaxValue));
+        }
+
+
+
+
         if (Input.GetKeyDown(KeyCode.F11))
         {
             Demo();
@@ -274,7 +285,7 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(30006, 80));
         Add(new SItemStack(30007, 80));
         Add(new SItemStack(30008, 80));
-        Add(new SItemStack(30009, 80));
+        //Add(new SItemStack(30009, 80));
         Add(new SItemStack(30010, 80));
         Add(new SItemStack(30011, 80));
         Add(new SItemStack(30012, 80));
