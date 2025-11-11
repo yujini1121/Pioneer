@@ -38,6 +38,9 @@ public class InstalledObject : MonoBehaviour
     }
     public void OnPlaced()
     {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.InstallObject);
+
         // 설치 직후 1회 초기화 훅
         if (_rend == null) _rend = GetComponent<Renderer>();
         if (_rend && _rend.material) _origColor = _rend.material.color;
@@ -56,6 +59,9 @@ public class InstalledObject : MonoBehaviour
 
     public void Remove()
     {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.DestroyedObject);
+        
         Destroy(gameObject);
     }
 

@@ -195,11 +195,15 @@ public class InGameUI : MonoBehaviour, IBegin
         {
             if (GuiltySystem.instance.canUseESC)
             {
+
+
                 ManuUI.SetActive(true);
             }
             else
             {
                 denyUiEndTime = Time.time + denyUiLifeTime;
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.CantESCNoise);
             }
         }
     }

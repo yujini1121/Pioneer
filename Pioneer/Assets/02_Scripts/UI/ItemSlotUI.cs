@@ -16,6 +16,13 @@ public class ItemSlotUI : MonoBehaviour,
     public TextMeshProUGUI durability;
     public bool isSlot;
     public bool isRepairSlot;
+    public List<System.Action> buttonClickAction;
+
+
+    private void Awake()
+    {
+        buttonClickAction = new List<System.Action>();
+    }
 
     public void Show(SItemStack item,
         [CallerFilePath] string file = "",
@@ -87,6 +94,11 @@ public class ItemSlotUI : MonoBehaviour,
         else if (isRepairSlot)
         {
             RepairUI.instance.ClickSlot(index);
+        }
+
+        foreach (var one in buttonClickAction)
+        {
+            one();
         }
     }
 }

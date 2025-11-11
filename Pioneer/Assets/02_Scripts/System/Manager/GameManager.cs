@@ -239,6 +239,9 @@ public class GameManager : MonoBehaviour, IBegin
 
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.MeetEnemy);
+
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
         EnemyScaleRow scale = GetScaleRowForDay(currentDay);
 

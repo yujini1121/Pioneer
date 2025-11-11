@@ -28,6 +28,9 @@ public class DarkMariner : MonoBehaviour
         {
             Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) => Player");
 
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.CantESCNoise);
+
             Curse();
         }
     }

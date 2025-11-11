@@ -44,7 +44,8 @@ public class TreasureBoxManager : MonoBehaviour
 
     public void Accept()
     {
-
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
 
         InventoryManager.Instance.Add(rewardStack[0]);
 

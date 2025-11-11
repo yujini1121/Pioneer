@@ -155,13 +155,17 @@ public class CrawlerAI : EnemyBase, IBegin
                     return;
                 }
                 // 플레이어, 에너미, 승무원만
-                /*UnityEngine.Debug.Log("CrawlerAI 타겟 맞는 사운드 출력");
-                AudioManager.instance.PlaySfx(AudioManager.SFX.Hit);*/
+                UnityEngine.Debug.Log("CrawlerAI 타겟 맞는 사운드 출력");
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Crawler);
+
                 targetBase.TakeDamage(attackDamage, this.gameObject);
             }
         }
         attackTimer = attackDelayTime;
-        AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeAttack_Crawler);
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeAttack_Crawler);
     }
 
     private void SortCloseObj()

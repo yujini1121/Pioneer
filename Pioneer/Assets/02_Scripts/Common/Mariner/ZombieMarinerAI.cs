@@ -119,6 +119,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
     {
         currentState = CrewState.Attacking;
 
+        
+
         if (target == null)
         {
             attackRoutine = null;
@@ -132,6 +134,9 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             agent.ResetPath();
             agent.isStopped = true;   
         }
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
 
         LookAtTarget();
 
@@ -212,9 +217,6 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
-                if (AudioManager.instance != null)
-                    AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
-
                 targetBase.TakeDamage(attackDamage, this.gameObject);
                 Debug.Log($"좀비가 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
             }

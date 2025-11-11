@@ -115,6 +115,9 @@ public class TitanAI : EnemyBase, IBegin
             yield return null;
         }
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Titan);
+
         // 여기에 데미지를 주는 로직
         Debug.Log("공격 발생! " + attackDamage + " 피해!");
         Collider[] hitColliders = DetectAttackRange();
