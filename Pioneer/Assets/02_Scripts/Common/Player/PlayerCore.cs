@@ -128,7 +128,8 @@ public class PlayerCore : CreatureBase, IBegin
     private Animator animator;
 
     private Vector3 currentDirection;
-    private int _curRunIdx = -1; // 0:F, 1:B, 2:L, 3:R
+    private int _curIdleIdx = -1; // 0:F, 1:B, 2:L, 3:R
+    private int _curRunIdx = -1; 
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
@@ -273,16 +274,40 @@ public class PlayerCore : CreatureBase, IBegin
         else return (v.z <= 0f) ? 0 : 1; // Front : Back
     }
 
+    void ChangeIdleByIndex(int idx)
+    {
+        UnityEngine.Debug.Log(idx);
+        if (idx < 0) return;
+        var target = slots.idle[idx];
+
+        controller.ChangeAnimationClip(slots.curIdleClip, target);
+        animator.SetTrigger("SetIdle");
+    }
+
+
     void ChangeRunByIndex(int idx)
     {
         if (idx < 0) return;
         var target = slots.run[idx];
-        //if (slots.curRunClip == target) return;
 
         controller.ChangeAnimationClip(slots.curRunClip, target);
-        //slots.curRunClip = target;
 
         animator.SetTrigger("SetRun");
+    }
+
+
+    // =============================================================
+    // 가만히있엇
+    // =============================================================
+    public void Idle(Vector3 moveInput)
+    {
+        int idx = Get4DirIndexXZ(moveInput);
+        UnityEngine.Debug.Log($"Idle idx : {idx}");
+        if (idx != _curRunIdx)
+        {
+            ChangeIdleByIndex(idx);
+            _curRunIdx = idx;
+        }
     }
 
 
