@@ -114,8 +114,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         // 밤 시작 감지 및 혼란→좀비 전환 루틴 트리거
         if (GameManager.Instance != null && GameManager.Instance.IsDaytime && !isNightBehaviorStarted)
         {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.ToNight);
 
             isNight = false;
 

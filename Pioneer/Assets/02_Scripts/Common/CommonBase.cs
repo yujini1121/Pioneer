@@ -39,9 +39,6 @@ public class CommonBase : MonoBehaviour, IBegin
 
         this.attacker = attacker;
 
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.Hit);
-
         if (hp <= 0)
         {
             IsDead = true;
@@ -52,9 +49,6 @@ public class CommonBase : MonoBehaviour, IBegin
     // 사라졌을때 호출하는 변수 (생명체인 경우 사망했을 때)
     public virtual void WhenDestroy()
     {
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
-
         Debug.Log($"{gameObject.name} 오브젝트 파괴");
         Destroy(gameObject);
     }

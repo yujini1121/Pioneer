@@ -297,7 +297,7 @@ public class MastSystem : CommonBase
     public override void WhenDestroy()
     {
         if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.Die);
+            AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
 
         Debug.Log("[MastSystem] WhenDestroy() → 게임오버 호출");
         GameManager.Instance?.TriggerGameOver();

@@ -125,6 +125,7 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private void Attack()
     {
+        AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Crawler);
         // Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, detectMask);
         Collider[] hitColliders = DetectAttackRange();
 
@@ -153,10 +154,14 @@ public class CrawlerAI : EnemyBase, IBegin
                     }
                     return;
                 }
+                // 플레이어, 에너미, 승무원만
+                UnityEngine.Debug.Log("CrawlerAI 타겟 맞는 사운드 출력");
+                AudioManager.instance.PlaySfx(AudioManager.SFX.Hit);
                 targetBase.TakeDamage(attackDamage, this.gameObject);
             }
         }
         attackTimer = attackDelayTime;
+        AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeAttack_Crawler);
     }
 
     private void SortCloseObj()

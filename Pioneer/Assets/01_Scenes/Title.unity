@@ -348,6 +348,7 @@ GameObject:
   - component: {fileID: 177020144}
   - component: {fileID: 177020143}
   - component: {fileID: 177020142}
+  - component: {fileID: 177020145}
   m_Layer: 5
   m_Name: OptionButton
   m_TagString: Untagged
@@ -469,6 +470,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 177020140}
   m_CullTransparentMesh: 1
+--- !u!114 &177020145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 177020140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates: []
 --- !u!1 &252014578
 GameObject:
   m_ObjectHideFlags: 0
@@ -481,6 +495,7 @@ GameObject:
   - component: {fileID: 252014582}
   - component: {fileID: 252014581}
   - component: {fileID: 252014580}
+  - component: {fileID: 252014583}
   m_Layer: 5
   m_Name: StartButton
   m_TagString: Untagged
@@ -602,6 +617,35 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 252014578}
   m_CullTransparentMesh: 1
+--- !u!114 &252014583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252014578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 4
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 2052874924}
+          m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
+          m_MethodName: ClickUI
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &762526807
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,6 +776,7 @@ GameObject:
   - component: {fileID: 797775870}
   - component: {fileID: 797775869}
   - component: {fileID: 797775868}
+  - component: {fileID: 797775871}
   m_Layer: 5
   m_Name: ExitButton
   m_TagString: Untagged
@@ -853,6 +898,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 797775866}
   m_CullTransparentMesh: 1
+--- !u!114 &797775871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 797775866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates: []
 --- !u!1001 &811665924
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2526,7 +2584,7 @@ MonoBehaviour:
   - sfx: 45
     sfxClips: {fileID: 8300000, guid: c6b3e766080da1d4a92ba58d7d5c1e3b, type: 3}
   sfxVolume: 0.2
-  sfxChannels: 10
+  sfxChannels: 30
 --- !u!4 &2052874925
 Transform:
   m_ObjectHideFlags: 0

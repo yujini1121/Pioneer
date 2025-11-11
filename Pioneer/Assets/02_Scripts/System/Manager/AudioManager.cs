@@ -278,4 +278,9 @@ public class AudioManager : MonoBehaviour, IBegin
         SetBgmVolume(bgmVol);
         SetSfxVolume(sfxVol);
     }
+
+    public void ClickUI()
+    {
+        PlaySfx(SFX.Click);
+    }
 }

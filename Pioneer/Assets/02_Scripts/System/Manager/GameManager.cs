@@ -161,6 +161,9 @@ public class GameManager : MonoBehaviour, IBegin
         if (isDay)
         {
             // 낮 -> 밤 전환
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.ToNight);
+
             Debug.Log($"밤이 되었습니다. (Day {currentDay})");
             IsDaytime = false;
             OnNightStart();
