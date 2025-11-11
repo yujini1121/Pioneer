@@ -79,13 +79,13 @@ public class CommonUI : MonoBehaviour, IBegin
         Vector3 mPositionPivot = Vector3.zero;
         switch (recipe.input.Length)
         {
-            case 1: mPositionPivot = new Vector3(0, 100, 0); break;
-            case 2: mPositionPivot = new Vector3(-112.5f, 100, 0); break;
-            case 3: mPositionPivot = new Vector3(-225f, 100, 0); break;
+            case 1: mPositionPivot = new Vector3(0, 50, 0); break;
+            case 2: mPositionPivot = new Vector3(-103f, 50, 0); break;
+            case 3: mPositionPivot = new Vector3(-216f, 50, 0); break;
             default: break;
         }
 
-        Vector3 delta = new Vector3(225, 0, 0);
+        Vector3 delta = new Vector3(216, 0, 0);
         for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
         {
             ui.materialPivots[rIndex].SetActive(true);

@@ -148,17 +148,17 @@ public class PlayerStatUI : MonoBehaviour
         switch (type)
         {
             case GrowStatType.Combat:
-                combatLevel.text = $"{currentLv}";     // 전투 레벨                
+                combatLevel.text = $"Lv. {currentLv}";     // 전투 레벨                
                 additionCombat.text = $"{statLevel.combatList[currentLv].attack * 100:F0} %";        // 공격력 + 추가 공격력 퍼센트                
                 additionCombat_WeaponDurability.text = $"{statLevel.combatList[currentLv].durability} %";   // 무기 내구도 감소치 + 추가 무기 내구도 감소치
                 break;
             case GrowStatType.Crafting:
-                craftingLevel.text = $"{currentLv}";     // 제작 레벨
+                craftingLevel.text = $"Lv. {currentLv}";     // 제작 레벨
                 // 대성공 확률 + 추가 대성공 확률
                 additionCrafting.text = $"{statLevel.craftingList[currentLv] * 100:F0} %";
                 break;
             case GrowStatType.Fishing:
-                fishingLevel.text = state.level.ToString();    // 낚시 레벨
+                fishingLevel.text = "Lv. " + state.level.ToString();    // 낚시 레벨
                 // 재료 추가 획득 확률 + 추가 획득 확률
                 additionFishing_AddIngredients.text = $"{statLevel.fishingList[currentLv].count * 100:F0} %";
                 // 보물상자 획득 확률 + 추가 획득 확률
