@@ -252,19 +252,16 @@ public class PlayerCore : CreatureBase, IBegin
 		float ax = Mathf.Abs(v.x);
 		float az = Mathf.Abs(v.z);
 		if (ax >= az) return (v.x >= 0f) ? 3 : 2; // Right : Left
-		else return (v.z >= 0f) ? 0 : 1; // Front : Back
+		else return (v.z <= 0f) ? 0 : 1; // Front : Back
 	}
 
 	void ChangeRunByIndex(int idx)
 	{
 		if (idx < 0) return;
 		var target = slots.run[idx];
-		if (slots.curRunClip == target) return;
 
 		controller.ChangeAnimationClip(slots.curRunClip, target);
-		slots.curRunClip = target;
 
-		animator.ResetTrigger("SetRun");
 		animator.SetTrigger("SetRun");
 	}
 

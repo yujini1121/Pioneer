@@ -234,12 +234,15 @@ public class PlayerController : MonoBehaviour
 			var key = overridesList[i].Key;
 			if (key != null && key == oldAnim)
 			{
-				overridesList[i] = new KeyValuePair<AnimationClip, AnimationClip>(key, newAnim);
+				if (overridesList[i].Value == newAnim) return;
+
+                overridesList[i] = new KeyValuePair<AnimationClip, AnimationClip>(key, newAnim);
 				break;
 			}
 		}
 
 		aoc.ApplyOverrides(overridesList);
 		animator.Rebind();
-	}
+		animator.Update(0f);
+    }
 }
