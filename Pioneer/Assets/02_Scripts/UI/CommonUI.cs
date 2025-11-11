@@ -7,7 +7,6 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditorInternal.ReorderableList;
 
 /// <summary>
 ///     해당 클래스는 공통적인 로직을 퍼블릭 정적 메서드로 바꿔놓은 것입니다. 코드 반복을 피하기 위한 클래스입니다.
@@ -92,7 +91,7 @@ public class CommonUI : MonoBehaviour, IBegin
             ui.materialPivots[rIndex].SetActive(true);
             ui.materialPivots[rIndex].GetComponent<RectTransform>().anchoredPosition
                 = mPositionPivot + rIndex * delta;
-
+                
             ui.materialEachText[rIndex].enabled = true;
             ui.materialIconImage[rIndex].enabled = true;
 
@@ -113,9 +112,6 @@ public class CommonUI : MonoBehaviour, IBegin
         ui.craftButton.onClick.RemoveAllListeners();
         ui.craftButton.onClick.AddListener(() =>
         {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
-
             if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
             if (currentCraftCoroutine != null)
             {
@@ -198,9 +194,6 @@ public class CommonUI : MonoBehaviour, IBegin
         Button categoryButton = categoryButtonObject.GetComponent<Button>();
         categoryButton.onClick.AddListener(() =>
         {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
-
             // 2. 제작 선택 버튼들
             // 해당 버튼을 누르면 제작 선택 UI가 뜸
             // 기존 제작 선택을 싹 제거함
@@ -243,10 +236,9 @@ public class CommonUI : MonoBehaviour, IBegin
                 m_oneUi.button.onClick.AddListener(() =>
                 {
 					Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 버튼 클릭됨!");
-                    if (AudioManager.instance != null)
-                        AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
 
-                    ui.gameObject.SetActive(true);
+
+					ui.gameObject.SetActive(true);
                     UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { m_one });
                 });
             }
@@ -282,8 +274,6 @@ public class CommonUI : MonoBehaviour, IBegin
 
         itemButton.onClick.AddListener(() => // 버튼 클릭 시
         {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.Click);
             ui.gameObject.SetActive(true);
             UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { itemButtonGameObject });
         });
@@ -377,22 +367,8 @@ public class CommonUI : MonoBehaviour, IBegin
         InventoryManager.Instance.Add(recipe.result);
         InventoryManager.Instance.Remove(recipe.input);
 
-        bool isSuccess = UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance();
-
-        if (isSuccess)
-        {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting);
-        }
-        else
-        {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting);
-        }
-
-
-        if (isSuccess)
-        {
+		if (UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance())
+		{
             if (IsDebuggingCraftCoroutine)
             {
                 Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
@@ -408,14 +384,14 @@ public class CommonUI : MonoBehaviour, IBegin
             {
                 SItemStack newRef = one.Copy();
 
-                newRef.amount *= 4;
-                newRef.amount /= 10;
+				newRef.amount *= 4;
+				newRef.amount /= 10;
 
-                InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
-            }
-        }
+				InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
+			}
+		}
 
-        for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+		for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
         {
             int need = recipe.input[rIndex].amount;
             int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
