@@ -9775,6 +9775,7 @@ MonoBehaviour:
   maxHp: 500
   IsDead: 0
   attacker: {fileID: 2034679914}
+  dropOffset: {x: 0, y: 0, z: 0}
   mastLevel: 1
   interactionRange: 1.5
   playerLayer:
@@ -9784,7 +9785,7 @@ MonoBehaviour:
   hpPercentageText: {fileID: 439152047233842039}
   upgradeMenuButton: {fileID: 439152047233842038}
   closeButton: {fileID: 439152047233842037}
-  hpSlider: {fileID: 0}
+  hpSlider: {fileID: 439152047233842040}
   upgradeUI: {fileID: 84139225091128456}
   enhanceButton: {fileID: 6422104804416450739}
   backButton: {fileID: 0}
@@ -9915,15 +9916,15 @@ MonoBehaviour:
   - {r: 1, g: 0.5, b: 0, a: 1}
   - {r: 0, g: 1, b: 1, a: 1}
   result:
-  - {fileID: 1189123428}
+  - {fileID: 491804331}
   - {fileID: 640650934}
   - {fileID: 1341768743}
-  - {fileID: 491804331}
+  - {fileID: 1494904340}
   resultPos:
-  - {x: 2.8284273, y: -0.12044251, z: 0}
+  - {x: -1.4142134, y: -0.12044251, z: -4.242641}
   - {x: -1.4142137, y: -0.12044251, z: 4.242641}
   - {x: -5.6568546, y: -0.12044251, z: -0.00000011920929}
-  - {x: -1.4142134, y: -0.12044251, z: -4.242641}
+  - {x: -2.8284268, y: -0.12044251, z: -2.8284273}
   found: 01010101
 --- !u!1 &2039986107 stripped
 GameObject:
@@ -11867,6 +11868,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &439152047233842040 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 897167607843146962, guid: 602a427ce28b7dd4fa5d60f6cc38011f,
+    type: 3}
+  m_PrefabInstance: {fileID: 439152047233842036}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &477152007101350976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13107,6 +13120,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   fov: {fileID: 2029828996017671682}
   speed: 0
   attackDamage: 0
@@ -13130,6 +13144,7 @@ MonoBehaviour:
     m_Bits: 256
   duabilityReducePrevent: 0
   creatureEffect: {fileID: 0}
+  controller: {fileID: 0}
   handAttackStartDefault: {fileID: 11400000, guid: cac60e5c912990f459fe7c629b5e80e6,
     type: 2}
   handAttackCurrentValueRaw: {fileID: 11400000, guid: 44a7ec6ff666348499c27d7843f6d17c,
@@ -16708,6 +16723,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   objectData: {fileID: 0}
   <isUsing>k__BackingField: 0
   interactRange: 3
@@ -24225,6 +24241,7 @@ GameObject:
   - component: {fileID: 6685575871557604701}
   - component: {fileID: 5749033069456428652}
   - component: {fileID: 1289128061156491909}
+  - component: {fileID: 8154792753122708685}
   m_Layer: 5
   m_Name: InGameUI
   m_TagString: Untagged
@@ -24232,6 +24249,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &8154792753122708685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8154792753122708684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cec42ab77cb0224f9e1b696295bf74d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultSfx: 4
 --- !u!1 &8164079273781385114
 GameObject:
   m_ObjectHideFlags: 0
