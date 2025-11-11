@@ -64,6 +64,20 @@ public class WeaponUseUtils
         Debug.Assert(itemWithState != null);
         Debug.Assert(data != null);
 
+        switch (data.id) // 사운드 스위치 문
+        {
+            case 20001:
+            case 20002:
+            case 20003:
+                if (AudioManager.instance != null) // 칼 사용
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
+                break;
+            default:
+                if (AudioManager.instance != null) // 주먹사용
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.Punch1_Player);
+                break;
+        }
+
         // 휘두르는 애니메이션
         // 플레이어 행동 사이클타임
         // 플레이어 클릭 방향 감지

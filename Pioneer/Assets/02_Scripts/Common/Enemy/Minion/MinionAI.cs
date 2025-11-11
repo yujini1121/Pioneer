@@ -181,6 +181,9 @@ public class MinionAI : EnemyBase, IBegin
         if (currentAttackTarget == null)
             yield break;
 
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Minion);
+
         CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
         // Debug.Log($"MinionAI targetBase : {this.name}, {targetBase.name}");
         if (targetBase != null && !targetBase.IsDead)

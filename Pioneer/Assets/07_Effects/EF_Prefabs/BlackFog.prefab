@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 587114417798764221}
   - component: {fileID: 3506273835059522494}
   - component: {fileID: 8192221941169880262}
+  - component: {fileID: 8106450119750051967}
   m_Layer: 0
   m_Name: BlackFog
   m_TagString: Untagged
@@ -41,7 +42,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6387338035820710673}
   serializedVersion: 8
-  lengthInSec: 3
+  lengthInSec: 5
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
@@ -4830,3 +4831,16 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &8106450119750051967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6387338035820710673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 334890127721c04479de91fd38b55c2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  armedTime: 2

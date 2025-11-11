@@ -70,6 +70,11 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            TakeDamage(9999, null); // 강제로 죽이기
+        }
+
         if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 
         if (!isRegistered)
@@ -549,7 +554,10 @@ public class MarinerAI : MarinerBase, IBegin
     public override void WhenDestroy()
     {
         if (AudioManager.instance != null)
+        {
             AudioManager.instance.PlaySfx(AudioManager.SFX.Die);
+            Debug.Log($"마리너 사망사운드 출력{(int)AudioManager.SFX.Die}");
+        }
 
         GameManager.Instance.MarinerDiedCount();
         PlayerCore.Instance.ReduceMentalOnMarinerDie();
