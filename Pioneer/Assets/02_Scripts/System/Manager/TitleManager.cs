@@ -11,6 +11,8 @@ public class TitleManager : MonoBehaviour
     public Slider bgmVolSlider;
     public Slider sfxVolSlider;
 
+    private bool readyToStart = false;
+
     private void Start()
     {
         SetDeactiveTitleButton();
@@ -32,14 +34,15 @@ public class TitleManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!readyToStart && Input.GetKeyDown(KeyCode.Space)) // 스페이스바를 한번 누르면 켜지고 그 이후론 작동없음
         {
-            AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
-        }
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
+
             SetActiveTitleButton();
-            SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
+            if (pressKeyText != null) pressKeyText.SetActive(false);
+
+            readyToStart = true;
         }
     }
 

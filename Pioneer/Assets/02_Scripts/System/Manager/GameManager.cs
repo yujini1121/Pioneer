@@ -169,8 +169,8 @@ public class GameManager : MonoBehaviour, IBegin
         {
             // 밤 -> 낮 전환
             IsDaytime = true;
-            OnNightEnd();
             currentDay++;
+            OnNightEnd();
             Debug.Log($"아침이 되었습니다. (Day {currentDay})");
         }
     }
