@@ -367,8 +367,22 @@ public class CommonUI : MonoBehaviour, IBegin
         InventoryManager.Instance.Add(recipe.result);
         InventoryManager.Instance.Remove(recipe.input);
 
-		if (UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance())
-		{
+        bool isSuccess = UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance();
+
+        if (isSuccess)
+        {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting);
+        }
+        else
+        {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting);
+        }
+
+
+        if (isSuccess)
+        {
             if (IsDebuggingCraftCoroutine)
             {
                 Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
@@ -384,14 +398,14 @@ public class CommonUI : MonoBehaviour, IBegin
             {
                 SItemStack newRef = one.Copy();
 
-				newRef.amount *= 4;
-				newRef.amount /= 10;
+                newRef.amount *= 4;
+                newRef.amount /= 10;
 
-				InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
-			}
-		}
+                InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
+            }
+        }
 
-		for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+        for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
         {
             int need = recipe.input[rIndex].amount;
             int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);

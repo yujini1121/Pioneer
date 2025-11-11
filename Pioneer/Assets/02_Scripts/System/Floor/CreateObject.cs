@@ -221,11 +221,27 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void HandleOrientationInput()
     {
-        int newIdx = -1;
-        if (Input.GetKeyDown(KeyCode.W)) newIdx = 0;
-        else if (Input.GetKeyDown(KeyCode.D)) newIdx = 1;
-        else if (Input.GetKeyDown(KeyCode.S)) newIdx = 2;
-        else if (Input.GetKeyDown(KeyCode.A)) newIdx = 3;
+        int newIdx = -1;//RotateInstallTypeObject
+        if (Input.GetKeyDown(KeyCode.W)) { 
+            newIdx = 0; 
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        }
+        else if (Input.GetKeyDown(KeyCode.D)) { 
+            newIdx = 1; 
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        }
+        else if (Input.GetKeyDown(KeyCode.S)) { 
+            newIdx = 2; 
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        }
+        else if (Input.GetKeyDown(KeyCode.A)) { 
+            newIdx = 3; 
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        }
 
         if (newIdx >= 0 && onHand != null)
         {
@@ -675,7 +691,9 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
-
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
+        
         cost = mCost;
 
 		Debug.Assert(cost.Length > 0);

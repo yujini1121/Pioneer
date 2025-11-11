@@ -19,6 +19,10 @@ public class DarkFog : MonoBehaviour
             // Debug.Log(">> DarkFog.Touched");
 
             GuiltySystem.instance.DarkFogTouched();
+
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_BlackFog);
+
             Destroy(gameObject, 1.0f);
             hasTouched = true;
         }

@@ -51,6 +51,9 @@ public class SpikeTrap : MonoBehaviour
         elapsed = 0f;
         while (elapsed < duration)
         {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.ActivatedSpiketrap);
+
             Debug.Log("µû²û");
             elapsed += 1f;
             yield return new WaitForSeconds(1f);

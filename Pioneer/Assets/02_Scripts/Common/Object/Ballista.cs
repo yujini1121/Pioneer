@@ -109,6 +109,10 @@ public class Ballista : StructureBase, IBegin
 
     private void Fire()
     {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BalistaAttack);
+        Debug.LogWarning("발리스타 작동 중 소리 나오나?");
+
         if (curCooldown <= 0f)
         {
             curCooldown = attackCooldown;

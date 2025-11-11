@@ -167,15 +167,15 @@ public class GuiltySystem : MonoBehaviour, IBegin
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.X) && Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.K))
         {
             CrewDead();
         }
-        if (Input.GetKey(KeyCode.X) && Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.L))
         {
             TimeReachedToDayTime();
         }
-        if (Input.GetKey(KeyCode.X) && Input.GetKeyDown(KeyCode.Semicolon))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Semicolon))
         {
             Drink();
         }
@@ -205,6 +205,15 @@ public class GuiltySystem : MonoBehaviour, IBegin
         Debug.Log($">> GuiltySystem.SpawnDarkFog()");
         GameObject fog = Instantiate(prefabDarkFog, player.transform.position, Quaternion.identity);
         fog.GetComponent<DarkFog>().armedTime = Time.time + 3.0f;
+
+        IEnumerator myCoroutine()
+        {
+            yield return new WaitForSeconds(2.0f);
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeAttack_BlackFog);
+        }
+
+        StartCoroutine(myCoroutine());
     }
 
     IEnumerator CoroutineDarkObject()
@@ -241,6 +250,9 @@ public class GuiltySystem : MonoBehaviour, IBegin
             {
                 AudioSourceScream.volume = screamSoundVolume[level];
                 AudioSourceScream.Play();
+
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.Scream2);
             }
         }
     }

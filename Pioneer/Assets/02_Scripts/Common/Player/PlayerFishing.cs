@@ -51,7 +51,10 @@ public class PlayerFishing : MonoBehaviour
     }
 
     private IEnumerator FishingLoop()
-    {        
+    {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
+
         while (true)
         {
             Debug.Log("≥¨Ω√ Ω√¿€");

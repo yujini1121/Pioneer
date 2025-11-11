@@ -161,7 +161,9 @@ public class CrawlerAI : EnemyBase, IBegin
             }
         }
         attackTimer = attackDelayTime;
-        AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeAttack_Crawler);
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeAttack_Crawler);
     }
 
     private void SortCloseObj()
