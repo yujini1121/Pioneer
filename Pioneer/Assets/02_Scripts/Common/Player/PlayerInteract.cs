@@ -14,6 +14,15 @@ public class PlayerInteract : MonoBehaviour
 		instance.ready.Add(one);
 	}
 
+	public void Clear()
+	{
+		if (closestOne != null)
+		{
+            closestOne.UnUse();
+            closestOne = null;
+        }
+	}
+
 	private void Awake()
 	{
 		instance = this;
@@ -23,7 +32,7 @@ public class PlayerInteract : MonoBehaviour
 	{
 		if (ready != null && ready.Count > 0)
 		{
-			if (Input.GetKeyDown(KeyCode.R))
+			if (Input.GetKeyDown(KeyCode.R) && PlayerCore.Instance.currentState == PlayerCore.PlayerState.Default)
 			{
 				Debug.Log("PlayerInteract");
 
