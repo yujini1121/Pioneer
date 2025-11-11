@@ -199,6 +199,22 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         IconRefresh();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
+        switch (InventoryManager.Instance.SelectedSlotInventory.id)
+        {
+            case 20001:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : 나무검");
+                break;
+            case 20002:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : 철 검");
+                break;
+            case 20003:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
+                break;
+            default:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
+                break;
+        }
+
 	}
 
     private void Awake()

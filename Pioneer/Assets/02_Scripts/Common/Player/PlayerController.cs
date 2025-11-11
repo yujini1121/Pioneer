@@ -154,7 +154,9 @@ public class PlayerController : MonoBehaviour
 
 			if (currentChargeTime >= ChargeTime)
 			{
-				isCharging = false;
+				PlayerInteract.instance.Clear();
+
+                isCharging = false;
 				playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
 
                 playerCore.Fishing(lastMoveDirection);

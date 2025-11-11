@@ -7,6 +7,7 @@ using UnityEngine.Audio;
 
 public class Option : MonoBehaviour, IBegin
 {
+    [SerializeField] private GameObject escUI;
     [SerializeField] private GameObject optionUI;
 
     public Slider bgmVolSlider;
@@ -28,7 +29,8 @@ public class Option : MonoBehaviour, IBegin
     }
     void Start()
     {
-        SetDeactivateOption();
+        SetDeactivateEscUI();
+        SetDeactivateOptionUI();
         if (AudioManager.instance != null)
         {
             AudioManager.instance.bgmVolSlider = bgmVolSlider;
@@ -42,28 +44,53 @@ public class Option : MonoBehaviour, IBegin
         {
             UnityEngine.Debug.Log("Screen Controller Instance Error");
         }
+
+        Time.timeScale = 1f;
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            bool isActive = optionUI.activeInHierarchy;
+            bool isActive = escUI.activeInHierarchy;
 
             if (isActive)
             {
-                SetDeactivateOption();
+                SetDeactivateEscUI();
+                SetDeactivateOptionUI();
             }
             else
             {
-                SetActivateOption();
+                SetActivateEscUI();
+                // SetActivateOptionUI();
             }
         }
     }
 
-    public void SetActivateOption() => optionUI.SetActive(true);
-    public void SetDeactivateOption()
+    public void SetActivateEscUI()
     {
-        optionUI.SetActive(false);
+        escUI.SetActive(true);
+        Time.timeScale = 0f;
+    }
+    public void SetDeactivateEscUI()
+    {
+        escUI.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    public void SetActivateOptionUI() => optionUI.SetActive(true);
+    public void SetDeactivateOptionUI() => optionUI.SetActive(false);
+
+    public void QuitGame()
+    {
+        Debug.Log("게임 종료 버튼 클릭!");
+
+        // 유니티 에디터에서 테스트할 경우 (Play 모드 중지)
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        // 실제 빌드된 게임에서 실행할 경우 (어플리케이션 종료)
+#else
+        Application.Quit();
+#endif
     }
 }
