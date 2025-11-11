@@ -9,15 +9,15 @@ using static MarinerBase;
 /* =============================================================
  * PlayerStats (CreatureBase 상속) : 체력, 공격력 같은 핵심 스탯 및 TakeDamage 같은 기능 관리
  [있어야 할 변수]
-int hp = 100;					// 체력
-int fullness = 100;				// 포만감
-int mental = 100;					// 정신력
-int attackDamage = 2; 				// 공격력
-float beforeAttackDelay = 0.6f;		// 공격 전 지연 시간 
-float AttackCooldown = 0.4f;			// 공격 후 지연 시간
-float totalAttackTime = 1.0f;			// 총 공격 시간
-int attackPerSecond = 1;			// 초당 공격 가능 횟수
-float attackRange = 0.4f;			// 공격 거리
+int hp = 100;               // 체력
+int fullness = 100;            // 포만감
+int mental = 100;               // 정신력
+int attackDamage = 2;             // 공격력
+float beforeAttackDelay = 0.6f;      // 공격 전 지연 시간 
+float AttackCooldown = 0.4f;         // 공격 후 지연 시간
+float totalAttackTime = 1.0f;         // 총 공격 시간
+int attackPerSecond = 1;         // 초당 공격 가능 횟수
+float attackRange = 0.4f;         // 공격 거리
 ===============================================================
 25.09.07 남은 일
     - 음식 섭취 했을 때 어떻게 구현할 것인지
@@ -34,268 +34,330 @@ float attackRange = 0.4f;			// 공격 거리
 // TODO : 죄책감 시스템.cs : 멘탈 디버프 있을때 죄책감 레벨 + 1 / CommonUi.cs : 대성공 확률 -40%;
 public class PlayerCore : CreatureBase, IBegin
 {
-    public static PlayerCore Instance;
+	public static PlayerCore Instance;
 
-        // 플레이어 행동 상태 열거형
-    public enum PlayerState
-    {
-        Default,            // 기본
-        ChargingFishing,    // 낚시 키 누르는 중
-        ActionFishing,      // 낚시 중
-        Dead                // 사망
-    }    
+	// 플레이어 행동 상태 열거형
+	public enum PlayerState
+	{
+		Default,            // 기본
+		ChargingFishing,    // 낚시 키 누르는 중
+		ActionFishing,      // 낚시 중
+		Dead                // 사망
+	}
 
-    // { 생체 시스템 변수 } //
-    // 포만감 열거형 (fullness 변수 값에 따른 상태)
-    public enum FullnessState
-    {
-        Full,       // 배부름 (80 ~ 100)
-        Normal,     // 보통 (30 ~ 79)
-        Hungry,     // 배고픔 (1 ~ 29)
-        Starving    // 굶주림 (0)
-    }
+	// { 생체 시스템 변수 } //
+	// 포만감 열거형 (fullness 변수 값에 따른 상태)
+	public enum FullnessState
+	{
+		Full,       // 배부름 (80 ~ 100)
+		Normal,     // 보통 (30 ~ 79)
+		Hungry,     // 배고픔 (1 ~ 29)
+		Starving    // 굶주림 (0)
+	}
 
-        // [ 공격력 변수 ]
-    public float AttackDamageCalculated
-    {
-        get
-        {
-            if (IsMentalDebuff())
-            {
-                return (attackDamage * 5) / 10;
-            }
-            else
-            {
-                return attackDamage;
-            }
-        }
-    }
-    public bool IsAttackDamageDebuff
-    {
-        get => IsMentalDebuff();
-    }
+	// [ 공격력 변수 ]
+	public float AttackDamageCalculated
+	{
+		get
+		{
+			if (IsMentalDebuff())
+			{
+				return (attackDamage * 5) / 10;
+			}
+			else
+			{
+				return attackDamage;
+			}
+		}
+	}
+	public bool IsAttackDamageDebuff
+	{
+		get => IsMentalDebuff();
+	}
 
-    [Header("포만감 변수")]
-    // [ 포만감 변수 ]  
-    public int currentFullness;                                            // 현재 포만감 값
-    public int maxFullness = 100;                                          // 최대 포만감 값
-    int minFullness = 0;                                            // 최소 포만감 값
-    FullnessState currentFullnessState;                             // 현재 포만감 상태
-    int fullnessStarvingMax = 100;                                  // 굶기 상태시 체력 깎이는 최대 횟수 (100회)
-    private Coroutine starvationCoroutine;                          // 굶기 상태시 실행되는 코루틴
+	[Header("포만감 변수")]
+	// [ 포만감 변수 ]  
+	public int currentFullness;                                            // 현재 포만감 값
+	public int maxFullness = 100;                                          // 최대 포만감 값
+	int minFullness = 0;                                            // 최소 포만감 값
+	FullnessState currentFullnessState;                             // 현재 포만감 상태
+	int fullnessStarvingMax = 100;                                  // 굶기 상태시 체력 깎이는 최대 횟수 (100회)
+	private Coroutine starvationCoroutine;                          // 굶기 상태시 실행되는 코루틴
 
-    [Header("포만감 설정")]
-    [SerializeField] private float fullnessDecreaseTime = 5f;       // 포만감 기본 감소 속도(시간)
-    [SerializeField] private float fullnessModifier = 1.3f;         // 포만감 감소 속도 증가값 => 30%
+	[Header("포만감 설정")]
+	[SerializeField] private float fullnessDecreaseTime = 5f;       // 포만감 기본 감소 속도(시간)
+	[SerializeField] private float fullnessModifier = 1.3f;         // 포만감 감소 속도 증가값 => 30%
 
-    [Header("정신력 변수")]
-    //[ 정신력 변수 ]
-    public int currentMental;                                              // 현재 정신력 값
-    public int CurrentMental => currentMental;
-    public int maxMental = 100;                                            // 최대 정신력 값
-    int minMental = 0;                                              // 최소 정신력 값
-    bool isDrunk = false;                                           // 만취 상태 여부
-    private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴 
-    bool isApplyDebuff = false;
+	[Header("정신력 변수")]
+	//[ 정신력 변수 ]
+	public int currentMental;                                              // 현재 정신력 값
+	public int CurrentMental => currentMental;
+	public int maxMental = 100;                                            // 최대 정신력 값
+	int minMental = 0;                                              // 최소 정신력 값
+	bool isDrunk = false;                                           // 만취 상태 여부
+	private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴 
+	bool isApplyDebuff = false;
 
-    [Header("정신력 설정")]
-    [SerializeField] private float existEnemyMentalCool = 2f;        // 일정 범위 안 에너미 존재시 정신력이 깎이는 시간 텀
-    [SerializeField] private int existEnemyMentalDecrease = -1;      // 일정 범위 안 에너미 존재시 깎이는 정신력 값 
-    [SerializeField] private int attackedFromEnemy = -3;             // 에너미한테 공격 당했을 경우 깎이는 정신력 값
-    [SerializeField] private float reduceMentalOnMarinerDie = 0.2f; // 승무원 사망시 깎이는 정신력 값
-    [SerializeField] private int eatFoodincreaseMental = 10;
+	[Header("정신력 설정")]
+	[SerializeField] private float existEnemyMentalCool = 2f;        // 일정 범위 안 에너미 존재시 정신력이 깎이는 시간 텀
+	[SerializeField] private int existEnemyMentalDecrease = -1;      // 일정 범위 안 에너미 존재시 깎이는 정신력 값 
+	[SerializeField] private int attackedFromEnemy = -3;             // 에너미한테 공격 당했을 경우 깎이는 정신력 값
+	[SerializeField] private float reduceMentalOnMarinerDie = 0.2f; // 승무원 사망시 깎이는 정신력 값
+	[SerializeField] private int eatFoodincreaseMental = 10;
 
-    // 공격 관련 설정 변수
-    [Header("공격 설정")]
-    [SerializeField] private PlayerAttack playerAttack;
-    [SerializeField] private float attackHeight = 1.0f;
-    [SerializeField] private LayerMask enemyLayer;
-    private PlayerController playerController;
-    private bool isattacked = false;
-    public float duabilityReducePrevent = 0f;
-    public int DuabilityReducePrevent => Mathf.RoundToInt(duabilityReducePrevent);
-    int currentAttackDamage = 0;
+	// 공격 관련 설정 변수
+	[Header("공격 설정")]
+	[SerializeField] private PlayerAttack playerAttack;
+	[SerializeField] private float attackHeight = 1.0f;
+	[SerializeField] private LayerMask enemyLayer;
+	private PlayerController playerController;
+	private bool isattacked = false;
+	public float duabilityReducePrevent = 0f;
+	public int DuabilityReducePrevent => Mathf.RoundToInt(duabilityReducePrevent);
+	int currentAttackDamage = 0;
 
-    public CreatureEffect creatureEffect;
+	public CreatureEffect creatureEffect;
 
-    public PlayerAttack PlayerAttack => playerAttack;
-    public float AttackHeight => attackHeight;
-    public LayerMask EnemyLayer => enemyLayer;
+	public PlayerAttack PlayerAttack => playerAttack;
+	public float AttackHeight => attackHeight;
+	public LayerMask EnemyLayer => enemyLayer;
 
-    [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
+	private Vector3 currentDirection;
+
+	[SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
 
-    public Transform mast;
-
 	public SItemWeaponTypeSO CalculatedHandAttack
-    {
-        get
-        {
-            SItemWeaponTypeSO returnValue = new SItemWeaponTypeSO();
-            returnValue.DeepCopyFrom(handAttackCurrentValueRaw);
-            
-            if (IsMentalDebuff())
-            {
+	{
+		get
+		{
+			SItemWeaponTypeSO returnValue = new SItemWeaponTypeSO();
+			returnValue.DeepCopyFrom(handAttackCurrentValueRaw);
+
+			if (IsMentalDebuff())
+			{
 #warning [생체 시스템 : 정신력 시스템] 정신력 40미만 공격력 감소량 구체적으로 작성
 				returnValue.weaponDamage /= 2; // 정신적으로 미쳐있을때만 영향 줌. 원래대로 복구함. 감소값 수정
 			}
 
-            return returnValue;
+			return returnValue;
 		}
-    }
+	}
 
 
-    public SItemStack dummyHandAttackItem;
+	public SItemStack dummyHandAttackItem;
 
 
-    // 기본 시스템 관련 번수
-    private Rigidbody playerRb;
-    private bool isAttacking = false;
-    private float defaultSpeed;
+	// 기본 시스템 관련 번수
+	private Rigidbody playerRb;
+	private bool isAttacking = false;
+	private float defaultSpeed;
 
-    public static event Action<int> PlayerHpChanged;
-    public static event Action<int> PlayerFullnessChanged;
-    public static event Action<int> PlayerMentalChanged;
+	public static event Action<int> PlayerHpChanged;
+	public static event Action<int> PlayerFullnessChanged;
+	public static event Action<int> PlayerMentalChanged;
 
-    public PlayerState currentState { get; private set; }
+	public PlayerState currentState { get; private set; }
 
-    // 코루틴 변수
-    private bool isRunningCoroutineItem = false;
-    public bool IsRunningCoroutineItem => isRunningCoroutineItem;
+	// 코루틴 변수
+	private bool isRunningCoroutineItem = false;
+	public bool IsRunningCoroutineItem => isRunningCoroutineItem;
 
-    void Awake()
-    {
-        Instance = this;
-        playerController = GetComponent<PlayerController>();
-        playerRb = GetComponent<Rigidbody>();
-        creatureEffect = GetComponent<CreatureEffect>();
-        SetSetAttribute();
+	void Awake()
+	{
+		Instance = this;
+		playerController = GetComponent<PlayerController>();
+		playerRb = GetComponent<Rigidbody>();
+		creatureEffect = GetComponent<CreatureEffect>();
+		SetSetAttribute();
 
-        handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
-        dummyHandAttackItem = new SItemStack(-1, -1);
-    }
-    
-    new void Start()
-    {
-        base.Start();
+		handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
+		dummyHandAttackItem = new SItemStack(-1, -1);
+	}
 
-        UpdateFullnessState();
-        StartCoroutine(FullnessSystemCoroutine());                   // 게임 시작시 포만감 계속 1씩 감소 시작
-    }
+	new void Start()
+	{
+		base.Start();
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F12))
-        {
-            transform.position = mast.position;
-        }
+		UpdateFullnessState();
+		StartCoroutine(FullnessSystemCoroutine());                   // 게임 시작시 포만감 계속 1씩 감소 시작
+	}
 
-        UnityEngine.Debug.Assert(fov != null);
-        UnityEngine.Debug.Assert(enemyLayer != null);
+	void Update()
+	{
+		UnityEngine.Debug.Assert(fov != null);
+		UnityEngine.Debug.Assert(enemyLayer != null);
 
 
-        fov.DetectTargets(enemyLayer);
-        if(!isDrunk)
-        { 
-        }
-        NearEnemy();
-        //MentalState();
-        // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
-    }
-    public override void WhenDestroy()
-    {        
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.TriggerGameOver();
-        }
-    }
+		fov.DetectTargets(enemyLayer);
+		if (!isDrunk)
+		{
+		}
+		NearEnemy();
+		//MentalState();
+		// UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
+	}
+	public override void WhenDestroy()
+	{
+		if (GameManager.Instance != null)
+		{
+			GameManager.Instance.TriggerGameOver();
+		}
+	}
 
-    #region 기본 시스템
-    // =============================================================
-    // 스테이터스 기초 값 세팅
-    // =============================================================
-    void SetSetAttribute()
-    {
-        maxHp = 100;
-        hp = maxHp;                 // 체력
-        speed = 4.0f;               // 이동 속도
-        defaultSpeed = speed;
-        currentFullness = 80;              // 포만감 (시작 값 80)
-        currentMental = maxMental;         // 정신력 (시작 값 100)
-        //attackDamage = 2;           // 공격력
-        attackDelayTime = 0.4f;     // 공격 쿨타임
-        attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
-    }
+	#region 기본 시스템
+	// =============================================================
+	// 스테이터스 기초 값 세팅
+	// =============================================================
+	void SetSetAttribute()
+	{
+		maxHp = 100;
+		hp = maxHp;                 // 체력
+		speed = 4.0f;               // 이동 속도
+		defaultSpeed = speed;
+		currentFullness = 80;              // 포만감 (시작 값 80)
+		currentMental = maxMental;         // 정신력 (시작 값 100)
+										   //attackDamage = 2;           // 공격력
+		attackDelayTime = 0.4f;     // 공격 쿨타임
+		attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
+	}
 
-    public void SetState(PlayerState state)
-    {
-        currentState = state;
-        UnityEngine.Debug.Log("Player State Changed to: " + state);
-    }
+	public void SetState(PlayerState state)
+	{
+		currentState = state;
+		UnityEngine.Debug.Log("Player State Changed to: " + state);
+	}
 
-    // =============================================================
-    // 이동
-    // =============================================================
-    public void Move(Vector3 moveInput)
-    {
-        if (currentState != PlayerState.Default) return;
+	// =============================================================
+	// 이동
+	// =============================================================
+	public void Move(Vector3 moveInput)
+	{
+		if (currentState != PlayerState.Default) return;
 
-        Vector3 moveVelocity = moveInput.normalized * speed;
+		if (currentDirection != moveInput)
+		{
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-        playerRb.velocity = new Vector3(moveVelocity.x, playerRb.velocity.y, moveVelocity.z);
-    }
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-    // =============================================================
-    // 공격
-    // =============================================================
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-    public bool IsMentalDebuff()
-    {
-        return currentMental < 40.0f; 
-    }
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-    public bool BeginCoroutine(IEnumerator coroutine)
-    {
-        if (isRunningCoroutineItem) return false;
-        StartCoroutine(CoroutineWraper(coroutine));
-        return true;
-    }
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-    private IEnumerator CoroutineWraper(IEnumerator coroutine)
-    {
-        isRunningCoroutineItem = true;
-        yield return coroutine;
-        isRunningCoroutineItem = false;
-    }
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-    public override void TakeDamage(int damage, GameObject attacker)
-    {
-        base.TakeDamage(damage, attacker);
-        PlayerHpChanged?.Invoke(hp);
-        if(attacker.CompareTag("Enemy"))
-            AttackedFromEnemy();
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+			if (moveInput.x > 0 && moveInput.y == 0)
+			{
+				playerController.ChangeAnimationClip(playerController.animSlots.curRunClip,
+													 playerController.animSlots.run[3]);
 
-        if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
-        {
-            SetState(PlayerState.Default);
+				playerController.animSlots.curRunClip = playerController.animSlots.run[3];
+				playerController.animator.SetTrigger("SetRun");
+				currentDirection = moveInput;
+			}
+		}
 
-            // ++++ 낚시 ui 바꿔야하는데 음 
-            if (playerController != null)
-            {
-                playerController.CancelFishing();
-            }
-            UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
-        }
+		Vector3 moveVelocity = moveInput.normalized * speed;
 
-        if(hp <= 0)
-        {
-            // creatureEffect.Effects[3].Play();
-        }
-    }
-    #endregion
+		playerRb.velocity = new Vector3(moveVelocity.x, playerRb.velocity.y, moveVelocity.z);
+	}
 
-    #region 포만감
-    /* =============================================================
+	// =============================================================
+	// 공격
+	// =============================================================
+
+	public bool IsMentalDebuff()
+	{
+		return currentMental < 40.0f;
+	}
+
+	public bool BeginCoroutine(IEnumerator coroutine)
+	{
+		if (isRunningCoroutineItem) return false;
+		StartCoroutine(CoroutineWraper(coroutine));
+		return true;
+	}
+
+	private IEnumerator CoroutineWraper(IEnumerator coroutine)
+	{
+		isRunningCoroutineItem = true;
+		yield return coroutine;
+		isRunningCoroutineItem = false;
+	}
+
+	public override void TakeDamage(int damage, GameObject attacker)
+	{
+		base.TakeDamage(damage, attacker);
+		PlayerHpChanged?.Invoke(hp);
+		if (attacker.CompareTag("Enemy"))
+			AttackedFromEnemy();
+
+		if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
+		{
+			SetState(PlayerState.Default);
+
+			// ++++ 낚시 ui 바꿔야하는데 음 
+			if (playerController != null)
+			{
+				playerController.CancelFishing();
+			}
+			UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
+		}
+
+		if (hp <= 0)
+		{
+			// creatureEffect.Effects[3].Play();
+		}
+	}
+	#endregion
+
+	#region 포만감
+	/* =============================================================
        { 포만감 }
     - 시작시 80으로 설정, 최대 100 최소 0
     - 현실 시간 5초에 한 번씩 1씩 감소
@@ -311,128 +373,128 @@ public class PlayerCore : CreatureBase, IBegin
     ============================================================= */
 
 
-    /// <summary>
-    /// 초당 포만감 1씩 감소 Start 함수에서 시작 (코루틴)
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator FullnessSystemCoroutine()
-    {
-        while(true)
-        {
-            float currentDecreaseTime = fullnessDecreaseTime;
-            if (hp < maxHp * 0.5f)
-            {
-                currentDecreaseTime = fullnessDecreaseTime / fullnessModifier;
-            }
+	/// <summary>
+	/// 초당 포만감 1씩 감소 Start 함수에서 시작 (코루틴)
+	/// </summary>
+	/// <returns></returns>
+	private IEnumerator FullnessSystemCoroutine()
+	{
+		while (true)
+		{
+			float currentDecreaseTime = fullnessDecreaseTime;
+			if (hp < maxHp * 0.5f)
+			{
+				currentDecreaseTime = fullnessDecreaseTime / fullnessModifier;
+			}
 
-            yield return new WaitForSeconds(currentDecreaseTime);
+			yield return new WaitForSeconds(currentDecreaseTime);
 
-            if(currentFullness >= 0)
-            {
-                currentFullness--;
-                currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
-                UpdateFullnessState();
+			if (currentFullness >= 0)
+			{
+				currentFullness--;
+				currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
+				UpdateFullnessState();
 
-                PlayerFullnessChanged?.Invoke(currentFullness);
-            }
-            UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
-        }
-    }
+				PlayerFullnessChanged?.Invoke(currentFullness);
+			}
+			UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
+		}
+	}
 
-    /// <summary>
-    /// 포만감 수치에 따라 상태 갱신 함수
-    /// </summary>
-    private void UpdateFullnessState()
-    {
-        FullnessState fullnessState;
+	/// <summary>
+	/// 포만감 수치에 따라 상태 갱신 함수
+	/// </summary>
+	private void UpdateFullnessState()
+	{
+		FullnessState fullnessState;
 
-        if (currentFullness >= 80)
-            fullnessState = FullnessState.Full;
-        else if (currentFullness >= 30)
-            fullnessState = FullnessState.Normal;
-        else if (currentFullness >= 1)
-            fullnessState = FullnessState.Hungry;
-        else
-            fullnessState = FullnessState.Starving;
+		if (currentFullness >= 80)
+			fullnessState = FullnessState.Full;
+		else if (currentFullness >= 30)
+			fullnessState = FullnessState.Normal;
+		else if (currentFullness >= 1)
+			fullnessState = FullnessState.Hungry;
+		else
+			fullnessState = FullnessState.Starving;
 
-        switch (fullnessState)
-        {
-            case FullnessState.Full:
-                speed = defaultSpeed * 1.2f;
-                break;
-            case FullnessState.Hungry:
-            case FullnessState.Starving:
-                speed = defaultSpeed * 0.7f;
-                break;
-            default:
-                speed = defaultSpeed;
-                break;
-        }
+		switch (fullnessState)
+		{
+			case FullnessState.Full:
+				speed = defaultSpeed * 1.2f;
+				break;
+			case FullnessState.Hungry:
+			case FullnessState.Starving:
+				speed = defaultSpeed * 0.7f;
+				break;
+			default:
+				speed = defaultSpeed;
+				break;
+		}
 
-        if (fullnessState != currentFullnessState)
-        {
-            currentFullnessState = fullnessState;            
+		if (fullnessState != currentFullnessState)
+		{
+			currentFullnessState = fullnessState;
 
-            if(currentFullnessState == FullnessState.Starving)      // 굶주림 상태일때
-            {
-                if(starvationCoroutine == null)
-                    starvationCoroutine = StartCoroutine(StarvingDamageCorountine());
-            }
-            else                                                    // 굶주림 상태가 아닐때
-            {
-                if (starvationCoroutine != null)
-                {
-                    StopCoroutine(starvationCoroutine);
-                    starvationCoroutine = null;
-                }
-            }
-        }
-    }
+			if (currentFullnessState == FullnessState.Starving)      // 굶주림 상태일때
+			{
+				if (starvationCoroutine == null)
+					starvationCoroutine = StartCoroutine(StarvingDamageCorountine());
+			}
+			else                                                    // 굶주림 상태가 아닐때
+			{
+				if (starvationCoroutine != null)
+				{
+					StopCoroutine(starvationCoroutine);
+					starvationCoroutine = null;
+				}
+			}
+		}
+	}
 
-    /// <summary>
-    /// 초당 체력 1씩 감소하는 굶주림 함수 (코루틴)
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator StarvingDamageCorountine()
-    {
-        UnityEngine.Debug.Log("굶주림 상태 : 체력 감소 시작");
-        for(int i = 0; i < fullnessStarvingMax; i++)
-        {
-            yield return new WaitForSeconds(1f);
-            //TakeDamage(1, this.gameObject);
-            hp -= 1;
-            hp = Mathf.Clamp(hp, 0, maxHp);
-            PlayerHpChanged?.Invoke(hp);
-        }        
-    }
+	/// <summary>
+	/// 초당 체력 1씩 감소하는 굶주림 함수 (코루틴)
+	/// </summary>
+	/// <returns></returns>
+	private IEnumerator StarvingDamageCorountine()
+	{
+		UnityEngine.Debug.Log("굶주림 상태 : 체력 감소 시작");
+		for (int i = 0; i < fullnessStarvingMax; i++)
+		{
+			yield return new WaitForSeconds(1f);
+			//TakeDamage(1, this.gameObject);
+			hp -= 1;
+			hp = Mathf.Clamp(hp, 0, maxHp);
+			PlayerHpChanged?.Invoke(hp);
+		}
+	}
 
-    /// <summary>
-    /// 음식 섭취시 포만감 증가, 증가값 매개변수로 전달
-    /// </summary>
-    /// <param name="increase"></param>
-    public void EatFoodFullness(int increase)
-    {
-        currentFullness += increase;
-        currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
+	/// <summary>
+	/// 음식 섭취시 포만감 증가, 증가값 매개변수로 전달
+	/// </summary>
+	/// <param name="increase"></param>
+	public void EatFoodFullness(int increase)
+	{
+		currentFullness += increase;
+		currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
 
-        PlayerFullnessChanged?.Invoke(currentFullness);
-    }
+		PlayerFullnessChanged?.Invoke(currentFullness);
+	}
 
-    // 굶주림 제거 
-    public void RemoveStarvingIEnumerator()
-    {
-        if(starvationCoroutine != null)
-        {
-            StopCoroutine(starvationCoroutine);
-            starvationCoroutine = null;
-        }
-    }
-    #endregion
+	// 굶주림 제거 
+	public void RemoveStarvingIEnumerator()
+	{
+		if (starvationCoroutine != null)
+		{
+			StopCoroutine(starvationCoroutine);
+			starvationCoroutine = null;
+		}
+	}
+	#endregion
 
-    #region 정신력
+	#region 정신력
 
 
-    /* =============================================================
+	/* =============================================================
         { 정신력 }
     - 시작시 100으로 시작, 0 ~ 100 사이의 값을 가짐
     - 정신력 40 ~ 100 : 효과 없음
@@ -455,99 +517,99 @@ public class PlayerCore : CreatureBase, IBegin
     TODO : 
     ============================================================= */
 
-    /// <summary>
-    /// 정신력 계산 ? 메서드 
-    /// </summary>
-    /// <param name="increase"></param>
-    public void UpdateMental(int increase)
-    {
-        if(isDrunk)
-            return;
+	/// <summary>
+	/// 정신력 계산 ? 메서드 
+	/// </summary>
+	/// <param name="increase"></param>
+	public void UpdateMental(int increase)
+	{
+		if (isDrunk)
+			return;
 
-        if(increase <= 0)
-        {
-            creatureEffect.Effects[1].Play();
-        }
-        else if (increase > 0)
-        {
-            creatureEffect.Effects[2].Play();
-        }
+		if (increase <= 0)
+		{
+			creatureEffect.Effects[1].Play();
+		}
+		else if (increase > 0)
+		{
+			creatureEffect.Effects[2].Play();
+		}
 
-        currentMental += increase;
-        currentMental = Mathf.Clamp(currentMental, minMental, maxMental);
+		currentMental += increase;
+		currentMental = Mathf.Clamp(currentMental, minMental, maxMental);
 
-        PlayerMentalChanged?.Invoke(currentMental);
+		PlayerMentalChanged?.Invoke(currentMental);
 
-        // 수치에 따라 디버프 부여,,
-    }
+		// 수치에 따라 디버프 부여,,
+	}
 
-    /// <summary>
-    /// 에너미에게 공격 받은 경우 정신력 감소 시키는 함수 -3
-    /// </summary>
-    public void AttackedFromEnemy()
-    {
-        UpdateMental(attackedFromEnemy);
-    }
+	/// <summary>
+	/// 에너미에게 공격 받은 경우 정신력 감소 시키는 함수 -3
+	/// </summary>
+	public void AttackedFromEnemy()
+	{
+		UpdateMental(attackedFromEnemy);
+	}
 
-    /// <summary>
-    /// 승무원 죽었을때 호출, 정신력 감소, 현재 정신력의 20%
-    /// </summary>
-    public void ReduceMentalOnMarinerDie()
-    {
-        float reduce = currentMental * reduceMentalOnMarinerDie;
-        UpdateMental(Mathf.RoundToInt(-reduce)); // 반올림하고 았는데 그냥 . 아래 수 버릴거면 수정 가능
-        GuiltySystem.instance.CrewDead();
-    }
+	/// <summary>
+	/// 승무원 죽었을때 호출, 정신력 감소, 현재 정신력의 20%
+	/// </summary>
+	public void ReduceMentalOnMarinerDie()
+	{
+		float reduce = currentMental * reduceMentalOnMarinerDie;
+		UpdateMental(Mathf.RoundToInt(-reduce)); // 반올림하고 았는데 그냥 . 아래 수 버릴거면 수정 가능
+		GuiltySystem.instance.CrewDead();
+	}
 
-    /// <summary>
-    /// 반경 2m 내에 에너미가 존재 여부를 확인하고 정신력 감소 코루틴 실행 및 중단할때 호출 
-    /// </summary>
-    public void NearEnemy()
-    {
-        if (fov.visibleTargets.Count > 0 && enemyExistCoroutine == null)
-        {
-            enemyExistCoroutine = StartCoroutine(EnemyExist());
-        }
-        else if(fov.visibleTargets.Count == 0 && enemyExistCoroutine != null)
-        {
-            StopCoroutine(enemyExistCoroutine);
-            enemyExistCoroutine = null;
-        }
-    }
+	/// <summary>
+	/// 반경 2m 내에 에너미가 존재 여부를 확인하고 정신력 감소 코루틴 실행 및 중단할때 호출 
+	/// </summary>
+	public void NearEnemy()
+	{
+		if (fov.visibleTargets.Count > 0 && enemyExistCoroutine == null)
+		{
+			enemyExistCoroutine = StartCoroutine(EnemyExist());
+		}
+		else if (fov.visibleTargets.Count == 0 && enemyExistCoroutine != null)
+		{
+			StopCoroutine(enemyExistCoroutine);
+			enemyExistCoroutine = null;
+		}
+	}
 
-    /// <summary>
-    /// 에너미 존재시 2초에 한 번 정신력 감소 -1
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator EnemyExist()
-    {
-        while(true)
-        {
-            yield return new WaitForSeconds(existEnemyMentalCool);
-            UpdateMental(existEnemyMentalDecrease);
-        }        
-    }
+	/// <summary>
+	/// 에너미 존재시 2초에 한 번 정신력 감소 -1
+	/// </summary>
+	/// <returns></returns>
+	private IEnumerator EnemyExist()
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(existEnemyMentalCool);
+			UpdateMental(existEnemyMentalDecrease);
+		}
+	}
 
-    public bool IsDrunk() // 만취상태인지만 리턴하는 메서드 
-    {
-        return isDrunk;
-    }
+	public bool IsDrunk() // 만취상태인지만 리턴하는 메서드 
+	{
+		return isDrunk;
+	}
 
-    public void StartDrunk()
-    {
+	public void StartDrunk()
+	{
 
-        StartCoroutine(Drunk());
-    }
+		StartCoroutine(Drunk());
+	}
 
-    // 술 아이템 사용시 호출
-    public IEnumerator Drunk()
-    {
-        isDrunk = true;
+	// 술 아이템 사용시 호출
+	public IEnumerator Drunk()
+	{
+		isDrunk = true;
 
-        yield return new WaitForSeconds(60f);
+		yield return new WaitForSeconds(60f);
 
-        isDrunk = false;
-    }
-    #endregion
+		isDrunk = false;
+	}
+	#endregion
 
 }
