@@ -171,10 +171,17 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     public void Sort()
     {
         InventoryManager.Instance.SortSelf();
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.ArrayItem);
+
         IconRefresh();
     }
     public void Remove()
     {
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.RemoveItem);
+        
         InventoryManager.Instance.RemoveMouseItem();
         mouseUI.Clear();
     }
@@ -184,6 +191,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         Debug.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
 
         InventoryManager.Instance.SelectSlot(index);
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.SelectQuickSlot);
 
         mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
         IconRefresh();

@@ -10,6 +10,8 @@ public class SItemConsumeTypeSO : SItemTypeSO
     public int EffectTarget;
     public int Max_Use_Count;
 
+    public int itemID;
+
     public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
         Debug.Log(">> 아이템_소모 : 사용됨");
@@ -19,6 +21,32 @@ public class SItemConsumeTypeSO : SItemTypeSO
         SItemStack removeItem = new SItemStack(itemWithState.id, 1);
 
         InventoryManager.Instance.Remove(removeItem);
+
+        switch (itemWithState.id)
+        {
+            case 40009:
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.Drink);
+                break;
+
+            case 40004:
+            case 40005:
+            case 40006:
+            case 40010:
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.EatingFood);
+                break;
+
+            case 40001:
+            case 40002:
+            case 40003:
+            case 40007:
+            case 40008:
+            case 40011:
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.UseComsumpitem);
+                break;
+        }
 
         switch (ConsumeEffect)
         {

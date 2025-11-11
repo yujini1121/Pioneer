@@ -112,15 +112,6 @@ public class MarinerInventory : InventoryBase
             InventoryManager.Instance.Add(item);
         }
 
-        if (AudioManager.instance != null) {
-            Debug.Log("take 사운드 호출");
-            AudioManager.instance.PlaySfx(AudioManager.SFX.Take);
-        }else
-        {
-            Debug.Log("사운드 호출 else");
-        }
-
-            Debug.Log($"마리너 인벤토리의 모든 아이템을 플레이어에게 전달했습니다. (총 {itemsToTransfer.Count}개 종류)");
     }
 
     /// <summary>

@@ -119,9 +119,6 @@ public class InventoryManager : InventoryBase
             Debug.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
 
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.Take);
-
         if (item.id == 40007)
         {
             RepairSystem.instance.remainRepairCount += item.amount;

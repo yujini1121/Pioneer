@@ -408,11 +408,11 @@ public class MarinerAI : MarinerBase, IBegin
             targetLayer
         );
 
-        if (AudioManager.instance != null)
+        /*if (AudioManager.instance != null)
         {
             Debug.Log("MarinerAI 맞을 때 소리 재생");
             AudioManager.instance.PlaySfx(AudioManager.SFX.Hit);
-        }
+        }*/
 
         foreach (var hit in hits)
         {

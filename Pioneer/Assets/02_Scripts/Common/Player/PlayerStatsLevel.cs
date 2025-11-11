@@ -146,11 +146,7 @@ public class PlayerStatsLevel : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.F8)) growStates[GrowStatType.Combat].level++;
             if (Input.GetKeyDown(KeyCode.F9)) growStates[GrowStatType.Crafting].level++;
             if (Input.GetKeyDown(KeyCode.F10)) growStates[GrowStatType.Fishing].level++;
-
-
 		}
-
-
     }
 
     // 스테이터스 초기 상태 설정
@@ -183,6 +179,9 @@ public class PlayerStatsLevel : MonoBehaviour
             growState.level++;
             UnityEngine.Debug.Log($"{type} 레벨업 -> {growState.level}");
 
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);
+
             // switch 문으로 수정
             if (type == GrowStatType.Combat)
             {
@@ -203,7 +202,11 @@ public class PlayerStatsLevel : MonoBehaviour
     {
         int combatLevel = growStates[GrowStatType.Combat].level;
         float increaseAttackDamage = 0f;
-        if(combatLevel >= 0 && combatLevel < combatList.Count)
+
+        /*if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);*/
+
+        if (combatLevel >= 0 && combatLevel < combatList.Count)
         {
             increaseAttackDamage = combatList[combatLevel].attack;
         }
@@ -226,6 +229,10 @@ public class PlayerStatsLevel : MonoBehaviour
     {
         int level = growStates[GrowStatType.Crafting].level;
         float greatSuccessChance = 0f;
+
+        /*if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);*/
+
         if (level >= 0 &&  level < craftingList.Count)
         {
             greatSuccessChance = craftingList[level];
@@ -241,6 +248,10 @@ public class PlayerStatsLevel : MonoBehaviour
     public (float count, float chest) FishingChance()      // C#의 튜플이라는 방식의 구현
     {
         int level = growStates[GrowStatType.Fishing].level;
+
+        /*if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);*/
+
         if (level >= 0 && level < fishingList.Count)
         {
             return fishingList[level]; // 정상 출력

@@ -127,7 +127,16 @@ public class PlayerCore : CreatureBase, IBegin
 
     public Transform mast;
 
-	public SItemWeaponTypeSO CalculatedHandAttack
+    // 배고픔 29 이하 소리 한 번 출력 확인 bool 변수
+    private bool isPlaySFXHunger = false;
+
+    // 정신력 29 이하 소리 한 번 출력 확인 bool 변수
+    private bool isPlaySFXMental = false;
+
+    // 체력 29 이하 소리 한 번 출력 확인 bool 변수
+    private bool isPlaySFXLowHp = false;
+
+    public SItemWeaponTypeSO CalculatedHandAttack
     {
         get
         {
@@ -275,7 +284,20 @@ public class PlayerCore : CreatureBase, IBegin
     {
         base.TakeDamage(damage, attacker);
         PlayerHpChanged?.Invoke(hp);
-        if(attacker.CompareTag("Enemy"))
+
+        if (hp <= 29 && !isPlaySFXLowHp)
+        {
+            isPlaySFXLowHp = true;
+            AudioManager.instance?.PlaySfx(AudioManager.SFX.Sanity29Down);
+        }
+
+        if (hp >= 30 && isPlaySFXLowHp)
+        {
+            isPlaySFXLowHp = false;
+        }
+
+
+        if (attacker.CompareTag("Enemy"))
             AttackedFromEnemy();
 
         if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
@@ -364,6 +386,7 @@ public class PlayerCore : CreatureBase, IBegin
                 speed = defaultSpeed * 1.2f;
                 break;
             case FullnessState.Hungry:
+                break;
             case FullnessState.Starving:
                 speed = defaultSpeed * 0.7f;
                 break;
@@ -374,9 +397,14 @@ public class PlayerCore : CreatureBase, IBegin
 
         if (fullnessState != currentFullnessState)
         {
-            currentFullnessState = fullnessState;            
+            currentFullnessState = fullnessState;
 
-            if(currentFullnessState == FullnessState.Starving)      // 굶주림 상태일때
+            if (currentFullnessState == FullnessState.Hungry)
+            {
+                AudioManager.instance?.PlaySfx(AudioManager.SFX.Hunger);
+            }
+
+            if (currentFullnessState == FullnessState.Starving)      // 굶주림 상태일때
             {
                 if(starvationCoroutine == null)
                     starvationCoroutine = StartCoroutine(StarvingDamageCorountine());
@@ -467,7 +495,18 @@ public class PlayerCore : CreatureBase, IBegin
         if(isDrunk)
             return;
 
-        if(increase <= 0)
+        if(currentMental <= 29 && !isPlaySFXMental)
+        {
+            isPlaySFXMental = true;
+            AudioManager.instance.PlaySfx(AudioManager.SFX.Sanity29Down);
+        }
+
+        if (currentMental >= 30 && isPlaySFXMental)
+        {
+            isPlaySFXMental = false;
+        }
+
+        if (increase <= 0)
         {
             creatureEffect.Effects[1].Play();
         }
