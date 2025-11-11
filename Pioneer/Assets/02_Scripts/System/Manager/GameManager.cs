@@ -121,6 +121,8 @@ public class GameManager : MonoBehaviour, IBegin
 
         Debug.Log($">> GameManager.Start()");
 
+        AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
+
         if (InventoryUiMain.instance != null)
             InventoryUiMain.instance.Start();
         else
@@ -164,6 +166,8 @@ public class GameManager : MonoBehaviour, IBegin
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.ToNight);
 
+            AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
+
             Debug.Log($"밤이 되었습니다. (Day {currentDay})");
             IsDaytime = false;
             OnNightStart();
@@ -173,6 +177,9 @@ public class GameManager : MonoBehaviour, IBegin
             // 밤 -> 낮 전환
             IsDaytime = true;
             currentDay++;
+
+            AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
+
             OnNightEnd();
             Debug.Log($"아침이 되었습니다. (Day {currentDay})");
         }
