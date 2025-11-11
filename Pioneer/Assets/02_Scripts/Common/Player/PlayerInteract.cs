@@ -41,18 +41,21 @@ public class PlayerInteract : MonoBehaviour
 					}
 				}
 
-
-				if (closestOne != null &&
-					closestOne == closest)
+				if (closestOne != null)
 				{
-					closestOne.UnUse();
-				}
-				closest.Use();
+                    closestOne.UnUse();
+					closestOne = null;
+                }
+                else if (closestOne == null ||
+					closestOne != closest)
+				{
+                    closest.Use();
+                    closestOne = closest;
+                }
 
-				
 
-				closestOne = closest;
-			}
+
+            }
 		}
 
 		ready = new List<StructureBase>();

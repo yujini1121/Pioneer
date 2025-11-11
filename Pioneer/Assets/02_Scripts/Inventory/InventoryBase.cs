@@ -53,41 +53,46 @@ public class InventoryBase : MonoBehaviour
         return sum;
     }
 
-    public bool TryAdd(SItemStack itemStack)
+    public bool TryAdd(SItemStack itemStack, out SItemStack remainOrNull)
     {
+        remainOrNull = null;
         if (itemStack.amount < 1) return true;
 
-        int firstEmpty = -1;
+        int amount = itemStack.amount;
+        int maxStack = ItemTypeManager.Instance.itemTypeSearch[itemStack.id].maxStack;
 
         for (int inventoryIndex = 0; inventoryIndex < itemLists.Count; ++inventoryIndex)
         {
-            if (itemLists[inventoryIndex] == null || itemLists[inventoryIndex].id == 0)
+            if (SItemStack.IsEmpty(itemLists[inventoryIndex])) continue;// 빈 슬롯
+            if (itemLists[inventoryIndex].id == itemStack.id && maxStack > 1) // 같은 아이템 슬롯 && 스택 가능함.
             {
-                if (firstEmpty == -1) firstEmpty = inventoryIndex;
-                continue; // 다음 칸에 같은 아이템이 있을 수 있어서 break을 하지 않음.
-            }
-
-            if (itemLists[inventoryIndex].id == itemStack.id)
-            {
-                itemLists[inventoryIndex].amount += itemStack.amount;
-                //InventoryUiMain.instance.IconRefresh();
-                return true;
+                itemLists[inventoryIndex].amount += amount;
+                if (itemLists[inventoryIndex].amount <= maxStack) // amount는 사실상 이제 0이 됨
+                {
+                    return true;
+                }
+                amount = itemLists[inventoryIndex].amount - maxStack; // 사실상 감소함.
+                itemLists[inventoryIndex].amount = maxStack;
+                continue;
             }
         }
 
-        // 인벤토리에 아이템을 넣을 빈 슬롯을 발견했습니다.
-        if (firstEmpty != -1)
+        for (int inventoryIndex = 0; inventoryIndex < itemLists.Count; ++inventoryIndex)
         {
-            itemLists[firstEmpty] = itemStack.Copy();
-
-			//SItemWeaponTypeSO weaponSo = ItemTypeManager.Instance.itemTypeSearch[itemStack.id] as SItemWeaponTypeSO;
-			//if (weaponSo != null)
-			//{
-			//    Debug.Log($">> InventoryBase.TryAdd : 무기 추가. 내구도 = {weaponSo.weaponDuability}");
-			//    itemLists[firstEmpty].duability = weaponSo.weaponDuability;
-			//}
-			return true;
+            if (SItemStack.IsEmpty(itemLists[inventoryIndex]))
+            {
+                itemLists[inventoryIndex] = new SItemStack(itemStack.id, amount, itemStack.duability);
+                if (itemLists[inventoryIndex].amount <= maxStack) // amount는 사실상 이제 0이 됨
+                {
+                    return true;
+                }
+                amount = itemLists[inventoryIndex].amount - maxStack; // 사실상 감소함.
+                itemLists[inventoryIndex].amount = maxStack;
+            }
         }
+
+        remainOrNull = itemStack.Copy();
+        remainOrNull.amount = amount;
 
         Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count} / adding : {itemStack.id} + {itemStack.amount}");
         return false;

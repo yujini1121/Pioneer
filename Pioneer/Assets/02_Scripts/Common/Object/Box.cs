@@ -6,6 +6,14 @@ public class Box : StructureBase, IInventory
 {
     public InventoryBase boxInventory;
 
+
+    public override void Interactive()
+    {
+        base.Interactive();
+
+
+    }
+
     public InventoryBase GetInventory()
     {
         return boxInventory;

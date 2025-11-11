@@ -116,9 +116,10 @@ public class InventoryUiable : InventoryBase
         }
 
         Debug.Assert(InventoryUiMain.instance != null);
-        if (TryAdd(item) == false)
+        SItemStack remain;// = null;
+        if (TryAdd(item, out remain) == false)
         {
-            ItemDropManager.instance.Drop(item, positionDrop.transform.position);
+            ItemDropManager.instance.Drop(remain, positionDrop.transform.position);
         }
         else
         {

@@ -18,7 +18,8 @@ public class InventoryManager : InventoryBase
     //public Dictionary<int, SItemStack> fastSearch;
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
-    [SerializeField] Vector3 dropOffset = new Vector3(1, -0.8f, -1);
+    private Vector3 dropOffset = new Vector3(0.5f, -0.75f, -0.5f); // ¿ÀÇÁ¼Â
+
     [Header("DEBUG")]
     [SerializeField] bool isDebugging;
     [SerializeField] bool isDebuggingAdd;
@@ -26,10 +27,23 @@ public class InventoryManager : InventoryBase
 
     public new void MouseSwitch(int index)
     {
-        if (mouseInventory != null && itemLists[index] != null && mouseInventory.id == itemLists[index].id)
+        if (mouseInventory != null && itemLists[index] != null &&
+            mouseInventory.id == itemLists[index].id &&
+            mouseInventory.itemBaseType.maxStack > 1)
         {
+            int maxStack = mouseInventory.itemBaseType.maxStack;
+
             itemLists[index].amount += mouseInventory.amount;
-            mouseInventory = null;
+
+            if (itemLists[index].amount > maxStack)
+            {
+                mouseInventory.amount = itemLists[index].amount - maxStack;
+                itemLists[index].amount = maxStack;
+            }
+            else
+            {
+                mouseInventory = null;
+            }
             SafeClean();
             return;
         }
@@ -94,13 +108,16 @@ public class InventoryManager : InventoryBase
             {
                 itemLists[index] = new SItemStack(mouseInventory);
                 itemLists[index].amount = 1;
+
+                mouseInventory.amount--;
             }
-            else
+            else if (itemLists[index].amount < itemLists[index].itemBaseType.maxStack)
             {
                 itemLists[index].amount++;
+
+                mouseInventory.amount--;
             }
-            mouseInventory.amount--;
-            
+
         }
         else if (itemLists[index] != null)
         {
@@ -126,9 +143,10 @@ public class InventoryManager : InventoryBase
         }
 
         Debug.Assert(InventoryUiMain.instance != null);
-        if (TryAdd(item) == false)
+        SItemStack remain;// = null;
+        if (TryAdd(item, out remain) == false)
         {
-            ItemDropManager.instance.Drop(item, positionDrop.transform.position);
+            ItemDropManager.instance.Drop(remain, positionDrop.transform.position);
         }
         else
         {
@@ -145,11 +163,11 @@ public class InventoryManager : InventoryBase
         for (int index = 0; index < inventoryCount; index++)
         {
             if (itemLists[index] == null) continue;
+            if (itemLists[index].itemBaseType.maxStack == 1) continue;
 
             for (int x = index + 1; x < inventoryCount; ++x)
             {
                 if (itemLists[x] == null) continue;
-
                 if (itemLists[index].id == itemLists[x].id)
                 {
                     itemLists[index].amount += itemLists[x].amount;
@@ -174,7 +192,9 @@ public class InventoryManager : InventoryBase
             new CultureInfo("ko-KR"), ignoreCase: false)).ToList();
         for (int index = 0; index < list.Count; index++)
         {
-            itemLists[index] = (list[index]);
+            SItemStack m;
+            TryAdd(list[index], out m);
+            //itemLists[index] = (list[index]);
         }
         SafeClean();
     }
@@ -242,16 +262,35 @@ public class InventoryManager : InventoryBase
         //itemLists[5] = new SItemStack(30001, 200);
         //itemLists[6] = new SItemStack(20001, 1);
         //itemLists[7] = new SItemStack(40001, 200);
-        Add(new SItemStack(30002, 100));
-        Add(new SItemStack(100, 100));
-        Add(new SItemStack(101, 100));
-        Add(new SItemStack(102, 100));
-        Add(new SItemStack(103, 100));
-        Add(new SItemStack(30001, 99999));
-        Add(new SItemStack(30003, 99999));
+        //Add(new SItemStack(100, 80));
+        //Add(new SItemStack(101, 80));
+        //Add(new SItemStack(102, 80));
+        //Add(new SItemStack(103, 80));
+        Add(new SItemStack(30001, 80));
+        Add(new SItemStack(30002, 80));
+        Add(new SItemStack(30003, 80));
+        Add(new SItemStack(30004, 80));
+        Add(new SItemStack(30005, 80));
+        Add(new SItemStack(30006, 80));
+        Add(new SItemStack(30007, 80));
+        Add(new SItemStack(30008, 80));
+        Add(new SItemStack(30009, 80));
+        Add(new SItemStack(30010, 80));
+        Add(new SItemStack(30011, 80));
+        Add(new SItemStack(30012, 80));
+        Add(new SItemStack(30013, 80));
+        Add(new SItemStack(30014, 80));
+        Add(new SItemStack(30015, 80));
+        Add(new SItemStack(30016, 80));
+        Add(new SItemStack(30017, 80));
+        Add(new SItemStack(30018, 80));
+        Add(new SItemStack(30019, 80));
+        Add(new SItemStack(30020, 80));
+        Add(new SItemStack(30021, 80));
+        Add(new SItemStack(30022, 80));
         Add(new SItemStack(20001, 1, 100));
-        Add(new SItemStack(40001, 200));
-        Add(new SItemStack(40009, 50));
-        Add(new SItemStack(40007, 50));
+        Add(new SItemStack(40001, 80));
+        Add(new SItemStack(40009, 80));
+        Add(new SItemStack(40007, 80));
     }
 }
