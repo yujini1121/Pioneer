@@ -53,52 +53,6 @@ public class BoxUI : MonoBehaviour
         PlayerStatUI.Instance.UpdateBasicStatUI();
     }
 
-    public void ClickOut()
-    {
-        // 마우스 아이탬 핸들
-        // 플레이어 아이템 핸들
-
-        if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory) == false)
-        {
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭 {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭1");
-            InventoryManager.Instance.MouseDrop();
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭2");
-            InventoryUiMain.instance.MouseUI.Clear();
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭3");
-            InventoryUiMain.instance.IconRefresh();
-            PlayerStatUI.Instance.UpdateBasicStatUI();
-            return;
-        }
-
-        if (PlayerCore.Instance.currentState != PlayerCore.PlayerState.ActionFishing)
-        {
-            // 플레이어 아이템 핸들
-            Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
-            if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
-            {
-                // 빈 아이템 주먹 공격
-
-                PlayerCore.Instance.BeginCoroutine(WeaponUseUtils.AttackCoroutine(
-                    PlayerCore.Instance,
-                    PlayerCore.Instance.dummyHandAttackItem,
-                    PlayerCore.Instance.CalculatedHandAttack));
-            }
-            else
-            {
-                PlayerCore.Instance.BeginCoroutine(
-                    ItemTypeManager.Instance.itemTypeSearch[
-                        InventoryManager.Instance.SelectedSlotInventory.id].Use(
-                                PlayerCore.Instance,
-                                InventoryManager.Instance.SelectedSlotInventory
-                            )
-                    );
-            }
-
-            InventoryUiMain.instance.IconRefresh();
-            PlayerStatUI.Instance.UpdateBasicStatUI();
-        }
-    }
 
     public void Sort()
     {

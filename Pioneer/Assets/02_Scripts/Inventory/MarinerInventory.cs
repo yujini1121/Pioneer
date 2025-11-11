@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class MarinerInventory : InventoryBase
 {
@@ -120,7 +121,8 @@ public class MarinerInventory : InventoryBase
     /// </summary>
     public bool AddItem(int itemId, int amount)
     {
-        return TryAdd(new SItemStack(itemId, amount));
+        SItemStack remain;
+        return TryAdd(new SItemStack(itemId, amount), out remain);
     }
 
     /// <summary>
@@ -143,7 +145,8 @@ public class MarinerInventory : InventoryBase
         {
             if (itemLists[i] != null)
             {
-                if (storageInventory.TryAdd(itemLists[i]))
+                SItemStack remain;
+                if (storageInventory.TryAdd(itemLists[i], out remain))
                 {
                     Debug.Log($"보관함에 저장: {itemLists[i].id} x {itemLists[i].amount}");
                     itemLists[i] = null;
