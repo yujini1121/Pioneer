@@ -9,6 +9,9 @@ using UnityEngine.Rendering;
 public class ItemSlotUI : MonoBehaviour, 
     IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
+    const bool IS_DEBUG_LOG = false;
+
+
     public int index;
     public UnityEngine.UI.Image image;
     public TextMeshProUGUI hotKey;
@@ -29,14 +32,14 @@ public class ItemSlotUI : MonoBehaviour,
         [CallerLineNumber] int line = 0,
         [CallerMemberName] string member = "")
     {
-        Debug.Log($">> ItemSlotUI.Show(SItemStack item) : 호출됨");
+        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 호출됨");
 
         if (item == null || item.id == 0)
         {
             Clear();
             return;
         }
-        Debug.Log($">> ItemSlotUI.Show(SItemStack item) : 내구도 = {item.duability}");
+        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 내구도 = {item.duability}");
 
 
         Debug.Assert(item != null);
@@ -44,7 +47,8 @@ public class ItemSlotUI : MonoBehaviour,
         Debug.Assert(ItemTypeManager.Instance != null);
         Debug.Assert(ItemTypeManager.Instance.itemTypeSearch != null);
         Debug.Assert(ItemTypeManager.Instance.itemTypeSearch[item.id] != null);
-        Debug.Log($">> ItemSlotUI.Show(SItemStack item) : {item.id} / {item.amount}");
+        if (IS_DEBUG_LOG) 
+            Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : {item.id} / {item.amount}");
 
         SItemTypeSO itemType = ItemTypeManager.Instance.itemTypeSearch[item.id];
         bool isNeedShowDuability = itemType.categories == EDataType.WeaponItem;

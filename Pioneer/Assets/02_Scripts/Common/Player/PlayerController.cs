@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
 	private GameManager gameManager;
 
 	// 이동 방향
-	private Vector3 lastMoveDirection;
+	private Vector3 lastMoveDirection = Vector3.back;
 
 	[Header("낚시 바다 확인 관련 설정")]
 	public float rayOffset;
@@ -39,7 +39,10 @@ public class PlayerController : MonoBehaviour
 	private AnimatorOverrideController aoc;
 	List<KeyValuePair<AnimationClip, AnimationClip>> overridesList = new();
 
-	void Awake()
+	Vector3 moveInput;
+	Vector3 moveDirection;
+
+    void Awake()
 	{
 		instance = this;
 
@@ -58,7 +61,21 @@ public class PlayerController : MonoBehaviour
 		// 바다 체크
 		isSeaInFront = CheckSea();
 
-		switch (playerCore.currentState)
+        // 이동
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector3(moveX, 0, moveY);
+        moveDirection = moveInput.normalized;
+
+		Debug.Log($"moveX : {moveX}, moveY: {moveY}");
+		Debug.Log($"moveInput : {moveInput}");
+
+        if (moveX == 0 && moveY == 0)
+        {
+            playerCore.Idle(lastMoveDirection);
+        }
+
+        switch (playerCore.currentState)
 		{
 			case PlayerCore.PlayerState.Default:
 				// 이동, 공격, 낚시 시작
@@ -73,30 +90,43 @@ public class PlayerController : MonoBehaviour
 				HendleFishing();
 				break;
 		}
-	}
+
+
+        /*if (PlayerCore.Instance.speed == 0)
+        {
+            Debug.Log("저왜움직여요");
+            playerCore.Idle();
+        }*/
+    }
 
 	private void HendleDefault()
 	{
-		// 이동
+		/*// 이동
 		float moveX = Input.GetAxisRaw("Horizontal");
 		float moveY = Input.GetAxisRaw("Vertical");
 		Vector3 moveInput = new Vector3(moveX, 0, moveY);
 		Vector3 moveDirection = moveInput.normalized;
-		playerCore.Move(moveInput);
+
+		if(moveX == 0 && moveY == 0)
+		{
+            playerCore.Idle();
+        }*/
+
+        playerCore.Move(moveInput);
 
 		if (moveDirection != Vector3.zero)
 		{
 			lastMoveDirection = moveDirection;
 		}
 
-		/*// 공격
+        /*// 공격
         if (Input.GetMouseButtonDown(0))
         {
             playerCore.Attack();
         }*/
 
-		// 낚시 시작 조건 확인하고 낚시 상태 전환?
-		if (isSeaInFront) // + 낮인지 && gameManager.currentGameTime < dayDuration?
+        // 낚시 시작 조건 확인하고 낚시 상태 전환?
+        if (isSeaInFront) // + 낮인지 && gameManager.currentGameTime < dayDuration?
 		{
 			fishingUI.gameObject.SetActive(true);
 
@@ -126,7 +156,10 @@ public class PlayerController : MonoBehaviour
 			{
 				isCharging = false;
 				playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
-				playerFishing.StartFishingLoop();
+
+                playerCore.Fishing(lastMoveDirection);
+
+                playerFishing.StartFishingLoop();
 				cancelDelayTimer = fishingCancelDelay;
 				currentChargeTime = 0f;
 				chargeSlider.value = 0f;
