@@ -130,6 +130,7 @@ public class PlayerCore : CreatureBase, IBegin
     private Vector3 currentDirection;
     private int _curIdleIdx = -1; // 0:F, 1:B, 2:L, 3:R
     private int _curRunIdx = -1; 
+    private int _curFishingIdx = -1; 
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
@@ -265,7 +266,7 @@ public class PlayerCore : CreatureBase, IBegin
         UnityEngine.Debug.Log("Player State Changed to: " + state);
     }
 
-    static int Get4DirIndexXZ(in Vector3 v)
+    static int Get4DirIndex(in Vector3 v)
     {
         if (v.sqrMagnitude < 1e-6f) return -1;
         float ax = Mathf.Abs(v.x);
@@ -274,9 +275,14 @@ public class PlayerCore : CreatureBase, IBegin
         else return (v.z <= 0f) ? 0 : 1; // Front : Back
     }
 
+    static int Get2DirIndex(in Vector3 v)
+    {
+        if (v.sqrMagnitude < 1e-6f) return -1;   // 정지면 -1
+        return (v.x >= 0f) ? 1 : 0;              // 1:Right, 0:Left
+    }
+
     void ChangeIdleByIndex(int idx)
     {
-        UnityEngine.Debug.Log(idx);
         if (idx < 0) return;
         var target = slots.idle[idx];
 
@@ -284,32 +290,37 @@ public class PlayerCore : CreatureBase, IBegin
         animator.SetTrigger("SetIdle");
     }
 
-
     void ChangeRunByIndex(int idx)
     {
         if (idx < 0) return;
         var target = slots.run[idx];
 
         controller.ChangeAnimationClip(slots.curRunClip, target);
-
         animator.SetTrigger("SetRun");
     }
 
+    void ChangeFishingByIndex(int idx)
+    {
+        if (idx < 0) return;
+        var target = slots.fising[idx];
+
+        controller.ChangeAnimationClip(slots.curFishingClip, target);
+        animator.SetTrigger("SetFishing"); 
+    }
 
     // =============================================================
     // 가만히있엇
     // =============================================================
     public void Idle(Vector3 moveInput)
     {
-        int idx = Get4DirIndexXZ(moveInput);
+        int idx = Get4DirIndex(moveInput);
         UnityEngine.Debug.Log($"Idle idx : {idx}");
         if (idx != _curRunIdx)
         {
             ChangeIdleByIndex(idx);
-            _curRunIdx = idx;
+            _curIdleIdx = idx;
         }
     }
-
 
     // =============================================================
     // 이동
@@ -318,7 +329,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (currentState != PlayerState.Default) return;
 
-        int idx = Get4DirIndexXZ(moveInput);
+        int idx = Get4DirIndex(moveInput);
         if (idx != _curRunIdx)
         {
             ChangeRunByIndex(idx);
@@ -327,6 +338,19 @@ public class PlayerCore : CreatureBase, IBegin
 
         var v = moveInput.normalized * speed;
         playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
+    }
+
+    // =============================================================
+    // 낚시
+    // =============================================================
+    public void Fishing(Vector3 dir)
+    {
+        int idx = Get2DirIndex(dir);
+        if (idx != _curFishingIdx)
+        {
+            ChangeFishingByIndex(idx);
+            _curFishingIdx = idx;
+        }
     }
 
     // =============================================================
