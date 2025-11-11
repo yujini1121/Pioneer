@@ -298,8 +298,6 @@ public class PlayerCore : CreatureBase, IBegin
         {
             ChangeRunByIndex(idx);
             _curRunIdx = idx;
-
-            UnityEngine.Debug.LogError(idx);
         }
 
         var v = moveInput.normalized * speed;
