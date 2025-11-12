@@ -85,9 +85,9 @@ public class MinionAI : EnemyBase, IBegin
         hp = 20;
         maxHp = hp;
         attackDamage = 2;
-        attackRange = 1f;
+        attackRange = 2f;
         speed = 2f;
-        detectionRange = 1.5f;
+        detectionRange = 4f;
         attackDelayTime = 2f;
         idleTime = 2f;
         SetMastTarget();
