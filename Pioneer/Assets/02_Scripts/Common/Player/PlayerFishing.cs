@@ -42,8 +42,8 @@ public class PlayerFishing : MonoBehaviour
     {
         if (fishingLoopCoroutine != null)
         {
-            creatureEffect.Effects[5].Stop();
-            creatureEffect.Effects[3].Stop();
+            /*creatureEffect.Effects[5].Stop();
+            creatureEffect.Effects[3].Stop();*/
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
             Debug.Log("낚시 중단");
@@ -58,7 +58,13 @@ public class PlayerFishing : MonoBehaviour
         while (true)
         {
             Debug.Log("낚시 시작");
-            creatureEffect.Effects[5].Play();
+
+            if (CreatureEffect.Instance != null)
+            {
+                ParticleSystem ps = CreatureEffect.Instance.Effects[8]; // 그냥 몸에서 제작완료
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0f));
+            }
+
             yield return new WaitForSeconds(2f);
 
             SItemTypeSO caughtItem = GetItem();
@@ -120,8 +126,8 @@ public class PlayerFishing : MonoBehaviour
                         InventoryManager.Instance.Add(waterBloombonusItemStack);
                     }
                 }
-
-                creatureEffect.Effects[3].Play();
+                
+                //creatureEffect.Effects[3].Play();
             }
             else
             {

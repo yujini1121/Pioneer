@@ -367,15 +367,49 @@ public class CommonUI : MonoBehaviour, IBegin
         InventoryManager.Instance.Add(recipe.result);
         InventoryManager.Instance.Remove(recipe.input);
 
-		if (UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance())
-		{
+        bool isSuccess = UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance();
+
+        if (isSuccess)
+        {
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting);
+
+            if (CreatureEffect.Instance != null)
+            {
+                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // 그냥 몸에서 제작완료
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
+
+            }
+            if (CreatureEffect.Instance != null)
+            {
+                ParticleSystem ps = CreatureEffect.Instance.Effects[6]; // 대성공
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position+new Vector3(0f,1f,0f));
+            }
+        }
+        else
+        {
+            GameObject target = GameObject.Find("CraftStation");
+
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting);
+
+            if (CreatureEffect.Instance != null)
+            {
+                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // 그냥 몸에서 제작완료
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
+            }
+        }
+
+
+        if (isSuccess)
+        {
             if (IsDebuggingCraftCoroutine)
             {
                 Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
             }
 
             // 대성공 발생
-            PlayerCore.Instance.creatureEffect.Effects[7].Play();
+            //PlayerCore.Instance.creatureEffect.Effects[7].Play();
             // 아이템 하나 더 추가
             InventoryManager.Instance.Add(recipe.result);
 
@@ -384,14 +418,14 @@ public class CommonUI : MonoBehaviour, IBegin
             {
                 SItemStack newRef = one.Copy();
 
-				newRef.amount *= 4;
-				newRef.amount /= 10;
+                newRef.amount *= 4;
+                newRef.amount /= 10;
 
-				InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
-			}
-		}
+                InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
+            }
+        }
 
-		for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+        for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
         {
             int need = recipe.input[rIndex].amount;
             int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);
