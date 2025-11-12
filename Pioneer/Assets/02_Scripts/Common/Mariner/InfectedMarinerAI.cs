@@ -69,8 +69,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
-        maxHp = 40;
-        hp = 40;
+        maxHp = 100;
+        hp = 100;
         speed = 1f;
         attackDamage = 6;
         attackRange = 1.5f;
@@ -395,7 +395,6 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (hasTransformedToZombie) return;
         hasTransformedToZombie = true;
 
-        GuiltySystem.instance.CrewDead();
         Debug.Log("좀비 변신 전 랜덤 이동 시작");
 
         SetRandomDestination();

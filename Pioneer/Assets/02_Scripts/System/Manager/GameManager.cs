@@ -196,10 +196,6 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void OnNightEnd()
     {
-        if(currentDay >= 6)
-        {
-            gameOverUI.ShowGameClearScreen(totalMarinerMembers, deadMarinerMembers);
-        }
         DespawnAllEnemies();
         ApplyMarinerEmbarkRule();
     }

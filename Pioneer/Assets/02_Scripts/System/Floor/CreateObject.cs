@@ -195,17 +195,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         SetPreviewColor(permitColor);
         if (Input.GetMouseButtonDown(0))
-        {
-            if (PlayerCore.Instance.currentState == PlayerCore.PlayerState.ActionFishing)
-            {
-                PlayerFishing.instance.StopFishingLoop();
-                PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
-                // PlayerController.instance.currentChargeTime = 0f;
-                PlayerController.instance.cencleChargeSlider.value = 0f;
-                PlayerController.instance.fishingCencleUI.gameObject.SetActive(false);
-            }
             MoveToCreate(worldPos, localPos);
-        }
     }
 
     private void CheckCreatable()
@@ -703,15 +693,6 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
-        if (PlayerCore.Instance.currentState == PlayerCore.PlayerState.ActionFishing)
-        {
-            PlayerFishing.instance.StopFishingLoop();
-            PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
-            // PlayerController.instance.currentChargeTime = 0f;
-            PlayerController.instance.cencleChargeSlider.value = 0f;
-            PlayerController.instance.fishingCencleUI.gameObject.SetActive(false);
-        }
-
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
         

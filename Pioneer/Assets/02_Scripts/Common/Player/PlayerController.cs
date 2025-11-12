@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
 	public Slider cencleChargeSlider;
 
 	private LayerMask combinedMask;
-	public float currentChargeTime;
+	private float currentChargeTime;
 	private bool isCharging;
 
 	[SerializeField] private float fishingCancelDelay = 1.0f;
@@ -69,6 +69,11 @@ public class PlayerController : MonoBehaviour
 
 		Debug.Log($"moveX : {moveX}, moveY: {moveY}");
 		Debug.Log($"moveInput : {moveInput}");
+
+        if (moveX == 0 && moveY == 0)
+        {
+            playerCore.Idle(lastMoveDirection);
+        }
 
         switch (playerCore.currentState)
 		{
@@ -138,7 +143,6 @@ public class PlayerController : MonoBehaviour
 
                 playerFishing.StartFishingLoop(); // 낚시 시작 확인
                 cancelDelayTimer = fishingCancelDelay;
-
 				currentChargeTime = 0f;
 				chargeSlider.value = 0f;
 				fishingUI.gameObject.SetActive(false);

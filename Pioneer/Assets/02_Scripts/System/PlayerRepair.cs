@@ -27,7 +27,7 @@ public class PlayerRepair : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //effect.SetActive(false);
+        effect.SetActive(false);
     }
 
     // Update is called once per frame
@@ -51,7 +51,7 @@ public class PlayerRepair : MonoBehaviour
 
         isAction = true;
 
-        //effect.SetActive(true);
+        effect.SetActive(true);
         circuleBack.SetActive(true);
         ringImage.enabled = true;
 
@@ -61,7 +61,7 @@ public class PlayerRepair : MonoBehaviour
             yield return null;
         }
 
-        //effect.SetActive(false);
+        effect.SetActive(false);
         circuleBack.SetActive(false);
         ringImage.enabled = false;
         target.Heal(target.maxHp);

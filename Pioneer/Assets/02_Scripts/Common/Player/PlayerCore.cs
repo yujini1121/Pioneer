@@ -75,8 +75,6 @@ public class PlayerCore : CreatureBase, IBegin
         get => IsMentalDebuff();
     }
 
-    private float lastEffectTime = -999f;
-
     [Header("포만감 변수")]
     // [ 포만감 변수 ]  
     public int currentFullness;                                            // 현재 포만감 값
@@ -218,12 +216,6 @@ public class PlayerCore : CreatureBase, IBegin
 
     void Update()
     {
-        if(hp < 0)
-        {
-            IsDead = true;
-            WhenDestroy();
-        }
-
         if (Input.GetKeyDown(KeyCode.F12))
         {
             transform.position = mast.position;
@@ -347,6 +339,13 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (currentState != PlayerState.Default) return;
 
+        int idx = Get4DirIndex(moveInput);
+        if (idx != _curRunIdx)
+        {
+            ChangeRunByIndex(idx);
+            _curRunIdx = idx;
+        }
+
         var v = moveInput.normalized * speed;
         playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
     }
@@ -381,6 +380,7 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     // 공격
     // =============================================================
+
     public bool IsMentalDebuff()
     {
         return currentMental < 40.0f; 
@@ -626,20 +626,13 @@ public class PlayerCore : CreatureBase, IBegin
             isPlaySFXMental = false;
         }
 
-        if (Time.time - lastEffectTime >= 10f) // 10초마다 1회만
+        if (increase <= 0)
         {
-            if (increase <= 0)
-            {
-                var ps = CreatureEffect.Instance.Effects[5];
-                CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
-            }
-            else if (increase > 0)
-            {
-                var ps = CreatureEffect.Instance.Effects[4];
-                CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
-            }
-
-            lastEffectTime = Time.time; // 시간 갱신
+            creatureEffect.Effects[1].Play();
+        }
+        else if (increase > 0)
+        {
+            creatureEffect.Effects[2].Play();
         }
 
         currentMental += increase;
