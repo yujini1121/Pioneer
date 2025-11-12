@@ -136,8 +136,6 @@ public class PlayerController : MonoBehaviour
                 isCharging = false;
 				playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
 
-                playerCore.FishingReady(lastMoveDirection);
-
                 playerFishing.StartFishingLoop();
 				cancelDelayTimer = fishingCancelDelay;
 				currentChargeTime = 0f;
