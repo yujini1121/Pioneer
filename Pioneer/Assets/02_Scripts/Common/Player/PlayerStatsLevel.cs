@@ -155,7 +155,7 @@ public class PlayerStatsLevel : MonoBehaviour
         growStates.Clear();
         growStates.Add(GrowStatType.Combat, new GrowState(GrowStatType.Combat, new int[] { 50, 100, 150, 200, 250 }));
         growStates.Add(GrowStatType.Crafting, new GrowState(GrowStatType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
-        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 50, 100, 150, 200, 250 }));
+        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 60, 120, 210, 300, 390 }));
     }
 
     /// <summary>
