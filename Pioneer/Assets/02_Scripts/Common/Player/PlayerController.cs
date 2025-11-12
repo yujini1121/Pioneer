@@ -90,28 +90,10 @@ public class PlayerController : MonoBehaviour
 				HendleFishing();
 				break;
 		}
-
-
-        /*if (PlayerCore.Instance.speed == 0)
-        {
-            Debug.Log("저왜움직여요");
-            playerCore.Idle();
-        }*/
     }
 
 	private void HendleDefault()
 	{
-		/*// 이동
-		float moveX = Input.GetAxisRaw("Horizontal");
-		float moveY = Input.GetAxisRaw("Vertical");
-		Vector3 moveInput = new Vector3(moveX, 0, moveY);
-		Vector3 moveDirection = moveInput.normalized;
-
-		if(moveX == 0 && moveY == 0)
-		{
-            playerCore.Idle();
-        }*/
-
         playerCore.Move(moveInput);
 
 		if (moveDirection != Vector3.zero)
@@ -159,15 +141,13 @@ public class PlayerController : MonoBehaviour
                 isCharging = false;
 				playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
 
-                playerCore.Fishing(lastMoveDirection);
-
-                playerFishing.StartFishingLoop();
-				cancelDelayTimer = fishingCancelDelay;
+                playerFishing.StartFishingLoop(); // 낚시 시작 확인
+                cancelDelayTimer = fishingCancelDelay;
 				currentChargeTime = 0f;
 				chargeSlider.value = 0f;
 				fishingUI.gameObject.SetActive(false);
 				fishingCencleUI.gameObject.SetActive(true);
-			}
+            }
 		}
 
 		if (Input.GetKeyUp(KeyCode.Q))
@@ -199,7 +179,7 @@ public class PlayerController : MonoBehaviour
 			currentChargeTime += Time.deltaTime;
 			cencleChargeSlider.value = currentChargeTime / ChargeTime;
 
-			if (currentChargeTime >= ChargeTime)
+            if (currentChargeTime >= ChargeTime)
 			{
 				Debug.Log("낚시 중단!");
 				playerFishing.StopFishingLoop();
@@ -207,7 +187,9 @@ public class PlayerController : MonoBehaviour
 				currentChargeTime = 0f;
 				cencleChargeSlider.value = 0f;
 				fishingCencleUI.gameObject.SetActive(false);
-			}
+
+                playerCore.Idle(lastMoveDirection);
+            }
 		}
 
 		if (Input.GetKeyUp(KeyCode.Q))

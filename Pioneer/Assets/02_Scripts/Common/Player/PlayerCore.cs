@@ -130,7 +130,8 @@ public class PlayerCore : CreatureBase, IBegin
     private Vector3 currentDirection;
     private int _curIdleIdx = -1; // 0:F, 1:B, 2:L, 3:R
     private int _curRunIdx = -1; 
-    private int _curFishingIdx = -1; 
+    private int _curFishingReadyIdx = -1; 
+    private int _curFishingHoldIdx = -1; 
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
@@ -299,13 +300,22 @@ public class PlayerCore : CreatureBase, IBegin
         animator.SetTrigger("SetRun");
     }
 
-    void ChangeFishingByIndex(int idx)
+    void ChangeFishingReadyByIndex(int idx)
     {
         if (idx < 0) return;
         var target = slots.fising[idx];
 
         controller.ChangeAnimationClip(slots.curFishingClip, target);
         animator.SetTrigger("SetFishing"); 
+    }
+
+    void ChangeFishingHoldByIndex(int idx)
+    {
+        if (idx < 0) return;
+        var target = slots.fisingHold[idx];
+
+        controller.ChangeAnimationClip(slots.curFishingHoldClip, target);
+        animator.SetTrigger("SetFishingHold");
     }
 
     // =============================================================
@@ -341,15 +351,29 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // =============================================================
-    // 낚시
+    // 낚시 준비
     // =============================================================
-    public void Fishing(Vector3 dir)
+    public void FishingReady(Vector3 dir)
     {
         int idx = Get2DirIndex(dir);
-        if (idx != _curFishingIdx)
+        if (idx < 0) return;
+
+        if (idx != _curFishingReadyIdx) { ChangeFishingReadyByIndex(idx); _curFishingReadyIdx = idx; }
+        //if (idx != _curFishingHoldIdx) { ChangeFishingHoldByIndex(idx); _curFishingHoldIdx = idx; }
+    }
+
+    // =============================================================
+    // 낚시 중
+    // =============================================================
+    public void FishingHold(Vector3 dir)
+    {
+        int idx = Get2DirIndex(dir);
+        if (idx < 0) return;
+
+        if (idx != _curFishingHoldIdx)
         {
-            ChangeFishingByIndex(idx);
-            _curFishingIdx = idx;
+            ChangeFishingHoldByIndex(idx);
+            _curFishingHoldIdx = idx;
         }
     }
 

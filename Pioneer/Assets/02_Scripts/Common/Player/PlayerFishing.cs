@@ -30,10 +30,12 @@ public class PlayerFishing : MonoBehaviour
         creatureEffect = PlayerCore.Instance.GetComponent<CreatureEffect>();
     }
 
+    // 현재 낚시 중인지 확인
     public void StartFishingLoop()
     {
         if(fishingLoopCoroutine == null)
         {
+            // 낚시 중이 아니면 낚시 시작
             fishingLoopCoroutine = StartCoroutine(FishingLoop());
         }
     }
@@ -50,6 +52,7 @@ public class PlayerFishing : MonoBehaviour
         }
     }
 
+    // 낚시로 아이템 추가하는 코드
     private IEnumerator FishingLoop()
     {
         if (AudioManager.instance != null)
@@ -57,10 +60,12 @@ public class PlayerFishing : MonoBehaviour
 
         while (true)
         {
+            // 낚시 시작
             Debug.Log("낚시 시작");
             creatureEffect.Effects[5].Play();
             yield return new WaitForSeconds(2f);
 
+            // 아이템 획득
             SItemTypeSO caughtItem = GetItem();
             if(caughtItem != null)
             {                

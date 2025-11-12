@@ -9,6 +9,7 @@ public class AnimationSlot
 	public List<AnimationClip> idle;
 	public List<AnimationClip> run;
 	public List<AnimationClip> fising;
+	public List<AnimationClip> fisingHold;
 	public List<AnimationClip> attack;
 
 	[Header("플레이어 전용")]
@@ -20,6 +21,7 @@ public class AnimationSlot
 	public AnimationClip curIdleClip;
 	public AnimationClip curRunClip;
 	public AnimationClip curFishingClip;
+	public AnimationClip curFishingHoldClip;
 	public AnimationClip curAttackClip;
 	public AnimationClip curWoodenSwordClip;
 	public AnimationClip curIronSwrordClip;
