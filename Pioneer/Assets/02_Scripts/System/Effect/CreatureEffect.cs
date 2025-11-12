@@ -1,41 +1,144 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class CreatureEffect : MonoBehaviour
 {
     public static CreatureEffect Instance;
 
-    [Header("°ÔÀÓ ¿ÀºêÁ§Æ®¿¡ ³ÖÀ» ÀÌÆåÆ®")]
+    [Header("ê²Œì„ ì˜¤ë¸Œì íŠ¸ì— ë„£ì„ ì´í™íŠ¸")]
     public ParticleSystem[] Effects;
 
-    [Header("ÀÚ½Å È¤Àº ¸Õ ´Ù¸¥ °ÔÀÓ¿ÀºêÁ§Æ®¿¡ ¼ÒÈ¯½ÃÅ³ ÀÌÆåÆ®¸¦ ´ãÀº ÇÁ¸®Æé")]
+    [Header("ìì‹  í˜¹ì€ ë¨¼ ë‹¤ë¥¸ ê²Œì„ì˜¤ë¸Œì íŠ¸ì— ì†Œí™˜ì‹œí‚¬ ì´í™íŠ¸ë¥¼ ë‹´ì€ í”„ë¦¬í©")]
     public GameObject prefabForEffect;
-    // ÀÌÈÄ¿¡ ´õ Ãß°¡ÇÒ °Í
-    // ±×·¯³ª °ÔÀÓ¿ÀºêÁ§Æ®´Â ¹İµå½Ã ÇÁ·ÎÁ§Æ® Ã¢¿¡ ÀÖ´Â ÇÁ¸®ÆéÀÌ¿©¾ßÁö.
-    // Àı´ë·Î ¾À¿¡ À§Ä¡ÇÑ, ¾î¶² °ÔÀÓ¿ÀºêÁ§Æ®ÀÇ ÀÚ½Ä °ÔÀÓ¿ÀºêÁ§Æ®¸¦ ±Ü¾î¿Í¼± ¾È µÊ
+    // ì´í›„ì— ë” ì¶”ê°€í•  ê²ƒ
+    // ê·¸ëŸ¬ë‚˜ ê²Œì„ì˜¤ë¸Œì íŠ¸ëŠ” ë°˜ë“œì‹œ í”„ë¡œì íŠ¸ ì°½ì— ìˆëŠ” í”„ë¦¬í©ì´ì—¬ì•¼ì§€.
+    // ì ˆëŒ€ë¡œ ì”¬ì— ìœ„ì¹˜í•œ, ì–´ë–¤ ê²Œì„ì˜¤ë¸Œì íŠ¸ì˜ ìì‹ ê²Œì„ì˜¤ë¸Œì íŠ¸ë¥¼ ê¸ì–´ì™€ì„  ì•ˆ ë¨
 
-    private void Awake()
+    void Awake()
     {
-        if(Instance == null)
-            Instance = this;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
-    public void PlayEffect(ParticleSystem effect, Vector3 position)
+    public void PlayEffect(ParticleSystem pooled, Vector3 pos)
     {
-        ParticleSystem ps = effect;
-        if (ps != null)
+        if (!pooled) return;
+
+        if (pooled.gameObject.activeInHierarchy)
         {
-            ps.transform.position = position;
-            ps.transform.rotation = Quaternion.identity;
-            ps.gameObject.SetActive(true);
-            ps.Play();
+            // ì´ë¯¸ ëˆ„êµ°ê°€ ì“°ëŠ” ì¤‘ â†’ ë³µì œë³¸ ìƒì„± í›„ ìë™ ì†Œë©¸
+            var clone = Instantiate(pooled, pos, pooled.transform.rotation);
+            SetOneShot(clone);
+            clone.Clear(true);
+            clone.Play(true);
+            Destroy(clone.gameObject, GetTotalDuration(clone.gameObject) + 0.1f);
+            return;
         }
-        else
-        {
-            Debug.Log("ÀÌÆåÆ® ³Î ¹ö±×");
-        }
+
+        // ë†€ê³  ìˆìœ¼ë©´ í’€ë§ ê°œì²´ ì¬ì‚¬ìš© + íƒ€ì„ì•„ì›ƒìœ¼ë¡œ êº¼ì£¼ê¸°
+        pooled.transform.position = pos;
+        SetPooled(pooled);
+        pooled.gameObject.SetActive(true);
+        pooled.Clear(true);
+        pooled.Play(true);
+
+        float t = GetTotalDuration(pooled.gameObject) + 0.1f;
+        StartCoroutine(DisableAfter(pooled.gameObject, t));
     }
 
-    public void PlayEffect(GameObject effectPrefab, Vector3 position)
+    void SetOneShot(ParticleSystem ps)
+    {
+        var m = ps.main;
+        m.loop = false;
+        m.stopAction = ParticleSystemStopAction.Destroy; // ëë‚˜ë©´ íŒŒê´´
+    }
+
+    void SetPooled(ParticleSystem ps)
+    {
+        var m = ps.main;
+        m.loop = false;
+        m.stopAction = ParticleSystemStopAction.None; // ëë‚˜ë©´ ì§ì ‘ ë¹„í™œì„±í™”
+    }
+
+    IEnumerator DisableAfter(GameObject go, float t)
+    {
+        yield return new WaitForSeconds(t);
+        if (go) go.SetActive(false);
+    }
+
+    // ìì‹ í¬í•¨ ê°€ì¥ ê¸´ ì¬ìƒ ì‹œê°„ ê³„ì‚°(ê³¡ì„ /ëœë¤ ëŒ€ì‘)
+    float GetTotalDuration(GameObject root)
+    {
+        float maxT = 0f;
+        foreach (var ps in root.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var m = ps.main;
+            float lifeMax = 0f;
+            switch (m.startLifetime.mode)
+            {
+                case ParticleSystemCurveMode.Constant:
+                    lifeMax = m.startLifetime.constant; break;
+                case ParticleSystemCurveMode.TwoConstants:
+                    lifeMax = Mathf.Max(m.startLifetime.constantMin, m.startLifetime.constantMax); break;
+                case ParticleSystemCurveMode.Curve:
+                    lifeMax = m.startLifetime.curve.Evaluate(1f); break;
+                case ParticleSystemCurveMode.TwoCurves:
+                    lifeMax = Mathf.Max(m.startLifetime.curveMin.Evaluate(1f), m.startLifetime.curveMax.Evaluate(1f)); break;
+            }
+            float t = m.duration + lifeMax;
+            if (t > maxT) maxT = t;
+        }
+        return maxT;
+    }
+
+    // CreatureEffect ì•ˆì— ì¶”ê°€
+    public void PlayEffectFollow(ParticleSystem pooled, Transform target, Vector3 localOffset)
+    {
+        if (!pooled || !target) return;
+
+        // ì¬ìƒ ì¤‘ì´ë©´ ë³µì œë³¸ ìƒì„± (ëë‚˜ë©´ ìë™ íŒŒê´´)
+        if (pooled.gameObject.activeInHierarchy)
+        {
+            var clone = Instantiate(pooled, target.position, pooled.transform.rotation, target);
+            clone.transform.localPosition = localOffset;
+            var m = clone.main;
+            m.loop = false;
+            m.simulationSpace = ParticleSystemSimulationSpace.Local; // ë¶€ëª¨ ê¸°ì¤€ìœ¼ë¡œ ë”°ë¼ê°
+            m.stopAction = ParticleSystemStopAction.Destroy;
+            clone.Clear(true);
+            clone.Play(true);
+            return;
+        }
+
+        // í’€ë§ëœ ê°œì²´ ì¬ì‚¬ìš©
+        pooled.transform.SetParent(target);
+        pooled.transform.localPosition = localOffset;
+        var main = pooled.main;
+        main.loop = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.stopAction = ParticleSystemStopAction.None;
+        pooled.gameObject.SetActive(true);
+        pooled.Clear(true);
+        pooled.Play(true);
+
+        float t = GetTotalDuration(pooled.gameObject) + 0.05f;
+        StartCoroutine(DisableAfterAndUnparent(pooled.gameObject, t));
+    }
+
+    private IEnumerator DisableAfterAndUnparent(GameObject go, float t)
+    {
+        yield return new WaitForSeconds(t);
+        if (!go) yield break;
+        go.transform.SetParent(Instance.transform, worldPositionStays: true); // í’€ë¡œ ë˜ëŒë¦¼(ì›í•˜ë©´ ì „ìš© ë¶€ëª¨ ì‚¬ìš©)
+        go.SetActive(false);
+    }
+    /*public void PlayEffect(GameObject effectPrefab, Vector3 position)
     {
         if (effectPrefab != null)
         {
@@ -43,7 +146,7 @@ public class CreatureEffect : MonoBehaviour
         }
         else
         {
-            Debug.Log("ÀÌÆåÆ® ³Î ¹ö±×");
+            Debug.Log("ì´í™íŠ¸ ë„ ë²„ê·¸");
         }
-    }
+    }*/
 }

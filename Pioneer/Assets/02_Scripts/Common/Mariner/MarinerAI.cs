@@ -561,6 +561,7 @@ public class MarinerAI : MarinerBase, IBegin
 
         GameManager.Instance.MarinerDiedCount();
         PlayerCore.Instance.ReduceMentalOnMarinerDie();
+        GuiltySystem.instance.CrewDead();
         base.WhenDestroy();
     }
 

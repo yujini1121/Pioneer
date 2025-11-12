@@ -47,6 +47,12 @@ public class TreasureBoxManager : MonoBehaviour
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
 
+        if (CreatureEffect.Instance != null)
+        {
+            ParticleSystem ps = CreatureEffect.Instance.Effects[9]; // 그냥 몸에서 제작완료
+            CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, 1.5f, 0f));
+        }
+
         InventoryManager.Instance.Add(rewardStack[0]);
 
         rewardStack.RemoveAt(0);

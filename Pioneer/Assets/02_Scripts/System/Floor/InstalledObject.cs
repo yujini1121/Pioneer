@@ -45,6 +45,13 @@ public class InstalledObject : MonoBehaviour
         if (_rend == null) _rend = GetComponent<Renderer>();
         if (_rend && _rend.material) _origColor = _rend.material.color;
 
+        if (CreatureEffect.Instance != null)
+        {
+            ParticleSystem ps = CreatureEffect.Instance.Effects[0]; 
+            CreatureEffect.Instance.PlayEffect(ps, transform.position + new Vector3(0f,1f,0f));
+            Debug.Log("설치 이펙트 호출");
+        }
+
         // 이동 상태는 반드시 해제
         _relocating = false;
     }
@@ -61,7 +68,14 @@ public class InstalledObject : MonoBehaviour
     {
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.DestroyedObject);
-        
+
+
+        if (CreatureEffect.Instance != null)
+        {
+            var ps = CreatureEffect.Instance.Effects[1]; 
+            CreatureEffect.Instance.PlayEffect(ps, transform.position);
+        }
+
         Destroy(gameObject);
     }
 
