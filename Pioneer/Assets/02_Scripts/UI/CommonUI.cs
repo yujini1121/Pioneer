@@ -374,17 +374,11 @@ public class CommonUI : MonoBehaviour, IBegin
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting);
 
-            if (CreatureEffect.Instance != null)
-            {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // 그냥 몸에서 제작완료
-                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
+            var ps = CreatureEffect.Instance.Effects[2];
+            CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
 
-            }
-            if (CreatureEffect.Instance != null)
-            {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[6]; // 대성공
-                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position+new Vector3(0f,1f,0f));
-            }
+            var ps2 = CreatureEffect.Instance.Effects[6];
+            CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 1.3f, 0f));
         }
         else
         {
@@ -393,11 +387,8 @@ public class CommonUI : MonoBehaviour, IBegin
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting);
 
-            if (CreatureEffect.Instance != null)
-            {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // 그냥 몸에서 제작완료
-                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
-            }
+            var ps3 = CreatureEffect.Instance.Effects[2];
+            CreatureEffect.Instance.PlayEffectFollow(ps3, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
         }
 
 
