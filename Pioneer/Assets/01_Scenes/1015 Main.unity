@@ -19298,6 +19298,9 @@ MonoBehaviour:
     fising:
     - {fileID: 7400000, guid: 2f93acdb7de48394bab38ceaa505ebb8, type: 2}
     - {fileID: 7400000, guid: df828e6f3cd6e814190e96ed875219f6, type: 2}
+    fisingHold:
+    - {fileID: 7400000, guid: f204882bdb602b04a994bd0f1d6fe5ae, type: 2}
+    - {fileID: 7400000, guid: f28b157084cb11d4bb8bdf8a4c2a6e73, type: 2}
     attack:
     - {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
     - {fileID: 7400000, guid: 6c10e85f0cab3a94caa9c849169d9c65, type: 2}
@@ -19321,6 +19324,8 @@ MonoBehaviour:
     curIdleClip: {fileID: 7400000, guid: e7b6ecb1e9b92b34388e2d13962d5097, type: 2}
     curRunClip: {fileID: 7400000, guid: c25097aee445c194087234cc8655cb54, type: 2}
     curFishingClip: {fileID: 7400000, guid: 2f93acdb7de48394bab38ceaa505ebb8, type: 2}
+    curFishingHoldClip: {fileID: 7400000, guid: f204882bdb602b04a994bd0f1d6fe5ae,
+      type: 2}
     curAttackClip: {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
     curWoodenSwordClip: {fileID: 7400000, guid: 03ad0a901485a154a9491a4536420aed,
       type: 2}
@@ -22199,7 +22204,6 @@ MonoBehaviour:
   material2eaText: {fileID: 1639034610}
   material3eaText: {fileID: 1245556898}
   craftLore: {fileID: 1330261395}
-  pivotItem: {fileID: 0}
   startPos: {x: 0, y: 0, z: 0}
   xTerm: 200
   yTerm: -200
@@ -26268,6 +26272,7 @@ MonoBehaviour:
     trap: {fileID: 6496894871947221018, guid: 2e1b17aa88865d14e832cfab90be1c1b, type: 3}
     lantern: {fileID: 8600612548437967184, guid: 48ada4cc6191cd944802c98adfe22c51,
       type: 3}
+    chest: {fileID: 0}
   navMeshSurface: {fileID: 860495886}
   stopDistance: 1.5
   uiRaycaster: {fileID: 0}

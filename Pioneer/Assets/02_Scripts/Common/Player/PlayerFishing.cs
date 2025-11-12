@@ -30,6 +30,27 @@ public class PlayerFishing : MonoBehaviour
         creatureEffect = PlayerCore.Instance.GetComponent<CreatureEffect>();
     }
 
+    // PlayerFishing.cs
+    public void BeginFishing(Vector3 dir)
+    {
+        // 좌/우만 사용: x>=0 → 1(오른쪽), x<0 → 0(왼쪽). 정지면 마지막 값 유지되므로 1로 처리
+        int idx = (Mathf.Abs(dir.x) < 1e-6f) ? 1 : (dir.x >= 0f ? 1 : 0);
+
+        // 안전장치: 리스트가 2개 미만이면 0으로 강제
+        var slots = PlayerCore.Instance.GetComponent<PlayerController>().animSlots;
+        int maxReady = (slots.fising != null) ? Mathf.Max(0, slots.fising.Count - 1) : 0;
+        int maxHold = (slots.fisingHold != null) ? Mathf.Max(0, slots.fisingHold.Count - 1) : 0;
+        idx = Mathf.Clamp(idx, 0, Mathf.Min(maxReady, maxHold));
+
+        PlayerCore.Instance.SetState(PlayerCore.PlayerState.ActionFishing);
+        PlayerCore.Instance.FishingReady(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
+        PlayerCore.Instance.FishingHold(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
+
+        StartFishingLoop();
+    }
+
+
+
     // 현재 낚시 중인지 확인
     public void StartFishingLoop()
     {
@@ -48,8 +69,8 @@ public class PlayerFishing : MonoBehaviour
             creatureEffect.Effects[3].Stop();
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
-            Debug.Log("낚시 중단");
         }
+        PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
     }
 
     // 낚시로 아이템 추가하는 코드

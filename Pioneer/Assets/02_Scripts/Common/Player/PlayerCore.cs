@@ -312,12 +312,10 @@ public class PlayerCore : CreatureBase, IBegin
     void ChangeFishingHoldByIndex(int idx)
     {
         if (idx < 0) return;
-        var target = slots.fisingHold[idx];
-
+        var target = slots.fisingHold[idx];          // ← fisingHold 로 반드시
         controller.ChangeAnimationClip(slots.curFishingHoldClip, target);
         animator.SetTrigger("SetFishingHold");
     }
-
     // =============================================================
     // 가만히있엇
     // =============================================================
