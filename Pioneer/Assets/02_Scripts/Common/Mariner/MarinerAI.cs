@@ -45,8 +45,8 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
-        maxHp = 100;
-        hp = 100;
+        maxHp = 40;
+        hp = 40;
         speed = 2f;
         attackDamage = 6;
         attackRange = 1.5f;
@@ -70,10 +70,10 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.L))
+        /*if (Input.GetKeyDown(KeyCode.L))
         {
             TakeDamage(9999, null); // 강제로 죽이기
-        }
+        }*/
 
         if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 
