@@ -44,8 +44,8 @@ public class PlayerFishing : MonoBehaviour
     {
         if (fishingLoopCoroutine != null)
         {
-            creatureEffect.Effects[5].Stop();
-            creatureEffect.Effects[3].Stop();
+            /*creatureEffect.Effects[5].Stop();
+            creatureEffect.Effects[3].Stop();*/
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
             Debug.Log("≥¨Ω√ ¡ﬂ¥‹");
@@ -62,7 +62,13 @@ public class PlayerFishing : MonoBehaviour
         {
             // ≥¨Ω√ Ω√¿€
             Debug.Log("≥¨Ω√ Ω√¿€");
-            creatureEffect.Effects[5].Play();
+
+            if (CreatureEffect.Instance != null)
+            {
+                ParticleSystem ps = CreatureEffect.Instance.Effects[8]; // ±◊≥… ∏ˆø°º≠ ¡¶¿€øœ∑·
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0f));
+            }
+
             yield return new WaitForSeconds(2f);
 
             // æ∆¿Ã≈€ »πµÊ
@@ -125,8 +131,8 @@ public class PlayerFishing : MonoBehaviour
                         InventoryManager.Instance.Add(waterBloombonusItemStack);
                     }
                 }
-
-                creatureEffect.Effects[3].Play();
+                
+                //creatureEffect.Effects[3].Play();
             }
             else
             {
