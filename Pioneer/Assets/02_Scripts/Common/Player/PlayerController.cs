@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
 	public Slider cencleChargeSlider;
 
 	private LayerMask combinedMask;
-	private float currentChargeTime;
+	public float currentChargeTime;
 	private bool isCharging;
 
 	[SerializeField] private float fishingCancelDelay = 1.0f;
@@ -70,11 +70,6 @@ public class PlayerController : MonoBehaviour
 		Debug.Log($"moveX : {moveX}, moveY: {moveY}");
 		Debug.Log($"moveInput : {moveInput}");
 
-        if (moveX == 0 && moveY == 0)
-        {
-            playerCore.Idle(lastMoveDirection);
-        }
-
         switch (playerCore.currentState)
 		{
 			case PlayerCore.PlayerState.Default:
@@ -90,28 +85,10 @@ public class PlayerController : MonoBehaviour
 				HendleFishing();
 				break;
 		}
-
-
-        /*if (PlayerCore.Instance.speed == 0)
-        {
-            Debug.Log("저왜움직여요");
-            playerCore.Idle();
-        }*/
     }
 
 	private void HendleDefault()
 	{
-		/*// 이동
-		float moveX = Input.GetAxisRaw("Horizontal");
-		float moveY = Input.GetAxisRaw("Vertical");
-		Vector3 moveInput = new Vector3(moveX, 0, moveY);
-		Vector3 moveDirection = moveInput.normalized;
-
-		if(moveX == 0 && moveY == 0)
-		{
-            playerCore.Idle();
-        }*/
-
         playerCore.Move(moveInput);
 
 		if (moveDirection != Vector3.zero)
@@ -159,7 +136,7 @@ public class PlayerController : MonoBehaviour
                 isCharging = false;
 				playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
 
-                playerCore.Fishing(lastMoveDirection);
+                playerCore.FishingReady(lastMoveDirection);
 
                 playerFishing.StartFishingLoop();
 				cancelDelayTimer = fishingCancelDelay;

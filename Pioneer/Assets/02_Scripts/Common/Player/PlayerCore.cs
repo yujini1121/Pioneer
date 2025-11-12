@@ -266,62 +266,6 @@ public class PlayerCore : CreatureBase, IBegin
         UnityEngine.Debug.Log("Player State Changed to: " + state);
     }
 
-    static int Get4DirIndex(in Vector3 v)
-    {
-        if (v.sqrMagnitude < 1e-6f) return -1;
-        float ax = Mathf.Abs(v.x);
-        float az = Mathf.Abs(v.z);
-        if (ax >= az) return (v.x >= 0f) ? 3 : 2; // Right : Left
-        else return (v.z <= 0f) ? 0 : 1; // Front : Back
-    }
-
-    static int Get2DirIndex(in Vector3 v)
-    {
-        if (v.sqrMagnitude < 1e-6f) return -1;   // 정지면 -1
-        return (v.x >= 0f) ? 1 : 0;              // 1:Right, 0:Left
-    }
-
-    void ChangeIdleByIndex(int idx)
-    {
-        if (idx < 0) return;
-        var target = slots.idle[idx];
-
-        controller.ChangeAnimationClip(slots.curIdleClip, target);
-        animator.SetTrigger("SetIdle");
-    }
-
-    void ChangeRunByIndex(int idx)
-    {
-        if (idx < 0) return;
-        var target = slots.run[idx];
-
-        controller.ChangeAnimationClip(slots.curRunClip, target);
-        animator.SetTrigger("SetRun");
-    }
-
-    void ChangeFishingByIndex(int idx)
-    {
-        if (idx < 0) return;
-        var target = slots.fising[idx];
-
-        controller.ChangeAnimationClip(slots.curFishingClip, target);
-        animator.SetTrigger("SetFishing"); 
-    }
-
-    // =============================================================
-    // 가만히있엇
-    // =============================================================
-    public void Idle(Vector3 moveInput)
-    {
-        int idx = Get4DirIndex(moveInput);
-        UnityEngine.Debug.Log($"Idle idx : {idx}");
-        if (idx != _curRunIdx)
-        {
-            ChangeIdleByIndex(idx);
-            _curIdleIdx = idx;
-        }
-    }
-
     // =============================================================
     // 이동
     // =============================================================
@@ -329,34 +273,13 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (currentState != PlayerState.Default) return;
 
-        int idx = Get4DirIndex(moveInput);
-        if (idx != _curRunIdx)
-        {
-            ChangeRunByIndex(idx);
-            _curRunIdx = idx;
-        }
-
         var v = moveInput.normalized * speed;
         playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
     }
 
     // =============================================================
-    // 낚시
-    // =============================================================
-    public void Fishing(Vector3 dir)
-    {
-        int idx = Get2DirIndex(dir);
-        if (idx != _curFishingIdx)
-        {
-            ChangeFishingByIndex(idx);
-            _curFishingIdx = idx;
-        }
-    }
-
-    // =============================================================
     // 공격
     // =============================================================
-
     public bool IsMentalDebuff()
     {
         return currentMental < 40.0f; 
