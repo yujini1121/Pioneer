@@ -36,14 +36,14 @@ public class PlayerCore : CreatureBase, IBegin
 {
     public static PlayerCore Instance;
 
-        // 플레이어 행동 상태 열거형
+    // 플레이어 행동 상태 열거형
     public enum PlayerState
     {
         Default,            // 기본
         ChargingFishing,    // 낚시 키 누르는 중
         ActionFishing,      // 낚시 중
         Dead                // 사망
-    }    
+    }
 
     // { 생체 시스템 변수 } //
     // 포만감 열거형 (fullness 변수 값에 따른 상태)
@@ -55,7 +55,7 @@ public class PlayerCore : CreatureBase, IBegin
         Starving    // 굶주림 (0)
     }
 
-        // [ 공격력 변수 ]
+    // [ 공격력 변수 ]
     public float AttackDamageCalculated
     {
         get
@@ -74,8 +74,6 @@ public class PlayerCore : CreatureBase, IBegin
     {
         get => IsMentalDebuff();
     }
-
-    private float lastEffectTime = -999f;
 
     [Header("포만감 변수")]
     // [ 포만감 변수 ]  
@@ -129,13 +127,15 @@ public class PlayerCore : CreatureBase, IBegin
     private AnimationSlot slots;
     private Animator animator;
 
+
+    private float lastEffectTime = -999f;
     private Vector3 currentDirection;
     private int _curIdleIdx = -1; // 0:F, 1:B, 2:L, 3:R
-    private int _curRunIdx = -1; 
-    private int _curFishingIdx = -1; 
+    private int _curRunIdx = -1;
+    private int _curFishingIdx = -1;
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
-	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
+    public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
 
     public Transform mast;
 
@@ -154,15 +154,15 @@ public class PlayerCore : CreatureBase, IBegin
         {
             SItemWeaponTypeSO returnValue = new SItemWeaponTypeSO();
             returnValue.DeepCopyFrom(handAttackCurrentValueRaw);
-            
+
             if (IsMentalDebuff())
             {
 #warning [생체 시스템 : 정신력 시스템] 정신력 40미만 공격력 감소량 구체적으로 작성
-				returnValue.weaponDamage /= 2; // 정신적으로 미쳐있을때만 영향 줌. 원래대로 복구함. 감소값 수정
-			}
+                returnValue.weaponDamage /= 2; // 정신적으로 미쳐있을때만 영향 줌. 원래대로 복구함. 감소값 수정
+            }
 
             return returnValue;
-		}
+        }
     }
 
 
@@ -206,7 +206,7 @@ public class PlayerCore : CreatureBase, IBegin
         playerRb = GetComponent<Rigidbody>();
 
     }
-    
+
     new void Start()
     {
         base.Start();
@@ -217,7 +217,7 @@ public class PlayerCore : CreatureBase, IBegin
 
     void Update()
     {
-        if(hp < 0)
+        if(hp <= 0)
         {
             IsDead = true;
             WhenDestroy();
@@ -233,8 +233,8 @@ public class PlayerCore : CreatureBase, IBegin
 
 
         fov.DetectTargets(enemyLayer);
-        if(!isDrunk)
-        { 
+        if (!isDrunk)
+        {
         }
         NearEnemy();
         //MentalState();
@@ -274,6 +274,62 @@ public class PlayerCore : CreatureBase, IBegin
         UnityEngine.Debug.Log("Player State Changed to: " + state);
     }
 
+    static int Get4DirIndex(in Vector3 v)
+    {
+        if (v.sqrMagnitude < 1e-6f) return -1;
+        float ax = Mathf.Abs(v.x);
+        float az = Mathf.Abs(v.z);
+        if (ax >= az) return (v.x >= 0f) ? 3 : 2; // Right : Left
+        else return (v.z <= 0f) ? 0 : 1; // Front : Back
+    }
+
+    static int Get2DirIndex(in Vector3 v)
+    {
+        if (v.sqrMagnitude < 1e-6f) return -1;   // 정지면 -1
+        return (v.x >= 0f) ? 1 : 0;              // 1:Right, 0:Left
+    }
+
+    void ChangeIdleByIndex(int idx)
+    {
+        if (idx < 0) return;
+        var target = slots.idle[idx];
+
+        controller.ChangeAnimationClip(slots.curIdleClip, target);
+        animator.SetTrigger("SetIdle");
+    }
+
+    void ChangeRunByIndex(int idx)
+    {
+        if (idx < 0) return;
+        var target = slots.run[idx];
+
+        controller.ChangeAnimationClip(slots.curRunClip, target);
+        animator.SetTrigger("SetRun");
+    }
+
+    void ChangeFishingByIndex(int idx)
+    {
+        if (idx < 0) return;
+        var target = slots.fising[idx];
+
+        controller.ChangeAnimationClip(slots.curFishingClip, target);
+        animator.SetTrigger("SetFishing");
+    }
+
+    // =============================================================
+    // 가만히있엇
+    // =============================================================
+    public void Idle(Vector3 moveInput)
+    {
+        int idx = Get4DirIndex(moveInput);
+        UnityEngine.Debug.Log($"Idle idx : {idx}");
+        if (idx != _curRunIdx)
+        {
+            ChangeIdleByIndex(idx);
+            _curIdleIdx = idx;
+        }
+    }
+
     // =============================================================
     // 이동
     // =============================================================
@@ -281,16 +337,37 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (currentState != PlayerState.Default) return;
 
+        int idx = Get4DirIndex(moveInput);
+        if (idx != _curRunIdx)
+        {
+            ChangeRunByIndex(idx);
+            _curRunIdx = idx;
+        }
+
         var v = moveInput.normalized * speed;
         playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
     }
 
     // =============================================================
+    // 낚시
+    // =============================================================
+    public void Fishing(Vector3 dir)
+    {
+        int idx = Get2DirIndex(dir);
+        if (idx != _curFishingIdx)
+        {
+            ChangeFishingByIndex(idx);
+            _curFishingIdx = idx;
+        }
+    }
+
+    // =============================================================
     // 공격
     // =============================================================
+
     public bool IsMentalDebuff()
     {
-        return currentMental < 40.0f; 
+        return currentMental < 40.0f;
     }
 
     public bool BeginCoroutine(IEnumerator coroutine)
@@ -339,7 +416,7 @@ public class PlayerCore : CreatureBase, IBegin
             UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
         }
 
-        if(hp <= 0)
+        if (hp <= 0)
         {
             // creatureEffect.Effects[3].Play();
         }
@@ -369,7 +446,7 @@ public class PlayerCore : CreatureBase, IBegin
     /// <returns></returns>
     private IEnumerator FullnessSystemCoroutine()
     {
-        while(true)
+        while (true)
         {
             float currentDecreaseTime = fullnessDecreaseTime;
             if (hp < maxHp * 0.5f)
@@ -379,7 +456,7 @@ public class PlayerCore : CreatureBase, IBegin
 
             yield return new WaitForSeconds(currentDecreaseTime);
 
-            if(currentFullness >= 0)
+            if (currentFullness >= 0)
             {
                 currentFullness--;
                 currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
@@ -433,7 +510,7 @@ public class PlayerCore : CreatureBase, IBegin
 
             if (currentFullnessState == FullnessState.Starving)      // 굶주림 상태일때
             {
-                if(starvationCoroutine == null)
+                if (starvationCoroutine == null)
                     starvationCoroutine = StartCoroutine(StarvingDamageCorountine());
             }
             else                                                    // 굶주림 상태가 아닐때
@@ -454,14 +531,14 @@ public class PlayerCore : CreatureBase, IBegin
     private IEnumerator StarvingDamageCorountine()
     {
         UnityEngine.Debug.Log("굶주림 상태 : 체력 감소 시작");
-        for(int i = 0; i < fullnessStarvingMax; i++)
+        for (int i = 0; i < fullnessStarvingMax; i++)
         {
             yield return new WaitForSeconds(1f);
             //TakeDamage(1, this.gameObject);
             hp -= 1;
             hp = Mathf.Clamp(hp, 0, maxHp);
             PlayerHpChanged?.Invoke(hp);
-        }        
+        }
     }
 
     /// <summary>
@@ -479,7 +556,7 @@ public class PlayerCore : CreatureBase, IBegin
     // 굶주림 제거 
     public void RemoveStarvingIEnumerator()
     {
-        if(starvationCoroutine != null)
+        if (starvationCoroutine != null)
         {
             StopCoroutine(starvationCoroutine);
             starvationCoroutine = null;
@@ -519,10 +596,10 @@ public class PlayerCore : CreatureBase, IBegin
     /// <param name="increase"></param>
     public void UpdateMental(int increase)
     {
-        if(isDrunk)
+        if (isDrunk)
             return;
 
-        if(currentMental <= 29 && !isPlaySFXMental)
+        if (currentMental <= 29 && !isPlaySFXMental)
         {
             isPlaySFXMental = true;
             AudioManager.instance.PlaySfx(AudioManager.SFX.Sanity29Down);
@@ -533,20 +610,19 @@ public class PlayerCore : CreatureBase, IBegin
             isPlaySFXMental = false;
         }
 
-        if (Time.time - lastEffectTime >= 10f) // 10초마다 1회만
+        if(Time.time - lastEffectTime >= 10f)
         {
-            if (increase <= 0)
+            if(increase <= 0)
             {
                 var ps = CreatureEffect.Instance.Effects[5];
                 CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
-            }
-            else if (increase > 0)
+            }else if (increase >0)
             {
                 var ps = CreatureEffect.Instance.Effects[4];
                 CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
             }
 
-            lastEffectTime = Time.time; // 시간 갱신
+            lastEffectTime = Time.time;
         }
 
         currentMental += increase;
@@ -584,7 +660,7 @@ public class PlayerCore : CreatureBase, IBegin
         {
             enemyExistCoroutine = StartCoroutine(EnemyExist());
         }
-        else if(fov.visibleTargets.Count == 0 && enemyExistCoroutine != null)
+        else if (fov.visibleTargets.Count == 0 && enemyExistCoroutine != null)
         {
             StopCoroutine(enemyExistCoroutine);
             enemyExistCoroutine = null;
@@ -597,11 +673,11 @@ public class PlayerCore : CreatureBase, IBegin
     /// <returns></returns>
     private IEnumerator EnemyExist()
     {
-        while(true)
+        while (true)
         {
             yield return new WaitForSeconds(existEnemyMentalCool);
             UpdateMental(existEnemyMentalDecrease);
-        }        
+        }
     }
 
     public bool IsDrunk() // 만취상태인지만 리턴하는 메서드 
