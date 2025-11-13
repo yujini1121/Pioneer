@@ -42,11 +42,9 @@ public class PlayerFishing : MonoBehaviour
         int maxHold = (slots.fisingHold != null) ? Mathf.Max(0, slots.fisingHold.Count - 1) : 0;
         idx = Mathf.Clamp(idx, 0, Mathf.Min(maxReady, maxHold));
 
-        PlayerCore.Instance.SetState(PlayerCore.PlayerState.ActionFishing);
+        //PlayerCore.Instance.SetState(PlayerCore.PlayerState.ActionFishing);
         PlayerCore.Instance.FishingReady(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
-        PlayerCore.Instance.FishingHold(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
-
-        StartFishingLoop();
+        //PlayerCore.Instance.FishingHold(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
     }
 
 
