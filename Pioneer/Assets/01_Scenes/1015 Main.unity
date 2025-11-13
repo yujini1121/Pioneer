@@ -14027,6 +14027,24 @@ MonoBehaviour:
   duabilityReducePrevent: 0
   creatureEffect: {fileID: 0}
   controller: {fileID: 0}
+  slots:
+    idle: []
+    run: []
+    fising: []
+    fisingHold: []
+    attack: []
+    woodenSword: []
+    ironSword: []
+    conchSword: []
+    curIdleClip: {fileID: 0}
+    curRunClip: {fileID: 0}
+    curFishingClip: {fileID: 0}
+    curFishingHoldClip: {fileID: 0}
+    curAttackClip: {fileID: 0}
+    curWoodenSwordClip: {fileID: 0}
+    curIronSwrordClip: {fileID: 0}
+    curConchSwordClip: {fileID: 0}
+  _curFishingHoldIdx: -1
   handAttackStartDefault: {fileID: 11400000, guid: cac60e5c912990f459fe7c629b5e80e6,
     type: 2}
   handAttackCurrentValueRaw: {fileID: 11400000, guid: 44a7ec6ff666348499c27d7843f6d17c,
@@ -19282,6 +19300,7 @@ MonoBehaviour:
   fishingCencleUI: {fileID: 1523561411}
   chargeSlider: {fileID: 414858961}
   cencleChargeSlider: {fileID: 583700802}
+  isCharging: 0
   fishingCancelDelay: 1
   animator: {fileID: 4775383469521072797}
   animSlots:
@@ -19331,6 +19350,7 @@ MonoBehaviour:
       type: 2}
     curIronSwrordClip: {fileID: 7400000, guid: 15d89d6f4ea00854ca058ee03641420b, type: 2}
     curConchSwordClip: {fileID: 7400000, guid: f1d022fddc143a1488bdd740cad4d1ca, type: 2}
+  nextAnimTrigger: 
 --- !u!222 &5622103427795389368
 CanvasRenderer:
   m_ObjectHideFlags: 0

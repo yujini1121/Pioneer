@@ -124,14 +124,14 @@ public class PlayerCore : CreatureBase, IBegin
 
     [Header("애니메이션 설정")]
     [SerializeField] private PlayerController controller;
-    private AnimationSlot slots;
+    public AnimationSlot slots;
     private Animator animator;
 
     private Vector3 currentDirection;
     private int _curIdleIdx = -1; // 0:F, 1:B, 2:L, 3:R
     private int _curRunIdx = -1; 
     private int _curFishingReadyIdx = -1; 
-    private int _curFishingHoldIdx = -1; 
+    public int _curFishingHoldIdx = -1; 
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
 	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
@@ -276,7 +276,7 @@ public class PlayerCore : CreatureBase, IBegin
         else return (v.z <= 0f) ? 0 : 1; // Front : Back
     }
 
-    static int Get2DirIndex(in Vector3 v)
+    public static int Get2DirIndex(in Vector3 v)
     {
         if (v.sqrMagnitude < 1e-6f) return -1;   // 정지면 -1
         return (v.x >= 0f) ? 1 : 0;              // 1:Right, 0:Left
@@ -288,7 +288,7 @@ public class PlayerCore : CreatureBase, IBegin
         var target = slots.idle[idx];
 
         controller.ChangeAnimationClip(slots.curIdleClip, target);
-        animator.SetTrigger("SetIdle");
+        playerController.nextAnimTrigger = "SetIdle";
     }
 
     void ChangeRunByIndex(int idx)
@@ -297,7 +297,7 @@ public class PlayerCore : CreatureBase, IBegin
         var target = slots.run[idx];
 
         controller.ChangeAnimationClip(slots.curRunClip, target);
-        animator.SetTrigger("SetRun");
+        playerController.nextAnimTrigger = "SetRun";
     }
 
     void ChangeFishingReadyByIndex(int idx)
@@ -306,15 +306,16 @@ public class PlayerCore : CreatureBase, IBegin
         var target = slots.fising[idx];
 
         controller.ChangeAnimationClip(slots.curFishingClip, target);
-        animator.SetTrigger("SetFishing"); 
+        playerController.nextAnimTrigger = "SetFishing";
     }
 
-    void ChangeFishingHoldByIndex(int idx)
+    public void ChangeFishingHoldByIndex(int idx)
     {
         if (idx < 0) return;
         var target = slots.fisingHold[idx];          // ← fisingHold 로 반드시
+        
         controller.ChangeAnimationClip(slots.curFishingHoldClip, target);
-        animator.SetTrigger("SetFishingHold");
+        playerController.nextAnimTrigger = "SetFishingHold";
     }
     // =============================================================
     // 가만히있엇
@@ -323,6 +324,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         int idx = Get4DirIndex(moveInput);
         UnityEngine.Debug.Log($"Idle idx : {idx}");
+
         if (idx != _curRunIdx)
         {
             ChangeIdleByIndex(idx);
@@ -356,7 +358,9 @@ public class PlayerCore : CreatureBase, IBegin
         int idx = Get2DirIndex(dir);
         if (idx < 0) return;
 
-        if (idx != _curFishingReadyIdx) { ChangeFishingReadyByIndex(idx); _curFishingReadyIdx = idx; }
+        ChangeFishingReadyByIndex(idx);
+
+        //if (idx != _curFishingReadyIdx) { ChangeFishingReadyByIndex(idx); _curFishingReadyIdx = idx; }
         //if (idx != _curFishingHoldIdx) { ChangeFishingHoldByIndex(idx); _curFishingHoldIdx = idx; }
     }
 
@@ -709,5 +713,4 @@ public class PlayerCore : CreatureBase, IBegin
         isDrunk = false;
     }
     #endregion
-
 }
