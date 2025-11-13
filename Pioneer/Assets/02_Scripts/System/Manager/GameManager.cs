@@ -372,12 +372,14 @@ public class GameManager : MonoBehaviour, IBegin
         {
             case 1: return 0;
             case 2: return 1;
-            case 3: return 2;
-            case 4: return 3;
-            case 5: return (marinerNow <= 3) ? 4 : 5;
+            case 3: return 1;
+            case 4: return 1;
+            case 5: return 1;
+            // case 5: return (marinerNow <= 3) ? 4 : 5;
             default:
                 // 6일차 이상은 마지막 값을 유지하거나, 필요 시 규칙 확장
-                return (marinerNow <= 3) ? 4 : 5;
+                return 1;
+                // return (marinerNow <= 3) ? 4 : 5;
         }
     }
 

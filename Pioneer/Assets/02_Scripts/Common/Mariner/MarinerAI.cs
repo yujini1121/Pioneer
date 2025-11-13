@@ -45,8 +45,8 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Awake()
     {
-        maxHp = 100;
-        hp = 100;
+        maxHp = 40;
+        hp = 40;
         speed = 2f;
         attackDamage = 6;
         attackRange = 1.5f;

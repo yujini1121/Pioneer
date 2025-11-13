@@ -84,7 +84,7 @@ public class MinionAI : EnemyBase, IBegin
     {
         hp = 20;
         maxHp = hp;
-        attackDamage = 2;
+        attackDamage = 5;
         attackRange = 1f;
         speed = 2f;
         detectionRange = 1.5f;

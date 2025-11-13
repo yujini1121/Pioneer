@@ -95,11 +95,11 @@ public class PlayerFishing : MonoBehaviour
                 if(caughtItem == treasureItem)
                 {
                     TreasureBoxManager.instance.GetBox();
-                    fishingExp = 10;
+                    fishingExp = 4;
                 }
                 else
                 {
-                    fishingExp = 5;
+                    fishingExp = 2;
                     InventoryManager.Instance.Add(itemStack);
                 }
 
