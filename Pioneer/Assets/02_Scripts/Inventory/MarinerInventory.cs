@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class MarinerInventory : InventoryBase
 {
@@ -138,7 +137,7 @@ public class MarinerInventory : InventoryBase
     public void TransferAllItemsToStorage(InventoryBase storageInventory)
     {
         Debug.Log("모든 아이템 보관함에 저장 함수 호출");
-        if (storageInventory == null) ; // 오류 검증을 위한 return 제거
+        if (storageInventory == null)return; // 오류 검증을 위한 return 제거
 
         for (int i = 0; i < itemLists.Count; i++)
         {
