@@ -27,7 +27,7 @@ public class PlayerRepair : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        effect.SetActive(false);
+        effect.SetActive(false);    
     }
 
     // Update is called once per frame

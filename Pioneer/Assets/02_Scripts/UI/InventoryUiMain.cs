@@ -75,6 +75,14 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void ClickSlot(int index)
     {
+        if (InGameUI.instance.IsPannelExpanded == false)
+        {
+            SelectSlot(index);
+            IconRefresh();
+            return;
+        }    
+
+
         // 현재 크래프팅 중
         if (CommonUI.instance.IsCurrentCrafting && InGameUI.instance.currentFabricationUi != null)
         {

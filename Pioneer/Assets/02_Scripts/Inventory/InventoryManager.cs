@@ -190,11 +190,23 @@ public class InventoryManager : InventoryBase
             .OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].categories)
             .ThenBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].typeName, StringComparer.Create(
             new CultureInfo("ko-KR"), ignoreCase: false)).ToList();
-        for (int index = 0; index < list.Count; index++)
+        for (int listIndex = 0; listIndex < list.Count; ++listIndex)
         {
-            SItemStack m;
-            TryAdd(list[index], out m);
-            //itemLists[index] = (list[index]);
+            Add(list[listIndex]);
+        }
+        list = new List<SItemStack>();
+        for (int index = 0; index < inventoryCount; index++)
+        {
+            list.Add(itemLists[index]);
+        }
+        // 9번부터 채우도록 이동함
+        for (int index = 9; index < inventoryCount; index++)
+        {
+            itemLists[index] = list[index - 9];
+        }
+        for (int index = 0; index < 9; index++)
+        {
+            itemLists[index] = list[index + 18];
         }
         SafeClean();
     }
