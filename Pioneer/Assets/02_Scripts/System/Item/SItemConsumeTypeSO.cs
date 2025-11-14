@@ -73,7 +73,7 @@ public class SItemConsumeTypeSO : SItemTypeSO
             //¹è°íÇÄ ÇØ¼Ò
             case 804://
                 PlayerCore.Instance.currentFullness = Mathf.Min
-                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 10);
+                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 5);
                 break;
             case 805://
                 PlayerCore.Instance.currentFullness = Mathf.Min

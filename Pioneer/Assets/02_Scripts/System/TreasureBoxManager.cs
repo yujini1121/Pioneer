@@ -1,4 +1,4 @@
-
+Ôªø
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ public class TreasureBoxManager : MonoBehaviour
 
     public void GetBox()
     {
-        Debug.Log(">> TreasureBoxManager : ∫∏ªÛ πﬁ¿Ω");
+        Debug.Log(">> TreasureBoxManager : Î≥¥ÏÉÅ Î∞õÏùå");
 
         SItemStack r = GetReward();
         rewardStack.Add(r);
@@ -46,6 +46,13 @@ public class TreasureBoxManager : MonoBehaviour
     {
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
+
+
+        if (CreatureEffect.Instance != null)
+        {
+            ParticleSystem ps = CreatureEffect.Instance.Effects[9]; 
+            CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, 1.5f, 0f));
+        }
 
         InventoryManager.Instance.Add(rewardStack[0]);
 

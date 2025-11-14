@@ -48,8 +48,8 @@ public class GuiltySystem : MonoBehaviour, IBegin
     private Vector2 mSize;
     private float slowEndTime = 0.0f;
     private int deadCount = 0;
-    private int maxAttackWeight = 20; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
-    private int currentAttackWeight = 0; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
+    public int maxAttackWeight = 30; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
+    public int currentAttackWeight = 0; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
     private int level = 0;
 
     public void ChangeWeight(int value)
@@ -59,10 +59,10 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
         switch (currentAttackWeight)
         {
-            case >= 16: level = 4; break;
-            case >= 12: level = 3; break;
-            case >= 8: level = 2; break;
-            case >= 4: level = 1; break;
+            case >= 25: level = 4; break;
+            case >= 19: level = 3; break;
+            case >= 10: level = 2; break;
+            case >= 3: level = 1; break;
             default: level = 0; break;
         }
         Debug.Log($">> GuiltySystem.ChangeWeight({value}) / level = {level}");

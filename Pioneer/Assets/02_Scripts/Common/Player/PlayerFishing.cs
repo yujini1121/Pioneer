@@ -85,7 +85,7 @@ public class PlayerFishing : MonoBehaviour
             if (CreatureEffect.Instance != null)
             {
                 ParticleSystem ps = CreatureEffect.Instance.Effects[8];
-                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0f));
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0.3f));
             }
             yield return new WaitForSeconds(2f);
 
@@ -98,11 +98,11 @@ public class PlayerFishing : MonoBehaviour
                 if(caughtItem == treasureItem)
                 {
                     TreasureBoxManager.instance.GetBox();
-                    fishingExp = 10;
+                    fishingExp = 4;
                 }
                 else
                 {
-                    fishingExp = 5;
+                    fishingExp = 2;
                     InventoryManager.Instance.Add(itemStack);
                 }
 
@@ -150,7 +150,7 @@ public class PlayerFishing : MonoBehaviour
                     }
                 }
 
-                creatureEffect.Effects[3].Play();
+                //creatureEffect.Effects[3].Play();
             }
             else
             {

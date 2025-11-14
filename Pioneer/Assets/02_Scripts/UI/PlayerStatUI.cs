@@ -33,8 +33,9 @@ public class PlayerStatUI : MonoBehaviour
     public Slider hpBar;
     public Slider fullnessBar;
     public Slider mentalBar;
+    public Slider guiltyBar;
 
-	private void Awake()
+    private void Awake()
 	{
         Instance = this;
 	}
@@ -72,6 +73,7 @@ public class PlayerStatUI : MonoBehaviour
         UpdateFullnessUI(PlayerCore.Instance.currentFullness);
         UpdateMentalUI(PlayerCore.Instance.CurrentMental);
         UpdateBasicStatUI();
+        UpdateGuiltyUI(GuiltySystem.instance.currentAttackWeight);
         UpdatePlayerGrowStatUI(GrowStatType.Combat);
         UpdatePlayerGrowStatUI(GrowStatType.Crafting);
         UpdatePlayerGrowStatUI(GrowStatType.Fishing);
@@ -83,7 +85,7 @@ public class PlayerStatUI : MonoBehaviour
         hpBar.maxValue = PlayerCore.Instance.maxHp;
         fullnessBar.maxValue = PlayerCore.Instance.maxFullness;
         mentalBar.maxValue = PlayerCore.Instance.maxMental;
-
+        guiltyBar.maxValue = GuiltySystem.instance.maxAttackWeight;
         UpdateHpUI(PlayerCore.Instance.hp);
         UpdateFullnessUI(PlayerCore.Instance.currentFullness);
         UpdateMentalUI(PlayerCore.Instance.CurrentMental);
@@ -107,6 +109,11 @@ public class PlayerStatUI : MonoBehaviour
     {
         playerHp.text = $"{currentHp}";
         hpBar.value = currentHp;
+    }
+
+    void UpdateGuiltyUI(int currentGuilty)
+    {
+        guiltyBar.value = currentGuilty;
     }
 
     public void UpdateBasicStatUI()

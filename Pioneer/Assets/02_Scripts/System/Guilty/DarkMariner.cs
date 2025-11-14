@@ -24,14 +24,17 @@ public class DarkMariner : MonoBehaviour
     {
         Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) : 호출됨, 충돌체 {collision.collider.name}");
 
-        if (ThisIsPlayer.IsThisPlayer(collision))
+        if (ThisIsPlayer.IsThisPlayer(collision) || collision.collider.GetComponent<PlayerAttack>() != null)
         {
             Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) => Player");
-
+            PlayerCore.Instance.TakeDamage(1, null);
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.CantESCNoise);
-
-            Curse();
+            if (GuiltySystem.instance.GuiltyLevel > 1)
+            {
+                Curse();
+            }
+            Destroy(gameObject);
         }
     }
 }
