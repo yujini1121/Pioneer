@@ -75,6 +75,8 @@ public class PlayerCore : CreatureBase, IBegin
         get => IsMentalDebuff();
     }
 
+    private float lastEffectTime = -999f;
+
     [Header("포만감 변수")]
     // [ 포만감 변수 ]  
     public int currentFullness;                                            // 현재 포만감 값

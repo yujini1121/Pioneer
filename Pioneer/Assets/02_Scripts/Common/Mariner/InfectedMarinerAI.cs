@@ -395,6 +395,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (hasTransformedToZombie) return;
         hasTransformedToZombie = true;
 
+        GuiltySystem.instance.CrewDead();
         Debug.Log("좀비 변신 전 랜덤 이동 시작");
 
         SetRandomDestination();

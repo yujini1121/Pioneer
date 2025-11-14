@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,10 +13,10 @@ public class PlayerFishing : MonoBehaviour
         public float dropProbability;
     }
 
-    [Header("³¬½Ã ¾ÆÀÌÅÛ µå¶ø Å×ÀÌºí")]
+    [Header("ë‚šì‹œ ì•„ì´í…œ ë“œë í…Œì´ë¸”")]
     public List<FishingDropItem> dropItemTable;
 
-    [Header("º¸¹° ¾ÆÀÌÅÛ")]
+    [Header("ë³´ë¬¼ ì•„ì´í…œ")]
     public SItemTypeSO treasureItem;
 
     private Coroutine fishingLoopCoroutine;
@@ -33,10 +33,10 @@ public class PlayerFishing : MonoBehaviour
     // PlayerFishing.cs
     public void BeginFishing(Vector3 dir)
     {
-        // ÁÂ/¿ì¸¸ »ç¿ë: x>=0 ¡æ 1(¿À¸¥ÂÊ), x<0 ¡æ 0(¿ŞÂÊ). Á¤Áö¸é ¸¶Áö¸· °ª À¯ÁöµÇ¹Ç·Î 1·Î Ã³¸®
+        // ì¢Œ/ìš°ë§Œ ì‚¬ìš©: x>=0 â†’ 1(ì˜¤ë¥¸ìª½), x<0 â†’ 0(ì™¼ìª½). ì •ì§€ë©´ ë§ˆì§€ë§‰ ê°’ ìœ ì§€ë˜ë¯€ë¡œ 1ë¡œ ì²˜ë¦¬
         int idx = (Mathf.Abs(dir.x) < 1e-6f) ? 1 : (dir.x >= 0f ? 1 : 0);
 
-        // ¾ÈÀüÀåÄ¡: ¸®½ºÆ®°¡ 2°³ ¹Ì¸¸ÀÌ¸é 0À¸·Î °­Á¦
+        // ì•ˆì „ì¥ì¹˜: ë¦¬ìŠ¤íŠ¸ê°€ 2ê°œ ë¯¸ë§Œì´ë©´ 0ìœ¼ë¡œ ê°•ì œ
         var slots = PlayerCore.Instance.GetComponent<PlayerController>().animSlots;
         int maxReady = (slots.fising != null) ? Mathf.Max(0, slots.fising.Count - 1) : 0;
         int maxHold = (slots.fisingHold != null) ? Mathf.Max(0, slots.fisingHold.Count - 1) : 0;
@@ -49,12 +49,12 @@ public class PlayerFishing : MonoBehaviour
 
 
 
-    // ÇöÀç ³¬½Ã ÁßÀÎÁö È®ÀÎ
+    // í˜„ì¬ ë‚šì‹œ ì¤‘ì¸ì§€ í™•ì¸
     public void StartFishingLoop()
     {
         if(fishingLoopCoroutine == null)
         {
-            // ³¬½Ã ÁßÀÌ ¾Æ´Ï¸é ³¬½Ã ½ÃÀÛ
+            // ë‚šì‹œ ì¤‘ì´ ì•„ë‹ˆë©´ ë‚šì‹œ ì‹œì‘
             fishingLoopCoroutine = StartCoroutine(FishingLoop());
         }
     }
@@ -63,15 +63,15 @@ public class PlayerFishing : MonoBehaviour
     {
         if (fishingLoopCoroutine != null)
         {
-            creatureEffect.Effects[5].Stop();
-            creatureEffect.Effects[3].Stop();
+            //creatureEffect.Effects[5].Stop();
+            //creatureEffect.Effects[3].Stop();
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
         }
         PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
     }
 
-    // ³¬½Ã·Î ¾ÆÀÌÅÛ Ãß°¡ÇÏ´Â ÄÚµå
+    // ë‚šì‹œë¡œ ì•„ì´í…œ ì¶”ê°€í•˜ëŠ” ì½”ë“œ
     private IEnumerator FishingLoop()
     {
         if (AudioManager.instance != null)
@@ -79,12 +79,17 @@ public class PlayerFishing : MonoBehaviour
 
         while (true)
         {
-            // ³¬½Ã ½ÃÀÛ
-            Debug.Log("³¬½Ã ½ÃÀÛ");
-            creatureEffect.Effects[5].Play();
+            // ë‚šì‹œ ì‹œì‘
+            Debug.Log("ë‚šì‹œ ì‹œì‘");
+
+            if (CreatureEffect.Instance != null)
+            {
+                ParticleSystem ps = CreatureEffect.Instance.Effects[8];
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0f));
+            }
             yield return new WaitForSeconds(2f);
 
-            // ¾ÆÀÌÅÛ È¹µæ
+            // ì•„ì´í…œ íšë“
             SItemTypeSO caughtItem = GetItem();
             if(caughtItem != null)
             {                
@@ -102,7 +107,7 @@ public class PlayerFishing : MonoBehaviour
                 }
 
                 PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
-                Debug.Log($">> PlayerFishing.FishingLoop() ¾ÆÀÌÅÛ È¹µæ: ¼ıÀÚ {caughtItem.id}, ÀÌ¸§ {caughtItem.typeName}, °æÇèÄ¡ +{fishingExp}");
+                Debug.Log($">> PlayerFishing.FishingLoop() ì•„ì´í…œ íšë“: ìˆ«ì {caughtItem.id}, ì´ë¦„ {caughtItem.typeName}, ê²½í—˜ì¹˜ +{fishingExp}");
 
                 (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
 
@@ -116,7 +121,7 @@ public class PlayerFishing : MonoBehaviour
                     {
                         InventoryManager.Instance.Add(itemStack);
                     }
-                    Debug.Log($"<color=cyan>[³¬½Ã ·¹º§ º¸³Ê½º!]</color> {caughtItem.typeName}À»(¸¦) Ãß°¡·Î È¹µæÇß½À´Ï´Ù! (È®·ü: {chances.extraItemChance * 100:F2}%)");
+                    Debug.Log($"<color=cyan>[ë‚šì‹œ ë ˆë²¨ ë³´ë„ˆìŠ¤!]</color> {caughtItem.typeName}ì„(ë¥¼) ì¶”ê°€ë¡œ íšë“í–ˆìŠµë‹ˆë‹¤! (í™•ë¥ : {chances.extraItemChance * 100:F2}%)");
                 }
 
                 if(Random.Range(0f, 1f) < chances.treasureChestChance)
@@ -127,11 +132,11 @@ public class PlayerFishing : MonoBehaviour
                         //InventoryManager.Instance.Add(treasureItemStack);
 
                         TreasureBoxManager.instance.GetBox();
-                        Debug.Log($"<color=yellow>[³¬½Ã ·¹º§ º¸³Ê½º!]</color> º¸¹°»óÀÚ¸¦ Ãß°¡·Î È¹µæÇß½À´Ï´Ù! (È®·ü: {chances.treasureChestChance * 100:F2}%)");
+                        Debug.Log($"<color=yellow>[ë‚šì‹œ ë ˆë²¨ ë³´ë„ˆìŠ¤!]</color> ë³´ë¬¼ìƒìë¥¼ ì¶”ê°€ë¡œ íšë“í–ˆìŠµë‹ˆë‹¤! (í™•ë¥ : {chances.treasureChestChance * 100:F2}%)");
                     }
                 }
 
-                // ¹ÙµğÀÌº¥Æ® ³ìÁ¶·Î ¾ò´Â Ãß°¡ ¾ÆÀÌÅÛ È¹µæ 
+                // ë°”ë””ì´ë²¤íŠ¸ ë…¹ì¡°ë¡œ ì–»ëŠ” ì¶”ê°€ ì•„ì´í…œ íšë“ 
                 if(OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
                 {
                     OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
@@ -149,18 +154,18 @@ public class PlayerFishing : MonoBehaviour
             }
             else
             {
-                Debug.LogError("¾ÆÀÌÅÛ È¹µæ¿¡ ½ÇÆĞÇß½À´Ï´Ù. µå¶ø Å×ÀÌºíÀ» È®ÀÎÇØÁÖ¼¼¿ä.");
+                Debug.LogError("ì•„ì´í…œ íšë“ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. ë“œë í…Œì´ë¸”ì„ í™•ì¸í•´ì£¼ì„¸ìš”.");
             }
 
-            Debug.Log("³¬½Ã ³¡");
+            Debug.Log("ë‚šì‹œ ë");
         }
     }
 
     private SItemTypeSO GetItem()
     {
-        Debug.Log("¾ÆÀÌÅÛ ¾ò±â ½ÃÀÛ");
+        Debug.Log("ì•„ì´í…œ ì–»ê¸° ì‹œì‘");
         float totalProbability = 0f;
-        // 1. ÀüÃ¼ °¡ÁßÄ¡ ÇÕ °è»ê
+        // 1. ì „ì²´ ê°€ì¤‘ì¹˜ í•© ê³„ì‚°
         for (int i = 0; i < dropItemTable.Count; i++)
         {
             totalProbability += dropItemTable[i].dropProbability;
@@ -170,16 +175,16 @@ public class PlayerFishing : MonoBehaviour
         {
             return dropItemTable[0].itemData;
         }
-        // 2. 0 ~ ÀüÃ¼ °¡ÁßÄ¡»çÀÌ ·£´ı ¼ıÀÚ »Ì±â
+        // 2. 0 ~ ì „ì²´ ê°€ì¤‘ì¹˜ì‚¬ì´ ëœë¤ ìˆ«ì ë½‘ê¸°
         float randomNum = Random.Range(0f, totalProbability);
-        // 3. ·£´ı ¼ıÀÚ°¡ ÇöÀç ¾ÆÀÌÅÛÀÇ °¡ÁßÄ¡ º¸´Ù ÀÛÀ¸¸é ´çÃ·
+        // 3. ëœë¤ ìˆ«ìê°€ í˜„ì¬ ì•„ì´í…œì˜ ê°€ì¤‘ì¹˜ ë³´ë‹¤ ì‘ìœ¼ë©´ ë‹¹ì²¨
         foreach (var item in dropItemTable)
         {
             if(randomNum <= item.dropProbability)
             {
                 return item.itemData;
             }
-            // 4. ´çÃ·µÇÁö¾Ê¾ÒÀ¸¸é ÇöÀç ¾ÆÀÌÅÛ °¡ÁßÄ¡¸¦ »©°í ´ÙÀ½ ¾ÆÀÌÅÛÀ¸·Î ³Ñ¾î°¨
+            // 4. ë‹¹ì²¨ë˜ì§€ì•Šì•˜ìœ¼ë©´ í˜„ì¬ ì•„ì´í…œ ê°€ì¤‘ì¹˜ë¥¼ ë¹¼ê³  ë‹¤ìŒ ì•„ì´í…œìœ¼ë¡œ ë„˜ì–´ê°
             randomNum -= item.dropProbability;
         }
         
