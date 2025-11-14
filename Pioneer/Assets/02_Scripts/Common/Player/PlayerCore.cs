@@ -218,6 +218,12 @@ public class PlayerCore : CreatureBase, IBegin
 
     void Update()
     {
+        if(hp <= 0)
+        {
+            IsDead = true;
+            WhenDestroy();
+        }
+
         if (Input.GetKeyDown(KeyCode.F12))
         {
             transform.position = mast.position;
