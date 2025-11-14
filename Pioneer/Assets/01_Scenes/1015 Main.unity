@@ -7255,6 +7255,7 @@ GameObject:
   - component: {fileID: 1549456459}
   - component: {fileID: 1549456458}
   - component: {fileID: 1549456460}
+  - component: {fileID: 1549456461}
   m_Layer: 5
   m_Name: Ring Background
   m_TagString: Untagged
@@ -7333,6 +7334,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 1
+--- !u!114 &1549456461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549456456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1550274837 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 316370968023127941, guid: 98b18744c0004ee44bf63dccd2e17b7e,
@@ -7395,9 +7408,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 511059636}
-        m_TargetAssemblyTypeName: Option, Assembly-CSharp
-        m_MethodName: QuitGame
+      - m_Target: {fileID: 2188712732434231756}
+        m_TargetAssemblyTypeName: GameOverUI, Assembly-CSharp
+        m_MethodName: GoToTitle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

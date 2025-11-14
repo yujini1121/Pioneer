@@ -60,7 +60,7 @@ public class GameOverUI : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    private void GoToTitle()
+    public void GoToTitle()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("Title");
