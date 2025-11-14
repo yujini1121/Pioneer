@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using Unity.AI.Navigation;
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,6 +25,9 @@ public class StructureBase : CommonBase
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected Collider[] detectedEnemies;
 
+    private NavMeshSurface nav;
+
+
     protected virtual void Awake()
     {
         if (objectData != null)
@@ -35,6 +42,7 @@ public class StructureBase : CommonBase
             hp = Mathf.Clamp(hp, 0, maxHp);
         }
 
+        nav = FindObjectOfType<NavMeshSurface>();
     }
 
     private void Update()
@@ -86,6 +94,13 @@ public class StructureBase : CommonBase
         }
     }
     #endregion
+
+    public override void WhenDestroy()
+    {
+        Debug.LogError("Àß ÆÄ±«µÆ¾î¿ë");
+        nav.BuildNavMesh();
+    }
+
 
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()
