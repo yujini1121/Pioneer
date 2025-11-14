@@ -26,8 +26,8 @@ public class PlayerController : MonoBehaviour
 	public Slider cencleChargeSlider;
 
 	private LayerMask combinedMask;
-	public float currentChargeTime;
-	private bool isCharging;
+	private float currentChargeTime;
+	public bool isCharging;
 
 	[SerializeField] private float fishingCancelDelay = 1.0f;
 	private float cancelDelayTimer;
@@ -38,6 +38,8 @@ public class PlayerController : MonoBehaviour
 	public AnimationSlot animSlots;
 	private AnimatorOverrideController aoc;
 	List<KeyValuePair<AnimationClip, AnimationClip>> overridesList = new();
+
+	public string nextAnimTrigger;
 
 	Vector3 moveInput;
 	Vector3 moveDirection;
@@ -73,9 +75,17 @@ public class PlayerController : MonoBehaviour
         switch (playerCore.currentState)
 		{
 			case PlayerCore.PlayerState.Default:
-				// 이동, 공격, 낚시 시작
+                // 이동, 공격, 낚시 시작
+                if (moveX == 0 && moveY == 0)
+                {
+                    playerCore.Idle(lastMoveDirection);
+                }
+				else
+				{
+					nextAnimTrigger = "SetRun";
+                }
 				HendleDefault();
-				break;
+                break;
 			case PlayerCore.PlayerState.ChargingFishing:
 				// 낚시 시작
 				HendleCharging();
@@ -84,7 +94,12 @@ public class PlayerController : MonoBehaviour
 				// 낚시 종료 조건
 				HendleFishing();
 				break;
-		}
+        }
+        animator.ResetTrigger("SetIdle");
+        animator.ResetTrigger("SetRun");
+        animator.ResetTrigger("SetFishing");
+        animator.ResetTrigger("SetFishingHold");
+        animator.SetTrigger(nextAnimTrigger);
     }
 
 	private void HendleDefault()
@@ -108,42 +123,50 @@ public class PlayerController : MonoBehaviour
 			fishingUI.gameObject.SetActive(true);
 
 			if (Input.GetKeyDown(KeyCode.Q))
-			{
+            {
+                playerFishing.BeginFishing(lastMoveDirection);
+                playerCore.SetState(PlayerCore.PlayerState.ChargingFishing);
 				isCharging = true;
 				currentChargeTime = 0f;
 				chargeSlider.value = 0f;
-				playerCore.SetState(PlayerCore.PlayerState.ChargingFishing);
-			}
+            }
 		}
 		else
 		{
 			fishingUI.gameObject.SetActive(false);
 			fishingCencleUI.gameObject.SetActive(false);
 		}
-	}
+    }
 
 	private void HendleCharging()
 	{
 		if (Input.GetKey(KeyCode.Q))
-		{
-			currentChargeTime += Time.deltaTime;
+        {
+            currentChargeTime += Time.deltaTime;
 			chargeSlider.value = currentChargeTime / ChargeTime;
+
 
 			if (currentChargeTime >= ChargeTime)
 			{
 				PlayerInteract.instance.Clear();
 
-                isCharging = false;
-				playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
 
-                playerFishing.StartFishingLoop();
-				cancelDelayTimer = fishingCancelDelay;
+                isCharging = false;
+
+                playerFishing.StartFishingLoop(); // 낚시 시작 확인
+
+                cancelDelayTimer = fishingCancelDelay;
 				currentChargeTime = 0f;
 				chargeSlider.value = 0f;
 				fishingUI.gameObject.SetActive(false);
 				fishingCencleUI.gameObject.SetActive(true);
-			}
-		}
+                playerCore.FishingHold(lastMoveDirection);
+
+				animator.Play("FishingHold");
+
+                playerCore.SetState(PlayerCore.PlayerState.ActionFishing);
+            }
+        }
 
 		if (Input.GetKeyUp(KeyCode.Q))
 		{
@@ -152,7 +175,7 @@ public class PlayerController : MonoBehaviour
 			chargeSlider.value = 0f;
 			playerCore.SetState(PlayerCore.PlayerState.Default);
 		}
-	}
+    }
 
 	private void HendleFishing()
 	{
@@ -174,7 +197,7 @@ public class PlayerController : MonoBehaviour
 			currentChargeTime += Time.deltaTime;
 			cencleChargeSlider.value = currentChargeTime / ChargeTime;
 
-			if (currentChargeTime >= ChargeTime)
+            if (currentChargeTime >= ChargeTime)
 			{
 				Debug.Log("낚시 중단!");
 				playerFishing.StopFishingLoop();
@@ -182,7 +205,9 @@ public class PlayerController : MonoBehaviour
 				currentChargeTime = 0f;
 				cencleChargeSlider.value = 0f;
 				fishingCencleUI.gameObject.SetActive(false);
-			}
+
+                //playerCore.Idle(lastMoveDirection);
+            }
 		}
 
 		if (Input.GetKeyUp(KeyCode.Q))
@@ -190,7 +215,7 @@ public class PlayerController : MonoBehaviour
 			currentChargeTime = 0f;
 			cencleChargeSlider.value = 0f;
 		}
-	}
+    }
 
 
 	private bool CheckSea()

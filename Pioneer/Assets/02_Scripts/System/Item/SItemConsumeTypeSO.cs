@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 [System.Serializable]
 [CreateAssetMenu(fileName = "ItemConsumeType", menuName = "ScriptableObjects/Items/ItemConsumeType", order = 1)]
@@ -51,26 +50,18 @@ public class SItemConsumeTypeSO : SItemTypeSO
 
         switch (ConsumeEffect)
         {
-            //Ã¼·Â »ó½Â
             case 801: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 15);
-                var ps = CreatureEffect.Instance.Effects[3]; // Heal ÀÌÆåÆ®
-                CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break; 
             case 802: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 40);
-                var ps1 = CreatureEffect.Instance.Effects[3]; // Heal ÀÌÆåÆ®
-                CreatureEffect.Instance.PlayEffectFollow(ps1, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             case 803:
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 70);
-                var ps2 = CreatureEffect.Instance.Effects[3]; // Heal ÀÌÆåÆ®
-    CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
-            //¹è°íÇÄ ÇØ¼Ò
             case 804://
                 PlayerCore.Instance.currentFullness = Mathf.Min
                     (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 10);
@@ -87,7 +78,6 @@ public class SItemConsumeTypeSO : SItemTypeSO
                 PlayerCore.Instance.currentFullness = Mathf.Min
                     (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 70);
                 break;
-            //Á¤½Å·Â »ó½Â?
             case 808:
                 PlayerCore.Instance.UpdateMental(10);
                 break;

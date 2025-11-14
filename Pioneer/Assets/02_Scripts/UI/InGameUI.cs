@@ -48,6 +48,7 @@ public class InGameUI : MonoBehaviour, IBegin
     float denyUiLifeTime = 2.0f;
     bool isCraftButtonExist = false;
     bool isPannelExpand = true;
+    public bool IsPannelExpanded => isPannelExpand;
     bool isNearCraft = false;
 
     private void Awake()
@@ -239,6 +240,5 @@ public class InGameUI : MonoBehaviour, IBegin
             makeshiftCraftUI.SetActive(true);
             gameObjectPlayerStatUiParent.SetActive(true);
         }
-
     }
 }

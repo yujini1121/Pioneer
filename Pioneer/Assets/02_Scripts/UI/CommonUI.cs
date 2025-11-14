@@ -141,7 +141,10 @@ public class CommonUI : MonoBehaviour, IBegin
 
                 // 여기서 건축물 선택
                 CloseTab(ui);
-                InGameUI.instance.UseTab();
+                if (InGameUI.instance.IsPannelExpanded)
+                {
+                    InGameUI.instance.UseTab();
+                }
 
                 CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull, recipe.input);
                 //asdasdads
@@ -367,40 +370,15 @@ public class CommonUI : MonoBehaviour, IBegin
         InventoryManager.Instance.Add(recipe.result);
         InventoryManager.Instance.Remove(recipe.input);
 
-        bool isSuccess = UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance();
-
-        if (isSuccess)
-        {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting);
-
-            var ps = CreatureEffect.Instance.Effects[2];
-            CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
-
-            var ps2 = CreatureEffect.Instance.Effects[6];
-            CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 1.3f, 0f));
-        }
-        else
-        {
-            GameObject target = GameObject.Find("CraftStation");
-
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting);
-
-            var ps3 = CreatureEffect.Instance.Effects[2];
-            CreatureEffect.Instance.PlayEffectFollow(ps3, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
-        }
-
-
-        if (isSuccess)
-        {
+		if (UnityEngine.Random.Range(0, 1.0f) < PlayerStatsLevel.Instance.CraftingChance())
+		{
             if (IsDebuggingCraftCoroutine)
             {
                 Debug.Log($">> CommonUI.Craft(...) : 대성공 발생했습니다!");
             }
 
             // 대성공 발생
-            //PlayerCore.Instance.creatureEffect.Effects[7].Play();
+            PlayerCore.Instance.creatureEffect.Effects[7].Play();
             // 아이템 하나 더 추가
             InventoryManager.Instance.Add(recipe.result);
 
@@ -409,14 +387,14 @@ public class CommonUI : MonoBehaviour, IBegin
             {
                 SItemStack newRef = one.Copy();
 
-                newRef.amount *= 4;
-                newRef.amount /= 10;
+				newRef.amount *= 4;
+				newRef.amount /= 10;
 
-                InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
-            }
-        }
+				InventoryManager.Instance.Add(newRef); // 40 퍼선트 페이백
+			}
+		}
 
-        for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
+		for (int rIndex = 0; rIndex < recipe.input.Length; rIndex++)
         {
             int need = recipe.input[rIndex].amount;
             int has = InventoryManager.Instance.Get(recipe.input[rIndex].id);

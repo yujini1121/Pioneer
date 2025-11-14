@@ -12,7 +12,7 @@ using UnityEngine.UI; // UI 레이캐스트용
 
 public class CreateObject : MonoBehaviour, IBegin
 {
-    public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern }
+    public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern, Chest }
 
     [System.Serializable]
     public class CreationList
@@ -25,6 +25,7 @@ public class CreateObject : MonoBehaviour, IBegin
         public GameObject ballista;
         public GameObject trap;
         public GameObject lantern;
+        public GameObject chest;
     }
 
     public static CreateObject instance;
@@ -98,6 +99,7 @@ public class CreateObject : MonoBehaviour, IBegin
         creationDict.Add(CreationType.Ballista, creationList.ballista);
         creationDict.Add(CreationType.Trap, creationList.trap);
         creationDict.Add(CreationType.Lantern, creationList.lantern);
+        creationDict.Add(CreationType.Chest, creationList.chest);
 
         CreateObjectInit();
     }
@@ -193,17 +195,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         SetPreviewColor(permitColor);
         if (Input.GetMouseButtonDown(0))
-        {
-            if (PlayerCore.Instance.currentState == PlayerCore.PlayerState.ActionFishing)
-            {
-                PlayerFishing.instance.StopFishingLoop();
-                PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
-                // PlayerController.instance.currentChargeTime = 0f;
-                PlayerController.instance.cencleChargeSlider.value = 0f;
-                PlayerController.instance.fishingCencleUI.gameObject.SetActive(false);
-            }
             MoveToCreate(worldPos, localPos);
-        }
     }
 
     private void CheckCreatable()
@@ -701,15 +693,6 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
-        if (PlayerCore.Instance.currentState == PlayerCore.PlayerState.ActionFishing)
-        {
-            PlayerFishing.instance.StopFishingLoop();
-            PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
-            // PlayerController.instance.currentChargeTime = 0f;
-            PlayerController.instance.cencleChargeSlider.value = 0f;
-            PlayerController.instance.fishingCencleUI.gameObject.SetActive(false);
-        }
-
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
         
