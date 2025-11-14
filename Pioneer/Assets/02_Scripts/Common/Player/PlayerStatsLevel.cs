@@ -126,9 +126,13 @@ public class PlayerStatsLevel : MonoBehaviour
         if(Instance == null)
             Instance = this;
         else
+        {
+            Debug.LogError($"!!!>> 이미 PlayerStatsLevel가 존재함. 현재 게임옵젝트 {gameObject.name} / 있는 게임오브젝트 {Instance.gameObject.name}");
             Destroy(Instance);
+        }
 
-            player = GetComponent<PlayerCore>();
+
+        player = GetComponent<PlayerCore>();
 
         InitGrowState();
     }
