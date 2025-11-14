@@ -44,6 +44,8 @@ public class PlayerController : MonoBehaviour
 	Vector3 moveInput;
 	Vector3 moveDirection;
 
+	public Transform mast;
+
     void Awake()
 	{
 		instance = this;
@@ -100,6 +102,12 @@ public class PlayerController : MonoBehaviour
         animator.ResetTrigger("SetFishing");
         animator.ResetTrigger("SetFishingHold");
         animator.SetTrigger(nextAnimTrigger);
+
+		// ≈ª√‚
+		if (Input.GetKeyDown(KeyCode.F12))
+		{
+			transform.position = mast.position;
+        }
     }
 
 	private void HendleDefault()

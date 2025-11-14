@@ -9805,6 +9805,7 @@ GameObject:
   - component: {fileID: 2034679916}
   - component: {fileID: 2034679915}
   - component: {fileID: 2034679920}
+  - component: {fileID: 2034679921}
   m_Layer: 15
   m_Name: Mast
   m_TagString: Mast
@@ -9979,6 +9980,25 @@ MonoBehaviour:
   - {x: -5.6568546, y: -0.12044251, z: -0.00000011920929}
   - {x: -2.8284268, y: -0.12044251, z: -2.8284273}
   found: 01010101
+--- !u!114 &2034679921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034679914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 4
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &2039986107 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1240166110790840559, guid: b80126354b6c58e44b0c9771a74576a1,
@@ -15456,6 +15476,7 @@ GameObject:
   - component: {fileID: 1421228664291149058}
   - component: {fileID: 2049672660}
   - component: {fileID: 7505562570904623940}
+  - component: {fileID: 7505562570904623941}
   m_Layer: 14
   m_Name: Fake Mast
   m_TagString: Engine
@@ -18689,6 +18710,7 @@ MonoBehaviour:
     curIronSwrordClip: {fileID: 7400000, guid: 15d89d6f4ea00854ca058ee03641420b, type: 2}
     curConchSwordClip: {fileID: 7400000, guid: f1d022fddc143a1488bdd740cad4d1ca, type: 2}
   nextAnimTrigger: 
+  mast: {fileID: 7505562570904623939}
 --- !u!222 &5622103427795389368
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -23920,6 +23942,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.192826, y: 3.4279099, z: 0.14699201}
   m_Center: {x: 0.008451164, y: 1.6866779, z: 0.00044703484}
+--- !u!114 &7505562570904623941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2946541762980039312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 4
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!114 &7559376497120776771
 MonoBehaviour:
   m_ObjectHideFlags: 0

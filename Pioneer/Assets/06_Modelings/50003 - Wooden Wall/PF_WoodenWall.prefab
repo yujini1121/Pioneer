@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8341233066174425059}
   - component: {fileID: 7865616011556500020}
   - component: {fileID: -1069939353206171248}
+  - component: {fileID: -667914053080149814}
   m_Layer: 7
   m_Name: PF_WoodenWall
   m_TagString: Untagged
@@ -142,6 +143,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   objectData: {fileID: 11400000, guid: 393edf7e7638bf141816119afa86fe49, type: 2}
   <isUsing>k__BackingField: 0
   interactRange: 1.5
@@ -149,3 +151,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   detectedEnemies: []
+--- !u!114 &-667914053080149814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7220446215017515215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 4
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff

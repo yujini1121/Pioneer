@@ -122,6 +122,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   objectData: {fileID: 0}
   <isUsing>k__BackingField: 0
   interactRange: 5
@@ -232,6 +233,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7923159467517202640}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 22f3e16222495f34faa2eaeea92d4462,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1267122812409073893}
   m_SourcePrefab: {fileID: 100100000, guid: 22f3e16222495f34faa2eaeea92d4462, type: 3}
 --- !u!4 &1381838416666776245 stripped
 Transform:
@@ -301,6 +306,7 @@ MonoBehaviour:
   maxHp: 30
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   objectData: {fileID: 11400000, guid: ce4fa41622f264f4fa6aefe9811e7955, type: 2}
   <isUsing>k__BackingField: 0
   interactRange: 3
@@ -308,3 +314,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   detectedEnemies: []
+--- !u!114 &1267122812409073893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758257748867876879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 4
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
