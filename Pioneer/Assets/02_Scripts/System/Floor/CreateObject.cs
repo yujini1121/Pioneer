@@ -668,6 +668,8 @@ public class CreateObject : MonoBehaviour, IBegin
 
         installRoutine = null;
         isCountingDown = false;
+
+        ExitInstallMode();
     }
 
     private void CancelInstallCountdown()
