@@ -1,9 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
+using Unity.AI.Navigation;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// 우클릭으로 설치된 오브젝트를 선택하고,
@@ -48,8 +49,8 @@ public class InstalledObjectUI : MonoBehaviour
     // 패널이 루트인 경우를 위한 가시성 토글용
     CanvasGroup panelCg;
     bool panelIsRoot => panel && panel.gameObject == gameObject;
+    private NavMeshSurface nav;
 
-    
 
     void Awake()
     {
@@ -68,11 +69,16 @@ public class InstalledObjectUI : MonoBehaviour
         // 버튼 리스너
         rotationButton.onClick.AddListener(() => { if (current) mode = Mode.Rotate; });
         moveButton.onClick.AddListener(() => { if (current) { current.BeginMove(); mode = Mode.Move; } });
-        removeButton.onClick.AddListener(() => { if (current) { current.Remove(); Hide(); } });
+        removeButton.onClick.AddListener(() => { if (current) { current.Remove(); Hide(); RebuildStart(); } });
         closeButton.onClick.AddListener(Hide);
         repairButton.onClick.AddListener(Repair);
 
         Hide(); // 시작 시 패널은 숨김(루트는 활성 상태 유지)
+    }
+
+    private void Start()
+    {
+        nav = FindObjectOfType<NavMeshSurface>();
     }
 
     void Update()
@@ -198,6 +204,19 @@ public class InstalledObjectUI : MonoBehaviour
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             (RectTransform)panel.parent, sp, null, out var lp);
         panel.anchoredPosition = lp;
+    }
+
+    public void RebuildStart()
+    {
+        StartCoroutine(Rebuild());
+    }
+
+    public IEnumerator Rebuild()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        nav.BuildNavMesh();
+        yield return null;
     }
 
     public void Hide()
