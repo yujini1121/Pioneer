@@ -90,7 +90,7 @@ public class MinionAI : EnemyBase, IBegin
         detectionRange = 1.5f;
         attackDelayTime = 2f;
         idleTime = 2f;
-        SetMastTarget();
+        // SetMastTarget();
         fov.viewRadius = detectionRange;
     }
 
