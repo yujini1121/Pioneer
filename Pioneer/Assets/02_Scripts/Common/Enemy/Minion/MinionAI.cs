@@ -50,7 +50,7 @@ public class MinionAI : EnemyBase, IBegin
         Collider[] targetsInAttackRange = DetectAttackRange();
         bool isTargetInAttackRange = currentAttackTarget != null && IsTargetInColliders(currentAttackTarget, targetsInAttackRange);
 
-        Debug.Log($"MinionAI currentAttackTarget & isTargetInAttackRange : {this.gameObject.name} {currentAttackTarget.name} & {isTargetInAttackRange}");
+        // Debug.Log($"MinionAI currentAttackTarget & isTargetInAttackRange : {this.gameObject.name} {currentAttackTarget.name} & {isTargetInAttackRange}");
 
         if (CanCreateNest(isTargetInAttackRange))
         {
@@ -76,7 +76,7 @@ public class MinionAI : EnemyBase, IBegin
                 AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
 
             revengeTarget = attacker;
-            Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
+            // Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
         }
     }
 
@@ -85,12 +85,13 @@ public class MinionAI : EnemyBase, IBegin
         hp = 20;
         maxHp = hp;
         attackDamage = 5;
-        attackRange = 1f;
+        attackRange = 2f;
         speed = 2f;
-        detectionRange = 1.5f;
+        detectionRange = 5f;
         attackDelayTime = 2f;
         idleTime = 2f;
-        // SetMastTarget();
+        //SetMastTarget();
+        currentAttackTarget = PlayerCore.Instance.gameObject;
         fov.viewRadius = detectionRange;
     }
 
@@ -118,7 +119,7 @@ public class MinionAI : EnemyBase, IBegin
             return;
         }
 
-        currentAttackTarget = mast;
+        currentAttackTarget = null;
     }
 
     // =============================================================
@@ -136,6 +137,9 @@ public class MinionAI : EnemyBase, IBegin
 
     private bool CanAttack(bool isTargetInAttackRange)
     {
+        if(currentAttackTarget == null)
+            return false;
+
         Vector3 direction = (currentAttackTarget.transform.position - transform.position).normalized;
         direction.y = 0;
         transform.rotation = Quaternion.LookRotation(direction);
@@ -157,7 +161,7 @@ public class MinionAI : EnemyBase, IBegin
     void CreateNest()
     {
         Instantiate(nestPrefab, new Vector3(transform.position.x, 0, transform.position.z), Quaternion.identity);
-        Debug.Log("DespawnAllEnemies CreateNest 둥지 낳음");
+        // Debug.Log("DespawnAllEnemies CreateNest 둥지 낳음");
         GameManager.Instance.checkTotalNest++;
         isNestCreated = true;
     }
@@ -177,7 +181,7 @@ public class MinionAI : EnemyBase, IBegin
 
     private IEnumerator Attack()
     {
-        Debug.Log("미니언 Attack 메서드 진입");
+        // Debug.Log("미니언 Attack 메서드 진입");
         if (currentAttackTarget == null)
             yield break;
 
@@ -223,6 +227,9 @@ public class MinionAI : EnemyBase, IBegin
     /// <returns></returns>
     private Transform FindClosestTargetInDetect(List<Transform> targets)
     {
+        if(targets.Count == 0)
+            return null;
+
         Transform closest = null;
         float closestDistance = float.MaxValue;
 
@@ -240,10 +247,10 @@ public class MinionAI : EnemyBase, IBegin
 
     private bool IsTargetInColliders(GameObject target, Collider[] colliders)
     {
-        Debug.Log(($"MinionAI IsTargetInColliders target : {target.name}"));
+        //Debug.Log(($"MinionAI IsTargetInColliders target : {target.name}"));
         foreach (var col in colliders)
         {
-            Debug.Log(($"MinionAI IsTargetInColliders col : {col.name}"));
+            //Debug.Log(($"MinionAI IsTargetInColliders col : {col.name}"));
             if (col.gameObject == target)
             {
                 return true;

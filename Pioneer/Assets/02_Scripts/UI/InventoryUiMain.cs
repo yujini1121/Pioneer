@@ -133,7 +133,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         {
             // 플레이어 아이템 핸들
             Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
-            if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
+            if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory) ||
+                InventoryManager.Instance.SelectedSlotInventory.itemBaseType.categories == EDataType.NormalItem)
             {
                 // 빈 아이템 주먹 공격
 

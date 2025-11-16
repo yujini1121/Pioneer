@@ -6,7 +6,7 @@ public class EnemyBase : CreatureBase, IBegin
     protected float idleTime;
     // public GameObject targetObject;
     public GameObject currentAttackTarget;
-    protected float detectionRange;
+    [SerializeField] protected float detectionRange;
 
     [Header("감지할 적 레이어")]
     [SerializeField] protected LayerMask detectMask;

@@ -15054,7 +15054,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6cb61862b182b747bfef9687f56fc43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstInfectionDay: 3
+  firstInfectionDay: 10
   infectionDelayWithinDay: 5
 --- !u!224 &2527502794489244116
 RectTransform:
@@ -18085,7 +18085,7 @@ PrefabInstance:
     - target: {fileID: 7563128521038918493, guid: e1650a53f5ef9f141bf40c59282fea84,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7737748580714480010, guid: e1650a53f5ef9f141bf40c59282fea84,
         type: 3}
@@ -20497,12 +20497,12 @@ MonoBehaviour:
   spawnLiftY: 0.05
   spawnRootName: __SPAWNPOINTS__
   enemySpawnTable:
-  - total: 5
-    minion: 5
+  - total: 3
+    minion: 3
     crawler: 0
     titan: 0
-  - total: 7
-    minion: 5
+  - total: 6
+    minion: 4
     crawler: 2
     titan: 0
   - total: 10
@@ -26807,7 +26807,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   circuleBack: {fileID: 1549456456}
   ringImage: {fileID: 1517500650}
-  effect: {fileID: 0}
   repairTime: 3
 --- !u!114 &8573141634702029877
 MonoBehaviour:

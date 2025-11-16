@@ -264,7 +264,7 @@ public class PlayerCore : CreatureBase, IBegin
         defaultSpeed = speed;
         currentFullness = 80;              // 포만감 (시작 값 80)
         currentMental = maxMental;         // 정신력 (시작 값 100)
-        //attackDamage = 2;           // 공격력
+        attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
         attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
     }

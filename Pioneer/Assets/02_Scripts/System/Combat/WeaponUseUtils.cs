@@ -113,21 +113,6 @@ public class WeaponUseUtils
                 Vector3 position = userGameObject.transform.position + dir * 0.5f;
                 position.y = PlayerCore.Instance.AttackHeight;
 
-                // ================= 이펙트 재생 ======================
-                /*ParticleSystem ps = CreatureEffect.Instance.Effects[0];
-                if (ps != null)
-                {
-                    ps.transform.position = position;
-                    ps.transform.rotation = Quaternion.LookRotation(position);
-
-                    ps.Play();
-                }
-                else
-                {
-                    Debug.Log("이펙트 널 버그");
-                }*/
-                // ====================================================
-
                 PlayerCore.Instance.PlayerAttack.transform.position = position;
                 PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
                 PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
