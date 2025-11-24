@@ -125,7 +125,6 @@ public class PlayerCore : CreatureBase, IBegin
     public LayerMask EnemyLayer => enemyLayer;
 
     [Header("애니메이션 설정")]
-    [SerializeField] private PlayerController controller;
     public AnimationSlot slots;
     private Animator animator;
 
@@ -195,15 +194,10 @@ public class PlayerCore : CreatureBase, IBegin
 
         handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
         dummyHandAttackItem = new SItemStack(-1, -1);
-
-        if (controller == null)
-            controller = GetComponentInParent<PlayerController>();
-        if (controller == null)
-            controller = PlayerController.instance; // 최후의 수단
-
+ 
         // 애니메이션
-        slots = controller.animSlots;
-        animator = controller.animator;
+        slots = playerController.animSlots;
+        animator = playerController.animator;
         playerRb = GetComponent<Rigidbody>();
 
     }
@@ -275,7 +269,7 @@ public class PlayerCore : CreatureBase, IBegin
         UnityEngine.Debug.Log("Player State Changed to: " + state);
     }
 
-    static int Get4DirIndex(in Vector3 v)
+    public static int Get4DirIndex(in Vector3 v)
     {
         if (v.sqrMagnitude < 1e-6f) return -1;
         float ax = Mathf.Abs(v.x);
@@ -295,7 +289,7 @@ public class PlayerCore : CreatureBase, IBegin
         if (idx < 0) return;
         var target = slots.idle[idx];
 
-        controller.ChangeAnimationClip(slots.curIdleClip, target);
+        playerController.ChangeAnimationClip(slots.curIdleClip, target);
         playerController.nextAnimTrigger = "SetIdle";
     }
 
@@ -304,7 +298,7 @@ public class PlayerCore : CreatureBase, IBegin
         if (idx < 0) return;
         var target = slots.run[idx];
 
-        controller.ChangeAnimationClip(slots.curRunClip, target);
+        playerController.ChangeAnimationClip(slots.curRunClip, target);
         playerController.nextAnimTrigger = "SetRun";
     }
 
@@ -313,7 +307,7 @@ public class PlayerCore : CreatureBase, IBegin
         if (idx < 0) return;
         var target = slots.fising[idx];
 
-        controller.ChangeAnimationClip(slots.curFishingClip, target);
+        playerController.ChangeAnimationClip(slots.curFishingClip, target);
         playerController.nextAnimTrigger = "SetFishing";
     }
 
@@ -321,10 +315,11 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (idx < 0) return;
         var target = slots.fisingHold[idx];          // ← fisingHold 로 반드시
-        
-        controller.ChangeAnimationClip(slots.curFishingHoldClip, target);
+
+        playerController.ChangeAnimationClip(slots.curFishingHoldClip, target);
         playerController.nextAnimTrigger = "SetFishingHold";
     }
+
     // =============================================================
     // 가만히있엇
     // =============================================================

@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
 	private GameManager gameManager;
 
 	// 이동 방향
-	private Vector3 lastMoveDirection = Vector3.back;
+	public Vector3 lastMoveDirection = Vector3.back;
 
 	[Header("낚시 바다 확인 관련 설정")]
 	public float rayOffset;

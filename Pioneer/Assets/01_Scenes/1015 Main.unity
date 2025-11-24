@@ -13550,7 +13550,6 @@ MonoBehaviour:
     m_Bits: 256
   duabilityReducePrevent: 0
   creatureEffect: {fileID: 0}
-  controller: {fileID: 0}
   slots:
     idle: []
     run: []
@@ -17075,11 +17074,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d40adedd46c17934aab8eab48e356701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 0
+  damage: 2
   attackCollider: {fileID: 8215995545158883394}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
+  playerController: {fileID: 5582197555067567805}
 --- !u!114 &4289791705529440528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18811,6 +18811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15ec610ffeb4e9342913cd92c7cd6191, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lastMoveDirection: {x: 0, y: 0, z: -1}
   rayOffset: 1.5
   ChargeTime: 1
   isSeaInFront: 0
@@ -20478,8 +20479,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 135
-  nightDuration: 75
+  dayDuration: 5
+  nightDuration: 20
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
