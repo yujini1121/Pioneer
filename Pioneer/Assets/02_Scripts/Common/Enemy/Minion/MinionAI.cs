@@ -1,6 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -17,19 +16,23 @@ public class MinionAI : EnemyBase, IBegin
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
 
-    // 공격 관련 변수
-    private float lastAttackTime = 0f;
-    private bool isCurrentAttacking = false;
-
     // 타겟 변수들
-    // private GameObject mast;  // 기본 목표 (돛대)
     private GameObject revengeTarget;   // 나를 공격한 적
     // 최종 목표 : currentAttackTarget
 
+    private float attackTimer = 0f;
+
+    private void Awake()
+    {
+        if (animator == null) animator = GetComponentInChildren<Animator>();
+    }
+
     void Start()
     {
+        base.Start();
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
+
         if (agent != null)
         {
             agent.speed = speed;
@@ -42,6 +45,20 @@ public class MinionAI : EnemyBase, IBegin
         if (!CheckOnGround())
             return;
 
+        float dt = Time.deltaTime;
+
+        // 공격 쿨타임이어도 애니메이션 트리거는 계속 갱신(안 그러면 미니언이 멈춘 것처럼 보일 수 있음)
+        if (attackTimer > 0f)
+        {
+            attackTimer -= dt;
+            ChangeIdleByIndex(lastMoveDirection);
+            ApplyAnimTrigger();
+
+            // 쿨타임 끝나면 다시 이동 허용
+            if (attackTimer <= 0f && agent != null) agent.isStopped = false;
+            return;
+        }
+
         fov.DetectTargets(detectMask);
 
         // 공격할 타겟 설정
@@ -50,20 +67,29 @@ public class MinionAI : EnemyBase, IBegin
         Collider[] targetsInAttackRange = DetectAttackRange();
         bool isTargetInAttackRange = currentAttackTarget != null && IsTargetInColliders(currentAttackTarget, targetsInAttackRange);
 
-        // Debug.Log($"MinionAI currentAttackTarget & isTargetInAttackRange : {this.gameObject.name} {currentAttackTarget.name} & {isTargetInAttackRange}");
-
         if (CanCreateNest(isTargetInAttackRange))
         {
             CreateNest();
+            ChangeIdleByIndex(lastMoveDirection);
         }
         else if (CanAttack(isTargetInAttackRange))
         {
-            StartCoroutine(AttackCoroutine());
+            Attack();
         }
         else if (CanMove())
         {
             Move();
+            UpdateLocomotionAnim();
         }
+        else
+        {
+            ChangeIdleByIndex(lastMoveDirection);
+        }
+
+        ApplyAnimTrigger();
+
+        //Debug.DrawRay(transform.position + Vector3.up * 0.2f, lastMoveDirection, Color.cyan);
+        //Debug.Log($"lastMoveDirection={lastMoveDirection} 4Dir={PlayerCore.Get4DirIndex(lastMoveDirection)}");
     }
 
     public override void TakeDamage(int damage, GameObject attacker)
@@ -76,7 +102,6 @@ public class MinionAI : EnemyBase, IBegin
                 AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
 
             revengeTarget = attacker;
-            // Debug.Log($"{name}이(가) {attacker.name}에게 공격받아 타겟을 변경합니다!");
         }
     }
 
@@ -90,7 +115,7 @@ public class MinionAI : EnemyBase, IBegin
         detectionRange = 5f;
         attackDelayTime = 2f;
         idleTime = 2f;
-        //SetMastTarget();
+
         currentAttackTarget = PlayerCore.Instance.gameObject;
         fov.viewRadius = detectionRange;
     }
@@ -137,7 +162,7 @@ public class MinionAI : EnemyBase, IBegin
 
     private bool CanAttack(bool isTargetInAttackRange)
     {
-        if(currentAttackTarget == null)
+        if (currentAttackTarget == null)
             return false;
 
         Vector3 direction = (currentAttackTarget.transform.position - transform.position).normalized;
@@ -146,8 +171,7 @@ public class MinionAI : EnemyBase, IBegin
 
         return currentAttackTarget != null
             && isTargetInAttackRange
-            && Time.time >= lastAttackTime + attackDelayTime
-            && (!isCurrentAttacking);
+            && attackTimer <= 0f;
     }
 
     private bool CanMove()
@@ -161,40 +185,45 @@ public class MinionAI : EnemyBase, IBegin
     void CreateNest()
     {
         Instantiate(nestPrefab, new Vector3(transform.position.x, 0, transform.position.z), Quaternion.identity);
-        // Debug.Log("DespawnAllEnemies CreateNest 둥지 낳음");
         GameManager.Instance.checkTotalNest++;
         isNestCreated = true;
     }
 
     // =============================================================
     // 공격 : 이미 공격이 가능함을 전제로 함. 공격 범위 안에 들어왔다는 뜻
-    // =============================================================   
-    private IEnumerator AttackCoroutine()
+    // =============================================================
+    private void Attack()
     {
-        isCurrentAttacking = true;
-        agent.isStopped = true;
-        yield return new WaitForSeconds(attackDelayTime);
-        yield return Attack();
-        agent.speed = speed;
-        isCurrentAttacking = false;
-    }
+        // 공격 시작해도 Run 애니메이션으로 이동하는 걸 막기 위함
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
 
-    private IEnumerator Attack()
-    {
-        // Debug.Log("미니언 Attack 메서드 진입");
+        // 공격 방향 갱신 (좌/우 2프레임)
+        if (currentAttackTarget != null)
+        {
+            Vector3 look = currentAttackTarget.transform.position - transform.position;
+            look.y = 0f;
+            if (look.sqrMagnitude > 1e-6f) lastMoveDirection = look.normalized;
+        }
+
+        ChangeAttackByIndex(lastMoveDirection);
+
         if (currentAttackTarget == null)
-            yield break;
+            return;
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Minion);
 
         CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
-        // Debug.Log($"MinionAI targetBase : {this.name}, {targetBase.name}");
         if (targetBase != null && !targetBase.IsDead)
         {
             targetBase.TakeDamage(attackDamage, this.gameObject);
-            lastAttackTime = Time.time;
         }
+
+        attackTimer = attackDelayTime;
     }
 
     // =============================================================
@@ -220,14 +249,9 @@ public class MinionAI : EnemyBase, IBegin
     // 유틸리티 메서드
     // =============================================================
 
-    /// <summary>
-    /// 가장 가까운 타겟을 찾음
-    /// </summary>
-    /// <param name="targets"></param>
-    /// <returns></returns>
     private Transform FindClosestTargetInDetect(List<Transform> targets)
     {
-        if(targets.Count == 0)
+        if (targets.Count == 0)
             return null;
 
         Transform closest = null;
@@ -247,10 +271,8 @@ public class MinionAI : EnemyBase, IBegin
 
     private bool IsTargetInColliders(GameObject target, Collider[] colliders)
     {
-        //Debug.Log(($"MinionAI IsTargetInColliders target : {target.name}"));
         foreach (var col in colliders)
         {
-            //Debug.Log(($"MinionAI IsTargetInColliders col : {col.name}"));
             if (col.gameObject == target)
             {
                 return true;
@@ -259,10 +281,6 @@ public class MinionAI : EnemyBase, IBegin
         return false;
     }
 
-    /// <summary>
-    /// 배 플렛폼 위인지 검사
-    /// </summary>
-    /// <returns></returns>
     protected override bool CheckOnGround()
     {
         if (Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
@@ -280,5 +298,25 @@ public class MinionAI : EnemyBase, IBegin
         }
 
         return isOnGround;
+    }
+
+    // ---------------- 애니메이션 유틸 ----------------
+
+    private void UpdateLocomotionAnim()
+    {
+        if (agent == null) return;
+
+        Vector3 v = agent.desiredVelocity;
+        v.y = 0f;
+
+        if (v.sqrMagnitude > 0.0001f)
+        {
+            lastMoveDirection = v.normalized;
+            ChangeRunByIndex(lastMoveDirection);
+        }
+        else
+        {
+            ChangeIdleByIndex(lastMoveDirection);
+        }
     }
 }

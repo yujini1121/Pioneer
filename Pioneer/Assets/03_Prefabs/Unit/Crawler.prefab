@@ -151,7 +151,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 1
+  m_BaseOffset: 1.3
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &1576153250567432981
@@ -192,6 +192,7 @@ MonoBehaviour:
   attackRange: 0
   attackDelayTime: 0
   currentAttackTarget: {fileID: 0}
+  detectionRange: 0
   detectMask:
     serializedVersion: 2
     m_Bits: 32896
@@ -200,6 +201,36 @@ MonoBehaviour:
     m_Bits: 8256
   attackBoxCenterOffset: {x: 0, y: 0, z: 1}
   mast: {fileID: 0}
+  slots:
+    idle:
+    - {fileID: 7400000, guid: 563befbf1a6df8646ad37eef25544d26, type: 2}
+    - {fileID: 7400000, guid: 36509b97a0609ad4a99edcc5c4180215, type: 2}
+    - {fileID: 7400000, guid: 8f8aba8c626d6b947b65a0f023a74575, type: 2}
+    - {fileID: 7400000, guid: 7d76634cca532114baddc05daf624f14, type: 2}
+    run:
+    - {fileID: 7400000, guid: fbe7e330ce4ff404584e957d7e7d749e, type: 2}
+    - {fileID: 7400000, guid: 03721cc8550b347419b0b2d571c05753, type: 2}
+    - {fileID: 7400000, guid: b28d0ca538bb3f446bcbfe7ff347f0a7, type: 2}
+    - {fileID: 7400000, guid: a06adcf1c36405e4a84b9685178b8afb, type: 2}
+    attack:
+    - {fileID: 7400000, guid: 11e8ad32fac66704f9480cee4609e7fa, type: 2}
+    - {fileID: 7400000, guid: 9bc6b9c9b1742d04d974cafe7d02319b, type: 2}
+    fising: []
+    fisingHold: []
+    woodenSword: []
+    ironSword: []
+    conchSword: []
+    curIdleClip: {fileID: 7400000, guid: 563befbf1a6df8646ad37eef25544d26, type: 2}
+    curRunClip: {fileID: 7400000, guid: fbe7e330ce4ff404584e957d7e7d749e, type: 2}
+    curAttackClip: {fileID: 7400000, guid: 11e8ad32fac66704f9480cee4609e7fa, type: 2}
+    curFishingClip: {fileID: 0}
+    curFishingHoldClip: {fileID: 0}
+    curWoodenSwordClip: {fileID: 0}
+    curIronSwrordClip: {fileID: 0}
+    curConchSwordClip: {fileID: 0}
+  animator: {fileID: 5977027100524816649}
+  nextAnimTrigger: 
+  lastMoveDirection: {x: 0, y: 0, z: -1}
 --- !u!114 &7684616046807313686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -257,6 +288,7 @@ GameObject:
   - component: {fileID: 2367966048663166238}
   - component: {fileID: 640465341989891565}
   - component: {fileID: 4456402184997952669}
+  - component: {fileID: 5977027100524816649}
   m_Layer: 8
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -343,3 +375,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &5977027100524816649
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8293167387613736193}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e021eca37ebc6c0418b5b02a87a5b37a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

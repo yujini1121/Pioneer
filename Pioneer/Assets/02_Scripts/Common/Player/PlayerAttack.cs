@@ -78,7 +78,6 @@ public class PlayerAttack : MonoBehaviour, IBegin
     {
         if (idx < 0) return;
         var target = slots.attack[idx];
-        Debug.LogError("¿Ö¾ÈµÅ¿ë");
 
         playerController.ChangeAnimationClip(slots.curAttackClip, target);
         playerController.animator.Play("Attack");

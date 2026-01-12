@@ -3217,11 +3217,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4926383961205332390, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
-        type: 3}
-      propertyPath: m_TagString
-      value: Enemy
-      objectReference: {fileID: 0}
     - target: {fileID: 6860211199804016371, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3275,39 +3270,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6042525674292446187, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 720907513}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 281c89dbc51ee4940bbdaa96b9ab776c, type: 3}
---- !u!1 &720907512 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6042525674292446187, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
-    type: 3}
-  m_PrefabInstance: {fileID: 720907511}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &720907513
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 720907512}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a3de3d88fa595c343a20c40ef11ea0c3, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &733057916
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5761,47 +5725,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crawler
       objectReference: {fileID: 0}
-    - target: {fileID: 4665850972790329012, guid: 57925bfba29c1704c94a26d630545e00,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8293167387613736193, guid: 57925bfba29c1704c94a26d630545e00,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1278467998}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57925bfba29c1704c94a26d630545e00, type: 3}
---- !u!1 &1278467997 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8293167387613736193, guid: 57925bfba29c1704c94a26d630545e00,
-    type: 3}
-  m_PrefabInstance: {fileID: 1278467996}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &1278467998
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1278467997}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: e021eca37ebc6c0418b5b02a87a5b37a, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1280084385
 GameObject:
   m_ObjectHideFlags: 0
@@ -7003,12 +6931,12 @@ PrefabInstance:
     - target: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9078708644997992570, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.26
+      value: -4.57
       objectReference: {fileID: 0}
     - target: {fileID: 9078708644997992570, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
@@ -7058,39 +6986,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4659406265448088296, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1517098233}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9, type: 3}
---- !u!1 &1517098232 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4659406265448088296, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1517098231}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &1517098233
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1517098232}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ad404652cef34674f8e7efb7667182f4, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1517500647
 GameObject:
   m_ObjectHideFlags: 0
@@ -13553,17 +13450,17 @@ MonoBehaviour:
   slots:
     idle: []
     run: []
+    attack: []
     fising: []
     fisingHold: []
-    attack: []
     woodenSword: []
     ironSword: []
     conchSword: []
     curIdleClip: {fileID: 0}
     curRunClip: {fileID: 0}
+    curAttackClip: {fileID: 0}
     curFishingClip: {fileID: 0}
     curFishingHoldClip: {fileID: 0}
-    curAttackClip: {fileID: 0}
     curWoodenSwordClip: {fileID: 0}
     curIronSwrordClip: {fileID: 0}
     curConchSwordClip: {fileID: 0}
@@ -18839,17 +18736,17 @@ MonoBehaviour:
     - {fileID: 7400000, guid: 674bb0a3d3bcaeb4ebea8467dd4b3b3d, type: 2}
     - {fileID: 7400000, guid: db8aad137e1564f43b641f982666e0bf, type: 2}
     - {fileID: 7400000, guid: 994b58853aeabf44ca94bd72195ee324, type: 2}
+    attack:
+    - {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
+    - {fileID: 7400000, guid: 6c10e85f0cab3a94caa9c849169d9c65, type: 2}
+    - {fileID: 7400000, guid: 16a966f395b80d44c9233f10a9d052d0, type: 2}
+    - {fileID: 7400000, guid: 6b00c26e3ba514b4cbe7b67308714084, type: 2}
     fising:
     - {fileID: 7400000, guid: 2f93acdb7de48394bab38ceaa505ebb8, type: 2}
     - {fileID: 7400000, guid: df828e6f3cd6e814190e96ed875219f6, type: 2}
     fisingHold:
     - {fileID: 7400000, guid: f204882bdb602b04a994bd0f1d6fe5ae, type: 2}
     - {fileID: 7400000, guid: f28b157084cb11d4bb8bdf8a4c2a6e73, type: 2}
-    attack:
-    - {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
-    - {fileID: 7400000, guid: 6c10e85f0cab3a94caa9c849169d9c65, type: 2}
-    - {fileID: 7400000, guid: 16a966f395b80d44c9233f10a9d052d0, type: 2}
-    - {fileID: 7400000, guid: 6b00c26e3ba514b4cbe7b67308714084, type: 2}
     woodenSword:
     - {fileID: 7400000, guid: 03ad0a901485a154a9491a4536420aed, type: 2}
     - {fileID: 7400000, guid: 17b2cf5a98893504295aa62105cb0558, type: 2}
@@ -18867,10 +18764,10 @@ MonoBehaviour:
     - {fileID: 7400000, guid: 32f7fbc3d5d530d42b2d479aa988ed8b, type: 2}
     curIdleClip: {fileID: 7400000, guid: e7b6ecb1e9b92b34388e2d13962d5097, type: 2}
     curRunClip: {fileID: 7400000, guid: c25097aee445c194087234cc8655cb54, type: 2}
+    curAttackClip: {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
     curFishingClip: {fileID: 7400000, guid: 2f93acdb7de48394bab38ceaa505ebb8, type: 2}
     curFishingHoldClip: {fileID: 7400000, guid: f204882bdb602b04a994bd0f1d6fe5ae,
       type: 2}
-    curAttackClip: {fileID: 7400000, guid: fded797d0243cdd47bfaa63b5bacb9ad, type: 2}
     curWoodenSwordClip: {fileID: 7400000, guid: 03ad0a901485a154a9491a4536420aed,
       type: 2}
     curIronSwrordClip: {fileID: 7400000, guid: 15d89d6f4ea00854ca058ee03641420b, type: 2}
@@ -27444,15 +27341,15 @@ SceneRoots:
   - {fileID: 1083285237}
   - {fileID: 860495885}
   - {fileID: 5006512736487884390}
-  - {fileID: 1715454870}
-  - {fileID: 8573141634702029872}
-  - {fileID: 1281740252}
-  - {fileID: 1225284913}
-  - {fileID: 1883705384}
-  - {fileID: 1278467996}
-  - {fileID: 1517098231}
-  - {fileID: 720907511}
   - {fileID: 1995952303}
   - {fileID: 1977188}
   - {fileID: 846831623}
   - {fileID: 101121380}
+  - {fileID: 1715454870}
+  - {fileID: 1281740252}
+  - {fileID: 1225284913}
+  - {fileID: 1883705384}
+  - {fileID: 8573141634702029872}
+  - {fileID: 1278467996}
+  - {fileID: 1517098231}
+  - {fileID: 720907511}

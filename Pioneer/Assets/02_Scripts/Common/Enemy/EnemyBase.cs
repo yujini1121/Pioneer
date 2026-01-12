@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyBase : CreatureBase, IBegin
@@ -23,6 +24,20 @@ public class EnemyBase : CreatureBase, IBegin
 
     [Header("마스트 게임오브젝트")]
     public GameObject mast;
+
+    // ===== Animation (공통) =====
+    [Header("애니메이션")]
+    [SerializeField] protected AnimationSlot slots;
+    [SerializeField] protected Animator animator;
+    [SerializeField] protected string nextAnimTrigger = "SetIdle";
+    [SerializeField] protected Vector3 lastMoveDirection = Vector3.back;
+
+    private AnimatorOverrideController aoc;
+    private readonly List<KeyValuePair<AnimationClip, AnimationClip>> overridesList = new();
+
+    protected int _curIdleIdx = -1;
+    protected int _curRunIdx = -1;
+    protected int _curAttackIdx = -1;
 
     /// <summary>
     /// 속성 변수에 값 할당
@@ -77,6 +92,88 @@ public class EnemyBase : CreatureBase, IBegin
 
         return isOnGround;
     }
+
+    #region 애니메이션
+    protected void ChangeIdleByIndex(Vector3 dir)
+    {
+        int idx = PlayerCore.Get4DirIndex(dir);
+        if (idx < 0) return;
+        if (slots == null || slots.idle == null || idx >= slots.idle.Count) return;
+
+        if (idx != _curIdleIdx)
+        {
+            ChangeAnimationClip(slots.curIdleClip, slots.idle[idx]);
+            _curIdleIdx = idx;
+        }
+
+        nextAnimTrigger = "SetIdle";
+    }
+
+    protected void ChangeRunByIndex(Vector3 dir)
+    {
+        int idx = PlayerCore.Get4DirIndex(dir);
+        if (idx < 0) return;
+        if (slots == null || slots.run == null || idx >= slots.run.Count) return;
+
+        if (idx != _curRunIdx)
+        {
+            ChangeAnimationClip(slots.curRunClip, slots.run[idx]);
+            _curRunIdx = idx;
+        }
+
+        nextAnimTrigger = "SetRun";
+    }
+
+    protected void ChangeAttackByIndex(Vector3 dir)
+    {
+        int idx = PlayerCore.Get2DirIndex(dir);
+        if (idx < 0) return;
+        if (slots == null || slots.attack == null || idx >= slots.attack.Count) return;
+
+        if (idx != _curAttackIdx)
+        {
+            ChangeAnimationClip(slots.curAttackClip, slots.attack[idx]);
+            _curAttackIdx = idx;
+        }
+
+        animator.Play("Attack");
+        nextAnimTrigger = "SetAttack";
+    }
+
+    protected void ApplyAnimTrigger()
+    {
+        if (animator == null) return;
+
+        animator.ResetTrigger("SetIdle");
+        animator.ResetTrigger("SetRun");
+        animator.ResetTrigger("SetAttack");
+        animator.SetTrigger(nextAnimTrigger);
+    }
+
+    // PlayerController의 ChangeAnimationClip 그대로 복붙, 정리 필요
+    public void ChangeAnimationClip(AnimationClip oldAnim, AnimationClip newAnim)
+    {
+        if (aoc == null || oldAnim == null || newAnim == null) return;
+
+        overridesList.Clear();
+        aoc.GetOverrides(overridesList);
+
+        for (int i = 0; i < overridesList.Count; i++)
+        {
+            var key = overridesList[i].Key;
+            if (key != null && key == oldAnim)
+            {
+                if (overridesList[i].Value == newAnim) return;
+                overridesList[i] = new KeyValuePair<AnimationClip, AnimationClip>(key, newAnim);
+                break;
+            }
+        }
+
+        aoc.ApplyOverrides(overridesList);
+        animator.Rebind();
+        animator.Update(0f);
+    }
+    #endregion
 
     /// <summary>
     /// Debug
