@@ -551,6 +551,7 @@ GameObject:
   - component: {fileID: 4419991302466445333}
   - component: {fileID: 8446833636355452162}
   - component: {fileID: 5615259743701811320}
+  - component: {fileID: 408707386174276870}
   m_Layer: 7
   m_Name: PF_Ballista
   m_TagString: Untagged
@@ -667,6 +668,7 @@ MonoBehaviour:
   maxHp: 0
   IsDead: 0
   attacker: {fileID: 0}
+  dropOffset: {x: 0, y: 0, z: 0}
   objectData: {fileID: 11400000, guid: ac880c82d9423e245a56ddc237748984, type: 2}
   <isUsing>k__BackingField: 0
   interactRange: 1.5
@@ -705,6 +707,25 @@ MonoBehaviour:
   grid: 1
   permitColor: {r: 0, g: 1, b: 0, a: 1}
   rejectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &408707386174276870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4900776315296722742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 1
+  m_Area: 4
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 0
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &5171196859541829659
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,15 @@ public class ThisIsPlayer : MonoBehaviour
 
     private void Awake()
     {
+        if (Player != null)
+        {
+            Debug.LogError("!!!>> ThisIsPlayer: Player object is already assigned!");
+        }
         Player = gameObject;
+    }
+
+    private void OnDestroy()
+    {
+        Debug.LogError("!!!>>플레이어 파괴!");
     }
 }

@@ -68,12 +68,12 @@ public class SItemConsumeTypeSO : SItemTypeSO
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 70);
                 var ps2 = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
-    CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
+                CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             //πË∞Ì«ƒ «ÿº“
             case 804://
                 PlayerCore.Instance.currentFullness = Mathf.Min
-                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 10);
+                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 5);
                 break;
             case 805://
                 PlayerCore.Instance.currentFullness = Mathf.Min

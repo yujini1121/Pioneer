@@ -28,7 +28,6 @@ public class MakeshiftCraftUiMain : MonoBehaviour, IBegin
             //Debug.Assert(ItemRecipeManager.Instance.recipes[index] != null);
             //Debug.Assert(ui != null);
             Button button = CommonUI.instance.ShowItemButton(pivot, makeshift[index], ui,
-                //index, 1, new Vector2(-200, -60), new Vector2(0, 0), new Vector2(100, 100));
                 index, 1, new Vector2(-200, -100), new Vector2(0, 0), new Vector2(100, 100));
 
             button.onClick.AddListener(() =>

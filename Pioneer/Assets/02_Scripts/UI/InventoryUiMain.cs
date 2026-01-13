@@ -75,6 +75,14 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void ClickSlot(int index)
     {
+        if (InGameUI.instance.IsPannelExpanded == false)
+        {
+            SelectSlot(index);
+            IconRefresh();
+            return;
+        }    
+
+
         // 현재 크래프팅 중
         if (CommonUI.instance.IsCurrentCrafting && InGameUI.instance.currentFabricationUi != null)
         {
@@ -125,7 +133,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         {
             // 플레이어 아이템 핸들
             Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
-            if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory))
+            if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory) ||
+                InventoryManager.Instance.SelectedSlotInventory.itemBaseType.categories == EDataType.NormalItem)
             {
                 // 빈 아이템 주먹 공격
 
@@ -199,24 +208,22 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         IconRefresh();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
-        if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory) == false)
+        switch (InventoryManager.Instance.SelectedSlotInventory.id)
         {
-            switch (InventoryManager.Instance.SelectedSlotInventory.id)
-            {
-                case 20001:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : 나무검");
-                    break;
-                case 20002:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : 철 검");
-                    break;
-                case 20003:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
-                    break;
-                default:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
-                    break;
-            }
+            case 20001:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : 나무검");
+                break;
+            case 20002:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : 철 검");
+                break;
+            case 20003:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
+                break;
+            default:
+                Debug.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
+                break;
         }
+
 	}
 
     private void Awake()
@@ -311,7 +318,6 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
             _forUi.Show(InventoryManager.Instance.itemLists[index]);
             _forUi.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
-            _forUi.SelectImage.SetActive(false);
 
         }
         mouseUI.Show(InventoryManager.Instance.mouseInventory);
@@ -321,7 +327,6 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if (mCurrentSelectedHotbarSlot != null)
         {
             mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
-            mCurrentSelectedHotbarSlot.SelectImage.SetActive(true);
         }
 
         PlayerStatUI.Instance.UpdateBasicStatUI();

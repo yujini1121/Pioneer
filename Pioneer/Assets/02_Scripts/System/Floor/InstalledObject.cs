@@ -1,5 +1,7 @@
-﻿using Unity.AI.Navigation;
+﻿using System.Collections;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// 설치 완료된 오브젝트의 상호작용 컨트롤(회전/이동/삭제).
@@ -30,12 +32,18 @@ public class InstalledObject : MonoBehaviour
     Quaternion _origRot;
     Renderer _rend;
     Color _origColor;
+    private NavMeshSurface nav;
 
     void Awake()
     {
         _rend = GetComponent<Renderer>();
         if (_rend && _rend.material) _origColor = _rend.material.color;
     }
+    private void Start()
+    {
+        nav = FindObjectOfType<NavMeshSurface>();
+    }
+
     public void OnPlaced()
     {
         if (AudioManager.instance != null)
@@ -75,9 +83,11 @@ public class InstalledObject : MonoBehaviour
             var ps = CreatureEffect.Instance.Effects[1]; 
             CreatureEffect.Instance.PlayEffect(ps, transform.position);
         }
-
+        InstalledObjectUI.Instance.RebuildStart();
         Destroy(gameObject);
     }
+
+
 
     // 회전
     public void RotateRight() { if (canRotate && !_relocating) transform.Rotate(0f, +90f, 0f); } 

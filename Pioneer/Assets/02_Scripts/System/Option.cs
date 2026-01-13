@@ -56,8 +56,9 @@ public class Option : MonoBehaviour, IBegin
 
             if (isActive)
             {
-                SetDeactivateEscUI();
-                SetDeactivateOptionUI();
+                if(!optionUI.activeInHierarchy)
+                    SetDeactivateEscUI();
+                // SetDeactivateOptionUI();
             }
             else
             {

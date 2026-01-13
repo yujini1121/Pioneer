@@ -70,10 +70,10 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
-        /*if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.L))
         {
             TakeDamage(9999, null); // 강제로 죽이기
-        }*/
+        }
 
         if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 

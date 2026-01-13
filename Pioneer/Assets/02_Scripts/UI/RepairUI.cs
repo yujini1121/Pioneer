@@ -27,6 +27,7 @@ public class RepairUI : MonoBehaviour
             itemSlotUIs[index] = slotGameObjects[index].GetComponent<ItemSlotUI>();
         }
         //IconRefresh();
+        // repairWindow.SetActive(false);
         ClickClose();
     }
 

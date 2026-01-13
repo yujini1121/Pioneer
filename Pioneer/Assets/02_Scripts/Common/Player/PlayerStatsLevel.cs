@@ -126,9 +126,13 @@ public class PlayerStatsLevel : MonoBehaviour
         if(Instance == null)
             Instance = this;
         else
+        {
+            Debug.LogError($"!!!>> 이미 PlayerStatsLevel가 존재함. 현재 게임옵젝트 {gameObject.name} / 있는 게임오브젝트 {Instance.gameObject.name}");
             Destroy(Instance);
+        }
 
-            player = GetComponent<PlayerCore>();
+
+        player = GetComponent<PlayerCore>();
 
         InitGrowState();
     }
@@ -155,7 +159,7 @@ public class PlayerStatsLevel : MonoBehaviour
         growStates.Clear();
         growStates.Add(GrowStatType.Combat, new GrowState(GrowStatType.Combat, new int[] { 50, 100, 150, 200, 250 }));
         growStates.Add(GrowStatType.Crafting, new GrowState(GrowStatType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
-        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 60, 120, 210, 300, 390 }));
+        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 60, 90, 120, 150, 180 }));
     }
 
     /// <summary>

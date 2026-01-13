@@ -192,6 +192,7 @@ MonoBehaviour:
   attackRange: 0
   attackDelayTime: 0
   currentAttackTarget: {fileID: 0}
+  detectionRange: 0
   detectMask:
     serializedVersion: 2
     m_Bits: 32896
@@ -200,6 +201,36 @@ MonoBehaviour:
     m_Bits: 0
   attackBoxCenterOffset: {x: 0, y: 0, z: 1}
   mast: {fileID: 0}
+  slots:
+    idle:
+    - {fileID: 7400000, guid: c8ecfd5a5320f8b4fa0523c76d3855be, type: 2}
+    - {fileID: 7400000, guid: fe499b9be8b104348982be321483b2f2, type: 2}
+    - {fileID: 7400000, guid: af200124a1874954092d7592788cc180, type: 2}
+    - {fileID: 7400000, guid: e5206eadf6caa37478768a153e522e26, type: 2}
+    run:
+    - {fileID: 7400000, guid: 7bf5c330888d2754ba18361564a65cc9, type: 2}
+    - {fileID: 7400000, guid: 21af94b34048ba544aa4771eca62c600, type: 2}
+    - {fileID: 7400000, guid: af234127b90217e4ba149e0871a85efc, type: 2}
+    - {fileID: 7400000, guid: 173edb9c23199344ea91b93cbdec7b39, type: 2}
+    attack:
+    - {fileID: 7400000, guid: 5704bec4164b80446bdabcfddad882ad, type: 2}
+    - {fileID: 7400000, guid: 24b6188f1d396f049b1fd1825920703c, type: 2}
+    fising: []
+    fisingHold: []
+    woodenSword: []
+    ironSword: []
+    conchSword: []
+    curIdleClip: {fileID: 7400000, guid: c8ecfd5a5320f8b4fa0523c76d3855be, type: 2}
+    curRunClip: {fileID: 7400000, guid: 7bf5c330888d2754ba18361564a65cc9, type: 2}
+    curAttackClip: {fileID: 7400000, guid: 5704bec4164b80446bdabcfddad882ad, type: 2}
+    curFishingClip: {fileID: 0}
+    curFishingHoldClip: {fileID: 0}
+    curWoodenSwordClip: {fileID: 0}
+    curIronSwrordClip: {fileID: 0}
+    curConchSwordClip: {fileID: 0}
+  animator: {fileID: 709669691857209171}
+  nextAnimTrigger: SetIdle
+  lastMoveDirection: {x: 0, y: 0, z: -1}
 --- !u!114 &7595422899972394721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -257,6 +288,7 @@ GameObject:
   - component: {fileID: 5185964432345869405}
   - component: {fileID: 3959760696602777137}
   - component: {fileID: 1228549071889162812}
+  - component: {fileID: 709669691857209171}
   m_Layer: 8
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -299,7 +331,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 97e6e4a2d67ff9346b132bbc1330a01d, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -343,3 +375,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &709669691857209171
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6042525674292446187}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a3de3d88fa595c343a20c40ef11ea0c3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

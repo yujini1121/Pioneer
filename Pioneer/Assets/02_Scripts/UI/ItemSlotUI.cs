@@ -17,7 +17,6 @@ public class ItemSlotUI : MonoBehaviour,
     public TextMeshProUGUI hotKey;
     public TextMeshProUGUI count;
     public TextMeshProUGUI durability;
-    public GameObject SelectImage;
     public bool isSlot;
     public bool isRepairSlot;
     public List<System.Action> buttonClickAction;
@@ -26,11 +25,6 @@ public class ItemSlotUI : MonoBehaviour,
     private void Awake()
     {
         buttonClickAction = new List<System.Action>();
-    }
-
-    private void Start()
-    {
-        if (SelectImage != null) SelectImage.SetActive(false);
     }
 
     public void Show(SItemStack item,
