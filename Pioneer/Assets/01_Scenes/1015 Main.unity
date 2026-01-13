@@ -3215,7 +3215,7 @@ PrefabInstance:
     - target: {fileID: 4926383961205332390, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6860211199804016371, guid: 281c89dbc51ee4940bbdaa96b9ab776c,
         type: 3}
@@ -18872,7 +18872,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 131063
 --- !u!1001 &5749561964456313624
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20376,8 +20376,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 5
-  nightDuration: 20
+  dayDuration: 120
+  nightDuration: 60
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
