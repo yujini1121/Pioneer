@@ -73,7 +73,10 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float installTimeSec = 2f; // Installable SO에서 주입시키기
     [SerializeField] private Image ringBackground;
     [SerializeField] private Image ringFill;
-    
+
+    [SerializeField] private const float defaultCellSize = 2f;
+    [SerializeField] private float[] cellSizeByType;
+
     private Coroutine installRoutine;
     private bool isCountingDown = false;
 
@@ -144,10 +147,18 @@ public class CreateObject : MonoBehaviour, IBegin
         var col = onHand.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
-
-    private static Vector3 SnapToGrid(Vector3 worldPos)
+    private Vector3 SnapToGrid(Vector3 worldPos)
     {
-        const float cellSize = 2f;
+        float cellSize = defaultCellSize;
+
+        int idx = (int)creationType;
+        if (cellSizeByType != null &&
+            idx >= 0 && idx < cellSizeByType.Length &&
+            cellSizeByType[idx] > 0f)
+        {
+            cellSize = cellSizeByType[idx];
+        }
+
         int x = Mathf.RoundToInt(worldPos.x / cellSize);
         int z = Mathf.RoundToInt(worldPos.z / cellSize);
         return new Vector3(x * cellSize, 0f, z * cellSize);
