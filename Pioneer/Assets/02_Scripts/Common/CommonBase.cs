@@ -102,7 +102,7 @@ public class CommonBase : MonoBehaviour, IBegin
     private IEnumerator HitFlashEffect()
     {
         // ¹àÀº Èò»öÀ¸·Î ºû³ª°Ô
-        Color brightWhite = new Color(2.5f, 2.5f, 2.5f, 1f);
+        Color brightWhite = Color.red; //new Color(2.5f, 2.5f, 2.5f, 1f);
 
         if (material.HasProperty("_Color"))
             material.SetColor("_Color", brightWhite);
