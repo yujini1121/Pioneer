@@ -24,6 +24,7 @@ public class StructureBase : CommonBase
     [Header("Àû °¨Áö")]
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected Collider[] detectedEnemies;
+    
 
     private NavMeshSurface nav;
 

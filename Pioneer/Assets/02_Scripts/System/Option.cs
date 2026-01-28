@@ -13,7 +13,7 @@ public class Option : MonoBehaviour, IBegin
     public Slider bgmVolSlider;
     public Slider sfxVolSlider;
 
-    private static Option instance;
+    public static Option instance;
 
     private void Awake()
     {
@@ -50,22 +50,22 @@ public class Option : MonoBehaviour, IBegin
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            bool isActive = escUI.activeInHierarchy;
+        //if (Input.GetKeyDown(KeyCode.Escape))
+        //{
+        //    bool isActive = escUI.activeInHierarchy;
 
-            if (isActive)
-            {
-                if(!optionUI.activeInHierarchy)
-                    SetDeactivateEscUI();
-                // SetDeactivateOptionUI();
-            }
-            else
-            {
-                SetActivateEscUI();
-                // SetActivateOptionUI();
-            }
-        }
+        //    if (isActive)
+        //    {
+        //        if(!optionUI.activeInHierarchy)
+        //            SetDeactivateEscUI();
+        //        // SetDeactivateOptionUI();
+        //    }
+        //    else
+        //    {
+        //        SetActivateEscUI();
+        //        // SetActivateOptionUI();
+        //    }
+        //}
     }
 
     public void SetActivateEscUI()
