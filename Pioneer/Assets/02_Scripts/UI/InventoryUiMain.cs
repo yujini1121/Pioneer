@@ -326,7 +326,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         if (mCurrentSelectedHotbarSlot != null)
         {
-            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
         }
 
         PlayerStatUI.Instance.UpdateBasicStatUI();

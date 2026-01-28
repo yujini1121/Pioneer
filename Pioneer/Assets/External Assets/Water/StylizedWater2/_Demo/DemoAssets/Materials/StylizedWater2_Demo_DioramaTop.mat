@@ -18,7 +18,7 @@ Material:
   - _FOAM
   - _NORMALMAP
   - _REFRACTION
-  - _SMOOTH_INTERSECTION
+  - _SHARP_INERSECTION
   - _TRANSLUCENCY
   - _WAVES
   m_InvalidKeywords:
@@ -197,8 +197,8 @@ Material:
     - _IntersectionSize: 0.944
     - _IntersectionSource: 0
     - _IntersectionSpeed: 0.1
-    - _IntersectionStyle: 2
-    - _IntersectionTiling: -0.030000046
+    - _IntersectionStyle: 1
+    - _IntersectionTiling: 0.9
     - _IntersectionWaveDist: 33.28
     - _LightingMode: 2
     - _LightingOn: 1
@@ -278,9 +278,9 @@ Material:
     - _VertexColorWaveFlattening: 0
     - _WaveCount: 2
     - _WaveDistance: 0.873
-    - _WaveHeight: 0.2
+    - _WaveHeight: 0.125
     - _WaveNormalStr: 7.6
-    - _WaveSpeed: 0.7
+    - _WaveSpeed: 1.1999999
     - _WaveSteepness: 0.54
     - _WaveTint: 0.013
     - _WavesOn: 1
