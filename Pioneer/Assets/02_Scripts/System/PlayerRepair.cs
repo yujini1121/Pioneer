@@ -67,6 +67,7 @@ public class PlayerRepair : MonoBehaviour
         target.Heal(target.maxHp);
 
         isAction = false;
-        InventoryManager.Instance.Remove(new SItemStack(40007, 1));
+        RepairSystem.instance.remainRepairCount--;
+        //InventoryManager.Instance.Remove(new SItemStack(40007, 1));
     }
 }

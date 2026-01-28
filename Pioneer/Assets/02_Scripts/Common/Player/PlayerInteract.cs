@@ -32,7 +32,7 @@ public class PlayerInteract : MonoBehaviour
 	{
 		if (ready != null && ready.Count > 0)
 		{
-			if (Input.GetKeyDown(KeyCode.R) && PlayerCore.Instance.currentState == PlayerCore.PlayerState.Default)
+			if (Input.GetKeyDown(KeyCode.E) && PlayerCore.Instance.currentState == PlayerCore.PlayerState.Default)
 			{
 				Debug.Log("PlayerInteract");
 

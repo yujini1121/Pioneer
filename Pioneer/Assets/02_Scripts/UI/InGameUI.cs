@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 // 모든 게임 Ui는 여기서 해결합니다.
 // 세부적 조작은 해당 컴포넌트를 경유해서 세팅합니다.
@@ -25,6 +22,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject gameObjectMastInteractiveText;
     public GameObject gameObjectMastUpgrade;
     public GameObject gameObjectPlayerStatUiParent;
+    public GameObject gameObjectCharacterPannelUI;
     public GameObject defaultCraftUI;
     public GameObject defaultCraftUiSubPivot;
     public GameObject makeshiftCraftUI;
@@ -41,6 +39,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public PlayerStatUI playerStatUi;
 
     public List<GameObject> currentOpenedUI = new List<GameObject>();
+    public List<InGameUiChunk> uiChunkStack = new List<InGameUiChunk>();
     private List<GameObject> mainCraftSelectUi;
 
     //Coroutine coroutineDenyESC = null;
@@ -159,6 +158,7 @@ public class InGameUI : MonoBehaviour, IBegin
         CommonUI.instance.CloseTab(makeshiftCraft.ui);
         Clear();
         Show(makeshiftCraftUI);
+        uiChunkStack.Add(new InGameUiChunk());
         makeshiftCraftUI.SetActive(isPannelExpand);
         InventoryUiMain.instance.IconRefresh();
         currentFabricationUi = makeshiftCraft.ui;
@@ -181,24 +181,35 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void UseESC()
     {
+        CreateObject.instance.ExitInstallMode();
+
+        if (uiChunkStack.Count > 0)
+        {
+            if(uiChunkStack[0].isNeedCloseAction)
+            {
+                uiChunkStack[0].CloseAction();
+            }
+            uiChunkStack.RemoveAt(0);
+        }
+
         if (defaultCraftUI.activeInHierarchy)
         {
-        
+            
             CloseDefaultCraftUI();
             return;
         }
 
         if (ManuUI.activeInHierarchy)
         {
-            ManuUI.SetActive(false);
+            //ManuUI.SetActive(false);
+            Option.instance.SetDeactivateEscUI();
         }
         else
         {
             if (GuiltySystem.instance.canUseESC)
             {
-
-
-                ManuUI.SetActive(true);
+                //ManuUI.SetActive(true);
+                Option.instance.SetActivateEscUI();
             }
             else
             {
@@ -238,7 +249,18 @@ public class InGameUI : MonoBehaviour, IBegin
         if (isPannelExpand == true && isNearCraft == false)
         {
             makeshiftCraftUI.SetActive(true);
+
+            uiChunkStack.Add(
+                new InGameUiChunk(new List<GameObject>() { gameObjectPlayerStatUiParent }, true,
+                () => { gameObjectPlayerStatUiParent.SetActive(false); }
+                ));
+            // -> 여기에 확장 할당
             gameObjectPlayerStatUiParent.SetActive(true);
         }
     }
+
+    public void ApplyUiStack(List<GameObject> uiGameobjects) =>
+        uiChunkStack.Add(new InGameUiChunk(uiGameobjects));
+    public void ApplyUiStack(List<GameObject> uiGameobjects, bool isNeedCloseAction, System.Action closeAction) =>
+        uiChunkStack.Add(new InGameUiChunk(uiGameobjects, isNeedCloseAction, closeAction));
 }

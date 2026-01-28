@@ -30,6 +30,8 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public static CreateObject instance;
 
+    public bool IsBuilding => onHand != null;
+
     [Header("기본 설정")]
     [SerializeField] private Transform worldSpaceParent;
     private Transform playerTrans;
@@ -76,6 +78,7 @@ public class CreateObject : MonoBehaviour, IBegin
     
     private Coroutine installRoutine;
     private bool isCountingDown = false;
+    private int rotateAngleIndex = 0;
 
     private GameObject _evalDummy;
 
@@ -223,48 +226,65 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void HandleOrientationInput()
     {
-        int newIdx = -1;//RotateInstallTypeObject
-        if (Input.GetKeyDown(KeyCode.W)) { 
-            newIdx = 0; 
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
-        }
-        else if (Input.GetKeyDown(KeyCode.D)) { 
-            newIdx = 1; 
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
-        }
-        else if (Input.GetKeyDown(KeyCode.S)) { 
-            newIdx = 2; 
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
-        }
-        else if (Input.GetKeyDown(KeyCode.A)) { 
-            newIdx = 3; 
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
-        }
 
-        if (newIdx >= 0 && onHand != null)
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0f) // 위로
         {
-            rotateN = newIdx;
-            onHand.transform.localRotation = Quaternion.Euler(0f, 90f * rotateN, 0f);
+            rotateAngleIndex++;
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
+        else if (scroll < 0f) // 아래로
+        {
+            rotateAngleIndex--;
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        }
+        if (rotateAngleIndex > 3) rotateAngleIndex = 0;
+        else if (rotateAngleIndex < 0) rotateAngleIndex = 3;
+        onHand.transform.localRotation = Quaternion.Euler(0f, 90f * rotateAngleIndex, 0f);
+
+        //int newIdx = -1;//RotateInstallTypeObject
+        //if (Input.GetKeyDown(KeyCode.W)) { 
+        //    newIdx = 0; 
+        //    if (AudioManager.instance != null)
+        //        AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        //}
+        //else if (Input.GetKeyDown(KeyCode.D)) { 
+        //    newIdx = 1; 
+        //    if (AudioManager.instance != null)
+        //        AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        //}
+        //else if (Input.GetKeyDown(KeyCode.S)) { 
+        //    newIdx = 2; 
+        //    if (AudioManager.instance != null)
+        //        AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        //}
+        //else if (Input.GetKeyDown(KeyCode.A)) { 
+        //    newIdx = 3; 
+        //    if (AudioManager.instance != null)
+        //        AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
+        //}
+        //if (newIdx >= 0 && onHand != null)
+        //{
+        //    rotateN = newIdx;
+        //    onHand.transform.localRotation = Quaternion.Euler(0f, 90f * rotateN, 0f);
+        //}
 
         if (!lockMovementWhileOrienting || playerAgent == null) return;
 
-        bool holdingAny = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+        //bool holdingAny = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
 
-        if (holdingAny && !isOrienting)
-        {
-            isOrienting = true;
-            LockPlayerMovement();
-        }
-        else if (!holdingAny && isOrienting)
-        {
-            isOrienting = false;
-            UnlockPlayerMovement();
-        }
+        //if (holdingAny && !isOrienting)
+        //{
+        //    isOrienting = true;
+        //    LockPlayerMovement();
+        //}
+        //else if (!holdingAny && isOrienting)
+        //{
+        //    isOrienting = false;
+        //    UnlockPlayerMovement();
+        //}
     }
 
     private bool IsBlockedByUI()
@@ -693,6 +713,7 @@ public class CreateObject : MonoBehaviour, IBegin
         arrivedTimer = 0f;
     }
 
+    // InGameUI에서 클릭을 통해 생성함. (해당 함수 호출을 보증합니다.)
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
 
