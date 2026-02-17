@@ -77,6 +77,8 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private const float defaultCellSize = 2f;
     [SerializeField] private float[] cellSizeByType;
 
+    [SerializeField] private float globalCellSize = 2f;
+
     private Coroutine installRoutine;
     private bool isCountingDown = false;
 
@@ -84,7 +86,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private SItemStack[] cost;
 
-	private void Awake()
+    private void Awake()
     {
         Debug.Log($">> CreateObject : {gameObject.name}");
         instance = this;
@@ -147,17 +149,33 @@ public class CreateObject : MonoBehaviour, IBegin
         var col = onHand.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
-    private Vector3 SnapToGrid(Vector3 worldPos)
+
+    private int GetFootprint()
     {
-        float cellSize = defaultCellSize;
+        int fp = 1;
 
         int idx = (int)creationType;
         if (cellSizeByType != null &&
             idx >= 0 && idx < cellSizeByType.Length &&
             cellSizeByType[idx] > 0f)
         {
-            cellSize = cellSizeByType[idx];
+            fp = Mathf.Max(1, Mathf.RoundToInt(cellSizeByType[idx]));
         }
+
+        return fp;
+    }
+
+    private Vector3 GetFootprintCenterOffset(float cellSize)
+    {
+        int fp = GetFootprint();
+        float half = (fp - 1) * 0.5f * cellSize;
+        return new Vector3(half, 0f, half);
+    }
+
+    private Vector3 SnapToGrid(Vector3 worldPos)
+    {
+        float cellSize = globalCellSize;
+        if (cellSize <= 0f) cellSize = defaultCellSize;
 
         int x = Mathf.RoundToInt(worldPos.x / cellSize);
         int z = Mathf.RoundToInt(worldPos.z / cellSize);
@@ -225,7 +243,12 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (!TryGetMouseGroundPoint(out var mouseWorldPos)) return;
 
-        Vector3 localPos = SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos));
+        float cellSize = globalCellSize;
+        if (cellSize <= 0f) cellSize = defaultCellSize;
+
+        Vector3 localBase = SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos));
+        Vector3 localPos = localBase + GetFootprintCenterOffset(cellSize);
+
         ApplyPreviewTransform(localPos);
 
         Vector3 worldPos = onHand.transform.position;
@@ -235,23 +258,27 @@ public class CreateObject : MonoBehaviour, IBegin
     private void HandleOrientationInput()
     {
         int newIdx = -1;//RotateInstallTypeObject
-        if (Input.GetKeyDown(KeyCode.W)) { 
-            newIdx = 0; 
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            newIdx = 0;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (Input.GetKeyDown(KeyCode.D)) { 
-            newIdx = 1; 
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            newIdx = 1;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (Input.GetKeyDown(KeyCode.S)) { 
-            newIdx = 2; 
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            newIdx = 2;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (Input.GetKeyDown(KeyCode.A)) { 
-            newIdx = 3; 
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            newIdx = 3;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
@@ -609,8 +636,8 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-	// EnterInstallMode(SInstallableObjectDataSO installableSO)가 호출되었을거라고 가정하고 호출합니다.
-	private IEnumerator InstallCountdownRoutine()
+    // EnterInstallMode(SInstallableObjectDataSO installableSO)가 호출되었을거라고 가정하고 호출합니다.
+    private IEnumerator InstallCountdownRoutine()
     {
         Debug.Assert(cost != null);
 
@@ -669,7 +696,7 @@ public class CreateObject : MonoBehaviour, IBegin
         InventoryUiMain.instance.IconRefresh();
 
 
-		playerAgent.ResetPath();
+        playerAgent.ResetPath();
         playerAgent.isStopped = false;
 
         tempObj = null;
@@ -718,13 +745,13 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
-        
+
         cost = mCost;
 
-		Debug.Assert(cost.Length > 0);
+        Debug.Assert(cost.Length > 0);
 
-		// 진행 중 카운트다운 정리
-		if (installRoutine != null) CancelInstallCountdown();
+        // 진행 중 카운트다운 정리
+        if (installRoutine != null) CancelInstallCountdown();
 
         // 기존 프리뷰/임시 오브젝트 정리
         if (onHand != null) { Destroy(onHand); onHand = null; }
@@ -760,7 +787,7 @@ public class CreateObject : MonoBehaviour, IBegin
     public void ExitInstallMode()
     {
         if (installRoutine != null) CancelInstallCountdown();
-        ringBackground.gameObject.SetActive (false);
+        ringBackground.gameObject.SetActive(false);
 
         if (onHand != null)
         {
