@@ -84,7 +84,10 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private SItemStack[] cost;
 
-	private void Awake()
+    // Footprint/Anchor 기반 판정을 위해 보관용 삭제 ㄴㄴ
+    private SInstallableObjectDataSO _activeInstallableSO;
+
+    private void Awake()
     {
         Debug.Log($">> CreateObject : {gameObject.name}");
         instance = this;
@@ -164,6 +167,51 @@ public class CreateObject : MonoBehaviour, IBegin
         return new Vector3(x * cellSize, 0f, z * cellSize);
     }
 
+    // 현재 타입의 셀 크기
+    private float GetActiveCellSize()
+    {
+        float cellSize = defaultCellSize;
+
+        int idx = (int)creationType;
+        if (cellSizeByType != null &&
+            idx >= 0 && idx < cellSizeByType.Length &&
+            cellSizeByType[idx] > 0f)
+        {
+            cellSize = cellSizeByType[idx];
+        }
+
+        return cellSize;
+    }
+
+    // Anchor 오프셋 가져오기
+    private Vector2 GetActiveAnchorOffsetCells()
+    {
+        if (_activeInstallableSO == null) return Vector2.zero;
+        return _activeInstallableSO.GetAnchorOffsetCellsByRotateN(rotateN);
+    }
+
+    // Footprint 값 가져오기
+    private Vector2Int GetActiveFootprint()
+    {
+        if (_activeInstallableSO == null) return Vector2Int.one;
+        return _activeInstallableSO.GetFootprintByRotateN(rotateN);
+    }
+
+    // Anchor를 반영한 스냅
+    private Vector3 SnapToGridWithAnchor(Vector3 localPos)
+    {
+        float cellSize = GetActiveCellSize();
+        Vector2 anchorCells = GetActiveAnchorOffsetCells();
+
+        float offsetX = anchorCells.x * cellSize;
+        float offsetZ = anchorCells.y * cellSize;
+
+        float x = Mathf.Round((localPos.x - offsetX) / cellSize) * cellSize + offsetX;
+        float z = Mathf.Round((localPos.z - offsetZ) / cellSize) * cellSize + offsetZ;
+
+        return new Vector3(x, 0f, z);
+    }
+
     private bool TryGetMouseGroundPoint(out Vector3 worldPoint)
     {
         worldPoint = default;
@@ -225,7 +273,11 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (!TryGetMouseGroundPoint(out var mouseWorldPos)) return;
 
-        Vector3 localPos = SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos));
+        // 기존: SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos))
+        // Anchor 반영 스냅(설치 판정 관련)
+        Vector3 localMouse = worldSpaceParent.InverseTransformPoint(mouseWorldPos);
+        Vector3 localPos = SnapToGridWithAnchor(localMouse);
+
         ApplyPreviewTransform(localPos);
 
         Vector3 worldPos = onHand.transform.position;
@@ -235,23 +287,27 @@ public class CreateObject : MonoBehaviour, IBegin
     private void HandleOrientationInput()
     {
         int newIdx = -1;//RotateInstallTypeObject
-        if (Input.GetKeyDown(KeyCode.W)) { 
-            newIdx = 0; 
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            newIdx = 0;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (Input.GetKeyDown(KeyCode.D)) { 
-            newIdx = 1; 
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            newIdx = 1;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (Input.GetKeyDown(KeyCode.S)) { 
-            newIdx = 2; 
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            newIdx = 2;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (Input.GetKeyDown(KeyCode.A)) { 
-            newIdx = 3; 
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            newIdx = 3;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
@@ -287,6 +343,52 @@ public class CreateObject : MonoBehaviour, IBegin
         uiRaycaster.Raycast(ped, results);
 
         return false;
+    }
+
+    private IEnumerable<Vector3> EnumerateFootprintCellCenters(Vector3 pivotCenterWorld)
+    {
+        Vector2Int fp = GetActiveFootprint();
+        float cellSize = GetActiveCellSize();
+
+        // 오프셋 공식: ix - w/2 + 0.5 
+        for (int ix = 0; ix < fp.x; ix++)
+        {
+            float ox = (ix - (fp.x / 2f) + 0.5f) * cellSize;
+            for (int iz = 0; iz < fp.y; iz++)
+            {
+                float oz = (iz - (fp.y / 2f) + 0.5f) * cellSize;
+                yield return pivotCenterWorld + new Vector3(ox, 0f, oz);
+            }
+        }
+    }
+
+    private bool CheckFootprintSupportAndOverlap(Vector3 pivotCenterWorld)
+    {
+        //maxDistance보다 멀면 설치 불가능
+        if (Vector3.SqrMagnitude(pivotCenterWorld - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
+        {
+            return false;
+        }
+
+        Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
+        Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
+
+        foreach (var cellCenter in EnumerateFootprintCellCenters(pivotCenterWorld))
+        {
+            // 플랫폼 체크
+            if (!Physics.CheckBox(cellCenter, halfSize, orientation, platformLayer))
+            {
+                return false;
+            }
+
+            // 겹침 체크(다른 설치물)
+            if (Physics.CheckBox(cellCenter, halfSize, orientation, creationLayer))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private bool CheckNear(Vector3 center)
@@ -386,31 +488,7 @@ public class CreateObject : MonoBehaviour, IBegin
                 return true;
 
             case CreationType.Barricade:
-                xArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
-                zArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
-
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-                    int zIndex = rotateN % 2 == 0 ? i : xArr.Length - 1 - i;
-
-                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[zIndex]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+                return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.Door:
                 xArr = new float[] { 0.353553f, 1.060659f };
@@ -441,109 +519,19 @@ public class CreateObject : MonoBehaviour, IBegin
                 return true;
 
             case CreationType.CraftingTable:
-                xArr = new float[] { -0.353553f, 0.353553f };
-                zArr = new float[] { -0.353553f, 0.353553f };
-
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-                    int zIndex = rotateN % 2 == 0 ? i : xArr.Length - 1 - i;
-
-                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[zIndex]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+                return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.Ballista:
-                xArr = new float[] { 0f, 0.707106f, 1.414213f, 0.707106f, 0f, -0.707106f, -1.414213f, -0.707106f, 0f };
-                zArr = new float[] { 0f, 0.707106f, 0f, -0.707106f, -1.414213f, -0.707106f, 0f, 0.707106f, 1.414213f };
-
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-
-                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[i]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+                return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.Trap:
-                xArr = new float[] { 0.353553f, 0.353553f, -0.353553f, -0.353553f };
-                zArr = new float[] { 0.353553f, -0.353553f, -0.353553f, 0.353553f };
-
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-
-                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[i]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+                return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.Lantern:
-                xArr = new float[] { 0f };
-                zArr = new float[] { 0f };
+                return CheckFootprintSupportAndOverlap(center);
 
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-
-                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[i]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+            case CreationType.Chest:
+                return CheckFootprintSupportAndOverlap(center);
         }
         #endregion
 
@@ -609,8 +597,8 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-	// EnterInstallMode(SInstallableObjectDataSO installableSO)가 호출되었을거라고 가정하고 호출합니다.
-	private IEnumerator InstallCountdownRoutine()
+    // EnterInstallMode(SInstallableObjectDataSO installableSO)가 호출되었을거라고 가정하고 호출합니다.
+    private IEnumerator InstallCountdownRoutine()
     {
         Debug.Assert(cost != null);
 
@@ -668,8 +656,7 @@ public class CreateObject : MonoBehaviour, IBegin
         InventoryManager.Instance.Remove(cost);
         InventoryUiMain.instance.IconRefresh();
 
-
-		playerAgent.ResetPath();
+        playerAgent.ResetPath();
         playerAgent.isStopped = false;
 
         tempObj = null;
@@ -718,13 +705,13 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
-        
+
         cost = mCost;
 
-		Debug.Assert(cost.Length > 0);
+        Debug.Assert(cost.Length > 0);
 
-		// 진행 중 카운트다운 정리
-		if (installRoutine != null) CancelInstallCountdown();
+        // 진행 중 카운트다운 정리
+        if (installRoutine != null) CancelInstallCountdown();
 
         // 기존 프리뷰/임시 오브젝트 정리
         if (onHand != null) { Destroy(onHand); onHand = null; }
@@ -737,8 +724,13 @@ public class CreateObject : MonoBehaviour, IBegin
         // 설치 타입/제작시간 세팅(SO 기준)
         if (installableSO != null)
         {
+            _activeInstallableSO = installableSO; // 현재 설치 SO 보관
             creationType = (CreationType)(int)installableSO.installType;
             installTimeSec = Mathf.Max(0.1f, installableSO.buildTime);
+        }
+        else
+        {
+            _activeInstallableSO = null;
         }
 
         // UI/상태 초기화
@@ -751,7 +743,6 @@ public class CreateObject : MonoBehaviour, IBegin
         arrivedTimer = 0f;
         rotateN = 0;
 
-        // 프리뷰 생성 및 기타 초기화(기존 로직)
         CreateObjectInit();
 
         Debug.Log($"[설치모드 진입] {creationType}, 제작 {installTimeSec:F2}s");
@@ -760,7 +751,7 @@ public class CreateObject : MonoBehaviour, IBegin
     public void ExitInstallMode()
     {
         if (installRoutine != null) CancelInstallCountdown();
-        ringBackground.gameObject.SetActive (false);
+        ringBackground.gameObject.SetActive(false);
 
         if (onHand != null)
         {
@@ -778,6 +769,8 @@ public class CreateObject : MonoBehaviour, IBegin
         playerAgent.isStopped = true;
 
         UnlockPlayerMovement();
+
+        _activeInstallableSO = null;
 
         Debug.Log("[설치 모드 종료됨]");
     }
@@ -829,6 +822,7 @@ public class CreateObject : MonoBehaviour, IBegin
         var bakType = creationType;
         var bakOnHand = onHand;
         var bakRotateN = rotateN;
+        var bakSO = _activeInstallableSO;
 
         try
         {
@@ -841,8 +835,6 @@ public class CreateObject : MonoBehaviour, IBegin
 
             // rotateN은 90도 단위 회전 지표
             rotateN = Mathf.RoundToInt(rot.eulerAngles.y / 90f) % 4;
-
-            // 기존 설치 검증 로직 그대로 사용
             return CheckNear(worldPos);
         }
         finally
@@ -851,6 +843,8 @@ public class CreateObject : MonoBehaviour, IBegin
             creationType = bakType;
             onHand = bakOnHand;
             rotateN = bakRotateN;
+
+            _activeInstallableSO = bakSO;
         }
     }
 }
