@@ -17,25 +17,29 @@ public class SInstallableObjectDataSO : SItemTypeSO
     public CreationType installType;
 
     [Header("설치 프리팹 및 설정")]
-    public GameObject prefab;                  // 설치 대상 프리팹
+    public GameObject prefab;                  
 
     [Tooltip("설치 판정용 Overlap/CheckBox 크기(미터) 그러니까 Unity 단위상 모델링의 실제 크기 작성")]
-    public Vector3 size = Vector3.one;         // 설치 판정용 Overlap 크기
+    public Vector3 size = Vector3.one;         
 
-    [Header("Footprint(셀 점유)")]
-    [Tooltip("그리드 셀 기준 점유 크기. 지금은 cellSize를 2x2로 놓은 걸 기준으로 작성했어요. (X=가로, Y=세로(Z))")]
+    [Header("Grid")]
+    [Tooltip("스냅/footprint 기준 셀 크기(미터).")]
+    public float gridCellSize = 0f;
+
+    [Header("Footprint")]
+    [Tooltip("Grid 셀 기준 점유 크기. 지금은 cellSize를 2x2로 놓은 걸 기준으로 작성. (X=가로, Y=세로(Z))")]
     public Vector2Int footprint = Vector2Int.one;
 
     [Tooltip("직사각형(footprint.x != footprint.y) 오브젝트는 90/270도 회전 시 (x,y)를 자동 스왑할지 (변수명 진짜 안예쁘다..)")]
     public bool swapFootprintOnRotate90 = true;
 
-    [Header("Anchor(스냅 오프셋)")]
+    [Header("Anchor")]
     [Tooltip("셀 중심 스냅 기준으로 반칸 오프셋을 줄지 결정")]
     public AnchorType anchor = AnchorType.Center;
 
     [Header("기능 확장")]
-    public int maxHp = 20;                     // 내구도
-    public float buildTime = 2f;               // 설치 시간
+    public int maxHp = 20;                     
+    public float buildTime = 2f;              
 
     /// <summary>
     /// rotateN: 0,1,2,3 (0=0도, 1=90도, 2=180도, 3=270도)
@@ -89,6 +93,7 @@ public class SInstallableObjectDataSO : SItemTypeSO
     private void OnValidate()
     {
         // 실수 방지: 0 이하 입력 방지
+        if (gridCellSize < 0f) gridCellSize = 0f;
         if (footprint.x < 1) footprint.x = 1;
         if (footprint.y < 1) footprint.y = 1;
         if (buildTime < 0.1f) buildTime = 0.1f;

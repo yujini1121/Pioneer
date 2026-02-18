@@ -75,7 +75,6 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private Image ringFill;
 
     [SerializeField] private const float defaultCellSize = 2f;
-    [SerializeField] private float[] cellSizeByType;
 
     private Coroutine installRoutine;
     private bool isCountingDown = false;
@@ -150,17 +149,10 @@ public class CreateObject : MonoBehaviour, IBegin
         var col = onHand.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
+
     private Vector3 SnapToGrid(Vector3 worldPos)
     {
-        float cellSize = defaultCellSize;
-
-        int idx = (int)creationType;
-        if (cellSizeByType != null &&
-            idx >= 0 && idx < cellSizeByType.Length &&
-            cellSizeByType[idx] > 0f)
-        {
-            cellSize = cellSizeByType[idx];
-        }
+        float cellSize = GetActiveCellSize();
 
         int x = Mathf.RoundToInt(worldPos.x / cellSize);
         int z = Mathf.RoundToInt(worldPos.z / cellSize);
@@ -170,17 +162,12 @@ public class CreateObject : MonoBehaviour, IBegin
     // 현재 타입의 셀 크기
     private float GetActiveCellSize()
     {
-        float cellSize = defaultCellSize;
+        // SO가 있으면 SO 우선
+        if (_activeInstallableSO != null && _activeInstallableSO.gridCellSize > 0f)
+            return _activeInstallableSO.gridCellSize;
 
-        int idx = (int)creationType;
-        if (cellSizeByType != null &&
-            idx >= 0 && idx < cellSizeByType.Length &&
-            cellSizeByType[idx] > 0f)
-        {
-            cellSize = cellSizeByType[idx];
-        }
-
-        return cellSize;
+        // SO가 없거나 0이면 default 사용
+        return defaultCellSize;
     }
 
     // Anchor 오프셋 가져오기
@@ -461,62 +448,13 @@ public class CreateObject : MonoBehaviour, IBegin
                 return false;
 
             case CreationType.Wall:
-                xArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
-                zArr = new float[] { -1.060659f, -0.353553f, 0.353553f, 1.060659f };
-
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-                    int zIndex = rotateN % 2 == 0 ? i : xArr.Length - 1 - i;
-
-                    Vector3 offset = new Vector3(xArr[i], 0f, zArr[zIndex]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+                return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.Barricade:
                 return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.Door:
-                xArr = new float[] { 0.353553f, 1.060659f };
-                zArr = new float[] { 0.353553f, 1.060659f };
-                xSign = new float[] { -1f, -1f, 1f, 1f };
-                zSign = new float[] { -1f, 1f, 1f, -1f };
-
-                for (int i = 0; i < xArr.Length; i++)
-                {
-                    float angle = onHand.transform.rotation.y;
-
-                    Vector3 offset = new Vector3(xArr[i] * xSign[rotateN % 4], 0f, zArr[i] * zSign[rotateN % 4]);
-                    Vector3 origin = center + offset;
-                    Vector3 halfSize = new Vector3(0.49f, 0.5f, 0.49f);
-                    Quaternion orientation = Quaternion.Euler(new Vector3(0f, 45f, 0f));
-
-                    if (!Physics.CheckBox(origin, halfSize, orientation, platformLayer))
-                    {
-                        Debug.Log("플랫폼 없음");
-                        return false;
-                    }
-                    if (Physics.CheckBox(origin, halfSize, orientation, creationLayer))
-                    {
-                        Debug.Log("오브젝트 있음");
-                        return false;
-                    }
-                }
-                return true;
+                return CheckFootprintSupportAndOverlap(center);
 
             case CreationType.CraftingTable:
                 return CheckFootprintSupportAndOverlap(center);
