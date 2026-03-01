@@ -90,10 +90,10 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         }
 
 
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-        {
-            InventoryManager.Instance.MouseSplit(index);
-        }
+        //if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        //{
+        //    InventoryManager.Instance.MouseSplit(index);
+        //}
         else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
         {
             InventoryManager.Instance.MouseSingle(index);
@@ -175,6 +175,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             //}
             // 내구도가 만료된 무기 혹은 맨손
         }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            Debug.Log("우클 감지");
+        }
+
     }
 
     public void Sort()
@@ -277,6 +283,21 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if (Input.GetKeyDown(KeyCode.Alpha9)) hotkeyInventoryNum = 8;
         if (hotkeyInventoryNum > -1) SelectSlot(hotkeyInventoryNum);
 
+        // 인벤토리 핫키 휠 스크롤
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0f) // 위로
+        {
+            hotkeyInventoryNum = InventoryManager.Instance.selectedSlotIndex - 1;
+            if (hotkeyInventoryNum < 0) hotkeyInventoryNum = quickSlot.Count - 1;
+            SelectSlot(hotkeyInventoryNum);
+        }
+        else if (scroll < 0f) // 아래로
+        {
+            hotkeyInventoryNum = InventoryManager.Instance.selectedSlotIndex + 1;
+            if (hotkeyInventoryNum >= quickSlot.Count) hotkeyInventoryNum = 0;
+            SelectSlot(hotkeyInventoryNum);
+        }
+
 # warning 나중에 채빈씨 브랜치 머지 하고 업데이트 된경우 주석 풀기
         //if (hotkeyInventoryNum > -1 &&
         //    PlayerCore.Instance.currentState != PlayerCore.PlayerState.Default) SelectSlot(hotkeyInventoryNum);
@@ -326,7 +347,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         if (mCurrentSelectedHotbarSlot != null)
         {
-            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
         }
 
         PlayerStatUI.Instance.UpdateBasicStatUI();

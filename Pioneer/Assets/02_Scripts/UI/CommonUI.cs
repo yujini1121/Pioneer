@@ -147,6 +147,8 @@ public class CommonUI : MonoBehaviour, IBegin
                 }
 
                 CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull, recipe.input);
+
+                Debug.Log("CommonUI : 설치 진입");
                 //asdasdads
 
             }

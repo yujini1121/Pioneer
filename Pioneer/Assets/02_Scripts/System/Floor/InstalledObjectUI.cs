@@ -83,12 +83,16 @@ public class InstalledObjectUI : MonoBehaviour
 
     void Update()
     {
-        // 우클릭: 대상 선택 + 전체 UI 활성화 + 위치 고정
-        if (Input.GetMouseButtonDown(1))
+        if (structure != null && (structure.hp <= 0 || (!structure.CanInteract)))
         {
-            CreateObject.instance.ExitInstallMode();
+            Hide();
+        }
 
-            if (TryPick(out var obj))
+        // 좌클릭: 대상 선택 + 전체 UI 활성화 + 위치 고정
+        if (Input.GetMouseButtonDown(0))
+        {
+            
+            if (TryPick(out var obj) && TryPick<StructureBase>(out var structureBase) && structureBase.CanInteract)
             {
                 SetSelection(obj);
                 ShowAt(current.transform.position);   // ★ 활성화 + 위치 지정
@@ -102,6 +106,14 @@ public class InstalledObjectUI : MonoBehaviour
             }
             else Hide();
         }
+        // 우클릭: 해당 대상 수리
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (TryPick<StructureBase>(out var structureBase))
+            {
+                PlayerRepair.instance.Repair(structureBase);
+            }
+        }
 
         if (!current) return;
 
@@ -112,8 +124,19 @@ public class InstalledObjectUI : MonoBehaviour
         switch (mode)
         {
             case Mode.Rotate:
-                if (Input.GetKeyDown(keyRotateLeft)) current.RotateLeft();
-                if (Input.GetKeyDown(keyRotateRight)) current.RotateRight();
+                //if (Input.GetKeyDown(keyRotateLeft)) current.RotateLeft();
+                //if (Input.GetKeyDown(keyRotateRight)) current.RotateRight();
+
+                float scroll = Input.GetAxis("Mouse ScrollWheel");
+                if (scroll > 0f) // 위로
+                {
+                    current.RotateLeft();
+                }
+                else if (scroll < 0f) // 아래로
+                {
+                    current.RotateRight();
+                }
+
                 break;
 
             case Mode.Move:
@@ -151,7 +174,7 @@ public class InstalledObjectUI : MonoBehaviour
         mode = Mode.Idle;
     }
 
-    bool TryPick(out InstalledObject obj)
+    public bool TryPick(out InstalledObject obj)
     {
         obj = null;
         var ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -159,6 +182,16 @@ public class InstalledObjectUI : MonoBehaviour
             obj = hit.collider.GetComponentInParent<InstalledObject>();
         return obj != null;
     }
+
+    public bool TryPick<ParentGoComponent>(out ParentGoComponent obj) where ParentGoComponent : class
+    {
+        obj = null;
+        var ray = cam.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out var hit, 1000f, interactableMask))
+            obj = hit.collider.GetComponentInParent<ParentGoComponent>();
+        return obj != null;
+    }
+
 
     /// <summary>
     /// 패널 다시 보이게 활성화 
