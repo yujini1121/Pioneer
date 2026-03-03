@@ -26,10 +26,14 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     [SerializeField] Button trashButton;
     [SerializeField] Sprite trashOpen;
     [SerializeField] Sprite trashClose;
+    [SerializeField] float clickTerm = 1.0f;
     RectTransform followUiRect1; // 마우스
     RectTransform followUiRect2; // 마우스
     ItemSlotUI[] itemSlotUIs;
     ItemSlotUI mCurrentSelectedHotbarSlot;
+    float clickTime = 0.0f;
+    int clickedSlotIndex = -1;
+    Coroutine clickCoroutine = null;
 
     public void InventoryExpand(bool value)
     {
@@ -73,6 +77,15 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         (windowMouseTextType.text, windowMouseTextCategory.text, windowMouseTextInfo.text) = GetInfomation(mItemStack); // 마우스
     }
 
+    public void RightClickSlot(int index)
+    {
+        if (InventoryManager.Instance.itemLists[index] != null
+            && InventoryManager.Instance.itemLists[index].itemBaseType.categories == EDataType.WeaponItem)
+        {
+            RepairUI.instance.Open();
+        }
+    }
+
     public void ClickSlot(int index)
     {
         if (InGameUI.instance.IsPannelExpanded == false)
@@ -80,16 +93,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             SelectSlot(index);
             IconRefresh();
             return;
-        }    
-
-
+        }
         // 현재 크래프팅 중
         if (CommonUI.instance.IsCurrentCrafting && InGameUI.instance.currentFabricationUi != null)
         {
             CommonUI.instance.StopCraft(InGameUI.instance.currentFabricationUi);
         }
-
-
         //if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         //{
         //    InventoryManager.Instance.MouseSplit(index);
@@ -100,9 +109,26 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         }
         else
         {
-            InventoryManager.Instance.MouseSwitch(index);
+            // 여기서 클릭 적용
+            // 1. 시간 재서 더블 클릭인지 판단 / 같은 슬롯인지 판단
+            // 1Y - 더블클릭 / 시간 카운터 종료 / 일반 클릭 예약 종료
+            // 1N - 시간 카운터 시작 / 1초 뒤 자동적으로 일반 클릭 시작(예약 시작)
+
+            if (IsDoubleClick(index))
+            {
+                WithdrawSingleClick(index);
+                DoubleClick(index);
+                EndCheckDoubleClick(index);
+            }
+            else
+            {
+                WithdrawSingleClick(index);
+                PrepareSingleClick(index);
+                BeginCheckDoubleClick(index);
+            }
         }
 
+        // 마우스 슬롯 이미지 업뎃 + 클릭한 슬롯 이미지 업데이트
         mouseUI.Show(InventoryManager.Instance.mouseInventory);
         itemSlotUIs[index].Show(InventoryManager.Instance.itemLists[index]);
 
@@ -204,31 +230,40 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         Debug.Assert(index >= 0);
         Debug.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
+        Debug.Assert(InventoryManager.Instance != null);
 
         InventoryManager.Instance.SelectSlot(index);
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.SelectQuickSlot);
-
         mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
         IconRefresh();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
-        switch (InventoryManager.Instance.SelectedSlotInventory.id)
+        if (InventoryManager.Instance.SelectedSlotInventory == null)
         {
-            case 20001:
-                Debug.Log($">> 선택된 슬롯 아이템 ID : 나무검");
-                break;
-            case 20002:
-                Debug.Log($">> 선택된 슬롯 아이템 ID : 철 검");
-                break;
-            case 20003:
-                Debug.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
-                break;
-            default:
-                Debug.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
-                break;
+            //Debug.Log($">> 선택된 슬롯 아이템 ID : 현재 쥔 아이템은 빈 아이템입니다.");
+            return;
         }
+        else
+        {
+            switch (InventoryManager.Instance.SelectedSlotInventory.id)
+            {
+                case 20001:
+                    Debug.Log($">> 선택된 슬롯 아이템 ID : 나무검");
+                    break;
+                case 20002:
+                    Debug.Log($">> 선택된 슬롯 아이템 ID : 철 검");
+                    break;
+                case 20003:
+                    Debug.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
+                    break;
+                default:
+                    Debug.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
+                    break;
+            }
+        }
+
 
 	}
 
@@ -252,6 +287,52 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         followUiRect2 = windowMouse.GetComponent<RectTransform>();
 
         IconRefresh();
+    }
+
+    private bool IsDoubleClick(int currentSlot)
+    {
+        return (clickedSlotIndex == currentSlot) && clickTime >= Time.time;
+    }
+    private void BeginCheckDoubleClick(int currentIndex)
+    {
+        clickedSlotIndex = currentIndex;
+        clickTime = Time.time + clickTerm;
+    }
+    private void EndCheckDoubleClick(int currentIndex)
+    {
+        clickedSlotIndex = -1;
+    }
+
+    private void DoubleClick(int index)
+    {
+        if (InventoryManager.Instance.itemLists[index] == null) return;
+        if (InventoryManager.Instance.itemLists[index].itemBaseType.categories != EDataType.ConsumeItem) return;
+
+        InventoryManager.Instance.itemLists[index].Use();
+
+        // 더블 클릭 준비
+        clickedSlotIndex = -1;
+        clickTime = 0.0f;
+    }
+    private void PrepareSingleClick(int index)
+    {
+        IEnumerator mSingleClickCoroutine(int _index)
+        {
+            yield return new WaitForSeconds(1);
+            InventoryManager.Instance.MouseSwitch(_index);
+        }
+
+        StartCoroutine(mSingleClickCoroutine(index));
+
+        InventoryManager.Instance.MouseSwitch(index);
+    }
+    private void WithdrawSingleClick(int index)
+    {
+        if (clickCoroutine != null)
+        {
+            StopCoroutine(clickCoroutine);
+            clickCoroutine = null;
+        }
     }
 
     // Update is called once per frame

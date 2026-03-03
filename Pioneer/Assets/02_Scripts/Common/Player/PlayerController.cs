@@ -46,7 +46,13 @@ public class PlayerController : MonoBehaviour
 
 	public Transform mast;
 
-    void Awake()
+	[Header("µð¹ö±×")]
+ 	public bool isDebugging;
+
+
+
+
+	void Awake()
 	{
 		instance = this;
 
@@ -71,8 +77,12 @@ public class PlayerController : MonoBehaviour
         moveInput = new Vector3(moveX, 0, moveY);
         moveDirection = moveInput.normalized;
 
-		Debug.Log($"moveX : {moveX}, moveY: {moveY}");
-		Debug.Log($"moveInput : {moveInput}");
+		if (isDebugging)
+		{
+            Debug.Log($"moveX : {moveX}, moveY: {moveY}");
+            Debug.Log($"moveInput : {moveInput}");
+        }
+
 
         switch (playerCore.currentState)
 		{

@@ -93,7 +93,18 @@ public class ItemSlotUI : MonoBehaviour,
     {
         if (isSlot)
         {
-            InventoryUiMain.instance.ClickSlot(index);
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                InventoryUiMain.instance.ClickSlot(index);
+            }
+            else if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                // 우클릭 시
+                InventoryUiMain.instance.RightClickSlot(index);
+            }
+
+
+
         }
         else if (isRepairSlot)
         {

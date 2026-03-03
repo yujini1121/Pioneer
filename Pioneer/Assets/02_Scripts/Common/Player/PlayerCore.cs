@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Rendering.VirtualTexturing;
 using static MarinerBase;
 
 #region 그냥 메모
@@ -184,6 +185,9 @@ public class PlayerCore : CreatureBase, IBegin
     private bool isRunningCoroutineItem = false;
     public bool IsRunningCoroutineItem => isRunningCoroutineItem;
 
+    [Header("디버깅")]
+    public bool isDebugging;
+
     void Awake()
     {
         Instance = this;
@@ -326,7 +330,10 @@ public class PlayerCore : CreatureBase, IBegin
     public void Idle(Vector3 moveInput)
     {
         int idx = Get4DirIndex(moveInput);
-        UnityEngine.Debug.Log($"Idle idx : {idx}");
+        if (isDebugging)
+        {
+            UnityEngine.Debug.Log($"Idle idx : {idx}");
+        }
 
         if (idx != _curRunIdx)
         {
@@ -485,7 +492,10 @@ public class PlayerCore : CreatureBase, IBegin
 
                 PlayerFullnessChanged?.Invoke(currentFullness);
             }
-            UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
+            if (isDebugging)
+            {
+                UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
+            }
         }
     }
 

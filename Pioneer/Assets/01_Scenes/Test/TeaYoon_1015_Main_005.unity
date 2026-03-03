@@ -2427,7 +2427,7 @@ PrefabInstance:
     - target: {fileID: 4438075312389558738, guid: a84cab11731be014e83e6379811bf21a,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4438075312389558738, guid: a84cab11731be014e83e6379811bf21a,
         type: 3}
@@ -3812,7 +3812,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.083333336
+  m_VoxelSize: 0.05
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
   m_BuildHeightMesh: 0
@@ -5725,6 +5725,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crawler
       objectReference: {fileID: 0}
+    - target: {fileID: 4665850972790329012, guid: 57925bfba29c1704c94a26d630545e00,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6931,7 +6936,7 @@ PrefabInstance:
     - target: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9078708644997992570, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
@@ -9892,6 +9897,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 2034679914}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   mastLevel: 1
   interactionRange: 1.5
   playerLayer:
@@ -10035,12 +10043,12 @@ MonoBehaviour:
   - {fileID: 491804331}
   - {fileID: 640650934}
   - {fileID: 1341768743}
-  - {fileID: 1494904340}
+  - {fileID: 1333126829}
   resultPos:
-  - {x: -1.4142134, y: -0.12044251, z: -4.242641}
-  - {x: -1.4142137, y: -0.12044251, z: 4.242641}
-  - {x: -5.6568546, y: -0.12044251, z: -0.00000011920929}
-  - {x: -2.8284268, y: -0.12044251, z: -2.8284273}
+  - {x: -1.4142134, y: -0.18066376, z: -4.242641}
+  - {x: -1.4142137, y: -0.18066376, z: 4.242641}
+  - {x: -5.6568546, y: -0.18066376, z: -0.00000011920929}
+  - {x: -4.2426405, y: -0.18066376, z: -1.4142137}
   found: 01010101
 --- !u!114 &2034679921
 MonoBehaviour:
@@ -12937,6 +12945,7 @@ MonoBehaviour:
   gameObjectMastInteractiveText: {fileID: 8367569421977765899}
   gameObjectMastUpgrade: {fileID: 0}
   gameObjectPlayerStatUiParent: {fileID: 2186950260192463445}
+  gameObjectCharacterPannelUI: {fileID: 0}
   defaultCraftUI: {fileID: 7706198975104593130}
   defaultCraftUiSubPivot: {fileID: 2549543640067407509}
   makeshiftCraftUI: {fileID: 7577170826654941612}
@@ -13424,6 +13433,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   fov: {fileID: 2029828996017671682}
   speed: 0
   attackDamage: 0
@@ -13475,6 +13487,7 @@ MonoBehaviour:
     amount: 0
     duability: 0
     isUseCoroutineEnd: 0
+  isDebugging: 0
 --- !u!222 &1578133781417789216
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -17075,6 +17088,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   objectData: {fileID: 0}
   <isUsing>k__BackingField: 0
   interactRange: 3
@@ -18774,6 +18790,7 @@ MonoBehaviour:
     curConchSwordClip: {fileID: 7400000, guid: f1d022fddc143a1488bdd740cad4d1ca, type: 2}
   nextAnimTrigger: 
   mast: {fileID: 7505562570904623939}
+  isDebugging: 0
 --- !u!222 &5622103427795389368
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -20376,8 +20393,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 5
-  nightDuration: 20
+  dayDuration: 10000
+  nightDuration: 10000
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -25991,6 +26008,7 @@ MonoBehaviour:
   installTimeSec: 3
   ringBackground: {fileID: 1549456458}
   ringFill: {fileID: 1517500650}
+  cellSizeByType: []
 --- !u!1001 &8526916259828762702
 PrefabInstance:
   m_ObjectHideFlags: 0
