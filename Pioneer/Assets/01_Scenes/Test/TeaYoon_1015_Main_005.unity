@@ -3812,7 +3812,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.083333336
+  m_VoxelSize: 0.05
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: e9b1b69b9c2405a4785e0fd1d97099ec, type: 2}
   m_BuildHeightMesh: 0
@@ -5724,6 +5724,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Crawler
+      objectReference: {fileID: 0}
+    - target: {fileID: 4665850972790329012, guid: 57925bfba29c1704c94a26d630545e00,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9892,6 +9897,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 2034679914}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   mastLevel: 1
   interactionRange: 1.5
   playerLayer:
@@ -12937,6 +12945,7 @@ MonoBehaviour:
   gameObjectMastInteractiveText: {fileID: 8367569421977765899}
   gameObjectMastUpgrade: {fileID: 0}
   gameObjectPlayerStatUiParent: {fileID: 2186950260192463445}
+  gameObjectCharacterPannelUI: {fileID: 0}
   defaultCraftUI: {fileID: 7706198975104593130}
   defaultCraftUiSubPivot: {fileID: 2549543640067407509}
   makeshiftCraftUI: {fileID: 7577170826654941612}
@@ -13420,10 +13429,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hp: 0
-  maxHp: 0
+  maxHp: 40000
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   fov: {fileID: 2029828996017671682}
   speed: 0
   attackDamage: 0
@@ -17075,6 +17087,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   objectData: {fileID: 0}
   <isUsing>k__BackingField: 0
   interactRange: 3
@@ -25991,6 +26006,7 @@ MonoBehaviour:
   installTimeSec: 3
   ringBackground: {fileID: 1549456458}
   ringFill: {fileID: 1517500650}
+  globalCellSize: 2
 --- !u!1001 &8526916259828762702
 PrefabInstance:
   m_ObjectHideFlags: 0

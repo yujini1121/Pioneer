@@ -126,8 +126,8 @@ public class WeaponUseUtils
 
 
                 // ³»±¸µµ ´â±â
-                itemWithState.duability = Mathf.Max(0, itemWithState.duability -
-                    Mathf.Max(0, data.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
+                //itemWithState.duability = Mathf.Max(0, itemWithState.duability -
+                //    Mathf.Max(0, data.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
 
                 PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
                 PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
