@@ -533,7 +533,11 @@ public class PlayerCore : CreatureBase, IBegin
 
         if (fullnessState != currentFullnessState)
         {
+            RemoveFullnessUI(currentFullnessState);
+
             currentFullnessState = fullnessState;
+
+            AddFullnessUI(currentFullnessState);
 
             if (currentFullnessState == FullnessState.Hungry)
             {
@@ -735,4 +739,43 @@ public class PlayerCore : CreatureBase, IBegin
         isDrunk = false;
     }
     #endregion
+
+    // ==============================================================
+    // 헬퍼함수
+
+    private void AddFullnessUI(FullnessState state)
+    {
+        if (BuffUIManager.Instance == null) return;
+
+        switch (state)
+        {
+            case FullnessState.Full:
+                BuffUIManager.Instance.BeginUI(EffectType.Fullness_Full, true);
+                break;
+            case FullnessState.Hungry:
+                BuffUIManager.Instance.BeginUI(EffectType.Fullness_Hungry, false);
+                break;
+            case FullnessState.Starving:
+                BuffUIManager.Instance.BeginUI(EffectType.Fullness_Starving, false);
+                break;
+        }
+    }
+
+    private void RemoveFullnessUI(FullnessState state)
+    {
+        if (BuffUIManager.Instance == null) return;
+
+        switch (state)
+        {
+            case FullnessState.Full:
+                BuffUIManager.Instance.EndUI(EffectType.Fullness_Full);
+                break;
+            case FullnessState.Hungry:
+                BuffUIManager.Instance.EndUI(EffectType.Fullness_Hungry);
+                break;
+            case FullnessState.Starving:
+                BuffUIManager.Instance.EndUI(EffectType.Fullness_Starving);
+                break;
+        }
+    }
 }
