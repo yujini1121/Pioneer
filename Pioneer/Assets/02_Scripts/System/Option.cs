@@ -70,17 +70,37 @@ public class Option : MonoBehaviour, IBegin
 
     public void SetActivateEscUI()
     {
+        InGameUI.instance.OpenUI(
+            new List<GameObject>() { escUI },
+            InGameUI.ID_ESC_OPTION,
+            () =>
+            {
+                escUI.SetActive(false);
+                Time.timeScale = 1f;
+            });
+
+
         escUI.SetActive(true);
         Time.timeScale = 0f;
     }
     public void SetDeactivateEscUI()
     {
-        escUI.SetActive(false);
-        Time.timeScale = 1f;
+        InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION);
     }
 
-    public void SetActivateOptionUI() => optionUI.SetActive(true);
-    public void SetDeactivateOptionUI() => optionUI.SetActive(false);
+    public void SetActivateOptionUI()
+    {
+        optionUI.SetActive(true);
+        InGameUI.instance.OpenUI(
+            new List<GameObject>() { optionUI },
+            InGameUI.ID_ESC_OPTION_SETTINGS,
+            () =>
+            {
+                optionUI.SetActive(false);
+            });
+
+    }
+    public void SetDeactivateOptionUI() => InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION_SETTINGS);
 
     public void QuitGame()
     {

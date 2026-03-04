@@ -28,7 +28,9 @@ public class RepairUI : MonoBehaviour
         }
         //IconRefresh();
         // repairWindow.SetActive(false);
-        ClickClose();
+        cg.alpha = 0f;
+        cg.interactable = false;
+        cg.blocksRaycasts = false;
     }
 
     // Update is called once per frame
@@ -45,13 +47,19 @@ public class RepairUI : MonoBehaviour
 
     public void ClickClose()
     {
-        cg.alpha = 0f;
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
+        InGameUI.instance.CloseUI(InGameUI.ID_REPAIR_ITEM);
     }
 
     public void Open()
     {
+        InGameUI.instance.OpenUI(new List<GameObject>() { }, InGameUI.ID_REPAIR_ITEM,
+            () =>
+            {
+                cg.alpha = 0f;
+                cg.interactable = false;
+                cg.blocksRaycasts = false;
+            }
+            );
         cg.alpha = 1f;
         cg.interactable = true;
         cg.blocksRaycasts = true;
