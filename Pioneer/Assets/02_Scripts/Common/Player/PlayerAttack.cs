@@ -32,6 +32,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
             // 애니메이션 호출
             ChangeAnim(playerController.lastMoveDirection);
 
+            InventoryManager.Instance.ApplyItemDuablilityUsed();
 
             // 경험치 제공
             PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);

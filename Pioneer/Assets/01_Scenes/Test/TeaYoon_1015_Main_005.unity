@@ -2427,7 +2427,7 @@ PrefabInstance:
     - target: {fileID: 4438075312389558738, guid: a84cab11731be014e83e6379811bf21a,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4438075312389558738, guid: a84cab11731be014e83e6379811bf21a,
         type: 3}
@@ -6936,7 +6936,7 @@ PrefabInstance:
     - target: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9078708644997992570, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
@@ -10043,12 +10043,12 @@ MonoBehaviour:
   - {fileID: 491804331}
   - {fileID: 640650934}
   - {fileID: 1341768743}
-  - {fileID: 1333126829}
+  - {fileID: 1494904340}
   resultPos:
-  - {x: -1.4142134, y: -0.18066376, z: -4.242641}
-  - {x: -1.4142137, y: -0.18066376, z: 4.242641}
-  - {x: -5.6568546, y: -0.18066376, z: -0.00000011920929}
-  - {x: -4.2426405, y: -0.18066376, z: -1.4142137}
+  - {x: -1.4142134, y: -0.12044251, z: -4.242641}
+  - {x: -1.4142137, y: -0.12044251, z: 4.242641}
+  - {x: -5.6568546, y: -0.12044251, z: -0.00000011920929}
+  - {x: -2.8284268, y: -0.12044251, z: -2.8284273}
   found: 01010101
 --- !u!114 &2034679921
 MonoBehaviour:
@@ -13429,7 +13429,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hp: 0
-  maxHp: 0
+  maxHp: 40000
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
@@ -13487,7 +13487,6 @@ MonoBehaviour:
     amount: 0
     duability: 0
     isUseCoroutineEnd: 0
-  isDebugging: 0
 --- !u!222 &1578133781417789216
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -18790,7 +18789,6 @@ MonoBehaviour:
     curConchSwordClip: {fileID: 7400000, guid: f1d022fddc143a1488bdd740cad4d1ca, type: 2}
   nextAnimTrigger: 
   mast: {fileID: 7505562570904623939}
-  isDebugging: 0
 --- !u!222 &5622103427795389368
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -20393,8 +20391,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 10000
-  nightDuration: 10000
+  dayDuration: 5
+  nightDuration: 20
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -26008,7 +26006,7 @@ MonoBehaviour:
   installTimeSec: 3
   ringBackground: {fileID: 1549456458}
   ringFill: {fileID: 1517500650}
-  cellSizeByType: []
+  globalCellSize: 2
 --- !u!1001 &8526916259828762702
 PrefabInstance:
   m_ObjectHideFlags: 0
