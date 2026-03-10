@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour, IBegin
         oneDayDuration = dayDuration + nightDuration;
 
         Debug.Log($">> GameManager.Start()");
+        Debug.Log($"[GameMode] Infinite Mode: {GameModeState.IsInfiniteMode}");
 
         AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
@@ -182,6 +183,13 @@ public class GameManager : MonoBehaviour, IBegin
 
             OnNightEnd();
             Debug.Log($"아침이 되었습니다. (Day {currentDay})");
+
+            // 일반 모드일 때만 6일차 엔딩 발생
+            if (!GameModeState.IsInfiniteMode && currentDay >= 6)
+            {
+                TriggerGameOver();
+                return;
+            }
         }
     }
 
@@ -240,6 +248,15 @@ public class GameManager : MonoBehaviour, IBegin
         }
     }
 
+    void ShowAllUI()
+    {
+        foreach (Canvas canvas in allUICanvas)
+        {
+            if (canvas != null)
+                canvas.gameObject.SetActive(true);
+        }
+    }
+
     private void SpawnEnemiesForCurrentDay()
     {
         Debug.Log("Spawn Enemies");
@@ -258,6 +275,32 @@ public class GameManager : MonoBehaviour, IBegin
 
         int spawnedCount = row.minion + row.crawler + row.titan;
         Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
+    }
+
+    public void ResumeFromEndingToInfiniteMode()
+    {
+        Time.timeScale = 1f;
+
+        // 플레이어 다시 보이게
+        if (ThisIsPlayer.Player != null)
+        {
+            Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
+            if (playerRenderer != null)
+            {
+                Color color = playerRenderer.material.color;
+                color.a = 1f;
+                playerRenderer.material.color = color;
+            }
+        }
+
+        // 숨겼던 UI 다시 켜기
+        ShowAllUI();
+
+        // 게임오버 패널 닫기
+        if (gameOverUI != null)
+            gameOverUI.HideGameOverScreen();
+
+        Debug.Log("[GameMode] 무한 모드로 전환되어 게임을 이어서 진행합니다.");
     }
 
     // 일차별 공격력 적용된 에너미 생성

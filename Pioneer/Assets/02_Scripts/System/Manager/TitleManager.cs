@@ -6,6 +6,7 @@ public class TitleManager : MonoBehaviour
     [SerializeField] private GameObject pressKeyText;
     [SerializeField] private GameObject titleButton;
     [SerializeField] private GameObject optionUI;
+    [SerializeField] private GameObject infiniteModeButton;
 
     [Header("사운드 슬라이더")]
     public Slider bgmVolSlider;
@@ -16,6 +17,9 @@ public class TitleManager : MonoBehaviour
     private void Start()
     {
         SetDeactiveTitleButton();
+
+        // 최초 엔딩 전까지는 무한 모드 버튼 숨김
+        RefreshInfiniteModeButton();
 
         if (AudioManager.instance != null)
         {
@@ -34,22 +38,51 @@ public class TitleManager : MonoBehaviour
 
     private void Update()
     {
-        if (!readyToStart && Input.GetKeyDown(KeyCode.Space)) // 스페이스바를 한번 누르면 켜지고 그 이후론 작동없음
+        // 타이틀 버튼 열기
+        if (!readyToStart && Input.GetKeyDown(KeyCode.Space))
         {
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
 
             SetActiveTitleButton();
-            if (pressKeyText != null) pressKeyText.SetActive(false);
+            if (pressKeyText != null)
+                pressKeyText.SetActive(false);
 
             readyToStart = true;
+        }
+
+        // F10 : 무한 모드 해금 초기화
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            ResetInfiniteModeUnlockByHotkey();
         }
     }
 
     public void StartGameActive()
     {
-        Debug.Log("시작버튼 누름");
+        Debug.Log("일반 시작 버튼 누름");
+        GameModeState.StartNormalMode();
         SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
+    }
+
+    public void StartInfiniteGame()
+    {
+        Debug.Log("무한 모드 버튼 누름");
+        GameModeState.StartInfiniteMode();
+        SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
+    }
+
+    public void RefreshInfiniteModeButton()
+    {
+        if (infiniteModeButton != null)
+            infiniteModeButton.SetActive(GameModeState.IsInfiniteModeUnlocked);
+    }
+    private void ResetInfiniteModeUnlockByHotkey()
+    {
+        GameModeState.ResetInfiniteModeUnlock();
+        RefreshInfiniteModeButton();
+
+        Debug.Log("[TitleManager] F10 입력: 무한 모드 해금 상태를 초기화했습니다.");
     }
 
     public void SetActiveTitleButton() => titleButton.SetActive(true);
@@ -60,7 +93,6 @@ public class TitleManager : MonoBehaviour
     public void QuitGame()
     {
         Debug.Log("게임 종료 버튼 클릭!");
-
         // 유니티 에디터에서 테스트할 경우 (Play 모드 중지)
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
