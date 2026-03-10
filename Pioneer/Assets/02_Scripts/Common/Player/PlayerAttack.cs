@@ -29,6 +29,9 @@ public class PlayerAttack : MonoBehaviour, IBegin
             other.GetComponent<CreatureBase>()?.TakeDamage(damage, this.gameObject);
             Debug.LogError($"damage : {damage}, this.gameObject : {this.gameObject}");
 
+            // 애니메이션 호출
+            ChangeAnim(playerController.lastMoveDirection);
+
             InventoryManager.Instance.ApplyItemDuablilityUsed();
 
             // 경험치 제공
