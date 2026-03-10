@@ -8,6 +8,7 @@ public class SItemStack
     public int id;
     public int amount;
     public int duability; // 내구도
+    public bool isDuabilityDamageReady; // 내구도 손상 준비
     //public bool isCanStack;
     public bool isUseCoroutineEnd = true; // 해당 클래스가 조작하지 않음. SItemTypeSO 등 외부 클래스가 접근
 

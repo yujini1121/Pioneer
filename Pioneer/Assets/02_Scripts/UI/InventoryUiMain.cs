@@ -26,7 +26,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     [SerializeField] Button trashButton;
     [SerializeField] Sprite trashOpen;
     [SerializeField] Sprite trashClose;
-    [SerializeField] float clickTerm = 1.0f;
+    [SerializeField] float clickTerm;
+    private float clickTermNow;
     RectTransform followUiRect1; // 마우스
     RectTransform followUiRect2; // 마우스
     ItemSlotUI[] itemSlotUIs;
@@ -122,7 +123,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             }
             else
             {
-                WithdrawSingleClick(index);
+                WithdrawSingleClick(index); // 이전 싱글 클릭을 지워버림
                 PrepareSingleClick(index);
                 BeginCheckDoubleClick(index);
             }
@@ -171,13 +172,26 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             }
             else
             {
-                PlayerCore.Instance.BeginCoroutine(
-                    ItemTypeManager.Instance.itemTypeSearch[
+                IEnumerator coroutine()
+                {
+                    yield return ItemTypeManager.Instance.itemTypeSearch[
                         InventoryManager.Instance.SelectedSlotInventory.id].Use(
                                 PlayerCore.Instance,
                                 InventoryManager.Instance.SelectedSlotInventory
-                            )
-                    );
+                            );
+                    Debug.Log($">> InventoryUiMain.ClickOut() : 아이템 지금 갯수 {InventoryManager.Instance.SelectedSlotInventory.amount}");
+                    if (InventoryManager.Instance.SelectedSlotInventory.amount == 0)
+                    {
+                        InventoryManager.Instance.SelectedSlotInventory = null;
+                        InventoryManager.Instance.itemLists[InventoryManager.Instance.selectedSlotIndex] = null;
+                    }
+
+
+                    InventoryManager.Instance.SafeClean();
+                    IconRefresh();
+                }
+
+                PlayerCore.Instance.BeginCoroutine(coroutine());
             }
 
             InventoryUiMain.instance.IconRefresh();
@@ -291,6 +305,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     private bool IsDoubleClick(int currentSlot)
     {
+        Debug.Log($">> InventoryUiMain.IsDoubleClick : ({clickedSlotIndex} == {currentSlot}) && {clickTime} >= {Time.time} => {(clickedSlotIndex == currentSlot) && clickTime >= Time.time}");
+
         return (clickedSlotIndex == currentSlot) && clickTime >= Time.time;
     }
     private void BeginCheckDoubleClick(int currentIndex)
@@ -305,10 +321,28 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     private void DoubleClick(int index)
     {
+        
+        Debug.Log($">> InventoryUiMain.DoubleClick : 더블 클릭 : {InventoryManager.Instance.itemLists[index].id}");
+
         if (InventoryManager.Instance.itemLists[index] == null) return;
         if (InventoryManager.Instance.itemLists[index].itemBaseType.categories != EDataType.ConsumeItem) return;
 
-        InventoryManager.Instance.itemLists[index].Use();
+        PlayerCore.Instance.BeginCoroutine(
+            ItemTypeManager.Instance.itemTypeSearch[
+                InventoryManager.Instance.itemLists[index].id].Use(
+                        PlayerCore.Instance,
+                        InventoryManager.Instance.itemLists[index]
+                    )
+            );
+
+
+        //InventoryManager.Instance.itemLists[index].Use(
+        //    PlayerCore.Instance,
+        //    InventoryManager.Instance.itemLists[index]
+        //    );
+        InventoryUiMain.instance.IconRefresh();
+
+        Debug.Log($">> InventoryUiMain.DoubleClick : 더블 클릭 실행됨");
 
         // 더블 클릭 준비
         clickedSlotIndex = -1;
@@ -318,13 +352,15 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         IEnumerator mSingleClickCoroutine(int _index)
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(clickTerm);
             InventoryManager.Instance.MouseSwitch(_index);
+            IconRefresh();
+            Debug.Log(">> Single Click : " + _index);
         }
 
-        StartCoroutine(mSingleClickCoroutine(index));
+        clickCoroutine = StartCoroutine(mSingleClickCoroutine(index));
 
-        InventoryManager.Instance.MouseSwitch(index);
+        // InventoryManager.Instance.MouseSwitch(index);
     }
     private void WithdrawSingleClick(int index)
     {
@@ -338,6 +374,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     // Update is called once per frame
     void Update()
     {
+        clickTermNow = Time.time;
+
         Vector2 mMousePos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvas.transform as RectTransform,

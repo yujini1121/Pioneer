@@ -3865,36 +3865,42 @@ MonoBehaviour:
       id: 30001
       amount: 4
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.4
   - reward:
       id: 30006
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
   - reward:
       id: 30014
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
   - reward:
       id: 30015
       amount: 2
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.2
   - reward:
       id: 30016
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
   - reward:
       id: 30017
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
 --- !u!1 &879551798
@@ -6936,7 +6942,7 @@ PrefabInstance:
     - target: {fileID: 1646136597593253128, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9078708644997992570, guid: 69fd1f0a3274eaf49ad7fdfc6d2f29b9,
         type: 3}
@@ -13486,7 +13492,9 @@ MonoBehaviour:
     id: 0
     amount: 0
     duability: 0
+    isDuabilityDamageReady: 0
     isUseCoroutineEnd: 0
+  isDebugging: 0
 --- !u!222 &1578133781417789216
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -18472,6 +18480,7 @@ MonoBehaviour:
   trashButton: {fileID: 6463973566251909605}
   trashOpen: {fileID: 21300000, guid: e2d4efe8a141b834686c67dec2b66161, type: 3}
   trashClose: {fileID: 21300000, guid: 7a0d79626255f0847b9f423cb9f617fd, type: 3}
+  clickTerm: 1
 --- !u!222 &5275192041277747456
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -18789,6 +18798,7 @@ MonoBehaviour:
     curConchSwordClip: {fileID: 7400000, guid: f1d022fddc143a1488bdd740cad4d1ca, type: 2}
   nextAnimTrigger: 
   mast: {fileID: 7505562570904623939}
+  isDebugging: 0
 --- !u!222 &5622103427795389368
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -21243,6 +21253,7 @@ MonoBehaviour:
   trashButton: {fileID: 1073017332124417368}
   trashOpen: {fileID: 21300000, guid: e2d4efe8a141b834686c67dec2b66161, type: 3}
   trashClose: {fileID: 21300000, guid: 7a0d79626255f0847b9f423cb9f617fd, type: 3}
+  clickTerm: 0.1
 --- !u!222 &6334669314849627438
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -26619,12 +26630,14 @@ MonoBehaviour:
     id: 0
     amount: 0
     duability: 0
+    isDuabilityDamageReady: 0
     isUseCoroutineEnd: 0
   selectedSlotIndex: 0
   SelectedSlotInventory:
     id: 0
     amount: 0
     duability: 0
+    isDuabilityDamageReady: 0
     isUseCoroutineEnd: 0
   inventoryCount: 27
   positionDrop: {fileID: 8068855977270320697}
