@@ -373,12 +373,34 @@ public class GameManager : MonoBehaviour, IBegin
 
     private DayEnemyRow GetSpawnRowForDay(int day)
     {
-        if (enemySpawnTable != null && enemySpawnTable.Length > 0)
+        if (enemySpawnTable == null || enemySpawnTable.Length == 0)
+            return new DayEnemyRow { total = 0, minion = 0, crawler = 0, titan = 0 };
+
+        // 1~5일차는 기존 표 그대로 사용
+        if (day <= enemySpawnTable.Length)
         {
             int idx = Mathf.Clamp(day - 1, 0, enemySpawnTable.Length - 1);
             return enemySpawnTable[idx];
         }
-        return new DayEnemyRow { total = 0, minion = Random.Range(2, 8), crawler = 0, titan = 0 };
+
+        // 무한 모드가 아니면 마지막(5일차) 값 유지
+        if (!GameModeState.IsInfiniteMode)
+            return enemySpawnTable[enemySpawnTable.Length - 1];
+
+        // 무한 모드 6일차 이상:
+        // 5일차 값을 기준으로 매일 미니언/크롤러/타이탄 각각 +1
+        DayEnemyRow baseRow = enemySpawnTable[enemySpawnTable.Length - 1];
+        int extraDays = day - enemySpawnTable.Length; // 6일차=1, 7일차=2, ...
+
+        DayEnemyRow result = new DayEnemyRow
+        {
+            minion = baseRow.minion + extraDays,
+            crawler = baseRow.crawler + extraDays,
+            titan = baseRow.titan + extraDays
+        };
+
+        result.total = result.minion + result.crawler + result.titan;
+        return result;
     }
 
     private EnemyScaleRow GetScaleRowForDay(int day)
