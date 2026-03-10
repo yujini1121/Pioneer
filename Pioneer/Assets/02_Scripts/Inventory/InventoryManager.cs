@@ -34,6 +34,8 @@ public class InventoryManager : InventoryBase
             int maxStack = mouseInventory.itemBaseType.maxStack;
 
             itemLists[index].amount += mouseInventory.amount;
+            
+
 
             if (itemLists[index].amount > maxStack)
             {
@@ -54,6 +56,11 @@ public class InventoryManager : InventoryBase
 
         itemLists[index] = mouseInventory;
         mouseInventory = temp;
+
+        if (InventoryManager.Instance.selectedSlotIndex == index)
+        {
+            InventoryManager.Instance.SelectedSlotInventory = itemLists[index];
+        }
     }
 
     public void MouseSplit(int index)
@@ -229,7 +236,7 @@ public class InventoryManager : InventoryBase
         InventoryUiMain.instance.IconRefresh();
     }
 
-	protected override void SafeClean()
+	public override void SafeClean()
     {
         base.SafeClean();
 
@@ -321,8 +328,8 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(30021, 80));
         Add(new SItemStack(30022, 80));
         
-        Add(new SItemStack(40001, 80));
-        Add(new SItemStack(40009, 80));
-        Add(new SItemStack(40007, 80));
+        Add(new SItemStack(40001, 8));
+        Add(new SItemStack(40009, 8));
+        Add(new SItemStack(40007, 8));
     }
 }
