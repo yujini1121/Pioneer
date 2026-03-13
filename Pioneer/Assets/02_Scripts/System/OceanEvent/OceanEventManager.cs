@@ -41,7 +41,7 @@ public class OceanEventManager : MonoBehaviour
         Debug.Log($"[OceanEventManager][첫날 이벤트 : {currentEvent.EventName}]");
     }
 
-    // 첫날에 해당 함수를 실행 해 선 안됩니다.
+    // 첫날에 해당 함수를 실행해선 안됩니다.
     public void EnterDay()
     {
         EndCurrentEvent();

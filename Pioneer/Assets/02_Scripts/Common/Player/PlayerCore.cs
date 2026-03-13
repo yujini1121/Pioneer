@@ -671,6 +671,13 @@ public class PlayerCore : CreatureBase, IBegin
         // 수치에 따라 디버프 부여,,
     }
 
+    // 바다이벤트 : 안개 -> 정신력 감소 
+    public void ReduceMentalByFog()
+    {
+        int reduceValue = Mathf.RoundToInt(maxMental * 0.1f);
+        UpdateMental(-reduceValue);
+    }
+
     /// <summary>
     /// 에너미에게 공격 받은 경우 정신력 감소 시키는 함수 -3
     /// </summary>

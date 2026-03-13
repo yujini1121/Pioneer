@@ -286,6 +286,17 @@ public class GameManager : MonoBehaviour, IBegin
         Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
     }
 
+    // 바다이벤트 : 안개 낮 효과 -> 미니언 추가 스폰
+    public void SpawnFogMinions(int count)
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0) return;
+        if (minion == null || count <= 0) return;
+
+        EnemyScaleRow scale = GetScaleRowForDay(currentDay);
+
+        SpawnOf(minion, count, scale);
+    }
+
     public void ResumeFromEndingToInfiniteMode()
     {
         Time.timeScale = 1f;
