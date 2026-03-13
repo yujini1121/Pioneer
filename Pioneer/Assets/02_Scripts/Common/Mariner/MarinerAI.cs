@@ -588,7 +588,7 @@ public class MarinerAI : MarinerBase, IBegin
             bool result = inventory.AddItem(acquiredItemID, 1);
 
             // 바다이벤트 녹조로 얻는 추가 아이템 획득 
-            if (OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
+            if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
             {
                 OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
 

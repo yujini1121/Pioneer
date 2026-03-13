@@ -58,8 +58,9 @@ public class OceanEventManager : MonoBehaviour
         //int selectedIndex = Random.Range(0, remainingEvents.Count);
         //currentEvent = remainingEvents[selectedIndex];
         //remainingEvents.RemoveAt(selectedIndex);
-        currentEvent = new OceanEventFog();
+        currentEvent = new OceanEventWaterBloom();
         currentEvent.EventRun();
+
         Debug.Log($"[OceanEventManager][오늘의 바다이벤트 : {currentEvent.EventName}]");
         currentEventName.text = currentEvent.EventName;
 
