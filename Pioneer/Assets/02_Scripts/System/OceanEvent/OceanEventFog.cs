@@ -114,7 +114,7 @@ public class OceanEventFog : OceanEventBase
     {
         while (IsRunning)
         {
-            yield return new WaitForSeconds(30f);
+            yield return new WaitForSeconds(3f);
 
             if (!IsRunning) yield break;
 
@@ -135,7 +135,7 @@ public class OceanEventFog : OceanEventBase
     {
         while (IsRunning)
         {
-            yield return new WaitForSeconds(40f);
+            yield return new WaitForSeconds(3f);
 
             if (!IsRunning) yield break;
 

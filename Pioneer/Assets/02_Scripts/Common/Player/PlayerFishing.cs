@@ -136,7 +136,7 @@ public class PlayerFishing : MonoBehaviour
                     }
                 }
 
-                // 바디이벤트 녹조로 얻는 추가 아이템 획득 
+                // 바다이벤트 녹조로 얻는 추가 아이템 획득 
                 if(OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
                 {
                     OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;

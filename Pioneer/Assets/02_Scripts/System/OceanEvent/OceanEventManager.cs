@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class OceanEventManager : MonoBehaviour
@@ -10,6 +11,7 @@ public class OceanEventManager : MonoBehaviour
     private List<OceanEventBase> allEvents;
     private List<OceanEventBase> remainingEvents;
     public OceanEventBase currentEvent;
+    public TextMeshProUGUI currentEventName;
 
     private readonly List<Coroutine> runningCoroutines = new List<Coroutine>();
 
@@ -39,6 +41,7 @@ public class OceanEventManager : MonoBehaviour
         currentEvent.EventRun();
 
         Debug.Log($"[OceanEventManager][첫날 이벤트 : {currentEvent.EventName}]");
+        currentEventName.text = currentEvent.EventName;
     }
 
     // 첫날에 해당 함수를 실행해선 안됩니다.
@@ -52,11 +55,13 @@ public class OceanEventManager : MonoBehaviour
             Debug.Log("[OceanEventManager][이벤트 목록 초기화]");
         }
 
-        int selectedIndex = Random.Range(0, remainingEvents.Count);
-        currentEvent = remainingEvents[selectedIndex];
-        remainingEvents.RemoveAt(selectedIndex);
-
+        //int selectedIndex = Random.Range(0, remainingEvents.Count);
+        //currentEvent = remainingEvents[selectedIndex];
+        //remainingEvents.RemoveAt(selectedIndex);
+        currentEvent = new OceanEventFog();
+        currentEvent.EventRun();
         Debug.Log($"[OceanEventManager][오늘의 바다이벤트 : {currentEvent.EventName}]");
+        currentEventName.text = currentEvent.EventName;
 
         currentEvent.EventRun();
     }
