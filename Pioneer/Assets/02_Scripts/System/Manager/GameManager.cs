@@ -62,11 +62,14 @@ public class GameManager : MonoBehaviour, IBegin
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
 
-    [Header("동적 스포너(EnemySpawnerFinder 연동)")]
+    [Header("동적 스포너(EnemySpawnerFinder)")]
     [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector에서 할당
     [SerializeField] private float spawnLiftY = 0.05f;                   // 살짝 띄워서 스폰
     [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";   // 하이어라키 정리용
     private Transform spawnRoot;                                         // 스폰 포인트 부모
+
+    [Header("바다이벤트")]
+    [SerializeField] private OceanEventManager oceanEventManager;
 
     // EnemySpawnerFinder에서 찾은 스폰 포인트 수
     private int activeSpawnCount = 0;
@@ -195,6 +198,9 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void OnNightStart()
     {
+        if (oceanEventManager != null)
+            oceanEventManager.EnterNight();
+
         RefreshSpawnPointsFromFinder();
 
         var s = GetScaleRowForDay(currentDay);
@@ -204,6 +210,9 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void OnNightEnd()
     {
+        if (oceanEventManager != null)
+            oceanEventManager.EnterDay();
+
         DespawnAllEnemies();
         ApplyMarinerEmbarkRule();
     }

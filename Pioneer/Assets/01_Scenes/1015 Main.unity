@@ -8179,7 +8179,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2346539483452467573}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1638633034
 MonoBehaviour:
@@ -9969,6 +9969,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1904211460}
   m_CullTransparentMesh: 1
+--- !u!1 &1922011990
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1922011991}
+  m_Layer: 0
+  m_Name: ----------[ OCEAN EVENT ]---------------------------------------------------------
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1922011991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1922011990}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1923158473
 GameObject:
   m_ObjectHideFlags: 0
@@ -17273,7 +17304,6 @@ Transform:
   - {fileID: 7989936097330746807}
   - {fileID: 8453677670605008161}
   - {fileID: 4855175696529883440}
-  - {fileID: 1638633033}
   - {fileID: 864062872}
   - {fileID: 282278402}
   m_Father: {fileID: 0}
@@ -24662,8 +24692,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 1
-  nightDuration: 1
+  dayDuration: 3
+  nightDuration: 3
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -24680,6 +24710,7 @@ MonoBehaviour:
   spawnerFinder: {fileID: 2034679920}
   spawnLiftY: 0.05
   spawnRootName: __SPAWNPOINTS__
+  oceanEventManager: {fileID: 1638633034}
   enemySpawnTable:
   - total: 3
     minion: 3
@@ -33099,3 +33130,5 @@ SceneRoots:
   - {fileID: 1278467996}
   - {fileID: 1517098231}
   - {fileID: 720907511}
+  - {fileID: 1922011991}
+  - {fileID: 1638633033}

@@ -12,9 +12,26 @@ using UnityEngine;
 
 public class OceanEventWaterBloom : OceanEventBase
 {
-    [SerializeField] private int getMoreProbability = 80;
+    private int getMoreProbability = 80;
 
     List<PlayerFishing.FishingDropItem> getMoreDropItems;
+
+    public OceanEventWaterBloom()
+    {
+        EventName = "≥Ï¡∂";
+    }
+
+    public override void EventRun()
+    {
+        base.EventRun();
+        Debug.Log("[OceanEventWaterBloom][≥Ï¡∂ ¿Ã∫•∆Æ Ω√¿€]");
+    }
+
+    public override void EventEnd()
+    {
+        base.EventEnd();
+        Debug.Log("[OceanEventWaterBloom][≥Ï¡∂ ¿Ã∫•∆Æ ¡æ∑·]");
+    }
 
     public SItemTypeSO GetMoreItem()
     {
@@ -25,10 +42,11 @@ public class OceanEventWaterBloom : OceanEventBase
             int randomIndex = Random.Range(0, getMoreDropItems.Count);
 
             PlayerFishing.FishingDropItem bonusItem = getMoreDropItems[randomIndex];
-            
+
+            Debug.Log($"[OceanEventWaterBloom][≥Ï¡∂ √ﬂ∞° æ∆¿Ã≈€ »πµÊ : {bonusItem.itemData.name}]");
             return bonusItem.itemData;
         }
-        
+
         return null;
     }
 }

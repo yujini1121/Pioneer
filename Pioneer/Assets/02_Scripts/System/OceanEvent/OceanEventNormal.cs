@@ -2,22 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OceanEventThunder : OceanEventBase
+public class OceanEventNormal : OceanEventBase
 {
-    public OceanEventThunder()
+    public OceanEventNormal()
     {
-        EventName = "뇌우";
+        EventName = "평범";
     }
 
     public override void EventRun()
     {
         base.EventRun();
-        Debug.Log("[OceanEventThunder][뇌우 이벤트 시작]");
+        Debug.Log("[OceanEventNormal][평범 이벤트 시작]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
-        Debug.Log("[OceanEventThunder][뇌우 이벤트 종료]");
+        Debug.Log("[OceanEventNormal][평범 이벤트 종료]");
     }
 }
