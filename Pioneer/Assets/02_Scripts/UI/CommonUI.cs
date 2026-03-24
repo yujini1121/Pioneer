@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-///     í•´ë‹¹ í´ë˜ìŠ¤ëŠ” ê³µí†µì ì¸ ë¡œì§ì„ í¼ë¸”ë¦­ ì •ì  ë©”ì„œë“œë¡œ ë°”ê¿”ë†“ì€ ê²ƒì…ë‹ˆë‹¤. ì½”ë“œ ë°˜ë³µì„ í”¼í•˜ê¸° ìœ„í•œ í´ë˜ìŠ¤ì…ë‹ˆë‹¤.
+///     ÇØ´ç Å¬·¡½º´Â °øÅëÀûÀÎ ·ÎÁ÷À» ÆÛºí¸¯ Á¤Àû ¸Ş¼­µå·Î ¹Ù²ã³õÀº °ÍÀÔ´Ï´Ù. ÄÚµå ¹İº¹À» ÇÇÇÏ±â À§ÇÑ Å¬·¡½ºÀÔ´Ï´Ù.
 /// </summary>
 public class CommonUI : MonoBehaviour, IBegin
 {
@@ -46,20 +46,20 @@ public class CommonUI : MonoBehaviour, IBegin
         }
     }
 
-    // ì†”ì§íˆ ë§í•˜ë©´ ì•„ì´í…œì„ ì„ íƒí–ˆì„ë•Œ ì¡°í•©í•  ìˆ˜ ìˆëŠ”ì§€ ì•„ë‹Œì§€ë¥¼ ê°€ì ¸ì˜¤ëŠ”ê²ƒì€ ë˜‘ê°™ë‹¤ê³  ë´„
-    // - ì œì‘í•  ìˆ˜ ìˆëŠ”ê°€? -> ì•„ì´í…œ ë ˆì‹œí”¼ ë§¤ë‹ˆì €
-    // - ì œì‘ ì°½ ë³€ê²½
+    // ¼ÖÁ÷È÷ ¸»ÇÏ¸é ¾ÆÀÌÅÛÀ» ¼±ÅÃÇßÀ»¶§ Á¶ÇÕÇÒ ¼ö ÀÖ´ÂÁö ¾Æ´ÑÁö¸¦ °¡Á®¿À´Â°ÍÀº ¶È°°´Ù°í º½
+    // - Á¦ÀÛÇÒ ¼ö ÀÖ´Â°¡? -> ¾ÆÀÌÅÛ ·¹½ÃÇÇ ¸Å´ÏÀú
+    // - Á¦ÀÛ Ã¢ º¯°æ
 
-    // ì•„ì´í…œ ì œì‘ ì°½ì„ ë³€ê²½í•´ì¤ë‹ˆë‹¤
-    // DefaultFabrication ui : ì œì‘ ì°½ ê²Œì„ì˜¤ë¸Œì íŠ¸ì˜ ì»´í¬ë„ŒíŠ¸ ì…ë‹ˆë‹¤.
-    // SItemRecipeSO recipe : ì œì‘í•˜ë ¤ëŠ” ë ˆì‹œí”¼ì…ë‹ˆë‹¤.
-    // InventoryBase inventory : ëˆ„êµ¬ì˜ ì¸ë²¤í† ë¦¬ë¥¼ ê¸°ë°˜ìœ¼ë¡œ ë§Œë“¤ ê²ƒì¸ì§€ì…ë‹ˆë‹¤. ì¼ë°˜ì ìœ¼ë¡œ í”Œë ˆì´ì–´ì˜ ì¸ë²¤í† ë¦¬ë¥¼ ê°–ë‹¤ì”ë‹ˆë‹¤
-    // GameObject[] outsideGameObjectCraftButtonsWithImage : ì´ë¯¸ì§€ë¥¼ ê°€ì§€ê³  ìˆëŠ” ê²Œì„ì˜¤ë¸Œì íŠ¸ì˜ ëª©ë¡ì´ë©°, í•´ë‹¹ ê²Œì„ì˜¤ë¸Œì íŠ¸ëŠ” ì•„ì´í…œì„ ë§Œë“¤ ìˆ˜ ìˆëŠ”ì§€ ì•„ë‹Œì§€ ì—¬ë¶€ë¥¼ ë³´ì—¬ì£¼ê¸° ìœ„í•¨ì…ë‹ˆë‹¤. ëª» ë§Œë“¤ë©´ ë°˜íˆ¬ëª…í•˜ê²Œ í•´ì•¼ í•˜ê±°ë“ ìš”
+    // ¾ÆÀÌÅÛ Á¦ÀÛ Ã¢À» º¯°æÇØÁİ´Ï´Ù
+    // DefaultFabrication ui : Á¦ÀÛ Ã¢ °ÔÀÓ¿ÀºêÁ§Æ®ÀÇ ÄÄÆ÷³ÍÆ® ÀÔ´Ï´Ù.
+    // SItemRecipeSO recipe : Á¦ÀÛÇÏ·Á´Â ·¹½ÃÇÇÀÔ´Ï´Ù.
+    // InventoryBase inventory : ´©±¸ÀÇ ÀÎº¥Åä¸®¸¦ ±â¹İÀ¸·Î ¸¸µé °ÍÀÎÁöÀÔ´Ï´Ù. ÀÏ¹İÀûÀ¸·Î ÇÃ·¹ÀÌ¾îÀÇ ÀÎº¥Åä¸®¸¦ °®´Ù¾¹´Ï´Ù
+    // GameObject[] outsideGameObjectCraftButtonsWithImage : ÀÌ¹ÌÁö¸¦ °¡Áö°í ÀÖ´Â °ÔÀÓ¿ÀºêÁ§Æ®ÀÇ ¸ñ·ÏÀÌ¸ç, ÇØ´ç °ÔÀÓ¿ÀºêÁ§Æ®´Â ¾ÆÀÌÅÛÀ» ¸¸µé ¼ö ÀÖ´ÂÁö ¾Æ´ÑÁö ¿©ºÎ¸¦ º¸¿©ÁÖ±â À§ÇÔÀÔ´Ï´Ù. ¸ø ¸¸µé¸é ¹İÅõ¸íÇÏ°Ô ÇØ¾ß ÇÏ°Åµç¿ä
     public void UpdateCraftWindowUi(DefaultFabrication ui, SItemRecipeSO recipe, InventoryBase inventory, GameObject[] outsideGameObjectCraftButtonsWithImage)
     {
         if (IsDebuggingCraft)
         {
-            Debug.Log($">> CommonUI.UpdateCraftWindowUi(...) -> í•¨ìˆ˜ í˜¸ì¶œë¨");
+            Debug.Log($">> CommonUI.UpdateCraftWindowUi(...) -> ÇÔ¼ö È£ÃâµÊ");
         }
 
         currentRecipe = recipe;
@@ -104,11 +104,11 @@ public class CommonUI : MonoBehaviour, IBegin
 
         mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
 
-        // ì œì‘ ì‹œê°„ í‘œì‹œ
+        // Á¦ÀÛ ½Ã°£ Ç¥½Ã
         ui.timeLeft.text = $"{recipe.time}s";
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
 
-        // í¬ë˜í”„íŠ¸ ë²„íŠ¼ ë¡œì§ ë°°ì¹˜
+        // Å©·¡ÇÁÆ® ¹öÆ° ·ÎÁ÷ ¹èÄ¡
         ui.craftButton.onClick.RemoveAllListeners();
         ui.craftButton.onClick.AddListener(() =>
         {
@@ -118,8 +118,8 @@ public class CommonUI : MonoBehaviour, IBegin
                 StopCoroutine(currentCraftCoroutine);
             }
 
-            // ì œì‘ ì‹œê°„ íƒ€ì„ ë³´ì—¬ì¤Œ + ì œì‘ ì™„ë£Œ ì‹œ ë˜ ì œì‘í•  ìˆ˜ ìˆëŠ”ì§€ ì—…ë°ì´íŠ¸
-            // ë‹¤ë§Œ ê±´ì„¤ ì•„ì´í…œì¸ê²½ìš° ë‹¤ë¥¸ ë¡œì§ì´ ì“°ì„
+            // Á¦ÀÛ ½Ã°£ Å¸ÀÓ º¸¿©ÁÜ + Á¦ÀÛ ¿Ï·á ½Ã ¶Ç Á¦ÀÛÇÒ ¼ö ÀÖ´ÂÁö ¾÷µ¥ÀÌÆ®
+            // ´Ù¸¸ °Ç¼³ ¾ÆÀÌÅÛÀÎ°æ¿ì ´Ù¸¥ ·ÎÁ÷ÀÌ ¾²ÀÓ
             // Debug.Log($">> CommonUI.UpdateCraftWindowUi(DefaultFabrication ui, SItemRecipeSO recipe, InventoryBase inventory, GameObject[] outsideGameObjectCraftButtonsWithImage) : IsCurrentCrafting = {IsCurrentCrafting}");
             if (IsCurrentCrafting)
             {
@@ -133,15 +133,15 @@ public class CommonUI : MonoBehaviour, IBegin
         });
     }
 
-#warning TODO : êµ¬ì¡°ë¬¼ ë°°ì¹˜ ë¡œì§
-    // ì¹´í…Œê³ ë¦¬ UI
-    // GameObject parent : ë²„íŠ¼ë“¤ì˜ ë¶€ëª¨ ê²Œì„ì˜¤ë¸Œì íŠ¸ì…ë‹ˆë‹¤
-    // SItemCategorySO category : ì¹´í…Œê³ ë¦¬ ìŠ¤í¬ë¦½í„°ë¸” ì˜¤ë¸Œì íŠ¸ì…ë‹ˆë‹¤
-    // DefaultFabrication ui : ì œì‘ ì°½ ê²Œì„ì˜¤ë¸Œì íŠ¸ì˜ ì»´í¬ë„ŒíŠ¸ ì…ë‹ˆë‹¤.
-    // ArgumentGeometry geometryCategoryButton : ì¹´í…Œê³ ë¦¬ ë²„íŠ¼ì˜ ê¸°í•˜í•™ì  ë°°ì¹˜ ê¸°ëŠ¥ì„ ìœ„í•œ ë§¤ê°œë³€ìˆ˜ì…ë‹ˆë‹¤
-    // ArgumentGeometry geometryCraftSelectCategory, : ì œì‘ ì„ íƒì˜ ì¹´í…Œê³ ë¦¬ í•­ëª©ì˜ ê¸°í•˜í•™ì  ë°°ì¹˜ ê¸°ëŠ¥ì„ ìœ„í•œ ë§¤ê°œë³€ìˆ˜ì…ë‹ˆë‹¤
-    // ArgumentGeometry geometryCraftSelectButton : ì œì‘ ì„ íƒ ë²„íŠ¼ì˜ ê¸°í•˜í•™ì  ë°°ì¹˜ ê¸°ëŠ¥ì„ ìœ„í•œ ë§¤ê°œë³€ìˆ˜ì…ë‹ˆë‹¤
-    // List<GameObject> prevCraftSelectButton : ì´ì „ ì œì‘ ì„ íƒ UIì„ ì§€ìš°ê¸° ìœ„í•œ ë§¤ê°œë³€ìˆ˜ì…ë‹ˆë‹¤. í•´ë‹¹ ì°¸ì¡°ë¡œ ìƒˆë¡­ê²Œ ë§Œë“¤ì–´ì§„ ì œì‘ ì„ íƒ ê²Œì„ì˜¤ë¸Œì íŠ¸ë“¤ì´ ì›ì†Œë¡œ ë“¤ì–´ì˜µë‹ˆë‹¤
+#warning TODO : ±¸Á¶¹° ¹èÄ¡ ·ÎÁ÷
+    // Ä«Å×°í¸® UI
+    // GameObject parent : ¹öÆ°µéÀÇ ºÎ¸ğ °ÔÀÓ¿ÀºêÁ§Æ®ÀÔ´Ï´Ù
+    // SItemCategorySO category : Ä«Å×°í¸® ½ºÅ©¸³ÅÍºí ¿ÀºêÁ§Æ®ÀÔ´Ï´Ù
+    // DefaultFabrication ui : Á¦ÀÛ Ã¢ °ÔÀÓ¿ÀºêÁ§Æ®ÀÇ ÄÄÆ÷³ÍÆ® ÀÔ´Ï´Ù.
+    // ArgumentGeometry geometryCategoryButton : Ä«Å×°í¸® ¹öÆ°ÀÇ ±âÇÏÇĞÀû ¹èÄ¡ ±â´ÉÀ» À§ÇÑ ¸Å°³º¯¼öÀÔ´Ï´Ù
+    // ArgumentGeometry geometryCraftSelectCategory, : Á¦ÀÛ ¼±ÅÃÀÇ Ä«Å×°í¸® Ç×¸ñÀÇ ±âÇÏÇĞÀû ¹èÄ¡ ±â´ÉÀ» À§ÇÑ ¸Å°³º¯¼öÀÔ´Ï´Ù
+    // ArgumentGeometry geometryCraftSelectButton : Á¦ÀÛ ¼±ÅÃ ¹öÆ°ÀÇ ±âÇÏÇĞÀû ¹èÄ¡ ±â´ÉÀ» À§ÇÑ ¸Å°³º¯¼öÀÔ´Ï´Ù
+    // List<GameObject> prevCraftSelectButton : ÀÌÀü Á¦ÀÛ ¼±ÅÃ UIÀ» Áö¿ì±â À§ÇÑ ¸Å°³º¯¼öÀÔ´Ï´Ù. ÇØ´ç ÂüÁ¶·Î »õ·Ó°Ô ¸¸µé¾îÁø Á¦ÀÛ ¼±ÅÃ °ÔÀÓ¿ÀºêÁ§Æ®µéÀÌ ¿ø¼Ò·Î µé¾î¿É´Ï´Ù
     public Button ShowCategoryButton(GameObject parent, SItemCategorySO category, DefaultFabrication ui,
         ArgumentGeometry geometryCategoryButton,
         ArgumentGeometry geometryCraftSelectCategory,
@@ -150,15 +150,15 @@ public class CommonUI : MonoBehaviour, IBegin
     {
 		if (IsDebuggingCraft)
 		{
-			Debug.Log($">> CommonUI.ShowCategoryButton(...) -> í•¨ìˆ˜ í˜¸ì¶œë¨");
+			Debug.Log($">> CommonUI.ShowCategoryButton(...) -> ÇÔ¼ö È£ÃâµÊ");
 		}
 
-		// 1. ì¹´í…Œê³ ë¦¬ ì´ë¯¸ì§€ ë²„íŠ¼
+		// 1. Ä«Å×°í¸® ÀÌ¹ÌÁö ¹öÆ°
 
-		// ë ˆì‹œí”¼ëŠ” ìŠ¤í…ë‹¤ë“œë§¤ë‹ˆì € ëœ¯ì–´ë´ì„œ í•´ë‹¹ í•­ëª©ì˜ ëª¨ë“  ì¹´í…Œê³ ë¦¬ì† ë ˆì‹œí”¼ë¥¼ ê°€ì ¸ì˜´
-		// ë²„íŠ¼ì„ ëˆ„ë¥´ë©´, ShowItemButtonì™€ í”„ë¦¬í© í˜¸ì¶œí•¨
+		// ·¹½ÃÇÇ´Â ½ºÅÙ´Ùµå¸Å´ÏÀú ¶â¾îºÁ¼­ ÇØ´ç Ç×¸ñÀÇ ¸ğµç Ä«Å×°í¸®¼Ó ·¹½ÃÇÇ¸¦ °¡Á®¿È
+		// ¹öÆ°À» ´©¸£¸é, ShowItemButton¿Í ÇÁ¸®Æé È£ÃâÇÔ
 
-		// ë²„íŠ¼ ë°°ì¹˜
+		// ¹öÆ° ¹èÄ¡
 		GameObject categoryButtonObject = Instantiate(prefabItemCategoryButton, parent.transform);
         RectTransform rectTransform = categoryButtonObject.GetComponent<RectTransform>();
         //rectTransform.sizeDelta = size;
@@ -170,20 +170,20 @@ public class CommonUI : MonoBehaviour, IBegin
             geometryCategoryButton.delta2D,
             geometryCategoryButton.start2D);
         rectTransform.sizeDelta = geometryCategoryButton.size;
-        // ë²„íŠ¼ ì´ë¯¸ì§€ ë°°ì¹˜
+        // ¹öÆ° ÀÌ¹ÌÁö ¹èÄ¡
         categoryButtonObject.GetComponent<UnityEngine.UI.Image>().sprite = category.categorySprite;
 
-        // ë²„íŠ¼ ë¡œì§ ë°°ì¹˜
+        // ¹öÆ° ·ÎÁ÷ ¹èÄ¡
         Button categoryButton = categoryButtonObject.GetComponent<Button>();
         categoryButton.onClick.AddListener(() =>
         {
-            // 2. ì œì‘ ì„ íƒ ë²„íŠ¼ë“¤
-            // í•´ë‹¹ ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ ì œì‘ ì„ íƒ UIê°€ ëœ¸
-            // ê¸°ì¡´ ì œì‘ ì„ íƒì„ ì‹¹ ì œê±°í•¨
+            // 2. Á¦ÀÛ ¼±ÅÃ ¹öÆ°µé
+            // ÇØ´ç ¹öÆ°À» ´©¸£¸é Á¦ÀÛ ¼±ÅÃ UI°¡ ¶ä
+            // ±âÁ¸ Á¦ÀÛ ¼±ÅÃÀ» ½Ï Á¦°ÅÇÔ
             foreach (GameObject prevUi in prevCraftSelectButton) Destroy(prevUi);
             ui.gameObject.SetActive(false);
 
-            // ì œì‘ ì„ íƒ ì¹´í…Œê³ ë¦¬ í•­ëª©
+            // Á¦ÀÛ ¼±ÅÃ Ä«Å×°í¸® Ç×¸ñ
             GameObject craftSelectCategory = Instantiate(prefabCraftSelectTopButton, parent.transform);
             craftSelectCategory.transform.parent = geometryCraftSelectCategory.parent.transform;
             craftSelectCategory.transform.localPosition = geometryCraftSelectCategory.start2D;
@@ -192,16 +192,16 @@ public class CommonUI : MonoBehaviour, IBegin
             craftSelectCategoryUi.categoryImage.sprite = category.categorySprite;
             craftSelectCategoryUi.categoryName.text = category.categoryName;
 
-            // ì œì‘ ì„ íƒ ë²„íŠ¼ ì†Œí™˜
+            // Á¦ÀÛ ¼±ÅÃ ¹öÆ° ¼ÒÈ¯
             for (int index = 0; index < category.recipes.Count; index++)
             {
                 GameObject m_one = Instantiate(prefabCraftSelectItemButton, parent.transform);
 
                 prevCraftSelectButton.Add(m_one);
-                // ë ˆì‹œí”¼ ê°€ì ¸ì˜¤ê¸°
+                // ·¹½ÃÇÇ °¡Á®¿À±â
                 SItemRecipeSO recipe = category.recipes[index];
                 SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
-                // ë²„íŠ¼ ë°°ì¹˜
+                // ¹öÆ° ¹èÄ¡
                 SetPosition(
                     m_one,
                     geometryCraftSelectButton.parent,
@@ -214,11 +214,11 @@ public class CommonUI : MonoBehaviour, IBegin
                 m_oneUi.image.sprite = ItemTypeManager.Instance.itemTypeSearch[category.recipes[index].result.id].image;
                 m_oneUi.itemName.text = ItemTypeManager.Instance.itemTypeSearch[category.recipes[index].result.id].typeName;
 
-                // ë²„íŠ¼ ë¡œì§ ë°°ì¹˜
+                // ¹öÆ° ·ÎÁ÷ ¹èÄ¡
                 //Button craftSelectItemButtons = categoryButtonObject.GetComponent<Button>();
                 m_oneUi.button.onClick.AddListener(() =>
                 {
-					Debug.Log($">> CommonUI.ShowCategoryButton(...) -> ë²„íŠ¼ í´ë¦­ë¨!");
+					Debug.Log($">> CommonUI.ShowCategoryButton(...) -> ¹öÆ° Å¬¸¯µÊ!");
 
 
 					ui.gameObject.SetActive(true);
@@ -230,32 +230,32 @@ public class CommonUI : MonoBehaviour, IBegin
         return categoryButton;
     }
 
-    // ê°„ì´ ì œì‘ UI
+    // °£ÀÌ Á¦ÀÛ UI
     public Button ShowItemButton(GameObject parent, SItemRecipeSO recipe, DefaultFabrication ui,
         int index, int rowCount, Vector2 delta, Vector2 start, Vector2 size)
     {
         SItemTypeSO recipeResultType = ItemTypeManager.Instance.itemTypeSearch[recipe.result.id];
 
-        // ë²„íŠ¼ ë°°ì¹˜
+        // ¹öÆ° ¹èÄ¡
         GameObject itemButtonGameObject = Instantiate(instance.prefabItemButton, parent.transform);
         RectTransform rectTransform = itemButtonGameObject.GetComponent<RectTransform>();
         rectTransform.sizeDelta = size;
         SetPosition(itemButtonGameObject, parent, index, rowCount, delta, start);
 
-        // ë²„íŠ¼ ê°€ìš©ì„± í‘œì‹œ
+        // ¹öÆ° °¡¿ë¼º Ç¥½Ã
         mSetButtonAvailable(itemButtonGameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
 
-        // ë²„íŠ¼ ì´ë¯¸ì§€ ë°°ì¹˜
+        // ¹öÆ° ÀÌ¹ÌÁö ¹èÄ¡
         itemButtonGameObject.GetComponent<UnityEngine.UI.Image>().sprite =
             ItemTypeManager.Instance.itemTypeSearch[recipe.result.id].image;
 
-        // ë²„íŠ¼ ë¡œì§ ë°°ì¹˜
+        // ¹öÆ° ·ÎÁ÷ ¹èÄ¡
         Debug.Assert(itemButtonGameObject != null);
         Debug.Assert(itemButtonGameObject.GetComponent<Button>() != null);
         Button itemButton = itemButtonGameObject.GetComponent<Button>();
 
 
-        itemButton.onClick.AddListener(() => // ë²„íŠ¼ í´ë¦­ ì‹œ
+        itemButton.onClick.AddListener(() => // ¹öÆ° Å¬¸¯ ½Ã
         {
             ui.gameObject.SetActive(true);
             UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { itemButtonGameObject });
@@ -266,7 +266,7 @@ public class CommonUI : MonoBehaviour, IBegin
 
 
 
-    // ì•„ì´í…œ ë²„íŠ¼
+    // ¾ÆÀÌÅÛ ¹öÆ°
 
 
 
@@ -320,11 +320,11 @@ public class CommonUI : MonoBehaviour, IBegin
     {
         if (isDebugging_CraftCoroutine)
         {
-            Debug.Log($">> CommonUI.CraftCoroutine(...) -> í•¨ìˆ˜ í˜¸ì¶œë¨");
+            Debug.Log($">> CommonUI.CraftCoroutine(...) -> ÇÔ¼ö È£ÃâµÊ");
         }
 
-        // ì…ë ¥ ì‹œê°„ë§Œí¼ ì§„í–‰
-        // ì„±ê³µì‹œ ë¦¬í„´
+        // ÀÔ·Â ½Ã°£¸¸Å­ ÁøÇà
+        // ¼º°ø½Ã ¸®ÅÏ
         IsCurrentCrafting = true;
         float leftTime = recipe.time;
         ui.craftButtonWord.text = DefaultFabrication.CraftEnd;
@@ -337,11 +337,11 @@ public class CommonUI : MonoBehaviour, IBegin
         }
         Craft(recipe, itemButtonGameObject, ui);
 
-		ui.timeLeft.text = $"ì œì‘ ì™„ë£Œ";
+		ui.timeLeft.text = $"Á¦ÀÛ ¿Ï·á";
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
         InventoryUiMain.instance.IconRefresh();
         IsCurrentCrafting = false;
-        // ìš”ê¸°ì— ê²½í—˜ì¹˜ ì¶”ê°€ ë¡œì§
+        // ¿ä±â¿¡ °æÇèÄ¡ Ãß°¡ ·ÎÁ÷
         PlayerStatsLevel.Instance.AddExp(GrowStatType.Crafting, currentRecipe.exp);
     }
 
@@ -359,13 +359,13 @@ public class CommonUI : MonoBehaviour, IBegin
 
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // ï¿½×³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û¿Ï·ï¿½
+                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // ??? ?????? ??????
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
 
             }
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[6]; // ï¿½ë¼ºï¿½ï¿½
+                ParticleSystem ps = CreatureEffect.Instance.Effects[6]; // ?–½??
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, 1f, 0f));
             }
         }
@@ -378,7 +378,7 @@ public class CommonUI : MonoBehaviour, IBegin
 
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // ï¿½×³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û¿Ï·ï¿½
+                ParticleSystem ps = CreatureEffect.Instance.Effects[2]; // ??? ?????? ??????
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
             }
         }
@@ -388,15 +388,15 @@ public class CommonUI : MonoBehaviour, IBegin
         {
             if (IsDebuggingCraftCoroutine)
             {
-                Debug.Log($">> CommonUI.Craft(...) : ëŒ€ì„±ê³µ ë°œìƒí–ˆìŠµë‹ˆë‹¤!");
+                Debug.Log($">> CommonUI.Craft(...) : ´ë¼º°ø ¹ß»ıÇß½À´Ï´Ù!");
             }
 
-            // ëŒ€ì„±ê³µ ë°œìƒ
+            // ´ë¼º°ø ¹ß»ı
             //PlayerCore.Instance.creatureEffect.Effects[7].Play();
-            // ì•„ì´í…œ í•˜ë‚˜ ë” ì¶”ê°€
+            // ¾ÆÀÌÅÛ ÇÏ³ª ´õ Ãß°¡
             InventoryManager.Instance.Add(recipe.result);
 
-            // ì•„ì´í…œ í˜ì´ë°±
+            // ¾ÆÀÌÅÛ ÆäÀÌ¹é
             foreach (SItemStack one in recipe.input)
             {
                 SItemStack newRef = one.Copy();
@@ -404,7 +404,7 @@ public class CommonUI : MonoBehaviour, IBegin
 				newRef.amount *= 4;
 				newRef.amount /= 10;
 
-				InventoryManager.Instance.Add(newRef); // 40 í¼ì„ íŠ¸ í˜ì´ë°±
+				InventoryManager.Instance.Add(newRef); // 40 ÆÛ¼±Æ® ÆäÀÌ¹é
 			}
 		}
 
@@ -425,6 +425,8 @@ public class CommonUI : MonoBehaviour, IBegin
 
     public void StopCraft(DefaultFabrication ui)
     {
+        if (currentCraftCoroutine == null) return;
+
         StopCoroutine(currentCraftCoroutine);
         currentCraftCoroutine = null;
         IsCurrentCrafting = false;

@@ -1,14 +1,14 @@
-ï»¿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
-using UnityEngine.UI; // UI ë ˆì´ìºìŠ¤íŠ¸ìš©
+using UnityEngine.UI; // UI ·¹ÀÌÄ³½ºÆ®¿ë
 
-#warning TODO : CreateObject ìˆ˜ì •ì´ í•„ìš”
-// í˜„ì¬ : ë§ˆìš°ìŠ¤ ìŠ¤ëƒ… -> ê±´ì„¤ ê°€ëŠ¥ ì—¬ë¶€ -> ì´ë™ -> ë°°ì¹˜
-// í•„ìš” : ë ˆì‹œí”¼ì—ì„œ ì œì‘ ì—¬ë¶€ ê°€ëŠ¥ -> ì œì‘ ë²„íŠ¼ ëˆŒë¦¼ -> ì œì‘ UI ë„ê¸° -> ê±´ì„¤ UI ì „í™˜ -> ë§ˆìš°ìŠ¤ ìŠ¤ëƒ… -> ê±´ì„¤ ê°€ëŠ¥ ì—¬ë¶€ -> ì´ë™ -> ì‹œê°„ ì†Œëª¨ ë° ë°©í•´ë°›ì§€ ì•ŠëŠ”ì§€ í•­ìƒ ì²´í¬ -> ì•„ì´í…œ ì†Œëª¨ -> ë°°ì¹˜
+#warning TODO : CreateObject ¼öÁ¤ÀÌ ÇÊ¿ä
+// ÇöÀç : ¸¶¿ì½º ½º³À -> °Ç¼³ °¡´É ¿©ºÎ -> ÀÌµ¿ -> ¹èÄ¡
+// ÇÊ¿ä : ·¹½ÃÇÇ¿¡¼­ Á¦ÀÛ ¿©ºÎ °¡´É -> Á¦ÀÛ ¹öÆ° ´­¸² -> Á¦ÀÛ UI ²ô±â -> °Ç¼³ UI ÀüÈ¯ -> ¸¶¿ì½º ½º³À -> °Ç¼³ °¡´É ¿©ºÎ -> ÀÌµ¿ -> ½Ã°£ ¼Ò¸ğ ¹× ¹æÇØ¹ŞÁö ¾Ê´ÂÁö Ç×»ó Ã¼Å© -> ¾ÆÀÌÅÛ ¼Ò¸ğ -> ¹èÄ¡
 
 public class CreateObject : MonoBehaviour, IBegin
 {
@@ -32,12 +32,12 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public bool IsBuilding => onHand != null;
 
-    [Header("ê¸°ë³¸ ì„¤ì •")]
+    [Header("±âº» ¼³Á¤")]
     [SerializeField] private Transform worldSpaceParent;
     private Transform playerTrans;
     private Camera mainCamera;
 
-    [Header("ì„¤ì¹˜ ì˜¤ë¸Œì íŠ¸ ì„¤ì •")]
+    [Header("¼³Ä¡ ¿ÀºêÁ§Æ® ¼³Á¤")]
     public CreationType creationType;
     [SerializeField] private float maxDistance = 5f;
     [SerializeField] private LayerMask platformLayer;
@@ -47,32 +47,32 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private CreationList creationList;
     private GameObject onHand;
     private GameObject tempObj;
-    private Renderer creationRender;  // MeshRenderer ê´€ë ¨ ë³€ê²½ì‚¬í•­ ìœ ì§€
+    private Renderer creationRender;  // MeshRenderer °ü·Ã º¯°æ»çÇ× À¯Áö
     private readonly Dictionary<CreationType, GameObject> creationDict = new Dictionary<CreationType, GameObject>();
     private int rotateN = 0;
 
-    [Header("ë„¤ë¸Œë©”ì‹œ ì„¤ì •")]
+    [Header("³×ºê¸Ş½Ã ¼³Á¤")]
     [SerializeField] public NavMeshSurface navMeshSurface;
     [SerializeField] private float stopDistance = 1.5f;
     private NavMeshAgent playerAgent;
 
-    [Header("UI ë ˆì´ìºìŠ¤íŠ¸ ì„¤ì •")]
-    [SerializeField] private GraphicRaycaster uiRaycaster;  // nullì´ì–´ì•¼ ì •ìƒì‘ë™; ì¼ë¶€ëŸ¬ í• ë‹¹ ì•ˆ í•´ë‘  ã…œã…œ..
+    [Header("UI ·¹ÀÌÄ³½ºÆ® ¼³Á¤")]
+    [SerializeField] private GraphicRaycaster uiRaycaster;  // nullÀÌ¾î¾ß Á¤»óÀÛµ¿; ÀÏºÎ·¯ ÇÒ´ç ¾È ÇØµÒ ¤Ì¤Ì..
 
-    [Header("ì´ë™ ì ê¸ˆ ì„¤ì •")]
+    [Header("ÀÌµ¿ Àá±İ ¼³Á¤")]
     [SerializeField] private bool lockMovementWhileOrienting = true;
     [SerializeField] private bool alsoZeroPlayerSpeed = true;
     private bool isOrienting = false;
     private bool movementLocked = false;
     private float originalPlayerSpeed = -1f;
 
-    [Header("ë²„ê·¸í•´ê²°í•˜ê³ ì‹¶ì–´ìš”")]
-    [SerializeField] private float arrivedSpeedEps;   // ì´ ì†ë„ë³´ë‹¤ ëŠë¦¬ë©´ "ë©ˆì¶¤"ìœ¼ë¡œ ê°„ì£¼
-    [SerializeField] private float arrivedHoldTime;    // ë©ˆì¶¤ì´ ì´ ì‹œê°„ ì´ìƒ ì§€ì†ë˜ë©´ ì„¤ì¹˜
+    [Header("¹ö±×ÇØ°áÇÏ°í½Í¾î¿ä")]
+    [SerializeField] private float arrivedSpeedEps;   // ÀÌ ¼Óµµº¸´Ù ´À¸®¸é "¸ØÃã"À¸·Î °£ÁÖ
+    [SerializeField] private float arrivedHoldTime;    // ¸ØÃãÀÌ ÀÌ ½Ã°£ ÀÌ»ó Áö¼ÓµÇ¸é ¼³Ä¡
     private float arrivedTimer = 0f;
 
-    [Header("ì œì‘ ëŒ€ê¸°")]
-    [SerializeField] private float installTimeSec = 2f; // Installable SOì—ì„œ ì£¼ì…ì‹œí‚¤ê¸°
+    [Header("Á¦ÀÛ ´ë±â")]
+    [SerializeField] private float installTimeSec = 2f; // Installable SO¿¡¼­ ÁÖÀÔ½ÃÅ°±â
     [SerializeField] private Image ringBackground;
     [SerializeField] private Image ringFill;
 
@@ -86,7 +86,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private SItemStack[] cost;
 
-    // Footprint/Anchor ê¸°ë°˜ íŒì •ì„ ìœ„í•´ ë³´ê´€ìš© ì‚­ì œ ã„´ã„´
+    // Footprint/Anchor ±â¹İ ÆÇÁ¤À» À§ÇØ º¸°ü¿ë »èÁ¦ ¤¤¤¤
     private SInstallableObjectDataSO _activeInstallableSO;
 
     private void Awake()
@@ -98,7 +98,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
 
-        // í”„ë¦¬íŒ¹ ë”•ì…”ë„ˆë¦¬ ë¹Œë“œ (ì´ë ‡ê²Œ ì•ˆ í•˜ë©´ ì•ˆë¨....)
+        // ÇÁ¸®ÆÕ µñ¼Å³Ê¸® ºôµå (ÀÌ·¸°Ô ¾È ÇÏ¸é ¾ÈµÊ....)
         creationDict.Add(CreationType.Platform, creationList.platform);
         creationDict.Add(CreationType.Wall, creationList.wall);
         creationDict.Add(CreationType.Door, creationList.door);
@@ -114,7 +114,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Start()
     {
-        ExitInstallMode(); // ê²Œì„ ì‹œì‘ ì‹œ ì„¤ì¹˜ ëª¨ë“œ OFF
+        ExitInstallMode(); // °ÔÀÓ ½ÃÀÛ ½Ã ¼³Ä¡ ¸ğµå OFF
     }
 
     private void Update()
@@ -148,7 +148,7 @@ public class CreateObject : MonoBehaviour, IBegin
         onHand.transform.localPosition = Vector3.zero;
         onHand.layer = 0;
 
-        creationRender = onHand.GetComponent<Renderer>(); // MeshRenderer ì‚¬ìš©
+        creationRender = onHand.GetComponent<Renderer>(); // MeshRenderer »ç¿ë
         var col = onHand.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
@@ -162,32 +162,32 @@ public class CreateObject : MonoBehaviour, IBegin
         return new Vector3(x * cellSize, 0f, z * cellSize);
     }
 
-    // í˜„ì¬ íƒ€ì…ì˜ ì…€ í¬ê¸°
+    // ÇöÀç Å¸ÀÔÀÇ ¼¿ Å©±â
     private float GetActiveCellSize()
     {
-        // SOê°€ ìˆìœ¼ë©´ SO ìš°ì„ 
+        // SO°¡ ÀÖÀ¸¸é SO ¿ì¼±
         if (_activeInstallableSO != null && _activeInstallableSO.gridCellSize > 0f)
             return _activeInstallableSO.gridCellSize;
 
-        // SOê°€ ì—†ê±°ë‚˜ 0ì´ë©´ default ì‚¬ìš©
+        // SO°¡ ¾ø°Å³ª 0ÀÌ¸é default »ç¿ë
         return defaultCellSize;
     }
 
-    // Anchor ì˜¤í”„ì…‹ ê°€ì ¸ì˜¤ê¸°
+    // Anchor ¿ÀÇÁ¼Â °¡Á®¿À±â
     private Vector2 GetActiveAnchorOffsetCells()
     {
         if (_activeInstallableSO == null) return Vector2.zero;
         return _activeInstallableSO.GetAnchorOffsetCellsByRotateN(rotateN);
     }
 
-    // Footprint ê°’ ê°€ì ¸ì˜¤ê¸°
+    // Footprint °ª °¡Á®¿À±â
     private Vector2Int GetActiveFootprint()
     {
         if (_activeInstallableSO == null) return Vector2Int.one;
         return _activeInstallableSO.GetFootprintByRotateN(rotateN);
     }
 
-    // Anchorë¥¼ ë°˜ì˜í•œ ìŠ¤ëƒ…
+    // Anchor¸¦ ¹İ¿µÇÑ ½º³À
     private Vector3 SnapToGridWithAnchor(Vector3 localPos)
     {
         float cellSize = GetActiveCellSize();
@@ -249,7 +249,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void CheckCreatable()
     {
-        #region UI ìœ„ì—ì„  ì„¤ì¹˜ê°€ëŠ¥ ì—¬ë¶€ í”„ë¦¬ë·°ë¶€í„° ë³´ì´ì§€ ì•Šê²Œ ì²˜ë¦¬í•¨ 
+        #region UI À§¿¡¼± ¼³Ä¡°¡´É ¿©ºÎ ÇÁ¸®ºäºÎÅÍ º¸ÀÌÁö ¾Ê°Ô Ã³¸®ÇÔ 
         if (IsBlockedByUI())
         {
             SetPreviewVisible(false);
@@ -263,8 +263,8 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (!TryGetMouseGroundPoint(out var mouseWorldPos)) return;
 
-        // ê¸°ì¡´: SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos))
-        // Anchor ë°˜ì˜ ìŠ¤ëƒ…(ì„¤ì¹˜ íŒì • ê´€ë ¨)
+        // ±âÁ¸: SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos))
+        // Anchor ¹İ¿µ ½º³À(¼³Ä¡ ÆÇÁ¤ °ü·Ã)
         Vector3 localMouse = worldSpaceParent.InverseTransformPoint(mouseWorldPos);
         Vector3 localPos = SnapToGridWithAnchor(localMouse);
 
@@ -277,13 +277,13 @@ public class CreateObject : MonoBehaviour, IBegin
     private void HandleOrientationInput()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f) // ìœ„ë¡œ
+        if (scroll > 0f) // À§·Î
         {
             rotateAngleIndex++;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (scroll < 0f) // ì•„ë˜ë¡œ
+        else if (scroll < 0f) // ¾Æ·¡·Î
         {
             rotateAngleIndex--;
             if (AudioManager.instance != null)
@@ -353,7 +353,7 @@ public class CreateObject : MonoBehaviour, IBegin
         Vector2Int fp = GetActiveFootprint();
         float cellSize = GetActiveCellSize();
 
-        // ì˜¤í”„ì…‹ ê³µì‹: ix - w/2 + 0.5 
+        // ¿ÀÇÁ¼Â °ø½Ä: ix - w/2 + 0.5 
         for (int ix = 0; ix < fp.x; ix++)
         {
             float ox = (ix - (fp.x / 2f) + 0.5f) * cellSize;
@@ -367,7 +367,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private bool CheckFootprintSupportAndOverlap(Vector3 pivotCenterWorld)
     {
-        //maxDistanceë³´ë‹¤ ë©€ë©´ ì„¤ì¹˜ ë¶ˆê°€ëŠ¥
+        //maxDistanceº¸´Ù ¸Ö¸é ¼³Ä¡ ºÒ°¡´É
         if (Vector3.SqrMagnitude(pivotCenterWorld - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
         {
             return false;
@@ -378,13 +378,13 @@ public class CreateObject : MonoBehaviour, IBegin
 
         foreach (var cellCenter in EnumerateFootprintCellCenters(pivotCenterWorld))
         {
-            // í”Œë«í¼ ì²´í¬
+            // ÇÃ·§Æû Ã¼Å©
             if (!Physics.CheckBox(cellCenter, halfSize, orientation, platformLayer))
             {
                 return false;
             }
 
-            // ê²¹ì¹¨ ì²´í¬(ë‹¤ë¥¸ ì„¤ì¹˜ë¬¼)
+            // °ãÄ§ Ã¼Å©(´Ù¸¥ ¼³Ä¡¹°)
             if (Physics.CheckBox(cellCenter, halfSize, orientation, creationLayer))
             {
                 return false;
@@ -396,60 +396,60 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private bool CheckNear(Vector3 center)
     {
-        float[] xArr; //xìœ„ì¹˜
-        float[] zArr; //yìœ„ì¹˜
-        float[] xSign; //xë¶€í˜¸
-        float[] zSign; //yë¶€í˜¸
+        float[] xArr; //xÀ§Ä¡
+        float[] zArr; //yÀ§Ä¡
+        float[] xSign; //xºÎÈ£
+        float[] zSign; //yºÎÈ£
 
-        //maxDistanceë³´ë‹¤ ë©€ë©´ ì„¤ì¹˜ ë¶ˆê°€ëŠ¥
+        //maxDistanceº¸´Ù ¸Ö¸é ¼³Ä¡ ºÒ°¡´É
         if (Vector3.SqrMagnitude(center - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
         {
             return false;
         }
 
-        #region ì˜¤ë¸Œì íŠ¸ì— ë”°ë¥¸ ì˜µì…˜ ì„¤ì •
+        #region ¿ÀºêÁ§Æ®¿¡ µû¸¥ ¿É¼Ç ¼³Á¤
         switch (creationType)
         {
             case CreationType.Platform:
-                // (ì¤‘ëµ) â€” í”„ë¡œì íŠ¸ì— ë°˜ì˜í•˜ì‹  MeshRenderer/ê°‘íŒ ê°œìˆ˜ ë¡œì§ í¬í•¨, ê¸°ì¡´ ê·¸ëŒ€ë¡œ ìœ ì§€
-                // 1) MastManager / MastSystem ìµœëŒ€ ê°œìˆ˜ ì²´í¬
-                // 2) ì£¼ë³€ ë°•ìŠ¤ ì²´í¬ ì¡°ê±´
-                // 3) ì„¤ì¹˜ ê°€ëŠ¥/ë¶ˆê°€ ë°˜í™˜
-                // ---- ì•„ë˜ëŠ” ì—…ë¡œë“œë³¸ ê·¸ëŒ€ë¡œ ìœ ì§€ ----
+                // (Áß·«) ? ÇÁ·ÎÁ§Æ®¿¡ ¹İ¿µÇÏ½Å MeshRenderer/°©ÆÇ °³¼ö ·ÎÁ÷ Æ÷ÇÔ, ±âÁ¸ ±×´ë·Î À¯Áö
+                // 1) MastManager / MastSystem ÃÖ´ë °³¼ö Ã¼Å©
+                // 2) ÁÖº¯ ¹Ú½º Ã¼Å© Á¶°Ç
+                // 3) ¼³Ä¡ °¡´É/ºÒ°¡ ¹İÈ¯
+                // ---- ¾Æ·¡´Â ¾÷·Îµåº» ±×´ë·Î À¯Áö ----
 
-                // ì£¼í›ˆ ì¶”ê°€
+                // ÁÖÈÆ Ãß°¡
                 if (MastManager.Instance != null)
                 {
                     int currentDeckCount = MastManager.Instance.currentDeckCount;
-                    int maxDeckCount = 30; // 1ë ˆë²¨ ìµœëŒ€ ê°¯ìˆ˜
+                    int maxDeckCount = 30; // 1·¹º§ ÃÖ´ë °¹¼ö
 
-                    // ë—ëŒ€ ë ˆë²¨ì— ë”°ë¥¸ ìµœëŒ€ ê°œìˆ˜ í™•ì¸
+                    // µ¾´ë ·¹º§¿¡ µû¸¥ ÃÖ´ë °³¼ö È®ÀÎ
                     MastSystem[] masts = FindObjectsOfType<MastSystem>();
                     if (masts.Length > 0)
                     {
                         maxDeckCount = masts[0].GetMaxDeckCount();
                     }
 
-                    // ìµœëŒ€ ê°œìˆ˜ ì´ˆê³¼ ì‹œ ì„¤ì¹˜ ë¶ˆê°€
+                    // ÃÖ´ë °³¼ö ÃÊ°ú ½Ã ¼³Ä¡ ºÒ°¡
                     if (currentDeckCount >= maxDeckCount)
                     {
-                        Debug.Log($"ê°‘íŒ ì„¤ì¹˜ ë¶ˆê°€: {currentDeckCount}/{maxDeckCount}ê°œ (ìµœëŒ€ ë„ë‹¬)");
+                        Debug.Log($"°©ÆÇ ¼³Ä¡ ºÒ°¡: {currentDeckCount}/{maxDeckCount}°³ (ÃÖ´ë µµ´Ş)");
                         return false;
                     }
                 }
-                // ì—¬ê¸°ê¹Œì§€
+                // ¿©±â±îÁö
 
                 //1.414213 * 0.5
                 xArr = new float[] { 0.707106f, 0.707106f, -0.707106f, -0.707106f };
                 zArr = new float[] { 0.707106f, -0.707106f, -0.707106f, 0.707106f };
 
-                //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì— í”Œë«í¼ ìˆìœ¼ë©´ ì„¤ì¹˜ ë¶ˆê°€
+                //¸¶¿ì½º À§Ä¡¿¡ ÇÃ·§Æû ÀÖÀ¸¸é ¼³Ä¡ ºÒ°¡
                 if (Physics.CheckBox(center, new Vector3(0.99f, 0.5f, 0.99f), Quaternion.Euler(new Vector3(0f, 45f, 0f)), platformLayer))
                 {
                     return false;
                 }
 
-                //ë§ˆìš°ìŠ¤ ìœ„ì¹˜ ê¸°ì¤€ 4ë°©í–¥ì— ì§ìœ¡ë©´ì²´(1.98, 1, 0.48) ë²”ìœ„ì— í”Œë«í¼ ìˆìœ¼ë©´ ì„¤ì¹˜ ê°€ëŠ¥
+                //¸¶¿ì½º À§Ä¡ ±âÁØ 4¹æÇâ¿¡ Á÷À°¸éÃ¼(1.98, 1, 0.48) ¹üÀ§¿¡ ÇÃ·§Æû ÀÖÀ¸¸é ¼³Ä¡ °¡´É
                 for (int i = 0; i < 4; i++)
                 {
                     Vector3 offset = new Vector3(xArr[i], 0f, zArr[i]);
@@ -512,7 +512,7 @@ public class CreateObject : MonoBehaviour, IBegin
         Vector3 dir = (world - playerTrans.position).normalized;
         Vector3 stopPos = world - dir * stopDistance;
 
-        // ë³´ì • : ë„ì°© íŒì • !!
+        // º¸Á¤ : µµÂø ÆÇÁ¤ !!
         playerAgent.stoppingDistance = stopDistance;
 
         UnlockPlayerMovement();
@@ -520,7 +520,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerAgent.ResetPath();
         playerAgent.SetDestination(stopPos);
 
-        // ìƒˆ ì´ë™ ì‹œì‘ì´ë¯€ë¡œ íƒ€ì´ë¨¸ ë¦¬ì…‹
+        // »õ ÀÌµ¿ ½ÃÀÛÀÌ¹Ç·Î Å¸ÀÌ¸Ó ¸®¼Â
         arrivedTimer = 0f;
     }
 
@@ -534,7 +534,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (nearEnough || almostStopped)
         {
-            // ë„ì°©: ê¸°ì¡´ íƒ€ì´ë¨¸ ëŒ€ì‹  ì œì‘ì‹œê°„ ì½”ë£¨í‹´ 1íšŒ ì‹œì‘
+            // µµÂø: ±âÁ¸ Å¸ÀÌ¸Ó ´ë½Å Á¦ÀÛ½Ã°£ ÄÚ·çÆ¾ 1È¸ ½ÃÀÛ
             if (!isCountingDown && installRoutine == null)
             {
                 installRoutine = StartCoroutine(InstallCountdownRoutine());
@@ -543,7 +543,7 @@ public class CreateObject : MonoBehaviour, IBegin
         else
         {
             arrivedTimer = 0f;
-            // ì´ë™ ì¬ê°œ: ì§„í–‰ ì¤‘ì´ë©´ ì·¨ì†Œ
+            // ÀÌµ¿ Àç°³: ÁøÇà ÁßÀÌ¸é Ãë¼Ò
             if (installRoutine != null)
             {
                 CancelInstallCountdown();
@@ -551,14 +551,14 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-    // EnterInstallMode(SInstallableObjectDataSO installableSO)ê°€ í˜¸ì¶œë˜ì—ˆì„ê±°ë¼ê³  ê°€ì •í•˜ê³  í˜¸ì¶œí•©ë‹ˆë‹¤.
+    // EnterInstallMode(SInstallableObjectDataSO installableSO)°¡ È£ÃâµÇ¾úÀ»°Å¶ó°í °¡Á¤ÇÏ°í È£ÃâÇÕ´Ï´Ù.
     private IEnumerator InstallCountdownRoutine()
     {
         Debug.Assert(cost != null);
 
         isCountingDown = true;
         arrivedTimer = 0f;
-        // UI ì‹œì‘
+        // UI ½ÃÀÛ
         if (ringFill != null)
         {
             ringFill.fillAmount = 0f;
@@ -568,14 +568,14 @@ public class CreateObject : MonoBehaviour, IBegin
         float t = 0f;
         while (t < installTimeSec)
         {
-            // ì·¨ì†Œ ì…ë ¥: ìš°í´ë¦­/ F
+            // Ãë¼Ò ÀÔ·Â: ¿ìÅ¬¸¯/ F
             if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.F))
             {
                 CancelInstallCountdown();
                 yield break;
             }
 
-            //// ì´ë™ ì…ë ¥ìœ¼ë¡œë„ ì·¨ì†Œ
+            //// ÀÌµ¿ ÀÔ·ÂÀ¸·Îµµ Ãë¼Ò
             //if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
             //{
             //    CancelInstallCountdown();
@@ -596,17 +596,17 @@ public class CreateObject : MonoBehaviour, IBegin
         navMeshSurface.BuildNavMesh();
         GameManager.Instance?.NotifyPlatformLayoutChanged();
 
-        // ì£¼í›ˆ ì¶”ê°€: ê°‘íŒ ê°œìˆ˜ ê°±ì‹ 
+        // ÁÖÈÆ Ãß°¡: °©ÆÇ °³¼ö °»½Å
         if (creationType == CreationType.Platform && MastManager.Instance != null)
         {
             MastManager.Instance.UpdateCurrentDeckCount();
-            Debug.Log($"í˜„ì¬ ê°‘íŒ ê°¯ìˆ˜: {MastManager.Instance.currentDeckCount}");
+            Debug.Log($"ÇöÀç °©ÆÇ °¹¼ö: {MastManager.Instance.currentDeckCount}");
         }
 
         tempObj.GetComponent<InstalledObject>()?.OnPlaced();
-        Debug.Log("[ì„¤ì¹˜ ì™„ë£Œë¨]");
+        Debug.Log("[¼³Ä¡ ¿Ï·áµÊ]");
 
-        // <<ì—¬ê¸°ì„œ ì¬ë£Œë¥¼ ë¹¼ëŠ” ë¡œì§
+        // <<¿©±â¼­ Àç·á¸¦ »©´Â ·ÎÁ÷
         InventoryManager.Instance.Remove(cost);
         InventoryUiMain.instance.IconRefresh();
 
@@ -645,7 +645,7 @@ public class CreateObject : MonoBehaviour, IBegin
         arrivedTimer = 0f;
     }
 
-    // InGameUIì—ì„œ í´ë¦­ì„ í†µí•´ ìƒì„±í•¨. (í•´ë‹¹ í•¨ìˆ˜ í˜¸ì¶œì„ ë³´ì¦í•©ë‹ˆë‹¤.)
+    // InGameUI¿¡¼­ Å¬¸¯À» ÅëÇØ »ı¼ºÇÔ. (ÇØ´ç ÇÔ¼ö È£ÃâÀ» º¸ÁõÇÕ´Ï´Ù.)
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
 
@@ -665,21 +665,21 @@ public class CreateObject : MonoBehaviour, IBegin
 
         Debug.Assert(cost.Length > 0);
 
-        // ì§„í–‰ ì¤‘ ì¹´ìš´íŠ¸ë‹¤ìš´ ì •ë¦¬
+        // ÁøÇà Áß Ä«¿îÆ®´Ù¿î Á¤¸®
         if (installRoutine != null) CancelInstallCountdown();
 
-        // ê¸°ì¡´ í”„ë¦¬ë·°/ì„ì‹œ ì˜¤ë¸Œì íŠ¸ ì •ë¦¬
+        // ±âÁ¸ ÇÁ¸®ºä/ÀÓ½Ã ¿ÀºêÁ§Æ® Á¤¸®
         if (onHand != null) { Destroy(onHand); onHand = null; }
         if (tempObj != null) { Destroy(tempObj); tempObj = null; }
 
-        // NavMeshAgent ë³´ì¥
+        // NavMeshAgent º¸Àå
         if (playerAgent == null) playerAgent = GetComponent<NavMeshAgent>();
         if (playerAgent != null && !playerAgent.enabled) playerAgent.enabled = true;
 
-        // ì„¤ì¹˜ íƒ€ì…/ì œì‘ì‹œê°„ ì„¸íŒ…(SO ê¸°ì¤€)
+        // ¼³Ä¡ Å¸ÀÔ/Á¦ÀÛ½Ã°£ ¼¼ÆÃ(SO ±âÁØ)
         if (installableSO != null)
         {
-            _activeInstallableSO = installableSO; // í˜„ì¬ ì„¤ì¹˜ SO ë³´ê´€
+            _activeInstallableSO = installableSO; // ÇöÀç ¼³Ä¡ SO º¸°ü
             creationType = (CreationType)(int)installableSO.installType;
             installTimeSec = Mathf.Max(0.1f, installableSO.buildTime);
         }
@@ -688,7 +688,7 @@ public class CreateObject : MonoBehaviour, IBegin
             _activeInstallableSO = null;
         }
 
-        // UI/ìƒíƒœ ì´ˆê¸°í™”
+        // UI/»óÅÂ ÃÊ±âÈ­
         if (ringFill != null)
         {
             ringFill.fillAmount = 0f;
@@ -700,7 +700,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         CreateObjectInit();
 
-        Debug.Log($"[ì„¤ì¹˜ëª¨ë“œ ì§„ì…] {creationType}, ì œì‘ {installTimeSec:F2}s");
+        Debug.Log($"[¼³Ä¡¸ğµå ÁøÀÔ] {creationType}, Á¦ÀÛ {installTimeSec:F2}s");
     }
 
     public void ExitInstallMode()
@@ -727,7 +727,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         _activeInstallableSO = null;
 
-        Debug.Log("[ì„¤ì¹˜ ëª¨ë“œ ì¢…ë£Œë¨]");
+        Debug.Log("[¼³Ä¡ ¸ğµå Á¾·áµÊ]");
     }
 
     private void LockPlayerMovement()
@@ -773,7 +773,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public bool EvaluatePlacement(CreationType type, Vector3 worldPos, Quaternion rot)
     {
-        // onHand/rotateNì„ ì ì‹œ ë¹Œë ¤ ì“°ë¯€ë¡œ ë°±ì—…-ë³µì›
+        // onHand/rotateNÀ» Àá½Ã ºô·Á ¾²¹Ç·Î ¹é¾÷-º¹¿ø
         var bakType = creationType;
         var bakOnHand = onHand;
         var bakRotateN = rotateN;
@@ -783,18 +783,18 @@ public class CreateObject : MonoBehaviour, IBegin
         {
             creationType = type;
 
-            // onHand ëŒ€ì²´ìš© ë”ë¯¸ íŠ¸ëœìŠ¤í¼
+            // onHand ´ëÃ¼¿ë ´õ¹Ì Æ®·£½ºÆû
             if (_evalDummy == null) _evalDummy = new GameObject("~EvalDummy");
             onHand = _evalDummy;
             onHand.transform.rotation = rot;
 
-            // rotateNì€ 90ë„ ë‹¨ìœ„ íšŒì „ ì§€í‘œ
+            // rotateNÀº 90µµ ´ÜÀ§ È¸Àü ÁöÇ¥
             rotateN = Mathf.RoundToInt(rot.eulerAngles.y / 90f) % 4;
             return CheckNear(worldPos);
         }
         finally
         {
-            // ë³µì›
+            // º¹¿ø
             creationType = bakType;
             onHand = bakOnHand;
             rotateN = bakRotateN;

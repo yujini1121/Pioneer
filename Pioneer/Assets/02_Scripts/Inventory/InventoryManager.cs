@@ -19,6 +19,7 @@ public class InventoryManager : InventoryBase
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
     private Vector3 dropOffset = new Vector3(0.5f, -0.75f, -0.5f); // 오프셋
+    private bool isThisFrameReloadCraft = false;
 
     [Header("DEBUG")]
     [SerializeField] bool isDebugging;
@@ -135,6 +136,7 @@ public class InventoryManager : InventoryBase
         {
             Debug.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
+        isThisFrameReloadCraft = true;
 
         if (item.id == 40007)
         {
@@ -278,9 +280,26 @@ public class InventoryManager : InventoryBase
         {
             Demo();
         }
-	}
+    }
 
-	private void Demo()
+    private void LateUpdate()
+    {
+        if (isThisFrameReloadCraft)
+        {
+            Debug.Log("아이템 획득 업데이트");
+
+            isThisFrameReloadCraft = false;
+            if (MakeshiftCraftUiMain.instance.isOpened)
+            {
+                Debug.Log("아이템 획득 업데이트 완료");
+
+                MakeshiftCraftUiMain.instance.UpdateRecipe();
+            }
+            CommonUI.instance.PickUpUpdate();
+        }
+    }
+
+    private void Demo()
     {
         //Add(new SItemStack(30001, 10));
         //Add(new SItemStack(30002, 10));
