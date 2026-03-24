@@ -377,7 +377,7 @@ public class CommonUI : MonoBehaviour, IBegin
         if (isSuccess)
         {
             if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting);
+                AudioManager.instance.PlaySfx(AudioManager.SFX.GreatSuccessCrafting2);
 
             if (CreatureEffect.Instance != null)
             {
@@ -396,7 +396,7 @@ public class CommonUI : MonoBehaviour, IBegin
             GameObject target = GameObject.Find("CraftStation");
 
             if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting);
+                AudioManager.instance.PlaySfx(AudioManager.SFX.SuccessCrafting2);
 
             if (CreatureEffect.Instance != null)
             {

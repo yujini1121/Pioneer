@@ -62,7 +62,7 @@ public class AudioManager : MonoBehaviour, IBegin
         InstallObject,
         RotateInstallTypeObject,
         DestroyedObject,
-        Hit_Object,
+        Hit_Object,hit,
         BalistaAttack,
         ActivatedSpiketrap,
         BeforeAttack_BlackFog,
@@ -79,7 +79,14 @@ public class AudioManager : MonoBehaviour, IBegin
         MeetEnemy,
         Punch1_Player,
         Hit,
-        Take
+        Take,
+        Hit2,
+        GreatSuccessCrafting2,
+        meetEnemy2,
+        Punch3_Player,
+        SuccessCrafting2,
+        To_night2,
+        grunt_effort_struggle_male_b_17
     }
 
     [Header("Vol UI")]
