@@ -77,11 +77,11 @@ public class MarinerManager : MonoBehaviour
         {
             var pick = candidates[Random.Range(0, candidates.Count)];
             InfectMariner(pick);
-            Debug.Log("낮 시간 랜덤 1명 감염 완료");
+            //Debug.Log("낮 시간 랜덤 1명 감염 완료");
         }
         else
         {
-            Debug.Log("감염 가능한 승무원이 없습니다.");
+            //Debug.Log("감염 가능한 승무원이 없습니다.");
         }
         lastInfectedDay = dayAtStart;
         infectionRoutineRunning = false;
@@ -91,7 +91,7 @@ public class MarinerManager : MonoBehaviour
     {
         if (mariner == null) return;
 
-        Debug.Log($"감염 발생: 승무원 {mariner.marinerId}");
+        //Debug.Log($"감염 발생: 승무원 {mariner.marinerId}");
 
         int id = mariner.marinerId;
         var go = mariner.gameObject;
@@ -111,7 +111,7 @@ public class MarinerManager : MonoBehaviour
 
         Destroy(mariner);
 
-        Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
+        //Debug.Log($"승무원 {id}: 감염 상태로 전환 완료 (InfectedMarinerAI 활성화)");
     }
 
     // ===== 승무원 등록 =====
@@ -138,7 +138,7 @@ public class MarinerManager : MonoBehaviour
             if (obj.CurrentHp < obj.maxHp * 0.5f)
             {
                 repairTargets.Add(obj);
-                Debug.Log($"수리 대상 추가: {obj.name} / HP: {obj.CurrentHp}/{obj.maxHp}");
+                //Debug.Log($"수리 대상 추가: {obj.name} / HP: {obj.CurrentHp}/{obj.maxHp}");
             }
         }
     }

@@ -119,11 +119,11 @@ public class MarinerBase : CreatureBase
 
     protected virtual void EnterWanderingState()
     {
-        Debug.Log("base nterWanderingState 실행");
+        //Debug.Log("base nterWanderingState 실행");
         SetRandomDirection();
         currentState = CrewState.Wandering;
         stateTimer = moveDuration;
-        Debug.Log($"{gameObject.name} - 랜덤 방향으로 이동 시작");
+        //Debug.Log($"{gameObject.name} - 랜덤 방향으로 이동 시작");
     }
 
     protected virtual void EnterIdleState()
@@ -134,19 +134,19 @@ public class MarinerBase : CreatureBase
         {
             agent.ResetPath();
         }
-        Debug.Log($"{gameObject.name} - 대기 상태로 전환");
+        //Debug.Log($"{gameObject.name} - 대기 상태로 전환");
     }
 
     protected virtual void EnterChasingState()
     {
         currentState = CrewState.Chasing;
         isChasing = true;
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 추격 상태로 전환");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 추격 상태로 전환");
     }
 
     protected void SetRandomDirection()
     {
-        Debug.Log("base SetRandomDirection 실행");
+        //Debug.Log("base SetRandomDirection 실행");
         float angle = Random.Range(0f, 360f);
         moveDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
     }
@@ -184,7 +184,7 @@ public class MarinerBase : CreatureBase
             CommonBase targetBase = target.GetComponent<CommonBase>();
             if (targetBase != null && targetBase.IsDead)
             {
-                Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 타겟 {target.name}이 죽었습니다. 새로운 타겟을 찾습니다.");
+                //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 타겟 {target.name}이 죽었습니다. 새로운 타겟을 찾습니다.");
                 target = null;
                 isChasing = false;
                 EnterWanderingState();
@@ -222,7 +222,7 @@ public class MarinerBase : CreatureBase
         {
             target = nearestTarget;
             EnterChasingState();
-            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: {target.name} 추격 시작!");
+            //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: {target.name} 추격 시작!");
         }
     }
 
@@ -323,11 +323,11 @@ public class MarinerBase : CreatureBase
                 }
             }
 
-            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점 발견 - {bestPoint}");
+            //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점 발견 - {bestPoint}");
             return bestPoint;
         }
 
-        Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾지 못함");
+        //Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾지 못함");
         return Vector3.zero;
     }
 
@@ -361,13 +361,13 @@ public class MarinerBase : CreatureBase
             personalEdgePoint = FindMyOwnEdgePoint();
             if (personalEdgePoint == Vector3.zero)
             {
-                Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾을 수 없어 현재 위치에서 파밍");
+                //Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾을 수 없어 현재 위치에서 파밍");
                 personalEdgePoint = transform.position;
             }
             hasFoundPersonalEdge = true;
         }
 
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점으로 이동 - {personalEdgePoint}");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점으로 이동 - {personalEdgePoint}");
 
         MoveTo(personalEdgePoint);
 
@@ -390,7 +390,7 @@ public class MarinerBase : CreatureBase
 
     protected virtual IEnumerator PerformPersonalEdgeFarming()
     {
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계에서 파밍 시작");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계에서 파밍 시작");
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
@@ -416,7 +416,7 @@ public class MarinerBase : CreatureBase
 
                 if (GameManager.Instance.TimeUntilNight() <= 30f)
                 {
-                    Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 밤이 가까워 파밍 중단");
+                    //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 밤이 가까워 파밍 중단");
                     OnNightApproaching();
                     yield break;
                 }
@@ -446,7 +446,7 @@ public class MarinerBase : CreatureBase
             secondPriorityRoutine = null;
         }
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
     }
 
     protected virtual void OnPersonalFarmingCompleted() { /* 각 AI에서 오버라이드 */ }
@@ -462,7 +462,7 @@ public class MarinerBase : CreatureBase
 
         MarinerManager.Instance.UpdateRepairTargets();
         List<StructureBase> needRepairList = MarinerManager.Instance.GetNeedsRepair();
-        Debug.Log($"승무원 {GetMarinerId()}: 수리 대상 개수: {needRepairList.Count}");
+        //Debug.Log($"승무원 {GetMarinerId()}: 수리 대상 개수: {needRepairList.Count}");
 
         foreach (var obj in needRepairList)
         {
@@ -472,7 +472,7 @@ public class MarinerBase : CreatureBase
 
                 if (MarinerManager.Instance.CanMarinerRepair(GetMarinerId(), targetRepairObject))
                 {
-                    Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 시작: {targetRepairObject.name}");
+                    //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 시작: {targetRepairObject.name}");
                     isRepairing = true;
 
                     // 이동 시작 전 공격/추격 끊기(의도치 않은 전환 방지)
@@ -493,7 +493,7 @@ public class MarinerBase : CreatureBase
         // 여기까지 왔다 = 현재 수리할 게 없음 → 그때만 2순위 시작
         if (!isSecondPriorityStarted)
         {
-            Debug.Log($"{GetCrewTypeName()} 수리 대상 없음 -> 2순위 행동 시작");
+            //Debug.Log($"{GetCrewTypeName()} 수리 대상 없음 -> 2순위 행동 시작");
             secondPriorityRoutine = StartCoroutine(StartSecondPriorityAction());
         }
     }
@@ -547,7 +547,7 @@ public class MarinerBase : CreatureBase
 
         if (targetRepairObject != null)
         {
-            Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 {(repairSuccess ? "성공" : "실패")}: {targetRepairObject.name}/ 수리량: {actualRepairAmount}");
+            //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()} 수리 {(repairSuccess ? "성공" : "실패")}: {targetRepairObject.name}/ 수리량: {actualRepairAmount}");
 
             targetRepairObject.Heal(actualRepairAmount);
 
@@ -570,7 +570,7 @@ public class MarinerBase : CreatureBase
 
     public virtual IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log($"{GetCrewTypeName()} 2순위 행동 - 기본 구현");
+        //Debug.Log($"{GetCrewTypeName()} 2순위 행동 - 기본 구현");
         yield return StartCoroutine(MoveToMyEdgeAndFarm());
     }
 
@@ -609,7 +609,7 @@ public class MarinerBase : CreatureBase
         if (agent != null && agent.isOnNavMesh)
             agent.ResetPath();
 
-        Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
+        //Debug.Log($"{GetCrewTypeName()} ResetPath 호출");
     }
 
     protected Vector3 GetRepairApproachPoint(Transform t, float approachRadius = 0.5f)

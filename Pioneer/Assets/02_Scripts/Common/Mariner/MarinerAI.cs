@@ -135,7 +135,7 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (GameManager.Instance.IsDaytime)
         {
-            Debug.Log($"승무원 {marinerId}: 전투 종료, 수리 재개");
+            //Debug.Log($"승무원 {marinerId}: 전투 종료, 수리 재개");
             // 즉시 1순위 행동 시작
             StartRepair();
         }
@@ -145,7 +145,7 @@ public class MarinerAI : MarinerBase, IBegin
         }
     }
 
-    private bool CheckSecondPriorityActionCancellation(string context)
+    /*private bool CheckSecondPriorityActionCancellation(string context)
     {
         if (!isSecondPriorityStarted)
         {
@@ -153,7 +153,7 @@ public class MarinerAI : MarinerBase, IBegin
             return true;
         }
         return false;
-    }
+    }*/
 
     private void OnTimeStateChanged(bool isDaytime)
     {
@@ -192,7 +192,7 @@ public class MarinerAI : MarinerBase, IBegin
         transform.rotation = initialRot;
         isSecondPriorityStarted = false;
         CancelCurrentRepair();
-        Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 전환");
+        //Debug.Log($"승무원 {marinerId}: 낮 행동 모드로 전환");
         StartRepair();
     }
 
@@ -230,13 +230,13 @@ public class MarinerAI : MarinerBase, IBegin
         {
             if (isRepairing)
             {
-                Debug.Log($"승무원 {marinerId}: 적 발견으로 수리 완전 취소");
+                //Debug.Log($"승무원 {marinerId}: 적 발견으로 수리 완전 취소");
                 CancelCurrentRepair();
             }
 
             if (isSecondPriorityStarted)
             {
-                Debug.Log($"승무원 {marinerId}: 적 발견으로 파밍 중단");
+                //Debug.Log($"승무원 {marinerId}: 적 발견으로 파밍 중단");
                 CancelSecondPriorityAction();
             }
 
@@ -280,7 +280,7 @@ public class MarinerAI : MarinerBase, IBegin
             StopAllCoroutines();
 
             ResetAgentPath();
-            Debug.Log($"승무원 {marinerId}: 수리 취소");
+            //Debug.Log($"승무원 {marinerId}: 수리 취소");
         }
     }
 
@@ -294,7 +294,7 @@ public class MarinerAI : MarinerBase, IBegin
             secondPriorityRoutine = null;
         }
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
     }
 
 
@@ -374,13 +374,13 @@ public class MarinerAI : MarinerBase, IBegin
                 CommonBase targetBase = target.GetComponent<CommonBase>();
                 if (targetBase != null && !targetBase.IsDead)
                 {
-                    Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
+                    //Debug.Log($"승무원 {marinerId}: 공격 완료, 추격 재개");
                     EnterChasingState();
                     yield break;
                 }
                 else
                 {
-                    Debug.Log($"승무원 {marinerId}: 적 처치 완료");
+                    //Debug.Log($"승무원 {marinerId}: 적 처치 완료");
                     target = null;
                     isChasing = false;
                     HandlePostCombatAction();
@@ -389,7 +389,7 @@ public class MarinerAI : MarinerBase, IBegin
             }
             else
             {
-                Debug.Log($"승무원 {marinerId}: 적 소실");
+                //Debug.Log($"승무원 {marinerId}: 적 소실");
                 isChasing = false;
                 HandlePostCombatAction();
                 yield break;
@@ -420,6 +420,7 @@ public class MarinerAI : MarinerBase, IBegin
             targetLayer
         );
 
+        /// 나중에 보기
         /*if (AudioManager.instance != null)
         {
             Debug.Log("MarinerAI 맞을 때 소리 재생");
@@ -432,7 +433,7 @@ public class MarinerAI : MarinerBase, IBegin
             if (targetBase != null)
             {
                 targetBase.TakeDamage(attackDamage, this.gameObject);
-                Debug.Log($"승무원이 {hit.name}에게 {attackDamage} 데미지");
+                //Debug.Log($"승무원이 {hit.name}에게 {attackDamage} 데미지");
             }
         }
     }
@@ -453,7 +454,7 @@ public class MarinerAI : MarinerBase, IBegin
         MarinerInventory inventory = GetComponent<MarinerInventory>();
         if (inventory != null && inventory.ShouldMoveToStorage())
         {
-            Debug.Log($"승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 보관함으로 이동");
+            //Debug.Log($"승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 보관함으로 이동");
 
             // 보관함 찾기
             GameObject storage = GameObject.FindWithTag("Engine");
@@ -480,7 +481,7 @@ public class MarinerAI : MarinerBase, IBegin
                         yield return null;
                     }
 
-                    Debug.Log($"승무원 {marinerId}: 보관함에 도착 - 아이템 저장");
+                    //Debug.Log($"승무원 {marinerId}: 보관함에 도착 - 아이템 저장");
 
                     // 보관함에 아이템 저장
                     var storageInventory = storage.GetComponent<InventoryBase>();
@@ -490,7 +491,7 @@ public class MarinerAI : MarinerBase, IBegin
                     }
                     else // 보관함 구현 후 삭제? or 에러처리? 
                     {
-                        Debug.LogWarning("보관함에 InventoryBase가 없음 - 아이템 제거, 보관함 구현 후 삭제?");
+                        //Debug.LogWarning("보관함에 InventoryBase가 없음 - 아이템 제거, 보관함 구현 후 삭제?");
 
                         List<SItemStack> itemsToRemove = new List<SItemStack>();
                         for (int i = 0; i < inventory.itemLists.Count; i++)
@@ -507,7 +508,7 @@ public class MarinerAI : MarinerBase, IBegin
                         }
                     }
 
-                    Debug.Log($"승무원 {marinerId}: 보관함 저장 완료 - 1순위 행동 재확인");
+                    //Debug.Log($"승무원 {marinerId}: 보관함 저장 완료 - 1순위 행동 재확인");
 
                     // 보관함 저장 후 1순위 행동(수리) 재확인
                     isSecondPriorityStarted = false;
@@ -517,7 +518,7 @@ public class MarinerAI : MarinerBase, IBegin
             }
             else
             {
-                Debug.LogWarning($"승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
+                //Debug.LogWarning($"승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
 
                 SetRandomDestination();
 
@@ -530,7 +531,7 @@ public class MarinerAI : MarinerBase, IBegin
         }
         else
         {
-            Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
+            //Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
             isSecondPriorityStarted = true;
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
@@ -563,7 +564,7 @@ public class MarinerAI : MarinerBase, IBegin
         if (AudioManager.instance != null)
         {
             AudioManager.instance.PlaySfx(AudioManager.SFX.Die);
-            Debug.Log($"마리너 사망사운드 출력{(int)AudioManager.SFX.Die}");
+            //Debug.Log($"마리너 사망사운드 출력{(int)AudioManager.SFX.Die}");
         }
 
         GameManager.Instance.MarinerDiedCount();
@@ -607,12 +608,12 @@ public class MarinerAI : MarinerBase, IBegin
                 }
             }
 
-            Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
+            //Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.ItemGet);
 
-        Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
+        //Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
     }
 
     private int GetRandomItemIDByProbability(ItemDrop[] dropList)
@@ -630,7 +631,7 @@ public class MarinerAI : MarinerBase, IBegin
             }
         }
 
-        Debug.LogError("확률 계산 오류: 아이템이 선택되지 않았습니다. 첫 번째 아이템 반환.");
+        //Debug.LogError("확률 계산 오류: 아이템이 선택되지 않았습니다. 첫 번째 아이템 반환.");
         return dropList.Length > 0 ? dropList[0].itemID : 0;
     }
 
@@ -648,7 +649,7 @@ public class MarinerAI : MarinerBase, IBegin
     {
         if (isNightRoaming) yield break;
         isNightRoaming = true;
-        Debug.Log($"승무원 {marinerId}: 야간 루틴 시작 - 수납 시도 후 랜덤 이동");
+        //Debug.Log($"승무원 {marinerId}: 야간 루틴 시작 - 수납 시도 후 랜덤 이동");
 
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
 
@@ -688,7 +689,7 @@ public class MarinerAI : MarinerBase, IBegin
                 if (storageInventory != null)
                 {
                     inventory.TransferAllItemsToStorage(storageInventory);
-                    Debug.Log($"승무원 {marinerId}: 보관함 도착 및 수납 완료");
+                    //Debug.Log($"승무원 {marinerId}: 보관함 도착 및 수납 완료");
                 }
                 else
                 {
@@ -729,12 +730,12 @@ public class MarinerAI : MarinerBase, IBegin
 
         isNightRoaming = false;
         nightRoamRoutine = null;
-        Debug.Log($"승무원 {marinerId}: 야간 루틴 종료");
+        //Debug.Log($"승무원 {marinerId}: 야간 루틴 종료");
     }
 
     protected override IEnumerator PerformPersonalEdgeFarming() // 애니메이션을 위한 오버라이드
     {
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [마리너] 파밍 시작");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [마리너] 파밍 시작");
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
