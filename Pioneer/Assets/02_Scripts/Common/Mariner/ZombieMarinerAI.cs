@@ -136,7 +136,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
 
         if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
+            AudioManager.instance.PlaySfx(AudioManager.SFX.Hit2);
 
         LookAtTarget();
 
