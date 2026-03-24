@@ -74,7 +74,7 @@ public class WeaponUseUtils
                 break;
             default:
                 if (AudioManager.instance != null) // аж╦т╩Г©К
-                    AudioManager.instance.PlaySfx(AudioManager.SFX.Punch1_Player);
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.Punch3_Player);
                 break;
         }
 

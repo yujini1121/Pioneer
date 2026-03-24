@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour, IBegin
         {
             // 낮 -> 밤 전환
             if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.ToNight);
+                AudioManager.instance.PlaySfx(AudioManager.SFX.To_night2);
 
             AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
 
@@ -273,7 +273,7 @@ public class GameManager : MonoBehaviour, IBegin
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
         if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.MeetEnemy);
+            AudioManager.instance.PlaySfx(AudioManager.SFX.meetEnemy2);
 
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
         EnemyScaleRow scale = GetScaleRowForDay(currentDay);

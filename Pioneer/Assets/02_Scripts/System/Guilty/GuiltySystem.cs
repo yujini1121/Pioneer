@@ -283,7 +283,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
                 AudioSourceScream.Play();
 
                 if (AudioManager.instance != null)
-                    AudioManager.instance.PlaySfx(AudioManager.SFX.Scream2);
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.grunt_effort_struggle_male_b_17);
             }
         }
     }
