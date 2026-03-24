@@ -111,7 +111,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             return; // 낮 로직(수리/파밍 재기동) 차단
         }
 
-        // 밤 시작 감지 및 혼란→좀비 전환 루틴 트리거
+        // 밤 시작 감지 및 혼란 ->좀비 전환 루틴 트리거
         if (GameManager.Instance != null && GameManager.Instance.IsDaytime && !isNightBehaviorStarted)
         {
 
@@ -157,7 +157,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         MarinerInventory inventory = GetComponent<MarinerInventory>();
         if (inventory != null && inventory.ShouldMoveToStorage())
         {
-            Debug.Log($"감염된 승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 아이템 처리");
+            //Debug.Log($"감염된 승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 아이템 처리");
 
             GameObject storage = GameObject.FindWithTag("Engine");
             if (storage != null)
@@ -174,14 +174,14 @@ public class InfectedMarinerAI : MarinerBase, IBegin
                         //프리-나이트 진입 시 즉시 이탈
                         if (IsPreNightActive)
                         {
-                            Debug.Log("감염된 승무원 밤되기 30초전 작동 → 2순위 즉시 중단");
+                            //Debug.Log("감염된 승무원 밤되기 30초전 작동 → 2순위 즉시 중단");
                             OnNightApproaching();
                             yield break;
                         }
                         yield return null;
                     }
 
-                    Debug.Log($"감염된 승무원 {marinerId}: 보관함 도착 - 아이템 버림");
+                    //Debug.Log($"감염된 승무원 {marinerId}: 보관함 도착 - 아이템 버림");
 
                     // 감염자는 저장하지 않고 버림
                     List<SItemStack> itemsToRemove = new List<SItemStack>();
@@ -192,7 +192,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
                     if (itemsToRemove.Count > 0)
                         inventory.Remove(itemsToRemove.ToArray());
 
-                    Debug.Log($"감염된 승무원 {marinerId}: 아이템 버림 완료 - 1순위 행동 재확인");
+                    //Debug.Log($"감염된 승무원 {marinerId}: 아이템 버림 완료 - 1순위 행동 재확인");
 
                     isSecondPriorityStarted = false;
                     StartRepair();
@@ -201,7 +201,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             }
             else
             {
-                Debug.LogWarning($"감염된 승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
+                //Debug.LogWarning($"감염된 승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
 
                 if (agent != null && agent.isOnNavMesh)
                     SetRandomDestination();
@@ -214,7 +214,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
         else
         {
-            Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍");
+            //Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍");
 
             yield return StartCoroutine(MoveToMyEdgeAndFarm());
 
@@ -251,7 +251,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         if (isNightRoaming) yield break;
         isNightRoaming = true;
-        Debug.Log($"감염 승무원 {marinerId}: 프리-나이트 루틴 시작 (공격 금지, 수납 후 랜덤 이동)");
+        //Debug.Log($"감염 승무원 {marinerId}: 프리-나이트 루틴 시작 (공격 금지, 수납 후 랜덤 이동)");
 
         // 경로 초기화
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
@@ -292,7 +292,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
                 if (storageInventory != null)
                 {
                     inventory.TransferAllItemsToStorage(storageInventory);
-                    Debug.Log($"감염 승무원 {marinerId}: 보관함 수납 완료");
+                    //Debug.Log($"감염 승무원 {marinerId}: 보관함 수납 완료");
                 }
                 else
                 {
@@ -301,7 +301,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
                         if (inventory.itemLists[i] != null)
                             itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
                     if (itemsToRemove.Count > 0) inventory.Remove(itemsToRemove.ToArray());
-                    Debug.Log($"감염 승무원 {marinerId}: 보관함 인벤토리 없음 → 아이템 버림");
+                    //Debug.Log($"감염 승무원 {marinerId}: 보관함 인벤토리 없음 → 아이템 버림");
                 }
             }
             else
@@ -311,7 +311,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
                     if (inventory.itemLists[i] != null)
                         itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
                 if (itemsToRemove.Count > 0) inventory.Remove(itemsToRemove.ToArray());
-                Debug.Log($"감염 승무원 {marinerId}: 보관함 접근 불가 → 아이템 버림");
+                //Debug.Log($"감염 승무원 {marinerId}: 보관함 접근 불가 → 아이템 버림");
             }
         }
 
@@ -337,7 +337,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     END:
         isNightRoaming = false;
         nightRoamRoutine = null;
-        Debug.Log($"감염 승무원 {marinerId}: 프리-나이트 루틴 종료 (밤 시작 또는 완료)");
+        //Debug.Log($"감염 승무원 {marinerId}: 프리-나이트 루틴 종료 (밤 시작 또는 완료)");
 
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
         ChangeToZombieAI();
@@ -351,7 +351,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         isNightBehaviorStarted = true;
         isConfused = true;
-        Debug.Log("혼란 상태 시작 - NavMesh로 이동");
+        //Debug.Log("혼란 상태 시작 - NavMesh로 이동");
 
         float escapedTime = 0f;
 
@@ -383,7 +383,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
 
         isConfused = false;
-        Debug.Log("혼란 종료 후 좀비 AI로 변경");
+        //Debug.Log("혼란 종료 후 좀비 AI로 변경");
 
         if (agent != null) agent.ResetPath();
 
@@ -396,7 +396,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         hasTransformedToZombie = true;
 
         GuiltySystem.instance.CrewDead();
-        Debug.Log("좀비 변신 전 랜덤 이동 시작");
+        //Debug.Log("좀비 변신 전 랜덤 이동 시작");
 
         SetRandomDestination();
 
@@ -433,7 +433,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         }
         else
         {
-            Debug.Log("setzombiemode불가");
+            //Debug.Log("setzombiemode불가");
         }
 
         var zombieAI = GetComponent<ZombieMarinerAI>();
@@ -472,9 +472,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (inventory != null)
         {
             bool result = inventory.AddItem(acquiredItemID, 1);
-            Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
+            //Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
-        Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
+        //Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍 완료");
     }
 
     private int GetRandomItemIDByProbability(ItemDrop[] dropList)
@@ -489,13 +489,13 @@ public class InfectedMarinerAI : MarinerBase, IBegin
                 return drop.itemID;
         }
 
-        Debug.LogError("확률 합 불일치: 첫 번째 아이템 반환.");
+        //Debug.LogError("확률 합 불일치: 첫 번째 아이템 반환.");
         return dropList.Length > 0 ? dropList[0].itemID : 0;
     }
 
     protected override IEnumerator PerformPersonalEdgeFarming()
     {
-        Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [감염] 가짜 파밍(낚시) 시작");
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: [감염] 가짜 파밍(낚시) 시작");
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);

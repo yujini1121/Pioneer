@@ -28,11 +28,11 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             if (found != null)
             {
                 attackRangeObject = found.gameObject;
-                Debug.Log($"[ZombieMarinerAI] AttackRange 자동 연결 성공: {attackRangeObject.name}");
+                //Debug.Log($"[ZombieMarinerAI] AttackRange 자동 연결 성공: {attackRangeObject.name}");
             }
             else
             {
-                Debug.LogWarning("[ZombieMarinerAI] AttackRange 오브젝트를 찾지 못했습니다!");
+                //Debug.LogWarning("[ZombieMarinerAI] AttackRange 오브젝트를 찾지 못했습니다!");
             }
         }
 
@@ -79,7 +79,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
             fov.Start();
         }
 
-        Debug.Log($"좀비 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}");
+        //Debug.Log($"좀비 승무원 {marinerId} 초기화 - HP: {maxHp}, 공격력: {attackDamage}");
     }
 
     private void Update()
@@ -212,13 +212,13 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         foreach (var hit in hits)
         {
             if (hit.gameObject == this.gameObject) continue;
-            Debug.Log($"좀비가 {hit.name} 공격 범위 내 감지");
+            //Debug.Log($"좀비가 {hit.name} 공격 범위 내 감지");
 
             CommonBase targetBase = hit.GetComponent<CommonBase>();
             if (targetBase != null)
             {
                 targetBase.TakeDamage(attackDamage, this.gameObject);
-                Debug.Log($"좀비가 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
+                //Debug.Log($"좀비가 {hit.name}에게 {attackDamage}의 데미지를 입혔습니다.");
             }
         }
     }
@@ -240,7 +240,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     public override IEnumerator StartSecondPriorityAction()
     {
-        Debug.Log($"좀비 {marinerId}: 배회 계속");
+        //Debug.Log($"좀비 {marinerId}: 배회 계속");
         yield return new WaitForSeconds(1f);
         EnterWanderingState();
     }
@@ -257,7 +257,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void OnEnable()
     {
-        Debug.Log("ZombieMariner에서 attack box 활성화");
+        //Debug.Log("ZombieMariner에서 attack box 활성화");
         if (attackRangeObject != null)
             attackRangeObject.SetActive(false);
 
