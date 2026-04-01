@@ -109,22 +109,34 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         }
         else
         {
-            // 여기서 클릭 적용
-            // 1. 시간 재서 더블 클릭인지 판단 / 같은 슬롯인지 판단
-            // 1Y - 더블클릭 / 시간 카운터 종료 / 일반 클릭 예약 종료
-            // 1N - 시간 카운터 시작 / 1초 뒤 자동적으로 일반 클릭 시작(예약 시작)
+            SItemStack clickedItem = InventoryManager.Instance.itemLists[index];
+            bool canUseByDoubleClick =
+                InventoryManager.Instance.mouseInventory == null &&
+                clickedItem != null &&
+                (clickedItem.itemBaseType.categories == EDataType.ConsumeItem ||
+                 clickedItem.itemBaseType.categories == EDataType.BuildObject);
 
-            if (IsDoubleClick(index))
+            if (canUseByDoubleClick)
             {
-                WithdrawSingleClick(index);
-                DoubleClick(index);
-                EndCheckDoubleClick(index);
+                if (IsDoubleClick(index))
+                {
+                    WithdrawSingleClick(index);
+                    DoubleClick(index);
+                    EndCheckDoubleClick(index);
+                }
+                else
+                {
+                    WithdrawSingleClick(index);
+                    PrepareSingleClick(index);
+                    BeginCheckDoubleClick(index);
+                }
             }
             else
             {
                 WithdrawSingleClick(index);
-                PrepareSingleClick(index);
-                BeginCheckDoubleClick(index);
+                EndCheckDoubleClick(index);
+                clickTime = 0.0f;
+                InventoryManager.Instance.MouseSwitch(index);
             }
         }
 
@@ -325,13 +337,14 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         IEnumerator mSingleClickCoroutine(int _index)
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(clickTerm);
             InventoryManager.Instance.MouseSwitch(_index);
+            clickCoroutine = null;
+            clickedSlotIndex = -1;
+            clickTime = 0.0f;
         }
 
-        StartCoroutine(mSingleClickCoroutine(index));
-
-        InventoryManager.Instance.MouseSwitch(index);
+        clickCoroutine = StartCoroutine(mSingleClickCoroutine(index));
     }
     private void WithdrawSingleClick(int index)
     {
@@ -339,6 +352,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         {
             StopCoroutine(clickCoroutine);
             clickCoroutine = null;
+            clickedSlotIndex = -1;
+            clickTime = 0.0f;
         }
     }
 
@@ -442,4 +457,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
 	}
 }
+
+
+
+
 
