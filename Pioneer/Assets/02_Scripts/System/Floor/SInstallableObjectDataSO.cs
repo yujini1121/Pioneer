@@ -1,19 +1,39 @@
+ï»¿using System.Collections;
 using UnityEngine;
-
 
 [CreateAssetMenu(fileName = "InstallableObject", menuName = "ScriptableObjects/Installables/InstallableObjects")]
 public class SInstallableObjectDataSO : SItemTypeSO
 {
     public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern, Storage }
 
-    [Header("¼³Ä¡ Å¸ÀÔ")]
+    [Header("ì„¤ì¹˜ íƒ€ì…")]
     public CreationType installType;
 
-    [Header("¼³Ä¡ ÇÁ¸®ÆÕ ¹× ¼³Á¤")]
-	public GameObject prefab;                  // ¼³Ä¡ ´ë»ó ÇÁ¸®ÆÕ
-	public Vector3 size = Vector3.one;         // ¼³Ä¡ ÆÇÁ¤¿ë Overlap Å©±â
+    [Header("ì„¤ì¹˜ í”„ë¦¬íŒ¹ ë° ì„¤ì •")]
+    public GameObject prefab;                  // ì„¤ì¹˜ ëŒ€ìƒ í”„ë¦¬íŒ¹
+    public Vector3 size = Vector3.one;         // ì„¤ì¹˜ íŒì •ìš© Overlap í¬ê¸°
 
-    [Header("±â´É È®Àå")]
-	public int maxHp = 20;                     // ³»±¸µµ
-	public float buildTime = 2f;               // ¼³Ä¡ ½Ã°£
+    [Header("ê¸°ëŠ¥ í™•ì¥")]
+    public int maxHp = 20;                     // ë‚´êµ¬ë„
+    public float buildTime = 2f;               // ì„¤ì¹˜ ì‹œê°„
+
+    public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
+    {
+        if (itemWithState == null || itemWithState.amount < 1)
+        {
+            yield break;
+        }
+
+        itemWithState.isUseCoroutineEnd = false;
+
+        SItemStack[] installCost = new SItemStack[]
+        {
+            new SItemStack(itemWithState.id, 1, itemWithState.duability)
+        };
+
+        CreateObject.instance.EnterInstallMode(this, installCost);
+
+        yield return null;
+        itemWithState.isUseCoroutineEnd = true;
+    }
 }

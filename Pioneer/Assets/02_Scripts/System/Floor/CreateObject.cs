@@ -658,7 +658,10 @@ public class CreateObject : MonoBehaviour, IBegin
             AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
 
         cost = mCost;
-        Debug.Assert(cost.Length > 0);
+        if (cost == null)
+        {
+            cost = new SItemStack[0];
+        }
 
         if (installRoutine != null) CancelInstallCountdown();
 
@@ -782,3 +785,4 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 }
+
