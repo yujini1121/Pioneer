@@ -1,9 +1,9 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// ¸ğµç °ÔÀÓ Ui´Â ¿©±â¼­ ÇØ°áÇÕ´Ï´Ù.
-// ¼¼ºÎÀû Á¶ÀÛÀº ÇØ´ç ÄÄÆ÷³ÍÆ®¸¦ °æÀ¯ÇØ¼­ ¼¼ÆÃÇÕ´Ï´Ù.
+// ëª¨ë“  ê²Œì„ UiëŠ” ì—¬ê¸°ì„œ í•´ê²°í•©ë‹ˆë‹¤.
+// ì„¸ë¶€ì  ì¡°ì‘ì€ í•´ë‹¹ ì»´í¬ë„ŒíŠ¸ë¥¼ ê²½ìœ í•´ì„œ ì„¸íŒ…í•©ë‹ˆë‹¤.
 public class InGameUI : MonoBehaviour, IBegin
 {
     static public InGameUI instance;
@@ -17,9 +17,9 @@ public class InGameUI : MonoBehaviour, IBegin
     public const int ID_ESC_OPTION = 7;
     public const int ID_ESC_OPTION_SETTINGS = 8;
 
-    [Header("¼­ºê UI °ÔÀÓ¿ÀºêÁ§Æ®")]// UI °ÔÀÓ ¿ÀºêÁ§Æ®°¡ Á¸ÀçÇÏ°í ¿ÜºÎ ½ºÅ©¸³Æ®¿¡¼­ Á¢±ÙÇÒ ÇÊ¿ä°¡ ÀÖ´Ù°í ÆÇ´ÜÇÏ´Â °æ¿ì, ¿©±â¿¡ Ãß°¡ÇÏ½Ç ¼ö ÀÖ½À´Ï´Ù.
+    [Header("ì„œë¸Œ UI ê²Œì„ì˜¤ë¸Œì íŠ¸")]// UI ê²Œì„ ì˜¤ë¸Œì íŠ¸ê°€ ì¡´ì¬í•˜ê³  ì™¸ë¶€ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ì ‘ê·¼í•  í•„ìš”ê°€ ìˆë‹¤ê³  íŒë‹¨í•˜ëŠ” ê²½ìš°, ì—¬ê¸°ì— ì¶”ê°€í•˜ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤.
     public GameObject gameObjectBarChart;
-    public GameObject gameObjectGuiltyBarChart; // ÁËÃ¥°¨
+    public GameObject gameObjectGuiltyBarChart; // ì£„ì±…ê°
     public GameObject gameObjectBuffEffect;
     public GameObject gameObjectItemGet;
     public GameObject gameObjectClock;
@@ -40,8 +40,8 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject gameObjectInventory;
     public GameObject ManuUI;
     public GameObject ManuDenyUI;
-    public List<GameObject> gameObjectListExpandedInventory; // ÀÎº¥Åä¸® Ä­ / Á¤·Ä ¹öÆ° / ¹ö¸®±â ¹öÆ°
-    [Header("¼­ºê UI ·ÎÁ÷ Å¬·¡½º")]
+    public List<GameObject> gameObjectListExpandedInventory; // ì¸ë²¤í† ë¦¬ ì¹¸ / ì •ë ¬ ë²„íŠ¼ / ë²„ë¦¬ê¸° ë²„íŠ¼
+    [Header("ì„œë¸Œ UI ë¡œì§ í´ë˜ìŠ¤")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
     [HideInInspector]
@@ -71,7 +71,7 @@ public class InGameUI : MonoBehaviour, IBegin
     void Start()
     {
         //OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
-        //    () => { Debug.Log("InGameUI.CloseAction Ã¢ ´İ±â - makeshiftCraftUI"); makeshiftCraftUI.SetActive(false); });
+        //    () => { Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI"); makeshiftCraftUI.SetActive(false); });
         UseTab();
 
     }
@@ -82,7 +82,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
         if (Input.GetKeyDown(KeyCode.J))
         {
-            Debug.Log($"InGameUI - makeshiftCraftUI »óÅÂ : {makeshiftCraftUI.activeInHierarchy}");
+            Debug.Log($"InGameUI - makeshiftCraftUI ìƒíƒœ : {makeshiftCraftUI.activeInHierarchy}");
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -109,13 +109,14 @@ public class InGameUI : MonoBehaviour, IBegin
         CommonUI.instance.CloseTab(mainCraft.ui);
         //Clear();
         CloseUI(ID_MAKESHIFT);
-        // ¿©±â¼­ ¼¼ÆÃ
+        // ì—¬ê¸°ì„œ ì„¸íŒ…
 
         defaultCraftUI.SetActive(true);
+        ApplyPanelExpandState();
         OpenUI(new List<GameObject>() { defaultCraftUI }, ID_CRAFTTABLE,
             () =>
             {
-                Debug.Log("InGameUI.CloseAction Ã¢ ´İ±â - defaultCraftUI");
+                Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - defaultCraftUI");
                 defaultCraftUI.SetActive(false);
             }
             );
@@ -182,7 +183,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void CloseDefaultCraftUI()
     {
-        Debug.Log("InGameUI.CloseDefaultCraftUI() È£ÃâµÊ");
+        Debug.Log("InGameUI.CloseDefaultCraftUI() í˜¸ì¶œë¨");
         //CommonUI.instance.CloseTab(makeshiftCraft.ui);
         //Clear();
         
@@ -191,7 +192,7 @@ public class InGameUI : MonoBehaviour, IBegin
         //    OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
         //    () =>
         //    {
-        //        Debug.Log("InGameUI.CloseAction Ã¢ ´İ±â - makeshiftCraftUI");
+        //        Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI");
         //        CommonUI.instance.CloseTab(makeshiftCraft.ui);
         //        makeshiftCraftUI.SetActive(false);
         //    }
@@ -204,6 +205,7 @@ public class InGameUI : MonoBehaviour, IBegin
         isNearCraft = false;
 
         CloseUI(ID_CRAFTTABLE);
+        ApplyPanelExpandState();
     }
 
     //public void Show(GameObject UiGo)
@@ -212,7 +214,7 @@ public class InGameUI : MonoBehaviour, IBegin
     //    currentOpenedUI.Add(UiGo);
     //}
 
-    //public void Clear() // ¸ğµç ¿­¸° UI ´İ±â
+    //public void Clear() // ëª¨ë“  ì—´ë¦° UI ë‹«ê¸°
     //{
     //    foreach (GameObject go in currentOpenedUI)
     //    {
@@ -258,17 +260,8 @@ public class InGameUI : MonoBehaviour, IBegin
         }
     }
 
-    public void UseTab()
+    private void ApplyPanelExpandState()
     {
-        // °£ÀÌ Á¦ÀÛ ÅÇÀÌ ¿­¸²(Á¶ÇÕ´ë ´êÁö ¾ÊÀ»¶§)
-        // ÀÎº¥Åä¸® ÅÇÀÌ È®ÀåµÊ
-        // Á¤·Ä ¹öÆ°
-        // ¹ö¸®±â ¹öÆ°
-        // Àåºñ Ã¢
-        // ÇÃ·¹ÀÌ¾î ½ºÅÈ Ã¢
-
-        isPannelExpand = !isPannelExpand;
-
         gameObjectBackgroundWhiteScreen.SetActive(isPannelExpand);
 
         foreach (GameObject g in gameObjectListExpandedInventory)
@@ -276,6 +269,20 @@ public class InGameUI : MonoBehaviour, IBegin
             g.SetActive(isPannelExpand);
         }
         InventoryUiMain.instance.InventoryExpand(isPannelExpand);
+    }
+
+    public void UseTab()
+    {
+        // ê°„ì´ ì œì‘ íƒ­ì´ ì—´ë¦¼
+        // ì¸ë²¤í† ë¦¬ íƒ­ì´ í™•ì¥ë¨
+        // ì •ë ¬ ë²„íŠ¼
+        // ë²„ë¦¬ê¸° ë²„íŠ¼
+        // ì¥ë¹„ ì°½
+        // í”Œë ˆì´ì–´ ìŠ¤íƒ¯ ì°½
+
+        isPannelExpand = !isPannelExpand;
+
+        ApplyPanelExpandState();
         if (isPannelExpand == false)
         {
             if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
@@ -286,32 +293,31 @@ public class InGameUI : MonoBehaviour, IBegin
             CloseUI(ID_CHAR_PANNEL);
 
 
-            Debug.Log(">> ´İ±â");
+            Debug.Log(">> ë‹«ê¸°");
         }
         if (isPannelExpand == true && isNearCraft == false) //
         {
-            Debug.Log(">> InGameUI.UseTab() ¿­±â");
+            Debug.Log(">> InGameUI.UseTab() ì—´ê¸°");
 
             OpenUI(new List<GameObject>() { gameObjectPlayerStatUiParent }, ID_CHAR_PANNEL,
                 () => {
-                    Debug.Log("InGameUI.CloseAction Ã¢ ´İ±â - gameObjectPlayerStatUiParent");
+                    Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - gameObjectPlayerStatUiParent");
                     gameObjectPlayerStatUiParent.SetActive(false); }
                 );
             OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
                 () => {
-                    Debug.Log("InGameUI.CloseAction Ã¢ ´İ±â - makeshiftCraftUI");
+                    Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI");
                     makeshiftCraftUI.SetActive(false);
                     Debug.Assert(makeshiftCraftUI.activeInHierarchy == false);
-                    Debug.Log($"InGameUI.CloseAction Ã¢ ´İ±â - makeshiftCraftUI »óÅÂ : {makeshiftCraftUI.activeInHierarchy}");
+                    Debug.Log($"InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI ìƒíƒœ : {makeshiftCraftUI.activeInHierarchy}");
                 }
                 );
             
-            // -> ¿©±â¿¡ È®Àå ÇÒ´ç
+            // -> ì—¬ê¸°ì— í™•ì¥ í• ë‹¹
             makeshiftCraftUI.SetActive(true);
             gameObjectPlayerStatUiParent.SetActive(true);
         }
     }
-
     //public void ApplyUiStack(List<GameObject> uiGameobjects) =>
     //    uiChunkStack.Add(new InGameUiChunk(uiGameobjects));
     //public void ApplyUiStack(List<GameObject> uiGameobjects, bool isNeedCloseAction, System.Action closeAction) =>
@@ -331,13 +337,13 @@ public class InGameUI : MonoBehaviour, IBegin
         OpenUI(uiGameobjects, id,
             () =>
             {
-                Debug.Log("InGameUI.CloseAction Ã¢ ´İ±â");
+                Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸°");
                 foreach (GameObject go in uiGameobjects) { go.SetActive(false); }
             });
     }
     public void OpenUI(List<GameObject> uiGameobjects, int id, System.Action closeAction)
     {
-        Debug.Log("InGameUI.OpenUI Ã¢ ¿­±â");
+        Debug.Log("InGameUI.OpenUI ì°½ ì—´ê¸°");
 
         foreach (GameObject g in uiGameobjects)
         {
@@ -367,3 +373,5 @@ public class InGameUI : MonoBehaviour, IBegin
     }
 
 }
+
+
