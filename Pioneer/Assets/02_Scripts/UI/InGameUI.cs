@@ -268,7 +268,7 @@ public class InGameUI : MonoBehaviour, IBegin
         // 플레이어 스탯 창
 
         isPannelExpand = !isPannelExpand;
-
+        MakeshiftCraftUiMain.instance.isOpened = isPannelExpand;
         gameObjectBackgroundWhiteScreen.SetActive(isPannelExpand);
 
         foreach (GameObject g in gameObjectListExpandedInventory)
@@ -303,12 +303,14 @@ public class InGameUI : MonoBehaviour, IBegin
                     makeshiftCraftUI.SetActive(false);
                     Debug.Assert(makeshiftCraftUI.activeInHierarchy == false);
                     Debug.Log($"InGameUI.CloseAction 창 닫기 - makeshiftCraftUI 상태 : {makeshiftCraftUI.activeInHierarchy}");
+                    MakeshiftCraftUiMain.instance.isOpened = false;
                 }
                 );
-            
+            MakeshiftCraftUiMain.instance.isOpened = true;
             // -> 여기에 확장 할당
             makeshiftCraftUI.SetActive(true);
             gameObjectPlayerStatUiParent.SetActive(true);
+            MakeshiftCraftUiMain.instance.UpdateRecipe();
         }
     }
 

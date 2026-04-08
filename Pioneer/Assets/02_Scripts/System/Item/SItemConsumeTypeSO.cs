@@ -55,20 +55,41 @@ public class SItemConsumeTypeSO : SItemTypeSO
             case 801: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 15);
-                var ps = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
-                CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
-                break; 
+                if (CreatureEffect.Instance != null)
+                {
+                    var ps = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
+                    CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
+                }
+                else
+                {
+                    Debug.Log($"<!> ≈©∏Æ√ƒ¿Ã∆Â∆Æ ΩÃ±€≈œ æ¯¿Ω");
+                }
+                break;
             case 802: //
+                if (CreatureEffect.Instance != null)
+                {
+                    var ps1 = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
+                    CreatureEffect.Instance.PlayEffectFollow(ps1, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
+                }
+                else
+                {
+                    Debug.Log($"<!> ≈©∏Æ√ƒ¿Ã∆Â∆Æ ΩÃ±€≈œ æ¯¿Ω");
+                }
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 40);
-                var ps1 = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
-                CreatureEffect.Instance.PlayEffectFollow(ps1, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             case 803:
+                if (CreatureEffect.Instance != null)
+                {
+                    var ps2 = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
+                    CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
+                }
+                else
+                {
+                    Debug.Log($"<!> ≈©∏Æ√ƒ¿Ã∆Â∆Æ ΩÃ±€≈œ æ¯¿Ω");
+                }
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 70);
-                var ps2 = CreatureEffect.Instance.Effects[3]; // Heal ¿Ã∆Â∆Æ
-                CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             //πË∞Ì«ƒ «ÿº“
             case 804://

@@ -39,6 +39,8 @@ public class GuiltySystem : MonoBehaviour, IBegin
     [SerializeField] List<float> screamSoundTerm;
     [SerializeField] List<float> screamSoundVolume;
     [SerializeField] Volume volumeScreenTransformation;
+    private int darkFogPoolSize = 100;
+    private Vector3 darkFogPoolPosition = new Vector3(0, 4, 0);
     private Coroutine darkObjectCoroutine;
     private Coroutine darkFogCoroutine;
     private Coroutine screamCoroutine;
@@ -51,6 +53,8 @@ public class GuiltySystem : MonoBehaviour, IBegin
     public int maxAttackWeight = 30; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
     public int currentAttackWeight = 0; // 변수명 레퍼런스 : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
     private int level = 0;
+    private Pool<DarkFog> darkFogPool;
+
 
     public void ChangeWeight(int value)
     {
@@ -135,6 +139,14 @@ public class GuiltySystem : MonoBehaviour, IBegin
     public void TimeReachedToDayTime() => ChangeWeight(-1);
     public void Drink() => ChangeWeight(-2);
     public void DarkFogTouched() => slowEndTime = Time.time + darkFogTime;
+    public void ReleasePoolObject(IdObject<DarkFog> poolObject)
+    {
+        darkFogPool.Release(poolObject);
+        poolObject.Value.transform.position = darkFogPoolPosition;
+
+
+        poolObject.Value.EndPossess();
+    }
 
     private void Awake()
     {
@@ -161,7 +173,19 @@ public class GuiltySystem : MonoBehaviour, IBegin
     // Start is called before the first frame update
     void Start()
     {
-        
+        darkFogPool = new Pool<DarkFog>();
+
+        for (int i = 0; i < darkFogPoolSize; i++)
+        {
+            GameObject newOne = Instantiate(prefabDarkFog, darkFogPoolPosition, Quaternion.identity);
+            DarkFog newOneDarkFog = newOne.GetComponent<DarkFog>();
+            darkFogPool.Add(newOneDarkFog, out IdObject<DarkFog> self);
+            newOneDarkFog.poolObjectSelf = self;
+            if (newOneDarkFog.particle) newOneDarkFog.particle = newOneDarkFog.gameObject.GetComponent<ParticleSystem>();
+            ParticleSystem.EmissionModule newOneParticle = newOneDarkFog.particle.emission ;
+            newOneParticle.rateOverTime = 0f;
+        }
+
     }
 
     // Update is called once per frame
@@ -203,8 +227,15 @@ public class GuiltySystem : MonoBehaviour, IBegin
     private void SpawnDarkFog()
     {
         Debug.Log($">> GuiltySystem.SpawnDarkFog()");
-        GameObject fog = Instantiate(prefabDarkFog, player.transform.position, Quaternion.identity);
+
+        
+        
+        //GameObject fog = Instantiate(prefabDarkFog, player.transform.position, Quaternion.identity);
+        DarkFog darkFog = darkFogPool.Possess().Value;
+        darkFog.PreparePossess();
+        GameObject fog = darkFog.gameObject;
         fog.GetComponent<DarkFog>().armedTime = Time.time + 3.0f;
+        fog.transform.position = player.transform.position;
 
         IEnumerator myCoroutine()
         {

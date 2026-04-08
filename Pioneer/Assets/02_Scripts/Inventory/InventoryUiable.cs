@@ -180,7 +180,7 @@ public class InventoryUiable : InventoryBase
 
 
 
-    protected override void SafeClean()
+    public override void SafeClean()
     {
         base.SafeClean();
 

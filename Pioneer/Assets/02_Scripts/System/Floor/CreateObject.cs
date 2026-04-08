@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
@@ -31,6 +32,8 @@ public class CreateObject : MonoBehaviour, IBegin
     public static CreateObject instance;
 
     public bool IsBuilding => onHand != null;
+
+    public GameObject UiOutside;
 
     [Header("기본 설정")]
     [SerializeField] private Transform worldSpaceParent;
@@ -113,10 +116,18 @@ public class CreateObject : MonoBehaviour, IBegin
     private void Start()
     {
         ExitInstallMode();
+
+        if (UiOutside == null)
+        {
+            Debug.LogError("CreateObject: UiOutside is not assigned! InGameUI -> Outside");
+        }
     }
 
     private void Update()
     {
+        if (onHand != null) UiOutside.SetActive(false);
+        else UiOutside.SetActive(true);
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             ExitInstallMode();

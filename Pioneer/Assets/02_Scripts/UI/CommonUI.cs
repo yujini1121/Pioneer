@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StylizedWater2;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,6 +50,19 @@ public class CommonUI : MonoBehaviour, IBegin
     // 솔직히 말하면 아이템을 선택했을때 조합할 수 있는지 아닌지를 가져오는것은 똑같다고 봄
     // - 제작할 수 있는가? -> 아이템 레시피 매니저
     // - 제작 창 변경
+
+    // 픽업업데이트
+    DefaultFabrication tempUi;
+    SItemRecipeSO tempRecipe;
+    GameObject[] tempOutsideGameObjectCraftButtonsWithImage;
+
+    public void PickUpUpdate()
+    {
+        if (tempUi.gameObject.activeInHierarchy)
+        {
+            UpdateCraftWindowUi(tempUi, tempRecipe, InventoryManager.Instance, tempOutsideGameObjectCraftButtonsWithImage);
+        }
+    }
 
     // 아이템 제작 창을 변경해줍니다
     // DefaultFabrication ui : 제작 창 게임오브젝트의 컴포넌트 입니다.
@@ -112,11 +126,15 @@ public class CommonUI : MonoBehaviour, IBegin
         ui.craftButton.onClick.RemoveAllListeners();
         ui.craftButton.onClick.AddListener(() =>
         {
+            Debug.Log("제작 시작 클릭함");
+
             if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
             if (currentCraftCoroutine != null)
             {
                 StopCoroutine(currentCraftCoroutine);
             }
+
+            Debug.Log($"제작 시작 진행1 / IsCurrentCrafting = {IsCurrentCrafting}, recipe.resultBuildingOrNull == null = {recipe.resultBuildingOrNull == null}");
 
             // 제작 시간 타임 보여줌 + 제작 완료 시 또 제작할 수 있는지 업데이트
             // 다만 건설 아이템인경우 다른 로직이 쓰임
@@ -125,9 +143,13 @@ public class CommonUI : MonoBehaviour, IBegin
             {
                 StopCraft(ui);
                 ui.timeLeft.text = $"{recipe.time}s";
+                IsCurrentCrafting = false;
             }
-            else if (recipe.resultBuildingOrNull == null)
+            // 사실 제작 시간 걸리는 아이템이 없음
+            
+            if (recipe.resultBuildingOrNull == null)
             {
+                Debug.Log("제작 시작 진행2 - 크래프트");
                 currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, outsideGameObjectCraftButtonsWithImage, ui));
 
             }
@@ -199,6 +221,11 @@ public class CommonUI : MonoBehaviour, IBegin
         Button categoryButton = categoryButtonObject.GetComponent<Button>();
         categoryButton.onClick.AddListener(() =>
         {
+            if (IsDebuggingCraft)
+            {
+                Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 버튼 클릭 함수 호출됨");
+            }
+
             // 2. 제작 선택 버튼들
             // 해당 버튼을 누르면 제작 선택 UI가 뜸
             // 기존 제작 선택을 싹 제거함
@@ -217,6 +244,11 @@ public class CommonUI : MonoBehaviour, IBegin
             // 제작 선택 버튼 소환
             for (int index = 0; index < category.recipes.Count; index++)
             {
+                if (IsDebuggingCraft)
+                {
+                    Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 레시피 배치중");
+                }
+
                 GameObject m_one = Instantiate(prefabCraftSelectItemButton, parent.transform);
 
                 prevCraftSelectButton.Add(m_one);
@@ -231,6 +263,7 @@ public class CommonUI : MonoBehaviour, IBegin
                     1,
                     -new Vector2(0, m_one.GetComponent<RectTransform>().sizeDelta.y),
                     geometryCraftSelectButton.start2D);
+                m_one.transform.parent = categoryButtonObject.transform;
                 CraftItemSelectSingle m_oneUi = m_one.GetComponent<CraftItemSelectSingle>();
 
                 m_oneUi.image.sprite = ItemTypeManager.Instance.itemTypeSearch[category.recipes[index].result.id].image;
@@ -245,7 +278,12 @@ public class CommonUI : MonoBehaviour, IBegin
 
 					ui.gameObject.SetActive(true);
                     UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { m_one });
+
+                    tempUi = ui;
+                    tempRecipe = recipe;
+                    tempOutsideGameObjectCraftButtonsWithImage = new GameObject[] { m_one };
                 });
+                m_one.SetActive(true);
             }
 
         });
@@ -281,11 +319,13 @@ public class CommonUI : MonoBehaviour, IBegin
         {
             ui.gameObject.SetActive(true);
             UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { itemButtonGameObject });
+
+            tempUi = ui;
+            tempRecipe = recipe;
+            tempOutsideGameObjectCraftButtonsWithImage = new GameObject[] { itemButtonGameObject };
         });
         return itemButton;
     }
-
-
 
 
     // 아이템 버튼
@@ -340,7 +380,8 @@ public class CommonUI : MonoBehaviour, IBegin
 
     private IEnumerator CraftCoroutine(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)
     {
-        if (isDebugging_CraftCoroutine)
+        //if (isDebugging_CraftCoroutine)
+        if (true)
         {
             Debug.Log($">> CommonUI.CraftCoroutine(...) -> 함수 호출됨");
         }
@@ -447,6 +488,8 @@ public class CommonUI : MonoBehaviour, IBegin
 
     public void StopCraft(DefaultFabrication ui)
     {
+        if (currentCraftCoroutine == null) return;
+
         StopCoroutine(currentCraftCoroutine);
         currentCraftCoroutine = null;
         IsCurrentCrafting = false;

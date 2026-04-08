@@ -19,6 +19,7 @@ public class InventoryManager : InventoryBase
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
     private Vector3 dropOffset = new Vector3(0.5f, -0.75f, -0.5f); // 오프셋
+    private bool isThisFrameReloadCraft = false;
 
     [Header("DEBUG")]
     [SerializeField] bool isDebugging;
@@ -34,6 +35,8 @@ public class InventoryManager : InventoryBase
             int maxStack = mouseInventory.itemBaseType.maxStack;
 
             itemLists[index].amount += mouseInventory.amount;
+            
+
 
             if (itemLists[index].amount > maxStack)
             {
@@ -54,6 +57,11 @@ public class InventoryManager : InventoryBase
 
         itemLists[index] = mouseInventory;
         mouseInventory = temp;
+
+        if (InventoryManager.Instance.selectedSlotIndex == index)
+        {
+            InventoryManager.Instance.SelectedSlotInventory = itemLists[index];
+        }
     }
 
     public void MouseSplit(int index)
@@ -135,6 +143,7 @@ public class InventoryManager : InventoryBase
         {
             Debug.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
+        isThisFrameReloadCraft = true;
 
         if (item.id == 40007)
         {
@@ -229,7 +238,7 @@ public class InventoryManager : InventoryBase
         InventoryUiMain.instance.IconRefresh();
     }
 
-	protected override void SafeClean()
+	public override void SafeClean()
     {
         base.SafeClean();
 
@@ -278,9 +287,26 @@ public class InventoryManager : InventoryBase
         {
             Demo();
         }
-	}
+    }
 
-	private void Demo()
+    private void LateUpdate()
+    {
+        if (isThisFrameReloadCraft)
+        {
+            Debug.Log("아이템 획득 업데이트");
+
+            isThisFrameReloadCraft = false;
+            if (MakeshiftCraftUiMain.instance.isOpened)
+            {
+                Debug.Log("아이템 획득 업데이트 완료");
+
+                MakeshiftCraftUiMain.instance.UpdateRecipe();
+            }
+            CommonUI.instance.PickUpUpdate();
+        }
+    }
+
+    private void Demo()
     {
         //Add(new SItemStack(30001, 10));
         //Add(new SItemStack(30002, 10));
@@ -321,8 +347,8 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(30021, 80));
         Add(new SItemStack(30022, 80));
         
-        Add(new SItemStack(40001, 80));
-        Add(new SItemStack(40009, 80));
-        Add(new SItemStack(40007, 80));
+        Add(new SItemStack(40001, 8));
+        Add(new SItemStack(40009, 8));
+        Add(new SItemStack(40007, 8));
     }
 }

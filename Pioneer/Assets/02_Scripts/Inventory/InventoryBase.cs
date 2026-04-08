@@ -124,7 +124,7 @@ public class InventoryBase : MonoBehaviour
         SafeClean();
     }
 
-    protected virtual void SafeClean()
+    public virtual void SafeClean()
     {
         for (int index = 0; index < itemLists.Count; ++index)
         {

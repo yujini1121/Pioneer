@@ -257,8 +257,8 @@ public class PlayerCore : CreatureBase, IBegin
     void SetSetAttribute()
     {
         //maxHp = 100;
-        maxHp = 40000;
-        hp = maxHp;                 // 체력
+        maxHp = 400;
+        hp = maxHp / 10;                 // 체력
         speed = 4.0f;               // 이동 속도
         defaultSpeed = speed;
         currentFullness = 80;              // 포만감 (시작 값 80)

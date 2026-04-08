@@ -32,6 +32,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
             // 애니메이션 호출
             ChangeAnim(playerController.lastMoveDirection);
 
+            // if (InventoryManager.Instance.curr)
             InventoryManager.Instance.ApplyItemDuablilityUsed();
 
             // 경험치 제공

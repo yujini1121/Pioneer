@@ -4464,36 +4464,42 @@ MonoBehaviour:
       id: 30001
       amount: 4
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.4
   - reward:
       id: 30006
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
   - reward:
       id: 30014
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
   - reward:
       id: 30015
       amount: 2
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.2
   - reward:
       id: 30016
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
   - reward:
       id: 30017
       amount: 1
       duability: 0
+      isDuabilityDamageReady: 0
       isUseCoroutineEnd: 0
     weight: 0.1
 --- !u!1 &865853216
@@ -10683,6 +10689,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 2034679914}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   mastLevel: 1
   interactionRange: 1.5
   playerLayer:
@@ -14422,6 +14431,7 @@ MonoBehaviour:
   gameObjectMastInteractiveText: {fileID: 3107409021741985174}
   gameObjectMastUpgrade: {fileID: 0}
   gameObjectPlayerStatUiParent: {fileID: 2186950260192463445}
+  gameObjectCharacterPannelUI: {fileID: 0}
   defaultCraftUI: {fileID: 7706198975104593130}
   defaultCraftUiSubPivot: {fileID: 2549543640067407509}
   makeshiftCraftUI: {fileID: 7577170826654941612}
@@ -14966,6 +14976,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   fov: {fileID: 2029828996017671682}
   speed: 0
   attackDamage: 0
@@ -15016,7 +15029,9 @@ MonoBehaviour:
     id: 0
     amount: 0
     duability: 0
+    isDuabilityDamageReady: 0
     isUseCoroutineEnd: 0
+  isDebugging: 0
 --- !u!224 &1544988987752833163
 RectTransform:
   m_ObjectHideFlags: 0
@@ -20337,6 +20352,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pivot: {fileID: 3387484118114285476}
   ui: {fileID: 1640592202}
+  prevButtonGameObjectList: []
+  isOpened: 0
   itemButtonSize: {x: 100, y: 100}
 --- !u!114 &4379086344490314857
 MonoBehaviour:
@@ -20442,6 +20459,9 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashDuration: 0.1
+  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  spriteRenderer: {fileID: 0}
   objectData: {fileID: 0}
   <isUsing>k__BackingField: 0
   interactRange: 3
@@ -22280,6 +22300,7 @@ MonoBehaviour:
   trashButton: {fileID: 6463973566251909605}
   trashOpen: {fileID: 21300000, guid: e2d4efe8a141b834686c67dec2b66161, type: 3}
   trashClose: {fileID: 21300000, guid: 7a0d79626255f0847b9f423cb9f617fd, type: 3}
+  clickTerm: 0
 --- !u!222 &5265999685683986717
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -22765,6 +22786,7 @@ MonoBehaviour:
     curConchSwordClip: {fileID: 7400000, guid: f1d022fddc143a1488bdd740cad4d1ca, type: 2}
   nextAnimTrigger: 
   mast: {fileID: 7505562570904623939}
+  isDebugging: 0
 --- !u!222 &5596471675180844073
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -25659,6 +25681,7 @@ MonoBehaviour:
   trashButton: {fileID: 1073017332124417368}
   trashOpen: {fileID: 21300000, guid: e2d4efe8a141b834686c67dec2b66161, type: 3}
   trashClose: {fileID: 21300000, guid: 7a0d79626255f0847b9f423cb9f617fd, type: 3}
+  clickTerm: 0
 --- !u!222 &6334669314849627438
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -31087,6 +31110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d124675bfc715041a7738d0935e7fbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UiOutside: {fileID: 0}
   worldSpaceParent: {fileID: 860495885}
   creationType: 2
   maxDistance: 7
@@ -31123,6 +31147,7 @@ MonoBehaviour:
   installTimeSec: 3
   ringBackground: {fileID: 1549456458}
   ringFill: {fileID: 1517500650}
+  globalCellSize: 2
 --- !u!1001 &8526916259828762702
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -31825,12 +31850,14 @@ MonoBehaviour:
     id: 0
     amount: 0
     duability: 0
+    isDuabilityDamageReady: 0
     isUseCoroutineEnd: 0
   selectedSlotIndex: 0
   SelectedSlotInventory:
     id: 0
     amount: 0
     duability: 0
+    isDuabilityDamageReady: 0
     isUseCoroutineEnd: 0
   inventoryCount: 27
   positionDrop: {fileID: 8068855977270320697}
