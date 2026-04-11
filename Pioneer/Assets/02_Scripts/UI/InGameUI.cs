@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +16,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public const int ID_CRAFTTABLE = 6;
     public const int ID_ESC_OPTION = 7;
     public const int ID_ESC_OPTION_SETTINGS = 8;
+    public const int ID_ESC_OPTION_HELP = 9;
 
     [Header("서브 UI 게임오브젝트")]// UI 게임 오브젝트가 존재하고 외부 스크립트에서 접근할 필요가 있다고 판단하는 경우, 여기에 추가하실 수 있습니다.
     public GameObject gameObjectBarChart;
@@ -373,5 +374,6 @@ public class InGameUI : MonoBehaviour, IBegin
     }
 
 }
+
 
 

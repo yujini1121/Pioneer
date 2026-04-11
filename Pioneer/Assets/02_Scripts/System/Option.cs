@@ -9,6 +9,7 @@ public class Option : MonoBehaviour, IBegin
 {
     [SerializeField] private GameObject escUI;
     [SerializeField] private GameObject optionUI;
+    [SerializeField] private GameObject helpUI;
 
     public Slider bgmVolSlider;
     public Slider sfxVolSlider;
@@ -31,6 +32,7 @@ public class Option : MonoBehaviour, IBegin
     {
         SetDeactivateEscUI();
         SetDeactivateOptionUI();
+        SetDeactivateHelpUI();
         if (AudioManager.instance != null)
         {
             AudioManager.instance.bgmVolSlider = bgmVolSlider;
@@ -88,6 +90,23 @@ public class Option : MonoBehaviour, IBegin
         InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION);
     }
 
+
+    public void SetActivateHelpUI()
+    {
+        if (helpUI == null) return;
+        if (InGameUI.instance.IsOpened(InGameUI.ID_ESC_OPTION_HELP)) return;
+
+        helpUI.SetActive(true);
+
+        InGameUI.instance.OpenUI(
+            new List<GameObject>() { helpUI },
+            InGameUI.ID_ESC_OPTION_HELP,
+            () =>
+            {
+                helpUI.SetActive(false);
+            });
+    }
+    public void SetDeactivateHelpUI() => InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION_HELP);
     public void SetActivateOptionUI()
     {
         optionUI.SetActive(true);
@@ -104,12 +123,12 @@ public class Option : MonoBehaviour, IBegin
 
     public void QuitGame()
     {
-        Debug.Log("°ÔÀÓ Á¾·á ¹öÆ° Å¬¸¯!");
+        Debug.Log("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ° Å¬ï¿½ï¿½!");
 
-        // À¯´ÏÆ¼ ¿¡µðÅÍ¿¡¼­ Å×½ºÆ®ÇÒ °æ¿ì (Play ¸ðµå ÁßÁö)
+        // ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½×½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ (Play ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        // ½ÇÁ¦ ºôµåµÈ °ÔÀÓ¿¡¼­ ½ÇÇàÇÒ °æ¿ì (¾îÇÃ¸®ÄÉÀÌ¼Ç Á¾·á)
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ó¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½)
 #else
         Application.Quit();
 #endif
