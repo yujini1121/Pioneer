@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "InstallableObject", menuName = "ScriptableObjects/Installables/InstallableObjects")]
@@ -7,50 +8,66 @@ public class SInstallableObjectDataSO : SItemTypeSO
 
     public enum AnchorType
     {
-        Center,   // 셀 중심(기본): (0, 0)
-        EdgeX,    // X만 반칸: (0.5, 0)
-        EdgeZ,    // Z만 반칸: (0, 0.5)
-        Corner    // X,Z 둘 다 반칸: (0.5, 0.5)
+        Center,
+        EdgeX,
+        EdgeZ,
+        Corner
     }
 
-    [Header("설치 타입")]
+    [Header("Install Type")]
     public CreationType installType;
 
-    [Header("설치 프리팹 및 설정")]
-    public GameObject prefab;                  
-
-    [Tooltip("설치 판정용 Overlap/CheckBox 크기(미터) 그러니까 Unity 단위상 모델링의 실제 크기 작성")]
-    public Vector3 size = Vector3.one;         
+    [Header("Prefab And Settings")]
+    public GameObject prefab;
+    public Vector3 size = Vector3.one;
 
     [Header("Grid")]
-    [Tooltip("스냅/footprint 기준 셀 크기(미터).")]
     public float gridCellSize = 0f;
 
     [Header("Footprint")]
-    [Tooltip("Grid 셀 기준 점유 크기. 지금은 cellSize를 2x2로 놓은 걸 기준으로 작성. (X=가로, Y=세로(Z))")]
     public Vector2Int footprint = Vector2Int.one;
-
-    [Tooltip("직사각형(footprint.x != footprint.y) 오브젝트는 90/270도 회전 시 (x,y)를 자동 스왑할지 (변수명 진짜 안예쁘다..)")]
     public bool swapFootprintOnRotate90 = true;
 
     [Header("Anchor")]
-    [Tooltip("셀 중심 스냅 기준으로 반칸 오프셋을 줄지 결정")]
     public AnchorType anchor = AnchorType.Center;
 
-    [Header("기능 확장")]
-    public int maxHp = 20;                     
-    public float buildTime = 2f;              
+    [Header("Stats")]
+    public int maxHp = 20;
+    public float buildTime = 2f;
 
-    /// <summary>
-    /// rotateN: 0,1,2,3 (0=0도, 1=90도, 2=180도, 3=270도)
-    /// 반환: 현재 회전 기준 점유 셀 (X,Z)
-    /// </summary>
+    public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
+    {
+        itemWithState.isUseCoroutineEnd = false;
+
+        if (CreateObject.instance == null)
+        {
+            Debug.LogWarning("[Installable] CreateObject.instance is null.");
+            itemWithState.isUseCoroutineEnd = true;
+            yield break;
+        }
+
+        if (itemWithState == null || itemWithState.amount <= 0)
+        {
+            Debug.LogWarning("[Installable] No item stack to install.");
+            itemWithState.isUseCoroutineEnd = true;
+            yield break;
+        }
+
+        CreateObject.instance.EnterInstallMode(this, new SItemStack[]
+        {
+            new SItemStack(itemWithState.id, 1, itemWithState.duability)
+        });
+
+        yield return null;
+        itemWithState.isUseCoroutineEnd = true;
+    }
+
     public Vector2Int GetFootprintByRotateN(int rotateN)
     {
         var fp = footprint;
-        if (!swapFootprintOnRotate90) return fp;
+        if (!swapFootprintOnRotate90)
+            return fp;
 
-        // 90/270도에서만 스왑하기
         bool is90or270 = (rotateN & 1) == 1;
         if (is90or270)
             return new Vector2Int(fp.y, fp.x);
@@ -58,15 +75,8 @@ public class SInstallableObjectDataSO : SItemTypeSO
         return fp;
     }
 
-    /// <summary>
-    /// 셀 중심 스냅 좌표에 더해줄 "셀 단위 오프셋"을 반환합니다.
-    /// 예) Corner면 (0.5, 0.5) 셀 만큼 이동 = 월드에선 (cellSize*0.5, cellSize*0.5)
-    /// rotateN에 따라 EdgeX/EdgeZ는 서로 바뀔 수 있습니다.
-    /// 머리 터질 것 같아요? 저도요.......
-    /// </summary>
     public Vector2 GetAnchorOffsetCellsByRotateN(int rotateN)
     {
-        // 기본(회전 0 기준)
         Vector2 offset;
         switch (anchor)
         {
@@ -77,11 +87,9 @@ public class SInstallableObjectDataSO : SItemTypeSO
             case AnchorType.Corner: offset = new Vector2(0.5f, 0.5f); break;
         }
 
-        // 90/180/270 회전 시 오프셋도 회전(셀 좌표계에서)
         int r = ((rotateN % 4) + 4) % 4;
         if (anchor == AnchorType.EdgeX || anchor == AnchorType.EdgeZ)
         {
-            // 90/270이면 X/Z 반칸이 서로 바뀜
             if ((r & 1) == 1)
                 offset = new Vector2(offset.y, offset.x);
         }
@@ -92,7 +100,6 @@ public class SInstallableObjectDataSO : SItemTypeSO
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // 실수 방지: 0 이하 입력 방지
         if (gridCellSize < 0f) gridCellSize = 0f;
         if (footprint.x < 1) footprint.x = 1;
         if (footprint.y < 1) footprint.y = 1;
