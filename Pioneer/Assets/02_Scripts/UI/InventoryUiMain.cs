@@ -252,6 +252,24 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         IconRefresh();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
+        if (CreateObject.instance != null)
+        {
+            SItemStack selected = InventoryManager.Instance.SelectedSlotInventory;
+            SInstallableObjectDataSO installable = selected?.itemBaseType as SInstallableObjectDataSO;
+
+            if (installable != null && selected.itemBaseType.categories == EDataType.BuildObject)
+            {
+                CreateObject.instance.EnterInstallMode(
+                    installable,
+                    new SItemStack[] { new SItemStack(selected.id, 1, selected.duability) }
+                );
+            }
+            else
+            {
+                CreateObject.instance.ExitInstallMode();
+            }
+        }
+
         if (InventoryManager.Instance.SelectedSlotInventory == null)
         {
             //Debug.Log($">> 선택된 슬롯 아이템 ID : 현재 쥔 아이템은 빈 아이템입니다.");

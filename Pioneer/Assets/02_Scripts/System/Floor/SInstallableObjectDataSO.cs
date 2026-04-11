@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "InstallableObject", menuName = "ScriptableObjects/Installables/InstallableObjects")]
@@ -34,33 +33,6 @@ public class SInstallableObjectDataSO : SItemTypeSO
     [Header("Stats")]
     public int maxHp = 20;
     public float buildTime = 2f;
-
-    public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
-    {
-        itemWithState.isUseCoroutineEnd = false;
-
-        if (CreateObject.instance == null)
-        {
-            Debug.LogWarning("[Installable] CreateObject.instance is null.");
-            itemWithState.isUseCoroutineEnd = true;
-            yield break;
-        }
-
-        if (itemWithState == null || itemWithState.amount <= 0)
-        {
-            Debug.LogWarning("[Installable] No item stack to install.");
-            itemWithState.isUseCoroutineEnd = true;
-            yield break;
-        }
-
-        CreateObject.instance.EnterInstallMode(this, new SItemStack[]
-        {
-            new SItemStack(itemWithState.id, 1, itemWithState.duability)
-        });
-
-        yield return null;
-        itemWithState.isUseCoroutineEnd = true;
-    }
 
     public Vector2Int GetFootprintByRotateN(int rotateN)
     {
