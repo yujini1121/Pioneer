@@ -18,7 +18,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public const int ID_ESC_OPTION_SETTINGS = 8;
     public const int ID_ESC_OPTION_HELP = 9;
 
-    [Header("?œë¸Œ UI ê²Œì„?¤ë¸Œ?íŠ¸")]// UI ê²Œì„ ?¤ë¸Œ?íŠ¸ê°€ ì¡´ì¬?˜ê³  ?¸ë? ?¤í¬ë¦½íŠ¸?ì„œ ?‘ê·¼???„ìš”ê°€ ?ˆë‹¤ê³??ë‹¨?˜ëŠ” ê²½ìš°, ?¬ê¸°??ì¶”ê??˜ì‹¤ ???ˆìŠµ?ˆë‹¤.
+    [Header("Sub UI GameObjects")]
     public GameObject gameObjectBarChart;
     public GameObject gameObjectGuiltyBarChart; // ì£„ì±…ê°?
     public GameObject gameObjectBuffEffect;
@@ -42,7 +42,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject ManuUI;
     public GameObject ManuDenyUI;
     public List<GameObject> gameObjectListExpandedInventory; // ?¸ë²¤? ë¦¬ ì¹?/ ?•ë ¬ ë²„íŠ¼ / ë²„ë¦¬ê¸?ë²„íŠ¼
-    [Header("?œë¸Œ UI ë¡œì§ ?´ë˜??)]
+    [Header("Sub UI Logic")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
     [HideInInspector]
@@ -184,7 +184,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void CloseDefaultCraftUI()
     {
-        Debug.Log("InGameUI.CloseDefaultCraftUI() ?¸ì¶œ??);
+        Debug.Log("InGameUI.CloseDefaultCraftUI() called");
         //CommonUI.instance.CloseTab(makeshiftCraft.ui);
         //Clear();
         

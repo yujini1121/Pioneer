@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
@@ -8,7 +8,7 @@ public class DarkFog : MonoBehaviour
     public float armedTime;
     bool hasTouched = false;
     public ParticleSystem particle;
-    public IdObject<DarkFog> poolObjectSelf;
+    public GuiltyPoolItem<DarkFog> poolObjectSelf;
     Coroutine coroutine;
 
     //public EmissionModule emit;
@@ -56,7 +56,7 @@ public class DarkFog : MonoBehaviour
             IEnumerator destroyCoroutine()
             {
                 yield return new WaitForSeconds(1.0f);
-                // ÆÄ±«
+                // ï¿½Ä±ï¿½
                 GuiltySystem.instance.ReleasePoolObject(poolObjectSelf);
             }
             StartCoroutine(destroyCoroutine());

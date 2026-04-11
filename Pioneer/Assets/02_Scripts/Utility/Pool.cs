@@ -1,78 +1,78 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Security.Cryptography;
 using System;
 
-public class IdObject<T>
+public class GuiltyPoolItem<T>
 {
     public int id;
     public T Value;
 }
 
-public class Pool<T>
+public class GuiltyPool<T>
 {
     int elementCount = 0;
 
-    // ÁØºñµÈ °´Ã¼
-    private readonly List<IdObject<T>> _readyList;
+    // ï¿½Øºï¿½ï¿½ ï¿½ï¿½Ã¼
+    private readonly List<GuiltyPoolItem<T>> _readyList;
 
-    // »ç¿ë Áß °´Ã¼ (ID ±âÁØ Á¤·Ä)
+    // ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ã¼ (ID ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     private readonly SortedDictionary<int, T> _inUse
         = new SortedDictionary<int, T>();
 
-    public Pool()
+    public GuiltyPool()
     {
-        _readyList = new List<IdObject<T>>();
+        _readyList = new List<GuiltyPoolItem<T>>();
     }
 
-    public Pool(List<T> initialItems)
+    public GuiltyPool(List<T> initialItems)
     {
-        _readyList = new List<IdObject<T>>();
+        _readyList = new List<GuiltyPoolItem<T>>();
 
         for (int i = 0; i < initialItems.Count; ++i)
         {
-            _readyList.Add(new IdObject<T> { id = i, Value = initialItems[i] });
+            _readyList.Add(new GuiltyPoolItem<T> { id = i, Value = initialItems[i] });
         }
         elementCount = initialItems.Count;
     }
 
-    // ÃÊ±â Ãß°¡
+    // ï¿½Ê±ï¿½ ï¿½ß°ï¿½
     public void Add(T item)
     {
-        _readyList.Add(new IdObject<T>() { id = elementCount, Value = item });
+        _readyList.Add(new GuiltyPoolItem<T>() { id = elementCount, Value = item });
         elementCount++;
     }
-    // ÃÊ±â Ãß°¡
-    public void Add(T item, out IdObject<T> self)
+    // ï¿½Ê±ï¿½ ï¿½ß°ï¿½
+    public void Add(T item, out GuiltyPoolItem<T> self)
     {
-        self = new IdObject<T>() { id = elementCount, Value = item };
+        self = new GuiltyPoolItem<T>() { id = elementCount, Value = item };
         _readyList.Add(self);
         elementCount++;
     }
 
-    // Áï½Ã È¹µæ
-    public IdObject<T> Possess()
+    // ï¿½ï¿½ï¿½ È¹ï¿½ï¿½
+    public GuiltyPoolItem<T> Possess()
     {
         if (_readyList.Count == 0)
             return default;
 
         int lastIndex = _readyList.Count - 1;
-        IdObject<T> item = _readyList[lastIndex];
+        GuiltyPoolItem<T> item = _readyList[lastIndex];
         _readyList.RemoveAt(lastIndex);
 
         int id = item.id;
 
         if (_inUse.ContainsKey(id))
-            throw new InvalidOperationException("Áßº¹ ID´Â Çã¿ëµÇÁö ¾ÊÀ½");
+            throw new InvalidOperationException("ï¿½ßºï¿½ IDï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
 
         _inUse.Add(id, item.Value);
 
         return item;
     }
 
-    // ¹ÝÈ¯ (Æ®¸® Å½»ö ½Ã°£)
-    public void Release(IdObject<T> item)
+    // ï¿½ï¿½È¯ (Æ®ï¿½ï¿½ Å½ï¿½ï¿½ ï¿½Ã°ï¿½)
+    public void Release(GuiltyPoolItem<T> item)
     {
         if (item == null)
             return;
@@ -83,6 +83,6 @@ public class Pool<T>
         {
             _readyList.Add(item);
         }
-        // ¾øÀ¸¸é ¹«½Ã (È¤Àº ¿¹¿Ü Ã³¸® °¡´É)
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (È¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     }
 }

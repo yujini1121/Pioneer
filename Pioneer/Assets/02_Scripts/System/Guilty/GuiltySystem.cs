@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -23,7 +23,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
 
     [Header("Dark Object")]
-    public Vector3 forwardVector; // Ä«¸Þ¶ó°¡ »ç¼±À¸·Î ¹èÄ¡µÈ °æ¿ì, ÀÌ´Â Áß¿äÇÕ´Ï´Ù.
+    public Vector3 forwardVector; // Ä«ï¿½Þ¶ï¿½ ï¿½ç¼±ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½, ï¿½Ì´ï¿½ ï¿½ß¿ï¿½ï¿½Õ´Ï´ï¿½.
     public Vector3 rightVector;
     [SerializeField] AudioSource AudioSourceScream;
     [SerializeField] GameObject prefabDarkObject;
@@ -50,10 +50,10 @@ public class GuiltySystem : MonoBehaviour, IBegin
     private Vector2 mSize;
     private float slowEndTime = 0.0f;
     private int deadCount = 0;
-    public int maxAttackWeight = 30; // º¯¼ö¸í ·¹ÆÛ·±½º : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
-    public int currentAttackWeight = 0; // º¯¼ö¸í ·¹ÆÛ·±½º : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
+    public int maxAttackWeight = 30; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û·ï¿½ï¿½ï¿½ : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
+    public int currentAttackWeight = 0; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Û·ï¿½ï¿½ï¿½ : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
     private int level = 0;
-    private Pool<DarkFog> darkFogPool;
+    private GuiltyPool<DarkFog> darkFogPool;
 
 
     public void ChangeWeight(int value)
@@ -139,7 +139,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
     public void TimeReachedToDayTime() => ChangeWeight(-1);
     public void Drink() => ChangeWeight(-2);
     public void DarkFogTouched() => slowEndTime = Time.time + darkFogTime;
-    public void ReleasePoolObject(IdObject<DarkFog> poolObject)
+    public void ReleasePoolObject(GuiltyPoolItem<DarkFog> poolObject)
     {
         darkFogPool.Release(poolObject);
         poolObject.Value.transform.position = darkFogPoolPosition;
@@ -173,13 +173,13 @@ public class GuiltySystem : MonoBehaviour, IBegin
     // Start is called before the first frame update
     void Start()
     {
-        darkFogPool = new Pool<DarkFog>();
+        darkFogPool = new GuiltyPool<DarkFog>();
 
         for (int i = 0; i < darkFogPoolSize; i++)
         {
             GameObject newOne = Instantiate(prefabDarkFog, darkFogPoolPosition, Quaternion.identity);
             DarkFog newOneDarkFog = newOne.GetComponent<DarkFog>();
-            darkFogPool.Add(newOneDarkFog, out IdObject<DarkFog> self);
+            darkFogPool.Add(newOneDarkFog, out GuiltyPoolItem<DarkFog> self);
             newOneDarkFog.poolObjectSelf = self;
             if (newOneDarkFog.particle) newOneDarkFog.particle = newOneDarkFog.gameObject.GetComponent<ParticleSystem>();
             ParticleSystem.EmissionModule newOneParticle = newOneDarkFog.particle.emission ;
@@ -298,13 +298,13 @@ public class GuiltySystem : MonoBehaviour, IBegin
         }
     }
 
-    // ¹Ù´ÙÀÌº¥Æ® : ¾È°³ ³· È¿°ú -> ÁËÃ¥°¨ °¡ÁßÄ¡ 1 Áõ°¡
+    // ï¿½Ù´ï¿½ï¿½Ìºï¿½Æ® : ï¿½È°ï¿½ ï¿½ï¿½ È¿ï¿½ï¿½ -> ï¿½ï¿½Ã¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ 1 ï¿½ï¿½ï¿½ï¿½
     public void AddFogDayWeight()
     {
         ChangeWeight(1);
     }
 
-    // ¹Ù´ÙÀÌº¥Æ® : ¾È°³ ¹ã È¿°ú -> ÁËÃ¥°¨ °¡ÁßÄ¡ addValue¸¸Å­ Áõ°¡
+    // ï¿½Ù´ï¿½ï¿½Ìºï¿½Æ® : ï¿½È°ï¿½ ï¿½ï¿½ È¿ï¿½ï¿½ -> ï¿½ï¿½Ã¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ addValueï¿½ï¿½Å­ ï¿½ï¿½ï¿½ï¿½
     public void AddFogNightWeight()
     {
         int addValue = Mathf.RoundToInt(currentAttackWeight * 0.2f);
