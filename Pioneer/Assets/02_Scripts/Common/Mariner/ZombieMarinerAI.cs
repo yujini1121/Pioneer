@@ -15,6 +15,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
     private float attackCooldown = 0f;
     private float attackInterval = 0.5f;
 
+    private StunHandler stunHandler;
+
     private void Awake()
     {
         InitZombieStats();
@@ -71,6 +73,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
     {
         base.Start();
 
+        stunHandler = GetComponent<StunHandler>();
+
         SetRandomDirection();
         stateTimer = moveDuration;
 
@@ -84,6 +88,9 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
         if (IsDead) return;
 
         attackCooldown -= Time.deltaTime;

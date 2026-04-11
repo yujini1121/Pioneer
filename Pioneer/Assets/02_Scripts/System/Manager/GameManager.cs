@@ -62,11 +62,14 @@ public class GameManager : MonoBehaviour, IBegin
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
 
-    [Header("동적 스포너(EnemySpawnerFinder 연동)")]
+    [Header("동적 스포너(EnemySpawnerFinder)")]
     [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector에서 할당
     [SerializeField] private float spawnLiftY = 0.05f;                   // 살짝 띄워서 스폰
     [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";   // 하이어라키 정리용
     private Transform spawnRoot;                                         // 스폰 포인트 부모
+
+    [Header("바다이벤트")]
+    [SerializeField] private OceanEventManager oceanEventManager;
 
     // EnemySpawnerFinder에서 찾은 스폰 포인트 수
     private int activeSpawnCount = 0;
@@ -120,6 +123,7 @@ public class GameManager : MonoBehaviour, IBegin
         oneDayDuration = dayDuration + nightDuration;
 
         Debug.Log($">> GameManager.Start()");
+        Debug.Log($"[GameMode] Infinite Mode: {GameModeState.IsInfiniteMode}");
 
         AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
@@ -182,11 +186,21 @@ public class GameManager : MonoBehaviour, IBegin
 
             OnNightEnd();
             Debug.Log($"아침이 되었습니다. (Day {currentDay})");
+
+            // 일반 모드일 때만 6일차 엔딩 발생
+            if (!GameModeState.IsInfiniteMode && currentDay >= 6)
+            {
+                TriggerGameOver();
+                return;
+            }
         }
     }
 
     private void OnNightStart()
     {
+        if (oceanEventManager != null)
+            oceanEventManager.EnterNight();
+
         RefreshSpawnPointsFromFinder();
 
         var s = GetScaleRowForDay(currentDay);
@@ -196,6 +210,9 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void OnNightEnd()
     {
+        if (oceanEventManager != null)
+            oceanEventManager.EnterDay();
+
         DespawnAllEnemies();
         ApplyMarinerEmbarkRule();
     }
@@ -240,6 +257,15 @@ public class GameManager : MonoBehaviour, IBegin
         }
     }
 
+    void ShowAllUI()
+    {
+        foreach (Canvas canvas in allUICanvas)
+        {
+            if (canvas != null)
+                canvas.gameObject.SetActive(true);
+        }
+    }
+
     private void SpawnEnemiesForCurrentDay()
     {
         Debug.Log("Spawn Enemies");
@@ -258,6 +284,43 @@ public class GameManager : MonoBehaviour, IBegin
 
         int spawnedCount = row.minion + row.crawler + row.titan;
         Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
+    }
+
+    // 바다이벤트 : 안개 낮 효과 -> 미니언 추가 스폰
+    public void SpawnFogMinions(int count)
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0) return;
+        if (minion == null || count <= 0) return;
+
+        EnemyScaleRow scale = GetScaleRowForDay(currentDay);
+
+        SpawnOf(minion, count, scale);
+    }
+
+    public void ResumeFromEndingToInfiniteMode()
+    {
+        Time.timeScale = 1f;
+
+        // 플레이어 다시 보이게
+        if (ThisIsPlayer.Player != null)
+        {
+            Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
+            if (playerRenderer != null)
+            {
+                Color color = playerRenderer.material.color;
+                color.a = 1f;
+                playerRenderer.material.color = color;
+            }
+        }
+
+        // 숨겼던 UI 다시 켜기
+        ShowAllUI();
+
+        // 게임오버 패널 닫기
+        if (gameOverUI != null)
+            gameOverUI.HideGameOverScreen();
+
+        Debug.Log("[GameMode] 무한 모드로 전환되어 게임을 이어서 진행합니다.");
     }
 
     // 일차별 공격력 적용된 에너미 생성
@@ -330,12 +393,34 @@ public class GameManager : MonoBehaviour, IBegin
 
     private DayEnemyRow GetSpawnRowForDay(int day)
     {
-        if (enemySpawnTable != null && enemySpawnTable.Length > 0)
+        if (enemySpawnTable == null || enemySpawnTable.Length == 0)
+            return new DayEnemyRow { total = 0, minion = 0, crawler = 0, titan = 0 };
+
+        // 1~5일차는 기존 표 그대로 사용
+        if (day <= enemySpawnTable.Length)
         {
             int idx = Mathf.Clamp(day - 1, 0, enemySpawnTable.Length - 1);
             return enemySpawnTable[idx];
         }
-        return new DayEnemyRow { total = 0, minion = Random.Range(2, 8), crawler = 0, titan = 0 };
+
+        // 무한 모드가 아니면 마지막(5일차) 값 유지
+        if (!GameModeState.IsInfiniteMode)
+            return enemySpawnTable[enemySpawnTable.Length - 1];
+
+        // 무한 모드 6일차 이상:
+        // 5일차 값을 기준으로 매일 미니언/크롤러/타이탄 각각 +1
+        DayEnemyRow baseRow = enemySpawnTable[enemySpawnTable.Length - 1];
+        int extraDays = day - enemySpawnTable.Length; // 6일차=1, 7일차=2, ...
+
+        DayEnemyRow result = new DayEnemyRow
+        {
+            minion = baseRow.minion + extraDays,
+            crawler = baseRow.crawler + extraDays,
+            titan = baseRow.titan + extraDays
+        };
+
+        result.total = result.minion + result.crawler + result.titan;
+        return result;
     }
 
     private EnemyScaleRow GetScaleRowForDay(int day)

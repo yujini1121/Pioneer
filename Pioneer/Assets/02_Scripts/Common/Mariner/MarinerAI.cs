@@ -43,6 +43,8 @@ public class MarinerAI : MarinerBase, IBegin
     private bool lastDaytimeState = false;
     private bool hasInitializedDaytimeState = false;
 
+    private StunHandler stunHandler;
+
     private void Awake()
     {
         maxHp = 40;
@@ -63,6 +65,8 @@ public class MarinerAI : MarinerBase, IBegin
     {
         base.Start();  // 먼저 호출 (NavMeshAgent 설정)
 
+        stunHandler = GetComponent<StunHandler>();
+
         SetRandomDirection();
         stateTimer = moveDuration;
         fov.Start();
@@ -70,10 +74,13 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            TakeDamage(9999, null); // 강제로 죽이기
-        }
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
+        //if (Input.GetKeyDown(KeyCode.L))
+        //{
+        //    TakeDamage(9999, null); // 강제로 죽이기
+        //}
 
         if (GameManager.Instance == null || MarinerManager.Instance == null) return;
 
@@ -587,8 +594,8 @@ public class MarinerAI : MarinerBase, IBegin
 
             bool result = inventory.AddItem(acquiredItemID, 1);
 
-            // 바디이벤트 녹조로 얻는 추가 아이템 획득 
-            if (OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
+            // 바다이벤트 녹조로 얻는 추가 아이템 획득 
+            if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
             {
                 OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
 

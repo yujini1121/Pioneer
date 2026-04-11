@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6979294893116040148
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8202563562800500763}
+  - component: {fileID: 5428059209140019754}
+  m_Layer: 0
+  m_Name: BuffUIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8202563562800500763
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6979294893116040148}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5428059209140019754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6979294893116040148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ee45d828f6b2b4aa801429bf7210e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buffParent: {fileID: 0}
+  debuffParent: {fileID: 0}
+  effectIconPrefab: {fileID: 4190585275526405361, guid: 08454f78bce4c2847b1792b671ad13c3,
+    type: 3}
+  iconFull: {fileID: 21300000, guid: 5753df462d93ad24fa4d1236b238914a, type: 3}
+  iconDrunk: {fileID: 21300000, guid: d8e59cff49fbe9c45b91257b94623b04, type: 3}
+  iconConfusion: {fileID: 21300000, guid: 344168bb29e09c04e8a7437d60165d4e, type: 3}
+  iconCharm: {fileID: 21300000, guid: 2f6a5e4d9f2a07b4b9b2ca91f3f17d7c, type: 3}
+  iconHungry: {fileID: 21300000, guid: b43d4c8ff0c189449a3698c549394455, type: 3}
+  iconStarving: {fileID: 21300000, guid: 4343bdd89856f2a45b2a90e0821b06b2, type: 3}
+  iconPanic: {fileID: 21300000, guid: 86892612f6a316646843bd3ff23009e1, type: 3}
+  iconDisarm: {fileID: 21300000, guid: 76ef63477fd48e946ab316135ff7d89b, type: 3}
+  iconLethargy: {fileID: 21300000, guid: b245b251bd9adf24e8077e2db3adf29a, type: 3}

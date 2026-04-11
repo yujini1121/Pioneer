@@ -219,7 +219,15 @@ public class InventoryManager : InventoryBase
 
     public void UpdateSlot() => SelectedSlotInventory = itemLists[selectedSlotIndex];
 
-
+    public void ApplyItemDuablilityUsed()
+    {
+        if (SelectedSlotInventory == null) return;
+        // data´Â SItemWeaponTypeÀÓ
+        SelectedSlotInventory.duability = Mathf.Max(0, SelectedSlotInventory.duability -
+                    Mathf.Max(0, (SelectedSlotInventory.itemBaseType as SItemWeaponTypeSO).duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
+        SafeClean();
+        InventoryUiMain.instance.IconRefresh();
+    }
 
 	protected override void SafeClean()
     {
@@ -289,6 +297,7 @@ public class InventoryManager : InventoryBase
         //Add(new SItemStack(101, 80));
         //Add(new SItemStack(102, 80));
         //Add(new SItemStack(103, 80));
+        Add(new SItemStack(20001, 1, 100));
         Add(new SItemStack(30001, 80));
         Add(new SItemStack(30002, 80));
         Add(new SItemStack(30003, 80));
@@ -311,7 +320,7 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(30020, 80));
         Add(new SItemStack(30021, 80));
         Add(new SItemStack(30022, 80));
-        Add(new SItemStack(20001, 1, 100));
+        
         Add(new SItemStack(40001, 80));
         Add(new SItemStack(40009, 80));
         Add(new SItemStack(40007, 80));

@@ -13,13 +13,19 @@ public class CommonBase : MonoBehaviour, IBegin
     public int CurrentHp => hp;
 
     [Header("Hit Effect")]
-    public float hitFlashDuration = 0.1f;
-    public Color hitColor = new Color(3f, 3f, 3f, 1f);
+    [Range(0f, 1f)] public float hitFlashAmount = 1f;
+    public float hitFlashDurations = 0.2f;
+    public Color hitFlashColor = Color.white;
+    public float hitFlashEmission = 2f;
 
     // public으로 변경해서 외부에서 설정 가능하게
     [HideInInspector] public SpriteRenderer spriteRenderer;
     private Material material;
     private Coroutine hitFlashCoroutine;
+
+    private static readonly int FlashColorID = Shader.PropertyToID("_FlashColor");
+    private static readonly int FlashAmountID = Shader.PropertyToID("_FlashAmount");
+    private static readonly int FlashEmissionID = Shader.PropertyToID("_FlashEmission");
 
     void Start()
     {
@@ -53,10 +59,21 @@ public class CommonBase : MonoBehaviour, IBegin
                 spriteRenderer.material = material;
                 Debug.Log($"[{gameObject.name}] Material 생성 완료!");
             }
+
+            // 셰이더 프로퍼티 기본값 초기화
+            if (material.HasProperty(FlashColorID))
+                material.SetColor(FlashColorID, hitFlashColor);
+
+            if (material.HasProperty(FlashAmountID))
+                material.SetFloat(FlashAmountID, 0f);
+
+            if (material.HasProperty(FlashEmissionID))
+                material.SetFloat(FlashEmissionID, hitFlashEmission);
         }
         else
         {
-            Debug.LogError($"[{gameObject.name}] SpriteRenderer를 찾을 수 없습니다!");
+            // SpriteRenderer가 없는 오브젝트는 피격 이펙트 생략
+            return;
         }
     }
 
@@ -86,6 +103,10 @@ public class CommonBase : MonoBehaviour, IBegin
             if (hitFlashCoroutine != null)
             {
                 StopCoroutine(hitFlashCoroutine);
+
+                // 연속 피격 시 이전 플래시가 남지 않도록 즉시 초기화
+                if (material.HasProperty(FlashAmountID))
+                    material.SetFloat(FlashAmountID, 0f);
             }
 
             hitFlashCoroutine = StartCoroutine(HitFlashEffect());
@@ -101,27 +122,24 @@ public class CommonBase : MonoBehaviour, IBegin
     // 피격 효과
     private IEnumerator HitFlashEffect()
     {
-        // 밝은 흰색으로 빛나게
-        Color brightWhite = Color.red; //new Color(2.5f, 2.5f, 2.5f, 1f);
+        if (material == null)
+            yield break;
 
-        if (material.HasProperty("_Color"))
-            material.SetColor("_Color", brightWhite);
+        if (material.HasProperty(FlashColorID))
+            material.SetColor(FlashColorID, hitFlashColor);
 
-        if (material.HasProperty("_BaseColor"))
-            material.SetColor("_BaseColor", brightWhite);
+        if (material.HasProperty(FlashEmissionID))
+            material.SetFloat(FlashEmissionID, hitFlashEmission);
 
-        material.color = brightWhite;
+        if (material.HasProperty(FlashAmountID))
+            material.SetFloat(FlashAmountID, hitFlashAmount);
 
-        yield return new WaitForSeconds(hitFlashDuration);
+        yield return new WaitForSeconds(hitFlashDurations);
 
-        // 원래 색상으로 복구
-        if (material.HasProperty("_Color"))
-            material.SetColor("_Color", Color.white);
+        if (material.HasProperty(FlashAmountID))
+            material.SetFloat(FlashAmountID, 0f);
 
-        if (material.HasProperty("_BaseColor"))
-            material.SetColor("_BaseColor", Color.white);
-
-        material.color = Color.white;
+        hitFlashCoroutine = null;
     }
 
     // 사라졌을때 호출하는 변수 (생명체인 경우 사망했을 때)

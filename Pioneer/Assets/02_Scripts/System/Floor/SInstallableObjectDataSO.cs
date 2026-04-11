@@ -1,3 +1,4 @@
+ï»¿using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "InstallableObject", menuName = "ScriptableObjects/Installables/InstallableObjects")]
@@ -5,99 +6,34 @@ public class SInstallableObjectDataSO : SItemTypeSO
 {
     public enum CreationType { Platform, Wall, Door, Barricade, CraftingTable, Ballista, Trap, Lantern, Storage }
 
-    public enum AnchorType
-    {
-        Center,   // ¼¿ Áß½É(±âº»): (0, 0)
-        EdgeX,    // X¸¸ ¹İÄ­: (0.5, 0)
-        EdgeZ,    // Z¸¸ ¹İÄ­: (0, 0.5)
-        Corner    // X,Z µÑ ´Ù ¹İÄ­: (0.5, 0.5)
-    }
-
-    [Header("¼³Ä¡ Å¸ÀÔ")]
+    [Header("ì„¤ì¹˜ íƒ€ì…")]
     public CreationType installType;
 
-    [Header("¼³Ä¡ ÇÁ¸®ÆÕ ¹× ¼³Á¤")]
-    public GameObject prefab;                  
+    [Header("ì„¤ì¹˜ í”„ë¦¬íŒ¹ ë° ì„¤ì •")]
+    public GameObject prefab;                  // ì„¤ì¹˜ ëŒ€ìƒ í”„ë¦¬íŒ¹
+    public Vector3 size = Vector3.one;         // ì„¤ì¹˜ íŒì •ìš© Overlap í¬ê¸°
 
-    [Tooltip("¼³Ä¡ ÆÇÁ¤¿ë Overlap/CheckBox Å©±â(¹ÌÅÍ) ±×·¯´Ï±î Unity ´ÜÀ§»ó ¸ğµ¨¸µÀÇ ½ÇÁ¦ Å©±â ÀÛ¼º")]
-    public Vector3 size = Vector3.one;         
+    [Header("ê¸°ëŠ¥ í™•ì¥")]
+    public int maxHp = 20;                     // ë‚´êµ¬ë„
+    public float buildTime = 2f;               // ì„¤ì¹˜ ì‹œê°„
 
-    [Header("Grid")]
-    [Tooltip("½º³À/footprint ±âÁØ ¼¿ Å©±â(¹ÌÅÍ).")]
-    public float gridCellSize = 0f;
-
-    [Header("Footprint")]
-    [Tooltip("Grid ¼¿ ±âÁØ Á¡À¯ Å©±â. Áö±İÀº cellSize¸¦ 2x2·Î ³õÀº °É ±âÁØÀ¸·Î ÀÛ¼º. (X=°¡·Î, Y=¼¼·Î(Z))")]
-    public Vector2Int footprint = Vector2Int.one;
-
-    [Tooltip("Á÷»ç°¢Çü(footprint.x != footprint.y) ¿ÀºêÁ§Æ®´Â 90/270µµ È¸Àü ½Ã (x,y)¸¦ ÀÚµ¿ ½º¿ÒÇÒÁö (º¯¼ö¸í ÁøÂ¥ ¾È¿¹»Ú´Ù..)")]
-    public bool swapFootprintOnRotate90 = true;
-
-    [Header("Anchor")]
-    [Tooltip("¼¿ Áß½É ½º³À ±âÁØÀ¸·Î ¹İÄ­ ¿ÀÇÁ¼ÂÀ» ÁÙÁö °áÁ¤")]
-    public AnchorType anchor = AnchorType.Center;
-
-    [Header("±â´É È®Àå")]
-    public int maxHp = 20;                     
-    public float buildTime = 2f;              
-
-    /// <summary>
-    /// rotateN: 0,1,2,3 (0=0µµ, 1=90µµ, 2=180µµ, 3=270µµ)
-    /// ¹İÈ¯: ÇöÀç È¸Àü ±âÁØ Á¡À¯ ¼¿ (X,Z)
-    /// </summary>
-    public Vector2Int GetFootprintByRotateN(int rotateN)
+    public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
-        var fp = footprint;
-        if (!swapFootprintOnRotate90) return fp;
-
-        // 90/270µµ¿¡¼­¸¸ ½º¿ÒÇÏ±â
-        bool is90or270 = (rotateN & 1) == 1;
-        if (is90or270)
-            return new Vector2Int(fp.y, fp.x);
-
-        return fp;
-    }
-
-    /// <summary>
-    /// ¼¿ Áß½É ½º³À ÁÂÇ¥¿¡ ´õÇØÁÙ "¼¿ ´ÜÀ§ ¿ÀÇÁ¼Â"À» ¹İÈ¯ÇÕ´Ï´Ù.
-    /// ¿¹) Corner¸é (0.5, 0.5) ¼¿ ¸¸Å­ ÀÌµ¿ = ¿ùµå¿¡¼± (cellSize*0.5, cellSize*0.5)
-    /// rotateN¿¡ µû¶ó EdgeX/EdgeZ´Â ¼­·Î ¹Ù²ğ ¼ö ÀÖ½À´Ï´Ù.
-    /// ¸Ó¸® ÅÍÁú °Í °°¾Æ¿ä? Àúµµ¿ä.......
-    /// </summary>
-    public Vector2 GetAnchorOffsetCellsByRotateN(int rotateN)
-    {
-        // ±âº»(È¸Àü 0 ±âÁØ)
-        Vector2 offset;
-        switch (anchor)
+        if (itemWithState == null || itemWithState.amount < 1)
         {
-            default:
-            case AnchorType.Center: offset = new Vector2(0f, 0f); break;
-            case AnchorType.EdgeX: offset = new Vector2(0.5f, 0f); break;
-            case AnchorType.EdgeZ: offset = new Vector2(0f, 0.5f); break;
-            case AnchorType.Corner: offset = new Vector2(0.5f, 0.5f); break;
+            yield break;
         }
 
-        // 90/180/270 È¸Àü ½Ã ¿ÀÇÁ¼Âµµ È¸Àü(¼¿ ÁÂÇ¥°è¿¡¼­)
-        int r = ((rotateN % 4) + 4) % 4;
-        if (anchor == AnchorType.EdgeX || anchor == AnchorType.EdgeZ)
+        itemWithState.isUseCoroutineEnd = false;
+
+        SItemStack[] installCost = new SItemStack[]
         {
-            // 90/270ÀÌ¸é X/Z ¹İÄ­ÀÌ ¼­·Î ¹Ù²ñ
-            if ((r & 1) == 1)
-                offset = new Vector2(offset.y, offset.x);
-        }
+            new SItemStack(itemWithState.id, 1, itemWithState.duability)
+        };
 
-        return offset;
-    }
+        CreateObject.instance.EnterInstallMode(this, installCost);
 
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        // ½Ç¼ö ¹æÁö: 0 ÀÌÇÏ ÀÔ·Â ¹æÁö
-        if (gridCellSize < 0f) gridCellSize = 0f;
-        if (footprint.x < 1) footprint.x = 1;
-        if (footprint.y < 1) footprint.y = 1;
-        if (buildTime < 0.1f) buildTime = 0.1f;
-        if (maxHp < 1) maxHp = 1;
+        yield return null;
+        itemWithState.isUseCoroutineEnd = true;
     }
-#endif
 }

@@ -50,6 +50,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     // 유틸 가드
     private bool _shuttingDown;
+
+    private StunHandler stunHandler;
+
     private bool IsPreNightActive =>
         GameManager.Instance != null &&
         GameManager.Instance.IsDaytime &&
@@ -85,6 +88,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     public override void Start()
     {
         base.Start(); 
+        stunHandler = GetComponent<StunHandler>();
+
         if (fov != null) fov.Start();
 
         nightConfusionTime = 10f; //혼란 유지 시간
@@ -98,6 +103,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
         if (IsDead) return;
         if (_shuttingDown || IsDead) return;
 

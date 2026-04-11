@@ -266,4 +266,21 @@ public class GuiltySystem : MonoBehaviour, IBegin
             SpawnDarkFog();
         }
     }
+
+    // 바다이벤트 : 안개 낮 효과 -> 죄책감 가중치 1 증가
+    public void AddFogDayWeight()
+    {
+        ChangeWeight(1);
+    }
+
+    // 바다이벤트 : 안개 밤 효과 -> 죄책감 가중치 addValue만큼 증가
+    public void AddFogNightWeight()
+    {
+        int addValue = Mathf.RoundToInt(currentAttackWeight * 0.2f);
+
+        if (addValue <= 0)
+            return;
+
+        ChangeWeight(addValue);
+    }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,27 +7,49 @@ public class GameOverUI : MonoBehaviour
 {
     [Header("UI 요소")]
     public GameObject gameOverPanel;
-    public GameObject[] otherUIPanels; // 숨길 다른 UI 패널들
+    public GameObject[] otherUIPanels;      // 숨길 다른 UI 패널들
 
+    [Header("텍스트")]
     public TextMeshProUGUI survivalTimeText;
     public TextMeshProUGUI crewStatsText;
-    public Button restartButton;
+
+    [Header("버튼")]
+    public Button continueButton;
     public Button titleButton;
 
     private void Start()
     {
-        gameOverPanel.SetActive(false);
-        if (restartButton != null)
-            restartButton.onClick.AddListener(RestartGame);
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+
+        if (continueButton != null)
+        {
+            continueButton.onClick.RemoveAllListeners();
+            continueButton.onClick.AddListener(ContinueInInfiniteMode);
+        }
+
         if (titleButton != null)
+        {
+            titleButton.onClick.RemoveAllListeners();
             titleButton.onClick.AddListener(GoToTitle);
+        }
     }
 
     public void ShowGameOverScreen(int totalCrewMembers, int deadCrewMembers)
     {
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
+
         UpdateGameOverTexts(totalCrewMembers, deadCrewMembers);
+
+        // 최초 엔딩을 봤다면 무한 모드 해금 
+        GameModeState.UnlockInfiniteMode();
+    }
+
+    public void HideGameOverScreen()
+    {
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
     }
 
     private void UpdateGameOverTexts(int totalCrewMembers, int deadCrewMembers)
@@ -54,10 +74,14 @@ public class GameOverUI : MonoBehaviour
         }
     }
 
-    private void RestartGame()
+    private void ContinueInInfiniteMode()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        GameModeState.StartInfiniteMode();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResumeFromEndingToInfiniteMode();
+        }
     }
 
     public void GoToTitle()

@@ -98,10 +98,21 @@ public class StructureBase : CommonBase
 
     public override void WhenDestroy()
     {
-        Debug.LogError("Àß ÆÄ±«µÆ¾î¿ë");
-        nav.BuildNavMesh();
+        base.WhenDestroy();
+
+        if (OceanEventManager.instance != null)
+        {
+            OceanEventManager.instance.BeginCoroutine(RebuildNavMeshNextFrame());
+        }
     }
 
+    private IEnumerator RebuildNavMeshNextFrame()
+    {
+        yield return null;
+
+        if (nav != null)
+            nav.BuildNavMesh();
+    }
 
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()

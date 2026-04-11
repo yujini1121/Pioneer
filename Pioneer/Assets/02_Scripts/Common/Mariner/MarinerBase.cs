@@ -48,6 +48,8 @@ public class MarinerBase : CreatureBase
     // NavMeshAgent 공통
     protected NavMeshAgent agent;
 
+    private float originalSpeed;
+
     public virtual void Start()
     {
         base.Start();
@@ -59,6 +61,13 @@ public class MarinerBase : CreatureBase
             agent.acceleration = 12f;
             agent.angularSpeed = 360f;
             agent.stoppingDistance = 0.5f;
+        }
+
+        originalSpeed = speed;
+
+        if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventThunder)
+        {
+            ApplyThunderSpeedModifier(0.8f);
         }
     }
 
@@ -645,6 +654,22 @@ public class MarinerBase : CreatureBase
             return Vector3.Distance(transform.position, agent.destination) <= thresh;
 
         return false;
+    }
+
+    public void ApplyThunderSpeedModifier(float multiplier)
+    {
+        speed = originalSpeed * multiplier;
+
+        if (agent != null)
+            agent.speed = speed;
+    }
+
+    public void ResetThunderSpeedModifier()
+    {
+        speed = originalSpeed;
+
+        if (agent != null)
+            agent.speed = speed;
     }
 
     protected virtual float GetRepairSuccessRate() => 1.0f;

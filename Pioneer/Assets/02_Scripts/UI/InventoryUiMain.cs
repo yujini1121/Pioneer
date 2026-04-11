@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -17,8 +17,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     [SerializeField] List<GameObject> slotGameObjects;
     [SerializeField] List<GameObject> inventorySlot;
     [SerializeField] List<GameObject> quickSlot;
-    [SerializeField] GameObject imageMouseHoldingItem; // ¸¶¿ì½º
-    [SerializeField] GameObject windowMouse; // ¸¶¿ì½º
+    [SerializeField] GameObject imageMouseHoldingItem; // ë§ˆìš°ìŠ¤
+    [SerializeField] GameObject windowMouse; // ë§ˆìš°ìŠ¤
     [SerializeField] Canvas canvas;
     [SerializeField] TextMeshProUGUI windowMouseTextType;
     [SerializeField] TextMeshProUGUI windowMouseTextCategory;
@@ -26,10 +26,14 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     [SerializeField] Button trashButton;
     [SerializeField] Sprite trashOpen;
     [SerializeField] Sprite trashClose;
-    RectTransform followUiRect1; // ¸¶¿ì½º
-    RectTransform followUiRect2; // ¸¶¿ì½º
+    [SerializeField] float clickTerm = 1.0f;
+    RectTransform followUiRect1; // ë§ˆìš°ìŠ¤
+    RectTransform followUiRect2; // ë§ˆìš°ìŠ¤
     ItemSlotUI[] itemSlotUIs;
     ItemSlotUI mCurrentSelectedHotbarSlot;
+    float clickTime = 0.0f;
+    int clickedSlotIndex = -1;
+    Coroutine clickCoroutine = null;
 
     public void InventoryExpand(bool value)
     {
@@ -67,10 +71,19 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             return;
         }
 
-        //Debug.Log($">> ¾ÆÀÌÅÛ ½ºÅÃ : {currentSelectedSlot[0].index} / {mItemStack.id} {mItemStack.amount}");
+        //Debug.Log($">> ì•„ì´í…œ ìŠ¤íƒ : {currentSelectedSlot[0].index} / {mItemStack.id} {mItemStack.amount}");
 
         // windowMouseText.text = 
-        (windowMouseTextType.text, windowMouseTextCategory.text, windowMouseTextInfo.text) = GetInfomation(mItemStack); // ¸¶¿ì½º
+        (windowMouseTextType.text, windowMouseTextCategory.text, windowMouseTextInfo.text) = GetInfomation(mItemStack); // ë§ˆìš°ìŠ¤
+    }
+
+    public void RightClickSlot(int index)
+    {
+        if (InventoryManager.Instance.itemLists[index] != null
+            && InventoryManager.Instance.itemLists[index].itemBaseType.categories == EDataType.WeaponItem)
+        {
+            RepairUI.instance.Open();
+        }
     }
 
     public void ClickSlot(int index)
@@ -80,16 +93,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             SelectSlot(index);
             IconRefresh();
             return;
-        }    
-
-
-        // ÇöÀç Å©·¡ÇÁÆÃ Áß
+        }
+        // í˜„ì¬ í¬ë˜í”„íŒ… ì¤‘
         if (CommonUI.instance.IsCurrentCrafting && InGameUI.instance.currentFabricationUi != null)
         {
             CommonUI.instance.StopCraft(InGameUI.instance.currentFabricationUi);
         }
-
-
         //if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         //{
         //    InventoryManager.Instance.MouseSplit(index);
@@ -100,9 +109,38 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         }
         else
         {
-            InventoryManager.Instance.MouseSwitch(index);
+            SItemStack clickedItem = InventoryManager.Instance.itemLists[index];
+            bool canUseByDoubleClick =
+                InventoryManager.Instance.mouseInventory == null &&
+                clickedItem != null &&
+                (clickedItem.itemBaseType.categories == EDataType.ConsumeItem ||
+                 clickedItem.itemBaseType.categories == EDataType.BuildObject);
+
+            if (canUseByDoubleClick)
+            {
+                if (IsDoubleClick(index))
+                {
+                    WithdrawSingleClick(index);
+                    DoubleClick(index);
+                    EndCheckDoubleClick(index);
+                }
+                else
+                {
+                    WithdrawSingleClick(index);
+                    PrepareSingleClick(index);
+                    BeginCheckDoubleClick(index);
+                }
+            }
+            else
+            {
+                WithdrawSingleClick(index);
+                EndCheckDoubleClick(index);
+                clickTime = 0.0f;
+                InventoryManager.Instance.MouseSwitch(index);
+            }
         }
 
+        // ë§ˆìš°ìŠ¤ ìŠ¬ë¡¯ ì´ë¯¸ì§€ ì—…ëƒ + í´ë¦­í•œ ìŠ¬ë¡¯ ì´ë¯¸ì§€ ì—…ë°ì´íŠ¸
         mouseUI.Show(InventoryManager.Instance.mouseInventory);
         itemSlotUIs[index].Show(InventoryManager.Instance.itemLists[index]);
 
@@ -113,17 +151,17 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 	}
     public void ClickOut()
     {
-        // ¸¶¿ì½º ¾ÆÀÌÅÆ ÇÚµé
-        // ÇÃ·¹ÀÌ¾î ¾ÆÀÌÅÛ ÇÚµé
+        // ë§ˆìš°ìŠ¤ ì•„ì´íƒ¬ í•¸ë“¤
+        // í”Œë ˆì´ì–´ ì•„ì´í…œ í•¸ë“¤
 
         if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory) == false)
         {
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ¾ÆÀÌÅÛ µå·Ó {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ¾ÆÀÌÅÛ µå·Ó1");
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ì•„ì´í…œ ë“œë¡­ {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ì•„ì´í…œ ë“œë¡­1");
             InventoryManager.Instance.MouseDrop();
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ¾ÆÀÌÅÛ µå·Ó2");
+            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ì•„ì´í…œ ë“œë¡­2");
             mouseUI.Clear();
-			//Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ¾ÆÀÌÅÛ µå·Ó3");
+			//Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : ì•„ì´í…œ ë“œë¡­3");
 			InventoryUiMain.instance.IconRefresh();
 			PlayerStatUI.Instance.UpdateBasicStatUI();
 			return;
@@ -131,12 +169,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         if(PlayerCore.Instance.currentState != PlayerCore.PlayerState.ActionFishing)
         {
-            // ÇÃ·¹ÀÌ¾î ¾ÆÀÌÅÛ ÇÚµé
-            Debug.Log($">> InventoryUiMain.ClickOut() : ¾ÆÀÌÅÛÀÌ ºñ¾î ÀÖ½À´Ï´Ù.");
+            // í”Œë ˆì´ì–´ ì•„ì´í…œ í•¸ë“¤
+            Debug.Log($">> InventoryUiMain.ClickOut() : ì•„ì´í…œì´ ë¹„ì–´ ìˆìŠµë‹ˆë‹¤.");
             if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory) ||
                 InventoryManager.Instance.SelectedSlotInventory.itemBaseType.categories == EDataType.NormalItem)
             {
-                // ºó ¾ÆÀÌÅÛ ÁÖ¸Ô °ø°İ
+                // ë¹ˆ ì•„ì´í…œ ì£¼ë¨¹ ê³µê²©
 
                 PlayerCore.Instance.BeginCoroutine(WeaponUseUtils.AttackCoroutine(
                     PlayerCore.Instance,
@@ -162,7 +200,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             //    SItemTypeSO receved = ItemTypeManager.
             //                            Instance.
             //                            types[InventoryManager.Instance.SelectedSlotInventory.id];
-            //    // ¸¸¾à ¹«±â´Ù && ³»±¸µµ°¡ ÀÖ´Ù
+            //    // ë§Œì•½ ë¬´ê¸°ë‹¤ && ë‚´êµ¬ë„ê°€ ìˆë‹¤
             //    SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
             //    if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
             //    {
@@ -170,15 +208,15 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             //        PlayerCore.Instance.Attack(weaponObject);
             //        return;
             //    }
-            //    // ¼ÒºñÇü ¾ÆÀÌÅÛÀÌ´Ù
+            //    // ì†Œë¹„í˜• ì•„ì´í…œì´ë‹¤
             //    SItemConsumeTypeSO consumeObject = receved as SItemConsumeTypeSO;
             //}
-            // ³»±¸µµ°¡ ¸¸·áµÈ ¹«±â È¤Àº ¸Ç¼Õ
+            // ë‚´êµ¬ë„ê°€ ë§Œë£Œëœ ë¬´ê¸° í˜¹ì€ ë§¨ì†
         }
 
         if (Input.GetMouseButtonDown(1))
         {
-            Debug.Log("¿ìÅ¬ °¨Áö");
+            Debug.Log("ìš°í´ ê°ì§€");
         }
 
     }
@@ -204,31 +242,40 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         Debug.Assert(index >= 0);
         Debug.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
+        Debug.Assert(InventoryManager.Instance != null);
 
         InventoryManager.Instance.SelectSlot(index);
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.SelectQuickSlot);
-
         mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
         IconRefresh();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
-        switch (InventoryManager.Instance.SelectedSlotInventory.id)
+        if (InventoryManager.Instance.SelectedSlotInventory == null)
         {
-            case 20001:
-                Debug.Log($">> ¼±ÅÃµÈ ½½·Ô ¾ÆÀÌÅÛ ID : ³ª¹«°Ë");
-                break;
-            case 20002:
-                Debug.Log($">> ¼±ÅÃµÈ ½½·Ô ¾ÆÀÌÅÛ ID : Ã¶ °Ë");
-                break;
-            case 20003:
-                Debug.Log($">> ¼±ÅÃµÈ ½½·Ô ¾ÆÀÌÅÛ ID : ÇØ½ÅÀÇ »ÔÇÇ¸®");
-                break;
-            default:
-                Debug.Log($">> ¼±ÅÃµÈ ½½·Ô ¾ÆÀÌÅÛ ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
-                break;
+            //Debug.Log($">> ì„ íƒëœ ìŠ¬ë¡¯ ì•„ì´í…œ ID : í˜„ì¬ ì¥” ì•„ì´í…œì€ ë¹ˆ ì•„ì´í…œì…ë‹ˆë‹¤.");
+            return;
         }
+        else
+        {
+            switch (InventoryManager.Instance.SelectedSlotInventory.id)
+            {
+                case 20001:
+                    Debug.Log($">> ì„ íƒëœ ìŠ¬ë¡¯ ì•„ì´í…œ ID : ë‚˜ë¬´ê²€");
+                    break;
+                case 20002:
+                    Debug.Log($">> ì„ íƒëœ ìŠ¬ë¡¯ ì•„ì´í…œ ID : ì²  ê²€");
+                    break;
+                case 20003:
+                    Debug.Log($">> ì„ íƒëœ ìŠ¬ë¡¯ ì•„ì´í…œ ID : í•´ì‹ ì˜ ë¿”í”¼ë¦¬");
+                    break;
+                default:
+                    Debug.Log($">> ì„ íƒëœ ìŠ¬ë¡¯ ì•„ì´í…œ ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
+                    break;
+            }
+        }
+
 
 	}
 
@@ -254,6 +301,62 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         IconRefresh();
     }
 
+    private bool IsDoubleClick(int currentSlot)
+    {
+        return (clickedSlotIndex == currentSlot) && clickTime >= Time.time;
+    }
+    private void BeginCheckDoubleClick(int currentIndex)
+    {
+        clickedSlotIndex = currentIndex;
+        clickTime = Time.time + clickTerm;
+    }
+    private void EndCheckDoubleClick(int currentIndex)
+    {
+        clickedSlotIndex = -1;
+    }
+
+    private void DoubleClick(int index)
+    {
+        if (InventoryManager.Instance.itemLists[index] == null) return;
+        EDataType category = InventoryManager.Instance.itemLists[index].itemBaseType.categories;
+        if (category != EDataType.ConsumeItem && category != EDataType.BuildObject) return;
+
+        PlayerCore.Instance.BeginCoroutine(
+            ItemTypeManager.Instance.itemTypeSearch[
+                InventoryManager.Instance.itemLists[index].id].Use(
+                    PlayerCore.Instance,
+                    InventoryManager.Instance.itemLists[index]
+                )
+        );
+
+        // ë”ë¸” í´ë¦­ ì¤€ë¹„
+        clickedSlotIndex = -1;
+        clickTime = 0.0f;
+    }
+    private void PrepareSingleClick(int index)
+    {
+        IEnumerator mSingleClickCoroutine(int _index)
+        {
+            yield return new WaitForSeconds(clickTerm);
+            InventoryManager.Instance.MouseSwitch(_index);
+            clickCoroutine = null;
+            clickedSlotIndex = -1;
+            clickTime = 0.0f;
+        }
+
+        clickCoroutine = StartCoroutine(mSingleClickCoroutine(index));
+    }
+    private void WithdrawSingleClick(int index)
+    {
+        if (clickCoroutine != null)
+        {
+            StopCoroutine(clickCoroutine);
+            clickCoroutine = null;
+            clickedSlotIndex = -1;
+            clickTime = 0.0f;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -270,7 +373,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         ShowWindow();
 
-        // ÀÎº¥Åä¸® ÇÖÅ° ¼±ÅÃ ½ÃÀÛ
+        // ì¸ë²¤í† ë¦¬ í•«í‚¤ ì„ íƒ ì‹œì‘
         int hotkeyInventoryNum = -1;
         if (Input.GetKeyDown(KeyCode.Alpha1)) hotkeyInventoryNum = 0;
         if (Input.GetKeyDown(KeyCode.Alpha2)) hotkeyInventoryNum = 1;
@@ -283,25 +386,25 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if (Input.GetKeyDown(KeyCode.Alpha9)) hotkeyInventoryNum = 8;
         if (hotkeyInventoryNum > -1) SelectSlot(hotkeyInventoryNum);
 
-        // ÀÎº¥Åä¸® ÇÖÅ° ÈÙ ½ºÅ©·Ñ
+        // ì¸ë²¤í† ë¦¬ í•«í‚¤ íœ  ìŠ¤í¬ë¡¤
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f) // À§·Î
+        if (scroll > 0f) // ìœ„ë¡œ
         {
             hotkeyInventoryNum = InventoryManager.Instance.selectedSlotIndex - 1;
             if (hotkeyInventoryNum < 0) hotkeyInventoryNum = quickSlot.Count - 1;
             SelectSlot(hotkeyInventoryNum);
         }
-        else if (scroll < 0f) // ¾Æ·¡·Î
+        else if (scroll < 0f) // ì•„ë˜ë¡œ
         {
             hotkeyInventoryNum = InventoryManager.Instance.selectedSlotIndex + 1;
             if (hotkeyInventoryNum >= quickSlot.Count) hotkeyInventoryNum = 0;
             SelectSlot(hotkeyInventoryNum);
         }
 
-# warning ³ªÁß¿¡ Ã¤ºó¾¾ ºê·£Ä¡ ¸ÓÁö ÇÏ°í ¾÷µ¥ÀÌÆ® µÈ°æ¿ì ÁÖ¼® Ç®±â
+# warning ë‚˜ì¤‘ì— ì±„ë¹ˆì”¨ ë¸Œëœì¹˜ ë¨¸ì§€ í•˜ê³  ì—…ë°ì´íŠ¸ ëœê²½ìš° ì£¼ì„ í’€ê¸°
         //if (hotkeyInventoryNum > -1 &&
         //    PlayerCore.Instance.currentState != PlayerCore.PlayerState.Default) SelectSlot(hotkeyInventoryNum);
-        // ~~Á¾·á~~ ÀÎº¥Åä¸® ÇÖÅ° ¼±ÅÃ ½ÃÀÛ
+        // ~~ì¢…ë£Œ~~ ì¸ë²¤í† ë¦¬ í•«í‚¤ ì„ íƒ ì‹œì‘
     }
 
     (string outTypeName, string outCategoriesName, string outInfomation) GetInfomation(SItemStack target)
@@ -311,13 +414,13 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         string categoriesName = "";
         switch (info.categories)
         {
-            case EDataType.CommonResource: categoriesName = "°øÅë ÀÚ¿ø"; break;
-            case EDataType.WeaponItem: categoriesName = "¹«±â ¾ÆÀÌÅÛ"; break;
-            case EDataType.NormalItem: categoriesName = "ÀÏ¹İ ¾ÆÀÌÅÛ"; break;
-            case EDataType.ConsumeItem: categoriesName = "¼Ò¸ğ ¾ÆÀÌÅÛ"; break;
-            case EDataType.BuildObject: categoriesName = "¼³Ä¡Çü ¿ÀºêÁ§Æ®"; break;
-            case EDataType.Recipe: categoriesName = "Á¦ÀÛ ·¹½ÃÇÇ"; break;
-            case EDataType.Unit: categoriesName = "À¯´Ö"; break;
+            case EDataType.CommonResource: categoriesName = "ê³µí†µ ìì›"; break;
+            case EDataType.WeaponItem: categoriesName = "ë¬´ê¸° ì•„ì´í…œ"; break;
+            case EDataType.NormalItem: categoriesName = "ì¼ë°˜ ì•„ì´í…œ"; break;
+            case EDataType.ConsumeItem: categoriesName = "ì†Œëª¨ ì•„ì´í…œ"; break;
+            case EDataType.BuildObject: categoriesName = "ì„¤ì¹˜í˜• ì˜¤ë¸Œì íŠ¸"; break;
+            case EDataType.Recipe: categoriesName = "ì œì‘ ë ˆì‹œí”¼"; break;
+            case EDataType.Unit: categoriesName = "ìœ ë‹›"; break;
             default: break;
         }
 
@@ -328,9 +431,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void IconRefresh()
     {
-        // ¸ğµç ¾ÆÀÌÅÛÀ»
-        // + ¼±ÅÃµÇÁö ¾ÊÀº »óÅÂ·Î ¹Ù²Ş
-        // + ³»±¸µµ Ã¼Å©
+        // ëª¨ë“  ì•„ì´í…œì„
+        // + ì„ íƒë˜ì§€ ì•Šì€ ìƒíƒœë¡œ ë°”ê¿ˆ
+        // + ë‚´êµ¬ë„ ì²´í¬
         for (int index = 0; index < slotGameObjects.Count; ++index)
         {
             //if (InventoryManager.Instance.itemLists[index] == null) continue;
@@ -354,3 +457,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
 	}
 }
+
+
+
+
+

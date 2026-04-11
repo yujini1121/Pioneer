@@ -114,6 +114,14 @@ public class MastSystem : CommonBase
             {
                 Debug.Log("[MastSystem] UI Open 조건 만족 → OpenUI 실행");
                 OpenUI();
+
+                InGameUI.instance.OpenUI(new System.Collections.Generic.List<GameObject>() { },
+                    InGameUI.ID_MAST_UI, () =>
+                    {
+                        isUIOpen = false;
+                        mastUI?.SetActive(false);
+                    }
+                    );
             }
             else
             {
@@ -127,31 +135,53 @@ public class MastSystem : CommonBase
         Debug.Log("[MastSystem] OpenUI()");
 
         isUIOpen = true;
-        isUpgradeMenuOpen = false;
+        //isUpgradeMenuOpen = false;
 
         if (mastUI == null) Debug.LogError("[MastSystem] mastUI 가 Inspector에 연결되지 않음!");
         if (upgradeUI == null) Debug.LogError("[MastSystem] upgradeUI 가 Inspector에 연결되지 않음!");
 
         mastUI?.SetActive(true);
-        upgradeUI?.SetActive(false);
+        //upgradeUI?.SetActive(false);
+        InGameUI.instance.CloseUI(InGameUI.ID_MAST_UPGRADE);
     }
 
     void OpenUpgradeMenu()
     {
         Debug.Log("[MastSystem] OpenUpgradeMenu()");
-
+        
+        InGameUI.instance.CloseUI(InGameUI.ID_MAST_UI);
+        
         isUpgradeMenuOpen = true;
-        mastUI?.SetActive(false);
         upgradeUI?.SetActive(true);
+        InGameUI.instance.OpenUI(new System.Collections.Generic.List<GameObject>() { },
+                       InGameUI.ID_MAST_UPGRADE, () =>
+                       {
+                           isUpgradeMenuOpen = false;
+                           upgradeUI?.SetActive(false);
+                       });
+
+        //mastUI?.SetActive(false);
     }
 
     void BackToMainUI()
     {
         Debug.Log("[MastSystem] BackToMainUI()");
-        isUpgradeMenuOpen = false;
 
+        isUIOpen = true;
         mastUI?.SetActive(true);
-        upgradeUI?.SetActive(false);
+        InGameUI.instance.OpenUI(new System.Collections.Generic.List<GameObject>() { },
+                    InGameUI.ID_MAST_UI, () =>
+                    {
+                        isUIOpen = false;
+                        mastUI?.SetActive(false);
+                    }
+                    );
+
+        InGameUI.instance.CloseUI(InGameUI.ID_MAST_UPGRADE);
+        //isUpgradeMenuOpen = false;
+
+        //mastUI?.SetActive(true);
+        //upgradeUI?.SetActive(false);
     }
 
     public void CloseAllUI()
@@ -161,8 +191,13 @@ public class MastSystem : CommonBase
         isUIOpen = false;
         isUpgradeMenuOpen = false;
 
+
         mastUI?.SetActive(false);
         upgradeUI?.SetActive(false);
+
+
+        InGameUI.instance.CloseUI(InGameUI.ID_MAST_UI);
+        InGameUI.instance.CloseUI(InGameUI.ID_MAST_UPGRADE);
     }
 
     void UpdateUI()

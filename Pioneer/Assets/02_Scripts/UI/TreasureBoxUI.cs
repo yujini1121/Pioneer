@@ -13,18 +13,6 @@ public class TreasureBoxUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void Awake()
     {
         instance = this;
@@ -40,7 +28,7 @@ public class TreasureBoxUI : MonoBehaviour
         itemImage.sprite = itemType.image;
 
         itemName.text = itemType.typeName;
-        itemCount.text = $"(x{sItemStack.amount})";
+        itemCount.text = $"x{sItemStack.amount}";
     }
 
     public void CloseWindow()

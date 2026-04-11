@@ -16,9 +16,13 @@ public class CrawlerAI : EnemyBase, IBegin
     private bool isAttack = false;
     private float attackTimer = 0f;
 
+    private StunHandler stunHandler;
+    private float originalSpeed;
+
     private void Awake()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>();
+        stunHandler = GetComponent<StunHandler>();
     }
 
     void Start()
@@ -27,10 +31,20 @@ public class CrawlerAI : EnemyBase, IBegin
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
         if (agent != null) agent.speed = speed;
+
+        originalSpeed = speed;
+
+        if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventThunder)
+        {
+            ApplyThunderSpeedModifier(0.8f);
+        }
     }
 
     void Update()
     {
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
         float dt = Time.deltaTime;
 
         // 공격 쿨타임이어도 애니메이션 트리거는 계속 갱신(안 그러면 크롤러가 멈춘 것처럼 보일 수 있음)
@@ -163,6 +177,22 @@ public class CrawlerAI : EnemyBase, IBegin
         sortedTarget = fov.visibleTargets
             .OrderBy(target => Vector3.Distance(transform.position, target.transform.position))
             .ToList();
+    }
+
+    public void ApplyThunderSpeedModifier(float multiplier)
+    {
+        speed = originalSpeed * multiplier;
+
+        if (agent != null)
+            agent.speed = speed;
+    }
+
+    public void ResetThunderSpeedModifier()
+    {
+        speed = originalSpeed;
+
+        if (agent != null)
+            agent.speed = speed;
     }
 
     // ---------------- 애니메이션 유틸 ----------------

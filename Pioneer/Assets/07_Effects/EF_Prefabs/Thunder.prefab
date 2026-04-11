@@ -4900,7 +4900,6 @@ GameObject:
   - component: {fileID: 6745356917420353943}
   - component: {fileID: 799718066211676457}
   - component: {fileID: 2752331846643594939}
-  - component: {fileID: 2679099638240195656}
   m_Layer: 0
   m_Name: Thunder
   m_TagString: Untagged
@@ -4939,7 +4938,7 @@ ParticleSystem:
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 1
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
@@ -9786,21 +9785,8 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4885947771507182583}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2679099638240195656
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4885947771507182583}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9189148afb80d1c45890f2aedc1987fd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetScreenSize: 0.1

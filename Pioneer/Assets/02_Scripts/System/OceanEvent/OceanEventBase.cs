@@ -4,7 +4,18 @@ using UnityEngine;
 
 public abstract class OceanEventBase
 {
-    public virtual void EventRun() { }
+    public string EventName { get; protected set; }
+    public bool IsRunning { get; protected set; }
+
+    public virtual void EventRun()
+    {
+        IsRunning = true;
+    }
+
     public virtual void EnterNight() { }
-	public virtual void EventEnd() { }
+
+    public virtual void EventEnd()
+    {
+        IsRunning = false;
+    }
 }

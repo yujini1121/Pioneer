@@ -22,6 +22,9 @@ public class MinionAI : EnemyBase, IBegin
 
     private float attackTimer = 0f;
 
+    private StunHandler stunHandler;
+    private float originalSpeed;
+
     private void Awake()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>();
@@ -30,6 +33,7 @@ public class MinionAI : EnemyBase, IBegin
     void Start()
     {
         base.Start();
+        stunHandler = GetComponent<StunHandler>();
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
 
@@ -38,10 +42,20 @@ public class MinionAI : EnemyBase, IBegin
             agent.speed = speed;
             agent.stoppingDistance = 0.8f;
         }
+
+        originalSpeed = speed;
+
+        if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventThunder)
+        {
+            ApplyThunderSpeedModifier(0.8f);
+        }
     }
 
     void Update()
     {
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
         if (!CheckOnGround())
             return;
 
@@ -298,6 +312,22 @@ public class MinionAI : EnemyBase, IBegin
         }
 
         return isOnGround;
+    }
+
+    public void ApplyThunderSpeedModifier(float multiplier)
+    {
+        speed = originalSpeed * multiplier;
+
+        if (agent != null)
+            agent.speed = speed;
+    }
+
+    public void ResetThunderSpeedModifier()
+    {
+        speed = originalSpeed;
+
+        if (agent != null)
+            agent.speed = speed;
     }
 
     // ---------------- 애니메이션 유틸 ----------------

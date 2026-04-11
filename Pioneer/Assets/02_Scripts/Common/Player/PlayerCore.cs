@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Rendering.VirtualTexturing;
 using static MarinerBase;
 
 #region 그냥 메모
@@ -148,6 +149,8 @@ public class PlayerCore : CreatureBase, IBegin
     // 체력 29 이하 소리 한 번 출력 확인 bool 변수
     private bool isPlaySFXLowHp = false;
 
+    private StunHandler stunHandler;
+
     public SItemWeaponTypeSO CalculatedHandAttack
     {
         get
@@ -173,6 +176,7 @@ public class PlayerCore : CreatureBase, IBegin
     private Rigidbody playerRb;
     private bool isAttacking = false;
     private float defaultSpeed;
+    private float thunderSpeedMultiplier = 1f;
 
     public static event Action<int> PlayerHpChanged;
     public static event Action<int> PlayerFullnessChanged;
@@ -183,6 +187,9 @@ public class PlayerCore : CreatureBase, IBegin
     // 코루틴 변수
     private bool isRunningCoroutineItem = false;
     public bool IsRunningCoroutineItem => isRunningCoroutineItem;
+
+    [Header("디버깅")]
+    public bool isDebugging;
 
     void Awake()
     {
@@ -205,6 +212,7 @@ public class PlayerCore : CreatureBase, IBegin
     new void Start()
     {
         base.Start();
+        stunHandler = GetComponent<StunHandler>();
 
         UpdateFullnessState();
         StartCoroutine(FullnessSystemCoroutine());                   // 게임 시작시 포만감 계속 1씩 감소 시작
@@ -212,7 +220,10 @@ public class PlayerCore : CreatureBase, IBegin
 
     void Update()
     {
-        if(hp <= 0)
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
+        if (hp <= 0)
         {
             IsDead = true;
             WhenDestroy();
@@ -252,7 +263,8 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     void SetSetAttribute()
     {
-        maxHp = 100;
+        //maxHp = 100;
+        maxHp = 40000;
         hp = maxHp;                 // 체력
         speed = 4.0f;               // 이동 속도
         defaultSpeed = speed;
@@ -326,7 +338,10 @@ public class PlayerCore : CreatureBase, IBegin
     public void Idle(Vector3 moveInput)
     {
         int idx = Get4DirIndex(moveInput);
-        UnityEngine.Debug.Log($"Idle idx : {idx}");
+        if (isDebugging)
+        {
+            UnityEngine.Debug.Log($"Idle idx : {idx}");
+        }
 
         if (idx != _curRunIdx)
         {
@@ -351,6 +366,21 @@ public class PlayerCore : CreatureBase, IBegin
 
         var v = moveInput.normalized * speed;
         playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
+    }
+
+    // =============================================================
+    // 뇌우 적용 : 이동속도 감소
+    // =============================================================
+    public void ApplyThunderSpeedModifier(float multiplier)
+    {
+        thunderSpeedMultiplier = multiplier;
+        UpdateFullnessState();
+    }
+
+    public void ResetThunderSpeedModifier()
+    {
+        thunderSpeedMultiplier = 1f;
+        UpdateFullnessState();
     }
 
     // =============================================================
@@ -485,7 +515,10 @@ public class PlayerCore : CreatureBase, IBegin
 
                 PlayerFullnessChanged?.Invoke(currentFullness);
             }
-            UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
+            if (isDebugging)
+            {
+                UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
+            }
         }
     }
 
@@ -505,24 +538,28 @@ public class PlayerCore : CreatureBase, IBegin
         else
             fullnessState = FullnessState.Starving;
 
+        float baseMoveSpeed;
         switch (fullnessState)
         {
             case FullnessState.Full:
-                speed = defaultSpeed * 1.2f;
-                break;
-            case FullnessState.Hungry:
+                baseMoveSpeed = defaultSpeed * 1.2f;
                 break;
             case FullnessState.Starving:
-                speed = defaultSpeed * 0.7f;
+                baseMoveSpeed = defaultSpeed * 0.7f;
                 break;
             default:
-                speed = defaultSpeed;
+                baseMoveSpeed = defaultSpeed;
                 break;
         }
+        speed = baseMoveSpeed * thunderSpeedMultiplier;
 
         if (fullnessState != currentFullnessState)
         {
+            RemoveFullnessUI(currentFullnessState);
+
             currentFullnessState = fullnessState;
+
+            AddFullnessUI(currentFullnessState);
 
             if (currentFullnessState == FullnessState.Hungry)
             {
@@ -656,6 +693,13 @@ public class PlayerCore : CreatureBase, IBegin
         // 수치에 따라 디버프 부여,,
     }
 
+    // 바다이벤트 : 안개 -> 정신력 감소 
+    public void ReduceMentalByFog()
+    {
+        int reduceValue = Mathf.RoundToInt(maxMental * 0.1f);
+        UpdateMental(-reduceValue);
+    }
+
     /// <summary>
     /// 에너미에게 공격 받은 경우 정신력 감소 시키는 함수 -3
     /// </summary>
@@ -724,4 +768,43 @@ public class PlayerCore : CreatureBase, IBegin
         isDrunk = false;
     }
     #endregion
+
+    // ==============================================================
+    // 헬퍼함수
+
+    private void AddFullnessUI(FullnessState state)
+    {
+        if (BuffUIManager.Instance == null) return;
+
+        switch (state)
+        {
+            case FullnessState.Full:
+                BuffUIManager.Instance.BeginUI(EffectType.Fullness_Full, true);
+                break;
+            case FullnessState.Hungry:
+                BuffUIManager.Instance.BeginUI(EffectType.Fullness_Hungry, false);
+                break;
+            case FullnessState.Starving:
+                BuffUIManager.Instance.BeginUI(EffectType.Fullness_Starving, false);
+                break;
+        }
+    }
+
+    private void RemoveFullnessUI(FullnessState state)
+    {
+        if (BuffUIManager.Instance == null) return;
+
+        switch (state)
+        {
+            case FullnessState.Full:
+                BuffUIManager.Instance.EndUI(EffectType.Fullness_Full);
+                break;
+            case FullnessState.Hungry:
+                BuffUIManager.Instance.EndUI(EffectType.Fullness_Hungry);
+                break;
+            case FullnessState.Starving:
+                BuffUIManager.Instance.EndUI(EffectType.Fullness_Starving);
+                break;
+        }
+    }
 }

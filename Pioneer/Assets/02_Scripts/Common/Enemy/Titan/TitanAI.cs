@@ -13,6 +13,9 @@ public class TitanAI : EnemyBase, IBegin
     private bool isAttack = false;
     private float attackTimer = 0f;
 
+    private StunHandler stunHandler;
+    private float originalSpeed;
+
     private void Awake()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>();
@@ -21,6 +24,8 @@ public class TitanAI : EnemyBase, IBegin
     void Start()
     {
         base.Start();
+
+        stunHandler = GetComponent<StunHandler>();
 
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;
@@ -32,10 +37,20 @@ public class TitanAI : EnemyBase, IBegin
 
         SetAttribute();
         if (agent != null) agent.speed = speed;
+
+        originalSpeed = speed;
+
+        if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventThunder)
+        {
+            ApplyThunderSpeedModifier(0.8f);
+        }
     }
 
     void Update()
     {
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
+
         float dt = Time.deltaTime;
 
         if (attackTimer > 0f)
@@ -197,6 +212,21 @@ public class TitanAI : EnemyBase, IBegin
         }
 
         isAttack = false;
+    }
+    public void ApplyThunderSpeedModifier(float multiplier)
+    {
+        speed = originalSpeed * multiplier;
+
+        if (agent != null)
+            agent.speed = speed;
+    }
+
+    public void ResetThunderSpeedModifier()
+    {
+        speed = originalSpeed;
+
+        if (agent != null)
+            agent.speed = speed;
     }
 
     private void UpdateLocomotionAnim()
