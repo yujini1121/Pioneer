@@ -1,26 +1,15 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// ëª¨ë“  ê²Œì„ UiëŠ” ì—¬ê¸°ì„œ í•´ê²°í•©ë‹ˆë‹¤.
-// ì„¸ë¶€ì  ì¡°ì‘ì€ í•´ë‹¹ ì»´í¬ë„ŒíŠ¸ë¥¼ ê²½ìœ í•´ì„œ ì„¸íŒ…í•©ë‹ˆë‹¤.
+// ¸ğµç °ÔÀÓ Ui´Â ¿©±â¼­ ÇØ°áÇÕ´Ï´Ù.
+// ¼¼ºÎÀû Á¶ÀÛÀº ÇØ´ç ÄÄÆ÷³ÍÆ®¸¦ °æÀ¯ÇØ¼­ ¼¼ÆÃÇÕ´Ï´Ù.
 public class InGameUI : MonoBehaviour, IBegin
 {
     static public InGameUI instance;
 
-    public const int ID_CHAR_PANNEL = 1;
-    public const int ID_MAKESHIFT = 2;
-    public const int ID_REPAIR_ITEM = 3;
-    public const int ID_MAST_UI = 4;
-    public const int ID_MAST_UPGRADE = 5;
-    public const int ID_CRAFTTABLE = 6;
-    public const int ID_ESC_OPTION = 7;
-    public const int ID_ESC_OPTION_SETTINGS = 8;
-    public const int ID_ESC_OPTION_HELP = 9;
-
-    [Header("ì„œë¸Œ UI ê²Œì„ì˜¤ë¸Œì íŠ¸")]// UI ê²Œì„ ì˜¤ë¸Œì íŠ¸ê°€ ì¡´ì¬í•˜ê³  ì™¸ë¶€ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ì ‘ê·¼í•  í•„ìš”ê°€ ìˆë‹¤ê³  íŒë‹¨í•˜ëŠ” ê²½ìš°, ì—¬ê¸°ì— ì¶”ê°€í•˜ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤.
+    [Header("¼­ºê UI °ÔÀÓ¿ÀºêÁ§Æ®")]// UI °ÔÀÓ ¿ÀºêÁ§Æ®°¡ Á¸ÀçÇÏ°í ¿ÜºÎ ½ºÅ©¸³Æ®¿¡¼­ Á¢±ÙÇÒ ÇÊ¿ä°¡ ÀÖ´Ù°í ÆÇ´ÜÇÏ´Â °æ¿ì, ¿©±â¿¡ Ãß°¡ÇÏ½Ç ¼ö ÀÖ½À´Ï´Ù.
     public GameObject gameObjectBarChart;
-    public GameObject gameObjectGuiltyBarChart; // ì£„ì±…ê°
+    public GameObject gameObjectGuiltyBarChart; // ÁËÃ¥°¨
     public GameObject gameObjectBuffEffect;
     public GameObject gameObjectItemGet;
     public GameObject gameObjectClock;
@@ -41,8 +30,8 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject gameObjectInventory;
     public GameObject ManuUI;
     public GameObject ManuDenyUI;
-    public List<GameObject> gameObjectListExpandedInventory; // ì¸ë²¤í† ë¦¬ ì¹¸ / ì •ë ¬ ë²„íŠ¼ / ë²„ë¦¬ê¸° ë²„íŠ¼
-    [Header("ì„œë¸Œ UI ë¡œì§ í´ë˜ìŠ¤")]
+    public List<GameObject> gameObjectListExpandedInventory; // ÀÎº¥Åä¸® Ä­ / Á¤·Ä ¹öÆ° / ¹ö¸®±â ¹öÆ°
+    [Header("¼­ºê UI ·ÎÁ÷ Å¬·¡½º")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
     [HideInInspector]
@@ -71,21 +60,13 @@ public class InGameUI : MonoBehaviour, IBegin
     // Start is called before the first frame update
     void Start()
     {
-        //OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
-        //    () => { Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI"); makeshiftCraftUI.SetActive(false); });
+        Show(makeshiftCraftUI);
         UseTab();
-
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            Debug.Log($"InGameUI - makeshiftCraftUI ìƒíƒœ : {makeshiftCraftUI.activeInHierarchy}");
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             UseESC();
@@ -108,19 +89,8 @@ public class InGameUI : MonoBehaviour, IBegin
     public void ShowDefaultCraftUI()
     {
         CommonUI.instance.CloseTab(mainCraft.ui);
-        //Clear();
-        CloseUI(ID_MAKESHIFT);
-        // ì—¬ê¸°ì„œ ì„¸íŒ…
-
-        defaultCraftUI.SetActive(true);
-        ApplyPanelExpandState();
-        OpenUI(new List<GameObject>() { defaultCraftUI }, ID_CRAFTTABLE,
-            () =>
-            {
-                Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - defaultCraftUI");
-                defaultCraftUI.SetActive(false);
-            }
-            );
+        Clear();
+        // ¿©±â¼­ ¼¼ÆÃ
 
         if (isCraftButtonExist == false)
         {
@@ -178,69 +148,58 @@ public class InGameUI : MonoBehaviour, IBegin
 
         }
 
+        Show(defaultCraftUI);
         currentFabricationUi = mainCraft.ui;
         isNearCraft = true;
     }
 
     public void CloseDefaultCraftUI()
     {
-        Debug.Log("InGameUI.CloseDefaultCraftUI() í˜¸ì¶œë¨");
-        //CommonUI.instance.CloseTab(makeshiftCraft.ui);
-        //Clear();
-        
-        //if (isPannelExpand && (IsOpened(ID_MAKESHIFT) == false))
-        //{
-        //    OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
-        //    () =>
-        //    {
-        //        Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI");
-        //        CommonUI.instance.CloseTab(makeshiftCraft.ui);
-        //        makeshiftCraftUI.SetActive(false);
-        //    }
-        //    );
-        //}
-
-        // makeshiftCraftUI.SetActive(isPannelExpand);
+        CommonUI.instance.CloseTab(makeshiftCraft.ui);
+        Clear();
+        Show(makeshiftCraftUI);
+        uiChunkStack.Add(new InGameUiChunk());
+        makeshiftCraftUI.SetActive(isPannelExpand);
         InventoryUiMain.instance.IconRefresh();
         currentFabricationUi = makeshiftCraft.ui;
         isNearCraft = false;
-
-        CloseUI(ID_CRAFTTABLE);
-        ApplyPanelExpandState();
     }
 
-    //public void Show(GameObject UiGo)
-    //{
-    //    UiGo.SetActive(true);
-    //    currentOpenedUI.Add(UiGo);
-    //}
+    public void Show(GameObject UiGo)
+    {
+        UiGo.SetActive(true);
+        currentOpenedUI.Add(UiGo);
+    }
 
-    //public void Clear() // ëª¨ë“  ì—´ë¦° UI ë‹«ê¸°
-    //{
-    //    foreach (GameObject go in currentOpenedUI)
-    //    {
-    //        go.SetActive(false);
-    //    }
-    //}
+    public void Clear()
+    {
+        foreach (GameObject go in currentOpenedUI)
+        {
+            go.SetActive(false);
+        }
+    }
 
     public void UseESC()
     {
         CreateObject.instance.ExitInstallMode();
 
-
-
         if (uiChunkStack.Count > 0)
         {
-            CloseUI();
+            if(uiChunkStack[0].isNeedCloseAction)
+            {
+                uiChunkStack[0].CloseAction();
+            }
+            uiChunkStack.RemoveAt(0);
         }
 
-        //if (defaultCraftUI.activeInHierarchy)
-        //{
-        //    CloseDefaultCraftUI();
-        //    return;
-        //}
+        if (defaultCraftUI.activeInHierarchy)
+        {
+            
+            CloseDefaultCraftUI();
+            return;
+        }
 
-        else if (ManuUI.activeInHierarchy)
+        if (ManuUI.activeInHierarchy)
         {
             //ManuUI.SetActive(false);
             Option.instance.SetDeactivateEscUI();
@@ -261,8 +220,17 @@ public class InGameUI : MonoBehaviour, IBegin
         }
     }
 
-    private void ApplyPanelExpandState()
+    public void UseTab()
     {
+        // °£ÀÌ Á¦ÀÛ ÅÇÀÌ ¿­¸²(Á¶ÇÕ´ë ´êÁö ¾ÊÀ»¶§)
+        // ÀÎº¥Åä¸® ÅÇÀÌ È®ÀåµÊ
+        // Á¤·Ä ¹öÆ°
+        // ¹ö¸®±â ¹öÆ°
+        // Àåºñ Ã¢
+        // ÇÃ·¹ÀÌ¾î ½ºÅÈ Ã¢
+
+        isPannelExpand = !isPannelExpand;
+
         gameObjectBackgroundWhiteScreen.SetActive(isPannelExpand);
 
         foreach (GameObject g in gameObjectListExpandedInventory)
@@ -270,110 +238,29 @@ public class InGameUI : MonoBehaviour, IBegin
             g.SetActive(isPannelExpand);
         }
         InventoryUiMain.instance.InventoryExpand(isPannelExpand);
-    }
-
-    public void UseTab()
-    {
-        // ê°„ì´ ì œì‘ íƒ­ì´ ì—´ë¦¼
-        // ì¸ë²¤í† ë¦¬ íƒ­ì´ í™•ì¥ë¨
-        // ì •ë ¬ ë²„íŠ¼
-        // ë²„ë¦¬ê¸° ë²„íŠ¼
-        // ì¥ë¹„ ì°½
-        // í”Œë ˆì´ì–´ ìŠ¤íƒ¯ ì°½
-
-        isPannelExpand = !isPannelExpand;
-
-        ApplyPanelExpandState();
         if (isPannelExpand == false)
         {
             if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
-            
             makeshiftCraftUI.SetActive(false);
             gameObjectPlayerStatUiParent.SetActive(false);
-            CloseUI(ID_MAKESHIFT);
-            CloseUI(ID_CHAR_PANNEL);
 
-
-            Debug.Log(">> ë‹«ê¸°");
+            Debug.Log(">> ´İ±â");
         }
-        if (isPannelExpand == true && isNearCraft == false) //
+        if (isPannelExpand == true && isNearCraft == false)
         {
-            Debug.Log(">> InGameUI.UseTab() ì—´ê¸°");
-
-            OpenUI(new List<GameObject>() { gameObjectPlayerStatUiParent }, ID_CHAR_PANNEL,
-                () => {
-                    Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - gameObjectPlayerStatUiParent");
-                    gameObjectPlayerStatUiParent.SetActive(false); }
-                );
-            OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
-                () => {
-                    Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI");
-                    makeshiftCraftUI.SetActive(false);
-                    Debug.Assert(makeshiftCraftUI.activeInHierarchy == false);
-                    Debug.Log($"InGameUI.CloseAction ì°½ ë‹«ê¸° - makeshiftCraftUI ìƒíƒœ : {makeshiftCraftUI.activeInHierarchy}");
-                }
-                );
-            
-            // -> ì—¬ê¸°ì— í™•ì¥ í• ë‹¹
             makeshiftCraftUI.SetActive(true);
+
+            uiChunkStack.Add(
+                new InGameUiChunk(new List<GameObject>() { gameObjectPlayerStatUiParent }, true,
+                () => { gameObjectPlayerStatUiParent.SetActive(false); }
+                ));
+            // -> ¿©±â¿¡ È®Àå ÇÒ´ç
             gameObjectPlayerStatUiParent.SetActive(true);
         }
     }
-    //public void ApplyUiStack(List<GameObject> uiGameobjects) =>
-    //    uiChunkStack.Add(new InGameUiChunk(uiGameobjects));
-    //public void ApplyUiStack(List<GameObject> uiGameobjects, bool isNeedCloseAction, System.Action closeAction) =>
-    //    uiChunkStack.Add(new InGameUiChunk(uiGameobjects, isNeedCloseAction, closeAction));
 
-    public bool IsOpened(int id)
-    {
-        for (int index = 0; index < uiChunkStack.Count; ++index)
-        {
-            if (uiChunkStack[index].id != id) continue;
-            return true;
-        }
-        return false;
-    }
-    public void OpenUI(List<GameObject> uiGameobjects, int id)
-    {
-        OpenUI(uiGameobjects, id,
-            () =>
-            {
-                Debug.Log("InGameUI.CloseAction ì°½ ë‹«ê¸°");
-                foreach (GameObject go in uiGameobjects) { go.SetActive(false); }
-            });
-    }
-    public void OpenUI(List<GameObject> uiGameobjects, int id, System.Action closeAction)
-    {
-        Debug.Log("InGameUI.OpenUI ì°½ ì—´ê¸°");
-
-        foreach (GameObject g in uiGameobjects)
-        {
-            g.SetActive(true);
-        }
-        InGameUiChunk one = new InGameUiChunk(uiGameobjects, true, closeAction);
-        one.id = id;
-        uiChunkStack.Add(one);
-    }
-    public void CloseUI(int id)
-    {
-        for (int index = 0; index < uiChunkStack.Count; ++index)
-        {
-            if (uiChunkStack[index].id != id) continue;
-            uiChunkStack[index].CloseAction();
-            uiChunkStack.RemoveAt(index);
-        }
-    }
-    public void CloseUI()
-    {
-        Debug.Log($"InGameUI.CloseUI() / Count = {uiChunkStack.Count}");
-
-        if (uiChunkStack.Count <= 0) return;
-
-        uiChunkStack[uiChunkStack.Count - 1].CloseAction();
-        uiChunkStack.RemoveAt(uiChunkStack.Count - 1);
-    }
-
+    public void ApplyUiStack(List<GameObject> uiGameobjects) =>
+        uiChunkStack.Add(new InGameUiChunk(uiGameobjects));
+    public void ApplyUiStack(List<GameObject> uiGameobjects, bool isNeedCloseAction, System.Action closeAction) =>
+        uiChunkStack.Add(new InGameUiChunk(uiGameobjects, isNeedCloseAction, closeAction));
 }
-
-
-

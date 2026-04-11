@@ -126,9 +126,31 @@ public class CommonUI : MonoBehaviour, IBegin
                 StopCraft(ui);
                 ui.timeLeft.text = $"{recipe.time}s";
             }
-            else
+            else if (recipe.resultBuildingOrNull == null)
             {
                 currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, outsideGameObjectCraftButtonsWithImage, ui));
+
+            }
+            // 건물 건축인 경우
+            else
+            {
+                // 제작 창을 닫음
+                // 헤당 위치로 이동
+                // 시간 소모
+                // 방해 없으면 계속 개발
+
+                // 여기서 건축물 선택
+                CloseTab(ui);
+                if (InGameUI.instance.IsPannelExpanded)
+                {
+                    InGameUI.instance.UseTab();
+                }
+
+                CreateObject.instance.EnterInstallMode(recipe.resultBuildingOrNull, recipe.input);
+
+                Debug.Log("CommonUI : 설치 진입");
+                //asdasdads
+
             }
         });
     }
@@ -438,6 +460,3 @@ public class CommonUI : MonoBehaviour, IBegin
         ui.gameObject.SetActive(false);
     }
 }
-
-
-
