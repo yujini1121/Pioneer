@@ -120,6 +120,8 @@ public class Ballista : StructureBase, IBegin
         nearestTrans = null;
         enemyDetect = false;
         colliders = null;
+
+        SetGunnerIdleOnce();
     }
 
     public override void UnUse()
@@ -305,6 +307,25 @@ public class Ballista : StructureBase, IBegin
             ForceUnmount();
 
         base.WhenDestroy();
+    }
+
+    private void SetGunnerIdleOnce()
+    {
+        if (gunner == null || gunnerCore == null)
+            return;
+
+        Vector3 dir = transform.forward;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude <= 0.0001f)
+            return;
+
+        dir.Normalize();
+
+        if (gunnerController != null)
+            gunnerController.lastMoveDirection = dir;
+
+        gunnerCore.Idle(dir);
     }
 
 #if UNITY_EDITOR

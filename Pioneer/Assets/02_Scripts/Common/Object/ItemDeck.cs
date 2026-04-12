@@ -13,6 +13,10 @@ public class ItemDeck : StructureBase
     private Coroutine warningCoroutine;
     private Color[] originColors;
     private bool isCached = false;
+
+    [Header("상부 설치 오브젝트 정리")]
+    [SerializeField] private Vector3 installedObjectCheckHalfExtents = new Vector3(0.9f, 2f, 0.9f);
+    [SerializeField] private Vector3 installedObjectCheckCenterOffset = new Vector3(0f, 1.2f, 0f);
     private void CacheDefaultState()
     {
         if (isCached) return;
@@ -63,6 +67,39 @@ public class ItemDeck : StructureBase
             warningRenderers[i].material.color = originColors[i];
         }
     }
+
+    private void DestroyInstalledObjectsOnTop()
+    {
+        Vector3 center = transform.position + installedObjectCheckCenterOffset;
+
+        Collider[] hits = Physics.OverlapBox(
+            center,
+            installedObjectCheckHalfExtents,
+            transform.rotation,
+            ~0,
+            QueryTriggerInteraction.Collide
+        );
+
+        HashSet<InstalledObject> targets = new HashSet<InstalledObject>();
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i] == null) continue;
+
+            InstalledObject installed = hits[i].GetComponentInParent<InstalledObject>();
+            if (installed == null) continue;
+            if (installed.gameObject == gameObject) continue;
+
+            targets.Add(installed);
+        }
+
+        foreach (InstalledObject installed in targets)
+        {
+            if (installed == null) continue;
+            Destroy(installed.gameObject);
+        }
+    }
+
     public void DestroyByThunder()
     {
         if (IsDead) return;
@@ -78,8 +115,11 @@ public class ItemDeck : StructureBase
     public override void WhenDestroy()
     {
         EndThunderWarning();
+        DestroyInstalledObjectsOnTop();
+
         if (ItemDeckDisconnect.instance != null)
             ItemDeckDisconnect.instance.RemoveDeck(gameObject);
+
         base.WhenDestroy();
     }
 }

@@ -105,9 +105,9 @@ public class OceanEventManager : MonoBehaviour
         }
 
         // 전체 선택
-        int selectedIndex = Random.Range(0, remainingEvents.Count);
-        currentEvent = remainingEvents[selectedIndex];
-        remainingEvents.RemoveAt(selectedIndex);
+        //int selectedIndex = Random.Range(0, remainingEvents.Count);
+        //currentEvent = remainingEvents[selectedIndex];
+        //remainingEvents.RemoveAt(selectedIndex);
 
         #region 하나만 선택
         //// 평범 
@@ -125,13 +125,13 @@ public class OceanEventManager : MonoBehaviour
         //                           sirenCharmDuration,
         //                           sirenProcChance);
 
-        //// 뇌우
-        //currentEvent = new OceanEventThunder(thunderEffect,
-        //                             rainEffect,
-        //                             thunderInterval,
-        //                             thunderWarningDuration,
-        //                             thunderRadius,
-        //                             thunderStunDuration);
+        // 뇌우
+        currentEvent = new OceanEventThunder(thunderEffect,
+                                     rainEffect,
+                                     thunderInterval,
+                                     thunderWarningDuration,
+                                     thunderRadius,
+                                     thunderStunDuration);
 
         //// 녹조
         //currentEvent = new OceanEventWaterBloom();

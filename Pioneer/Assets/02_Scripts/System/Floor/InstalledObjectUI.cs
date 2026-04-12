@@ -51,7 +51,7 @@ public class InstalledObjectUI : MonoBehaviour
     bool panelIsRoot => panel && panel.gameObject == gameObject;
     private NavMeshSurface nav;
     bool selectedThisFrame;
-
+    MeshRenderer outlinedRenderer;
 
     void Awake()
     {
@@ -100,15 +100,7 @@ public class InstalledObjectUI : MonoBehaviour
                 SetSelection(obj);
                 selectedThisFrame = true;
                 ShowAt(current.transform.position);   // �� Ȱ��ȭ + ��ġ ����
-
-                MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
-                if (meshRenderer != null && outlineMat != null)
-                {
-                    List<Material> materials = new List<Material>(meshRenderer.sharedMaterials);
-                    materials.Add(outlineMat);
-                    meshRenderer.sharedMaterials = materials.ToArray();
-                }
-
+                
                 structure = current.gameObject.GetComponent<StructureBase>();
                 UpdateDurability();
             }
@@ -164,15 +156,12 @@ public class InstalledObjectUI : MonoBehaviour
             if (!RectTransformUtility.RectangleContainsScreenPoint(panel, Input.mousePosition, null) &&
                 (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
             {
-                MeshRenderer currentRenderer = current != null ? current.GetComponent<MeshRenderer>() : null;
-                Hide();
-                if (currentRenderer != null)
+                if (!selectedThisFrame && IsPanelVisible() && Input.GetMouseButtonDown(0))
                 {
-                    List<Material> materials = new List<Material>(currentRenderer.sharedMaterials);
-                    if (materials.Count > 0 && outlineMat != null && materials[materials.Count - 1] == outlineMat)
+                    if (!RectTransformUtility.RectangleContainsScreenPoint(panel, Input.mousePosition, null) &&
+                        (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
                     {
-                        materials.RemoveAt(materials.Count - 1);
-                        currentRenderer.sharedMaterials = materials.ToArray();
+                        Hide();
                     }
                 }
             }
@@ -182,11 +171,18 @@ public class InstalledObjectUI : MonoBehaviour
         UpdateDurability();
     }
 
-
     void SetSelection(InstalledObject obj)
     {
+        if (current == obj)
+            return;
+
+        RemoveOutline();
+
         current = obj;
         mode = Mode.Idle;
+
+        if (current != null)
+            ApplyOutline(current);
     }
 
     public bool TryPick(out InstalledObject obj)
@@ -268,11 +264,12 @@ public class InstalledObjectUI : MonoBehaviour
         nav.BuildNavMesh();
         yield return null;
     }
-
     public void Hide()
     {
+        RemoveOutline();
 
         current = null;
+        structure = null;
         mode = Mode.Idle;
 
         if (panelIsRoot)
@@ -322,5 +319,66 @@ public class InstalledObjectUI : MonoBehaviour
         if (repairImage2 != null) repairImage2.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
         if (durabilityText != null && structure.maxHp > 0)
             durabilityText.text = $"{(structure.hp * 100) / structure.maxHp}%";
+    }
+
+    private MeshRenderer GetTargetRenderer(InstalledObject obj)
+    {
+        if (obj == null) return null;
+
+        MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
+        if (meshRenderer == null)
+            meshRenderer = obj.GetComponentInChildren<MeshRenderer>();
+
+        return meshRenderer;
+    }
+
+    private void ApplyOutline(InstalledObject obj)
+    {
+        if (obj == null || outlineMat == null)
+            return;
+
+        MeshRenderer meshRenderer = GetTargetRenderer(obj);
+        if (meshRenderer == null)
+            return;
+
+        List<Material> materials = new List<Material>(meshRenderer.sharedMaterials);
+        if (!materials.Contains(outlineMat))
+        {
+            materials.Add(outlineMat);
+            meshRenderer.sharedMaterials = materials.ToArray();
+        }
+
+        outlinedRenderer = meshRenderer;
+    }
+
+    private void RemoveOutline()
+    {
+        if (outlinedRenderer == null || outlineMat == null)
+        {
+            outlinedRenderer = null;
+            return;
+        }
+
+        List<Material> materials = new List<Material>(outlinedRenderer.sharedMaterials);
+        bool removed = false;
+
+        for (int i = materials.Count - 1; i >= 0; i--)
+        {
+            if (materials[i] == outlineMat)
+            {
+                materials.RemoveAt(i);
+                removed = true;
+            }
+        }
+
+        if (removed)
+            outlinedRenderer.sharedMaterials = materials.ToArray();
+
+        outlinedRenderer = null;
+    }
+
+    private void OnDisable()
+    {
+        RemoveOutline();
     }
 }
