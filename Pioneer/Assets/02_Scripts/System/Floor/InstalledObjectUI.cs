@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.AI.Navigation;
@@ -7,36 +7,36 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// ¿ìÅ¬¸¯À¸·Î ¼³Ä¡µÈ ¿ÀºêÁ§Æ®¸¦ ¼±ÅÃÇÏ°í,
-/// ÆÐ³Î(È¸Àü/ÀÌµ¿/Á¦°Å/´Ý±â/³»±¸µµ)À» ´ë»ó À§Ä¡¿¡ Ç¥½ÃÇÑ´Ù.
-/// - È¸Àü: A/D Å°
-/// - ÀÌµ¿/Á¦°Å/´Ý±â: ¹öÆ° Å¬¸¯
-/// ÆÐ³ÎÀÌ ·çÆ®(InstalledObjectUI ÀÚ½Å)¿©µµ Àý´ë ·çÆ®¸¦ ºñÈ°¼ºÈ­ÇÏÁö ¾Ê´Â´Ù(¾÷µ¥ÀÌÆ® Á¤Áö ¹æÁö).
+/// ï¿½ï¿½Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½,
+/// ï¿½Ð³ï¿½(È¸ï¿½ï¿½/ï¿½Ìµï¿½/ï¿½ï¿½ï¿½ï¿½/ï¿½Ý±ï¿½/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ Ç¥ï¿½ï¿½ï¿½Ñ´ï¿½.
+/// - È¸ï¿½ï¿½: A/D Å°
+/// - ï¿½Ìµï¿½/ï¿½ï¿½ï¿½ï¿½/ï¿½Ý±ï¿½: ï¿½ï¿½Æ° Å¬ï¿½ï¿½
+/// ï¿½Ð³ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®(InstalledObjectUI ï¿½Ú½ï¿½)ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´Â´ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½).
 /// </summary>
 public class InstalledObjectUI : MonoBehaviour
 {
     public static InstalledObjectUI Instance { get; private set; }
 
-    [Header("UI ÂüÁ¶(ÀüºÎ È°¼ºÈ­ ´ë»ó)")]
-    [SerializeField] RectTransform panel;      // ¸Þ´º ·çÆ®(ÀÚ½Ä ±ÇÀå). ºñ¿öµÎ¸é ÀÚµ¿À¸·Î ÀÚ½Å(transform)À» »ç¿ë.
+    [Header("UI ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½)")]
+    [SerializeField] RectTransform panel;      // ï¿½Þ´ï¿½ ï¿½ï¿½Æ®(ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½). ï¿½ï¿½ï¿½ï¿½Î¸ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ú½ï¿½(transform)ï¿½ï¿½ ï¿½ï¿½ï¿½.
     [SerializeField] Button rotationButton;
     //[SerializeField] Button moveButton;
     [SerializeField] Button removeButton;
     [SerializeField] Button closeButton;
     [SerializeField] Button repairButton;
-    [SerializeField] GameObject durabilityUI;  // ÇÊ¿ä½Ã ¿¬°á(Ç¥½Ã¸¸)
+    [SerializeField] GameObject durabilityUI;  // ï¿½Ê¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(Ç¥ï¿½Ã¸ï¿½)
     [SerializeField] TextMeshProUGUI durabilityText;
     [SerializeField] Image repairImage1;
     [SerializeField] Image repairImage2;
 
-    [Header("¼±ÅÃ/·¹ÀÌÄ³½ºÆ®")]
-    [SerializeField] LayerMask interactableMask; // ¼³Ä¡ ¿ÀºêÁ§Æ® ·¹ÀÌ¾î
+    [Header("ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½Ä³ï¿½ï¿½Æ®")]
+    [SerializeField] LayerMask interactableMask; // ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Ì¾ï¿½
 
-    [Header("È¸Àü Å°")]
+    [Header("È¸ï¿½ï¿½ Å°")]
     [SerializeField] KeyCode keyRotateLeft = KeyCode.A; // -90
     [SerializeField] KeyCode keyRotateRight = KeyCode.D; // +90
 
-    [Header("¾Æ¿ô¶óÀÎ")]
+    [Header("ï¿½Æ¿ï¿½ï¿½ï¿½ï¿½")]
     [SerializeField] Material outlineMat;
 
     private enum Mode { Idle, Rotate, Move }
@@ -46,34 +46,35 @@ public class InstalledObjectUI : MonoBehaviour
     InstalledObject current;
     StructureBase structure;
 
-    // ÆÐ³ÎÀÌ ·çÆ®ÀÎ °æ¿ì¸¦ À§ÇÑ °¡½Ã¼º Åä±Û¿ë
+    // ï¿½Ð³ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ì¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ã¼ï¿½ ï¿½ï¿½Û¿ï¿½
     CanvasGroup panelCg;
     bool panelIsRoot => panel && panel.gameObject == gameObject;
     private NavMeshSurface nav;
+    bool selectedThisFrame;
 
 
     void Awake()
     {
-        // ½Ì±ÛÅæ
+        // ï¿½Ì±ï¿½ï¿½ï¿½
         if (Instance && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
-        // ±âº» ÂüÁ¶
-        if (!panel) panel = (RectTransform)transform; // ºñ¿öµÐ °æ¿ì ·çÆ® »ç¿ë
+        // ï¿½âº» ï¿½ï¿½ï¿½ï¿½
+        if (!panel) panel = (RectTransform)transform; // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® ï¿½ï¿½ï¿½
         cam = Camera.main;
 
-        // ·çÆ® ºñÈ°¼ºÈ­ ¹æÁö: ÆÐ³Î¿¡ CanvasGroup ºÎÂø(¾øÀ¸¸é Ãß°¡)
+        // ï¿½ï¿½Æ® ï¿½ï¿½È°ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½: ï¿½Ð³Î¿ï¿½ CanvasGroup ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½)
         panelCg = panel.GetComponent<CanvasGroup>();
         if (!panelCg) panelCg = panel.gameObject.AddComponent<CanvasGroup>();
 
-        // ¹öÆ° ¸®½º³Ê
+        // ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         rotationButton.onClick.AddListener(() => { if (current) mode = Mode.Rotate; });
         //moveButton.onClick.AddListener(() => { if (current) { current.BeginMove(); mode = Mode.Move; } });
         removeButton.onClick.AddListener(() => { if (current) { current.Remove(); Hide(); RebuildStart(); } });
         closeButton.onClick.AddListener(Hide);
         repairButton.onClick.AddListener(Repair);
 
-        Hide(); // ½ÃÀÛ ½Ã ÆÐ³ÎÀº ¼û±è(·çÆ®´Â È°¼º »óÅÂ À¯Áö)
+        Hide(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Æ®ï¿½ï¿½ È°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
     }
 
     private void Start()
@@ -83,30 +84,37 @@ public class InstalledObjectUI : MonoBehaviour
 
     void Update()
     {
+        selectedThisFrame = false;
+
         if (structure != null && (structure.hp <= 0 || (!structure.CanInteract)))
         {
             Hide();
         }
 
-        // ÁÂÅ¬¸¯: ´ë»ó ¼±ÅÃ + ÀüÃ¼ UI È°¼ºÈ­ + À§Ä¡ °íÁ¤
+        // ï¿½ï¿½Å¬ï¿½ï¿½: ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ + ï¿½ï¿½Ã¼ UI È°ï¿½ï¿½È­ + ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
         if (Input.GetMouseButtonDown(0))
         {
             
             if (TryPick(out var obj) && TryPick<StructureBase>(out var structureBase) && structureBase.CanInteract)
             {
                 SetSelection(obj);
-                ShowAt(current.transform.position);   // ¡Ú È°¼ºÈ­ + À§Ä¡ ÁöÁ¤
+                selectedThisFrame = true;
+                ShowAt(current.transform.position);   // ï¿½ï¿½ È°ï¿½ï¿½È­ + ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
 
-                List<Material> materials = new List<Material>(obj.GetComponent<MeshRenderer>().sharedMaterials);
-                materials.Add(outlineMat);
-                obj.GetComponent<MeshRenderer>().sharedMaterials = materials.ToArray();
+                MeshRenderer meshRenderer = obj.GetComponent<MeshRenderer>();
+                if (meshRenderer != null && outlineMat != null)
+                {
+                    List<Material> materials = new List<Material>(meshRenderer.sharedMaterials);
+                    materials.Add(outlineMat);
+                    meshRenderer.sharedMaterials = materials.ToArray();
+                }
 
                 structure = current.gameObject.GetComponent<StructureBase>();
                 UpdateDurability();
             }
             else Hide();
         }
-        // ¿ìÅ¬¸¯: ÇØ´ç ´ë»ó ¼ö¸®
+        // ï¿½ï¿½Å¬ï¿½ï¿½: ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (Input.GetMouseButtonDown(1))
         {
             if (TryPick<StructureBase>(out var structureBase))
@@ -117,10 +125,10 @@ public class InstalledObjectUI : MonoBehaviour
 
         if (!current) return;
 
-        // ´ë»ó ¿òÁ÷ÀÓ¿¡ ¸ÂÃç ÆÐ³Î À§Ä¡ ÃßÀû
+        // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
         RepositionToCurrent();
 
-        // ¸ðµå Ã³¸®
+        // ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
         switch (mode)
         {
             case Mode.Rotate:
@@ -128,11 +136,11 @@ public class InstalledObjectUI : MonoBehaviour
                 //if (Input.GetKeyDown(keyRotateRight)) current.RotateRight();
 
                 float scroll = Input.GetAxis("Mouse ScrollWheel");
-                if (scroll > 0f) // À§·Î
+                if (scroll > 0f) // ï¿½ï¿½ï¿½ï¿½
                 {
                     current.RotateLeft();
                 }
-                else if (scroll < 0f) // ¾Æ·¡·Î
+                else if (scroll < 0f) // ï¿½Æ·ï¿½ï¿½ï¿½
                 {
                     current.RotateRight();
                 }
@@ -140,9 +148,9 @@ public class InstalledObjectUI : MonoBehaviour
                 break;
 
             case Mode.Move:
-                Debug.Log("¹¹¾ß ÀÌµ¿ ÁøÀÔÇßÀÝ¾Æ¿ä");
+                Debug.Log("ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¾Æ¿ï¿½");
                 current.TickRelocate(cam);
-                if (!current.IsRelocating)          // ÀÌµ¿ Á¾·á ¡æ Idle º¹±Í
+                if (!current.IsRelocating)          // ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Idle ï¿½ï¿½ï¿½ï¿½
                 {
                     mode = Mode.Idle;
                     RepositionToCurrent();
@@ -150,16 +158,23 @@ public class InstalledObjectUI : MonoBehaviour
                 break;
         }
 
-        // ÆÐ³Î ¿Ü Å¬¸¯ or ESCÅ°·Î ´Ý±â
-        if (IsPanelVisible() && Input.GetMouseButtonDown(0))
+        // ï¿½Ð³ï¿½ ï¿½ï¿½ Å¬ï¿½ï¿½ or ESCÅ°ï¿½ï¿½ ï¿½Ý±ï¿½
+        if (!selectedThisFrame && IsPanelVisible() && Input.GetMouseButtonDown(0))
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(panel, Input.mousePosition, null) &&
-                !EventSystem.current.IsPointerOverGameObject())
+                (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject()))
             {
+                MeshRenderer currentRenderer = current != null ? current.GetComponent<MeshRenderer>() : null;
                 Hide();
-                List<Material> materials = new List<Material>(current.GetComponent<MeshRenderer>().sharedMaterials);
-                materials.RemoveAt(materials.Count - 1);
-                current.GetComponent<MeshRenderer>().sharedMaterials = materials.ToArray();
+                if (currentRenderer != null)
+                {
+                    List<Material> materials = new List<Material>(currentRenderer.sharedMaterials);
+                    if (materials.Count > 0 && outlineMat != null && materials[materials.Count - 1] == outlineMat)
+                    {
+                        materials.RemoveAt(materials.Count - 1);
+                        currentRenderer.sharedMaterials = materials.ToArray();
+                    }
+                }
             }
         }
         if (IsPanelVisible() && Input.GetKeyDown(KeyCode.Escape)) Hide();
@@ -194,7 +209,7 @@ public class InstalledObjectUI : MonoBehaviour
 
 
     /// <summary>
-    /// ÆÐ³Î ´Ù½Ã º¸ÀÌ°Ô È°¼ºÈ­ 
+    /// ï¿½Ð³ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ È°ï¿½ï¿½È­ 
     /// </summary>
     /// <param name="worldPos"></param>
     void ShowAt(Vector3 worldPos)
@@ -220,7 +235,7 @@ public class InstalledObjectUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇöÀç ¼±ÅÃ ´ë»ó À§Ä¡·Î ÆÐ³Î °íÁ¤
+    /// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ð³ï¿½ ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     void RepositionToCurrent()
     {
@@ -229,10 +244,12 @@ public class InstalledObjectUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿ùµå ÁÂÇ¥ ¡æ ·ÎÄÃ ÁÂÇ¥·Î º¯È¯
+    /// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½È¯
     /// </summary>
     void Reposition(Vector3 worldPos)
     {
+        if (cam == null || panel == null || panel.parent == null) return;
+
         var sp = cam.WorldToScreenPoint(worldPos);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             (RectTransform)panel.parent, sp, null, out var lp);
@@ -279,26 +296,31 @@ public class InstalledObjectUI : MonoBehaviour
 
     private void Repair()
     {
+        if (RepairSystem.instance == null || structure == null) return;
         if (RepairSystem.instance.remainRepairCount <= 0) return;
 
-        Debug.Log($"¼ö¸® ¹öÆ° ´­¸²");
+        Debug.Log($"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½");
 
-        if (structure.ObjectData.id == 50005)
+        if (structure.ObjectData != null && structure.ObjectData.id == 50005)
         {
-            RepairUI.instance.Open();
+            if (RepairUI.instance != null)
+                RepairUI.instance.Open();
         }
         else
         {
-            PlayerRepair.instance.Repair(structure);
+            if (PlayerRepair.instance != null)
+                PlayerRepair.instance.Repair(structure);
         }
 
     }
 
     private void UpdateDurability()
     {
-        repairImage1.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
-        repairImage2.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
+        if (structure == null || RepairSystem.instance == null) return;
 
-        durabilityText.text = $"{(structure.hp * 100) / structure.maxHp}%";
+        if (repairImage1 != null) repairImage1.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
+        if (repairImage2 != null) repairImage2.color = (RepairSystem.instance.remainRepairCount > 0) ? Color.white : Color.red;
+        if (durabilityText != null && structure.maxHp > 0)
+            durabilityText.text = $"{(structure.hp * 100) / structure.maxHp}%";
     }
 }

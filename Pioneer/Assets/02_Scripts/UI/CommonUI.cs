@@ -365,7 +365,7 @@ public class CommonUI : MonoBehaviour, IBegin
         }
         Craft(recipe, itemButtonGameObject, ui);
 
-		ui.timeLeft.text = $"���� �Ϸ�";
+		ui.timeLeft.text = $"제작 완료";
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
         InventoryUiMain.instance.IconRefresh();
         IsCurrentCrafting = false;
