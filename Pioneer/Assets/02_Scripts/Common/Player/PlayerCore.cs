@@ -229,10 +229,12 @@ public class PlayerCore : CreatureBase, IBegin
             WhenDestroy();
         }
 
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F12))
         {
             transform.position = mast.position;
         }
+#endif
 
         UnityEngine.Debug.Assert(fov != null);
         UnityEngine.Debug.Assert(enemyLayer != null);

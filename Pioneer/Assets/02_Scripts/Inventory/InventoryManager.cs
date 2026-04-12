@@ -265,6 +265,7 @@ public class InventoryManager : InventoryBase
 
 	private void Update()
 	{
+#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Keypad1))
         {
             Add(new SItemStack(20001, 1, 100));
@@ -273,13 +274,11 @@ public class InventoryManager : InventoryBase
             Add(new SItemStack(20003, 1, int.MaxValue));
         }
 
-
-
-
         if (Input.GetKeyDown(KeyCode.F11))
         {
             Demo();
         }
+#endif
     }
 
     private void LateUpdate()

@@ -113,10 +113,12 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger(nextAnimTrigger);
 
         // ≈ª√‚
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F12))
         {
             transform.position = mast.position;
         }
+#endif
     }
 
     private void HendleDefault()

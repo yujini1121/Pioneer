@@ -145,12 +145,14 @@ public class PlayerStatsLevel : MonoBehaviour
             growStateForInspector = new List<GrowState>(growStates.Values);
         }
 
+#if UNITY_EDITOR
         if (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
         {
             if (Input.GetKeyDown(KeyCode.F8)) growStates[GrowStatType.Combat].level++;
             if (Input.GetKeyDown(KeyCode.F9)) growStates[GrowStatType.Crafting].level++;
             if (Input.GetKeyDown(KeyCode.F10)) growStates[GrowStatType.Fishing].level++;
-		}
+        }
+#endif
     }
 
     // 스테이터스 초기 상태 설정

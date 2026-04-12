@@ -52,10 +52,12 @@ public class TitleManager : MonoBehaviour
         }
 
         // F10 : 무한 모드 해금 초기화
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F10))
         {
             ResetInfiniteModeUnlockByHotkey();
         }
+#endif
     }
 
     public void StartGameActive()
