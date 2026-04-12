@@ -9,11 +9,11 @@ using UnityEditor;
 public class Ballista : StructureBase, IBegin
 {
     [Header("회전")]
-    [SerializeField] private float rotationSpeed = 50f; // 항상 부드러운 회전
+    [SerializeField] private float rotationSpeed = 50f;
 
     [Header("발리스타 옵션")]
     [SerializeField] private float attackPower = 25f;
-    [SerializeField] private float attackRange = 8f;   // 원형 탐지 고정
+    [SerializeField] private float attackRange = 8f;
     [SerializeField] private float attackCooldown = 2f;
     [SerializeField] private float attackSpeed = 4f;
     [SerializeField] private Vector3 boltHalfSize = new Vector3(0.5f, 0.5f, 1f);
@@ -28,145 +28,270 @@ public class Ballista : StructureBase, IBegin
 
     private readonly List<GameObject> bolts = new List<GameObject>();
     private GameObject gunner;
+    private PlayerController gunnerController;
+    private Rigidbody gunnerRb;
     private float centerVecY;
     private int poolIndex = 0;
     private float curCooldown = 0f;
+    private bool isDestroyed = false;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (interactRange < 3.5f)
+            interactRange = 3.5f;
+    }
 
     private void Start()
     {
         var sc = GetComponent<SphereCollider>();
         centerVecY = sc ? sc.center.y : transform.position.y;
 
-        for (int i = 0; i < boltPool.childCount; i++)
-            bolts.Add(boltPool.GetChild(i).gameObject);
+        bolts.Clear();
+        if (boltPool != null)
+        {
+            for (int i = 0; i < boltPool.childCount; i++)
+                bolts.Add(boltPool.GetChild(i).gameObject);
+        }
     }
 
     private void Update()
     {
-        if (!isUsing) return;
+        if (isDestroyed || !isUsing)
+            return;
 
-        // ▼ 변경: 베이스 HP 사용
-        if (CurrentHp <= 0f)
+        if (gunner == null)
         {
-            if (gunner)
-            {
-                gunner.transform.parent = null;
-                foreach (var component in gunner.GetComponents<Behaviour>())
-                {
-                    if (component is MeshFilter || component is MeshRenderer || component is Transform || component == null)
-                        continue;
-                    component.enabled = true;
-                }
-                var cap = gunner.GetComponent<CapsuleCollider>();
-                if (cap) cap.enabled = true;
-            }
-            Destroy(gameObject);
+            UnUse();
             return;
         }
 
-        Vector3 center = transform.position; center.y = centerVecY;
+        Vector3 center = transform.position;
+        center.y = centerVecY;
 
-        // 원형 탐지 고정
         colliders = Physics.OverlapSphere(center, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
-
         enemyDetect = colliders != null && colliders.Length > 0;
-        if (!enemyDetect) return;
+
+        if (!enemyDetect)
+        {
+            nearestTrans = null;
+            return;
+        }
 
         LookAt();
         Fire();
     }
 
-    public void Use(GameObject _gunner)
+    public override void Use()
     {
-        if (isUsing) return;
+        if (isDestroyed || isUsing)
+            return;
+
+        GameObject player = ThisIsPlayer.Player;
+        if (player == null)
+            return;
+
+        if (gunnerPos == null)
+            gunnerPos = transform;
+
         base.Use();
 
-        gunner = _gunner;
+        gunner = player;
+        gunnerController = gunner.GetComponent<PlayerController>();
+        gunnerRb = gunner.GetComponent<Rigidbody>();
+
+        if (gunnerController != null)
+            gunnerController.enabled = false;
+
+        if (gunnerRb != null)
+        {
+            gunnerRb.velocity = Vector3.zero;
+            gunnerRb.angularVelocity = Vector3.zero;
+        }
+
         gunner.transform.SetParent(gunnerPos);
         gunner.transform.localPosition = Vector3.zero;
+        gunner.transform.localRotation = Quaternion.identity;
+
+        curCooldown = 0f;
+        nearestTrans = null;
+        enemyDetect = false;
+        colliders = null;
+    }
+
+    public override void UnUse()
+    {
+        if (!isUsing)
+            return;
+
+        base.UnUse();
+        ForceUnmount();
+
+        nearestTrans = null;
+        enemyDetect = false;
+        colliders = null;
+    }
+
+    private void ForceUnmount()
+    {
+        if (gunner == null)
+            return;
+
+        gunner.transform.SetParent(null);
+
+        if (gunnerPos != null)
+        {
+            gunner.transform.position = gunnerPos.position;
+            gunner.transform.rotation = gunnerPos.rotation;
+        }
+        else
+        {
+            gunner.transform.position = transform.position;
+        }
+
+        if (gunnerController != null)
+            gunnerController.enabled = true;
+
+        if (gunnerRb != null)
+        {
+            gunnerRb.velocity = Vector3.zero;
+            gunnerRb.angularVelocity = Vector3.zero;
+        }
+
+        gunner = null;
+        gunnerController = null;
+        gunnerRb = null;
     }
 
     private void LookAt()
     {
+        if (colliders == null || colliders.Length == 0)
+            return;
+
         nearestTrans = colliders[0].transform;
         float minSqr = Mathf.Infinity;
         Vector3 selfPos = transform.position;
 
         foreach (var col in colliders)
         {
+            if (col == null)
+                continue;
+
             float d = (selfPos - col.transform.position).sqrMagnitude;
-            if (d < minSqr) { minSqr = d; nearestTrans = col.transform; }
+            if (d < minSqr)
+            {
+                minSqr = d;
+                nearestTrans = col.transform;
+            }
         }
 
+        if (nearestTrans == null)
+            return;
+
         Vector3 dir = nearestTrans.position - transform.position;
-        dir.y = 0;
-        if (dir.sqrMagnitude > 0.0001f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
-        }
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.0001f)
+            return;
+
+        Quaternion targetRot = Quaternion.LookRotation(dir.normalized);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
     }
 
     private void Fire()
     {
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.BalistaAttack);
-        Debug.LogWarning("발리스타 작동 중 소리 나오나?");
+        if (nearestTrans == null || bolts.Count == 0 || boltPool == null)
+            return;
 
-        if (curCooldown <= 0f)
-        {
-            curCooldown = attackCooldown;
-            StartCoroutine(FireBolt(boltPool.GetChild(poolIndex).gameObject, nearestTrans));
-
-            poolIndex = (poolIndex + 1) % boltPool.childCount;
-        }
-        else
+        if (curCooldown > 0f)
         {
             curCooldown -= Time.deltaTime;
+            return;
         }
+
+        curCooldown = attackCooldown;
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.SFX.BalistaAttack);
+
+        GameObject bolt = bolts[poolIndex];
+        poolIndex = (poolIndex + 1) % bolts.Count;
+
+        StartCoroutine(FireBolt(bolt, nearestTrans));
     }
 
     private IEnumerator FireBolt(GameObject bolt, Transform target)
     {
-        bolt.SetActive(true);
-        bolt.transform.parent = null;
+        if (bolt == null || boltPool == null)
+            yield break;
 
-        Vector3 prevPos = bolt.transform.position;
-        Vector3 dir = bolt.transform.forward;
+        Transform boltTransform = bolt.transform;
+        Vector3 firePosition = boltPool.position;
+        Vector3 dir = target != null
+            ? (target.position - firePosition).normalized
+            : transform.forward;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.0001f)
+            dir = transform.forward;
+
+        boltTransform.SetParent(null);
+        boltTransform.SetPositionAndRotation(firePosition, Quaternion.LookRotation(dir));
+        bolt.SetActive(true);
+
+        Vector3 prevPos = firePosition;
         float traveled = 0f;
 
         while (traveled < attackRange)
         {
             float step = attackSpeed * Time.deltaTime;
-            Vector3 nextPos = bolt.transform.position + dir * step;
+            Vector3 nextPos = boltTransform.position + dir * step;
 
-            if (Physics.BoxCast(prevPos, boltHalfSize, dir, out RaycastHit hit, Quaternion.LookRotation(dir), step, enemyLayer))
+            if (Physics.BoxCast(prevPos, boltHalfSize, dir, out RaycastHit hit, boltTransform.rotation, step, enemyLayer, QueryTriggerInteraction.Ignore))
             {
-                Debug.Log("Hit: " + hit.collider.name);
+                CommonBase targetBase = hit.collider.GetComponentInParent<CommonBase>();
+                if (targetBase == null)
+                    targetBase = hit.collider.GetComponent<CommonBase>();
+
+                if (targetBase != null)
+                    targetBase.TakeDamage(Mathf.RoundToInt(attackPower), gameObject);
+
                 break;
             }
 
-            bolt.transform.position = nextPos;
+            boltTransform.position = nextPos;
             traveled += step;
             prevPos = nextPos;
-
             yield return null;
         }
 
-        bolt.transform.parent = boltPool;
-        bolt.transform.localPosition = Vector3.zero;
-        bolt.transform.localRotation = Quaternion.identity;
+        boltTransform.SetParent(boltPool);
+        boltTransform.localPosition = Vector3.zero;
+        boltTransform.localRotation = Quaternion.identity;
         bolt.SetActive(false);
+    }
+
+    public override void WhenDestroy()
+    {
+        if (isDestroyed)
+            return;
+
+        isDestroyed = true;
+
+        if (isUsing)
+            UnUse();
+        else
+            ForceUnmount();
+
+        base.WhenDestroy();
     }
 
 #if UNITY_EDITOR
     protected override void OnDrawGizmos()
     {
-        // 베이스: 상호작용 반경
         base.OnDrawGizmos();
-        if (!drawGizmos) return;
+        if (!drawGizmos)
+            return;
 
-        // 공격 사거리(원)
         Vector3 center = GetComponent<Collider>() ? GetComponent<Collider>().bounds.center : transform.position;
         Handles.color = Color.cyan;
         Handles.DrawWireDisc(center, Vector3.up, attackRange);
