@@ -355,6 +355,10 @@ public class GameManager : MonoBehaviour, IBegin
 
             GameObject e = Instantiate(prefab, p.position + offset, Quaternion.identity);
 
+            UnitFadeController fade = EnsureUnitFadeController(e);
+            if (fade != null)
+                fade.PlaySpawnFade();
+
             if (enemyRoot != null) e.transform.SetParent(enemyRoot);
             e.name = $"{prefab.name}_Day{currentDay}_#{i + 1}";
 
@@ -373,20 +377,22 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void DespawnAllEnemies()
     {
-		/*
-        foreach (GameObject e in spawnedEnemies)
-            if (e != null) Destroy(e);
+        Debug.Log($"DespawnAllEnemies 들어옴 / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
 
-        spawnedEnemies.Clear();*/
-		Debug.Log($"DespawnAllEnemies 들어옴 / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
-
-		foreach (GameObject one in GameObject.FindGameObjectsWithTag("Enemy"))
+        foreach (GameObject one in GameObject.FindGameObjectsWithTag("Enemy"))
         {
-            Debug.Log($"DespawnAllEnemies : {one.name}");
-            Destroy(one);
-			Debug.Log($"DespawnAllEnemies one 삭제");
-		}
+            if (one == null) continue;
 
+            Debug.Log($"DespawnAllEnemies : {one.name}");
+
+            UnitFadeController fade = EnsureUnitFadeController(one);
+            if (fade != null)
+                fade.PlayDespawnFadeAndDestroy();
+            else
+                Destroy(one);
+        }
+
+        spawnedEnemies.Clear();
 
         Debug.Log("[Despawn] 밤 종료로 모든 에너미 제거");
     }
@@ -634,5 +640,16 @@ public class GameManager : MonoBehaviour, IBegin
         {
             return false;
         }
+    }
+
+    private UnitFadeController EnsureUnitFadeController(GameObject target)
+    {
+        if (target == null) return null;
+
+        UnitFadeController fade = target.GetComponent<UnitFadeController>();
+        if (fade == null)
+            fade = target.AddComponent<UnitFadeController>();
+
+        return fade;
     }
 }

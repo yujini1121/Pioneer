@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 4930473689417466764}
   - component: {fileID: 1576153250567432981}
   - component: {fileID: 5435836492186938498}
-  - component: {fileID: 7684616046807313686}
   - component: {fileID: 7713655985835454389}
   - component: {fileID: 836700704905923453}
   m_Layer: 8
@@ -187,8 +186,10 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: -0.6, z: 0}
-  hitFlashDuration: 0.1
-  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  hitFlashAmount: 1
+  hitFlashDurations: 0.2
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  hitFlashEmission: 2
   spriteRenderer: {fileID: 0}
   fov: {fileID: 1576153250567432981}
   speed: 0
@@ -235,21 +236,6 @@ MonoBehaviour:
   animator: {fileID: 5977027100524816649}
   nextAnimTrigger: 
   lastMoveDirection: {x: 0, y: 0, z: -1}
---- !u!114 &7684616046807313686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4665850972790329012}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc5c5d51652fc13468c3473c737cc25a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fadeDuration: 2
-  playOnEnable: 1
-  stopAgentDuringIntro: 1
 --- !u!114 &7713655985835454389
 MonoBehaviour:
   m_ObjectHideFlags: 0

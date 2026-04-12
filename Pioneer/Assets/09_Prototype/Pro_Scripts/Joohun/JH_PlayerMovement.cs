@@ -86,7 +86,7 @@ public class JH_PlayerMovement : MonoBehaviour
                     component.enabled = false;
                 }
                 GetComponent<CapsuleCollider>().enabled = false;
-                ballista?.Use(gameObject);
+                //ballista?.Use(gameObject);
             }
         }
     }

@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 2151693467487321608}
   - component: {fileID: 6619639927548977897}
   - component: {fileID: 4368125581735223614}
+  - component: {fileID: 8852190579416723449}
   m_Layer: 11
   m_Name: Infected Mariner
   m_TagString: Untagged
@@ -160,8 +161,10 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
-  hitFlashDuration: 0.1
-  hitColor: {r: 3, g: 3, b: 3, a: 1}
+  hitFlashAmount: 1
+  hitFlashDurations: 0.2
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  hitFlashEmission: 2
   spriteRenderer: {fileID: 0}
   fov: {fileID: 0}
   speed: 0
@@ -233,6 +236,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isStunned: 0
+--- !u!114 &8852190579416723449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038291238442652822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0e3f606fc3a5ac4bbcd2729c29b717d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeInDurations: 1.5
+  fadeOutDurations: 1.5
+  playFadeInOnEnable: 1
+  stopAgentDuringFade: 1
 --- !u!1 &4688622703810975482
 GameObject:
   m_ObjectHideFlags: 0
