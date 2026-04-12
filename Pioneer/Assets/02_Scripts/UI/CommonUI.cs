@@ -105,7 +105,7 @@ public class CommonUI : MonoBehaviour, IBegin
         mSetButtonAvailable(ui.craftButton.gameObject.GetComponent<UnityEngine.UI.Image>(), recipe);
 
         // ���� �ð� ǥ��
-        ui.timeLeft.text = $"{recipe.time}s";
+        ui.timeLeft.text = $"{recipe.time:0.0}s";
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
 
         // ũ����Ʈ ��ư ���� ��ġ
@@ -124,7 +124,7 @@ public class CommonUI : MonoBehaviour, IBegin
             if (IsCurrentCrafting)
             {
                 StopCraft(ui);
-                ui.timeLeft.text = $"{recipe.time}s";
+                ui.timeLeft.text = $"{recipe.time:0.0}s";
             }
             else
             {
@@ -181,13 +181,19 @@ public class CommonUI : MonoBehaviour, IBegin
             // �ش� ��ư�� ������ ���� ���� UI�� ��
             // ���� ���� ������ �� ������
             foreach (GameObject prevUi in prevCraftSelectButton) Destroy(prevUi);
+            prevCraftSelectButton.Clear();
             ui.gameObject.SetActive(false);
 
             // ���� ���� ī�װ�� �׸�
-            GameObject craftSelectCategory = Instantiate(prefabCraftSelectTopButton, parent.transform);
-            craftSelectCategory.transform.parent = geometryCraftSelectCategory.parent.transform;
-            craftSelectCategory.transform.localPosition = geometryCraftSelectCategory.start2D;
+            GameObject craftSelectCategory = Instantiate(prefabCraftSelectTopButton);
+            RectTransform craftSelectCategoryRect = craftSelectCategory.GetComponent<RectTransform>();
+            craftSelectCategoryRect.SetParent(geometryCraftSelectCategory.parent.transform, false);
+            craftSelectCategoryRect.localScale = Vector3.one;
+            craftSelectCategoryRect.localPosition = geometryCraftSelectCategory.start2D;
+            craftSelectCategory.SetActive(true);
+            craftSelectCategory.transform.SetAsLastSibling();
             prevCraftSelectButton.Add(craftSelectCategory);
+            Debug.Log($">> CommonUI.ShowCategoryButton(...) / created top ui / active={craftSelectCategory.activeSelf} / localPos={craftSelectCategoryRect.localPosition}");
             CraftItemSelectTop craftSelectCategoryUi = craftSelectCategory.GetComponent<CraftItemSelectTop>();
             craftSelectCategoryUi.categoryImage.sprite = category.categorySprite;
             craftSelectCategoryUi.categoryName.text = category.categoryName;
@@ -195,8 +201,7 @@ public class CommonUI : MonoBehaviour, IBegin
             // ���� ���� ��ư ��ȯ
             for (int index = 0; index < category.recipes.Count; index++)
             {
-                GameObject m_one = Instantiate(prefabCraftSelectItemButton, parent.transform);
-
+                GameObject m_one = Instantiate(prefabCraftSelectItemButton);
                 prevCraftSelectButton.Add(m_one);
                 // ������ ��������
                 SItemRecipeSO recipe = category.recipes[index];
@@ -209,6 +214,9 @@ public class CommonUI : MonoBehaviour, IBegin
                     1,
                     -new Vector2(0, m_one.GetComponent<RectTransform>().sizeDelta.y),
                     geometryCraftSelectButton.start2D);
+                m_one.SetActive(true);
+                m_one.transform.SetAsLastSibling();
+                Debug.Log($">> CommonUI.ShowCategoryButton(...) / created single ui / index={index} / active={m_one.activeSelf} / localPos={m_one.GetComponent<RectTransform>().localPosition}");
                 CraftItemSelectSingle m_oneUi = m_one.GetComponent<CraftItemSelectSingle>();
 
                 m_oneUi.image.sprite = ItemTypeManager.Instance.itemTypeSearch[category.recipes[index].result.id].image;
@@ -295,8 +303,18 @@ public class CommonUI : MonoBehaviour, IBegin
     {
         int xPos = index % rowCount;
         int yPos = index / rowCount;
+        Vector3 localPosition = new Vector3(start.x, start.y, 0.0f) + new Vector3(delta.x * xPos, delta.y * yPos);
 
-        target.transform.position = parent.transform.position + new Vector3(start.x, start.y, 0.0f) + new Vector3(delta.x * xPos, delta.y * yPos);
+        if (target.TryGetComponent<RectTransform>(out RectTransform rectTransform))
+        {
+            rectTransform.SetParent(parent.transform, false);
+            rectTransform.localScale = Vector3.one;
+            rectTransform.localPosition = localPosition;
+            return;
+        }
+
+        target.transform.SetParent(parent.transform, false);
+        target.transform.localPosition = localPosition;
     }
 
     public void PickUpUpdate()
@@ -341,7 +359,7 @@ public class CommonUI : MonoBehaviour, IBegin
 
         while (leftTime > 0.0f)
         {
-            ui.timeLeft.text = $"{leftTime}s";
+        ui.timeLeft.text = $"{leftTime:0.0}s";
             leftTime -= Time.deltaTime;
             yield return null;
         }
@@ -441,7 +459,7 @@ public class CommonUI : MonoBehaviour, IBegin
         currentCraftCoroutine = null;
         IsCurrentCrafting = false;
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
-        ui.timeLeft.text = $"{currentRecipe.time}s";
+        ui.timeLeft.text = $"{currentRecipe.time:0.0}s";
     }
 
     public void CloseTab(DefaultFabrication ui)

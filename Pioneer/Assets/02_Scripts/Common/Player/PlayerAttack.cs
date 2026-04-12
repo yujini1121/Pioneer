@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour, IBegin
@@ -10,10 +10,10 @@ public class PlayerAttack : MonoBehaviour, IBegin
     [Header("애니메이션 설정")]
     [SerializeField] PlayerController playerController;
     AnimationSlot slots;
+    readonly HashSet<CreatureBase> hitTargets = new HashSet<CreatureBase>();
 
     private void Awake()
     {
-        // 게임 시작 시 확실하게 비활성화
         if (attackCollider != null)
         {
             attackCollider.enabled = false;
@@ -24,20 +24,47 @@ public class PlayerAttack : MonoBehaviour, IBegin
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy") || other.gameObject.layer == enemyLayer)
+        TryDealDamage(other);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        TryDealDamage(other);
+    }
+
+    private void TryDealDamage(Collider other)
+    {
+        if (!IsEnemyTarget(other))
+            return;
+
+        CreatureBase target = other.GetComponentInParent<CreatureBase>();
+        if (target == null)
         {
-            other.GetComponent<CreatureBase>()?.TakeDamage(damage, this.gameObject);
-            Debug.LogError($"damage : {damage}, this.gameObject : {this.gameObject}");
-
-            // 애니메이션 호출
-            ChangeAnim(playerController.lastMoveDirection);
-
-            InventoryManager.Instance.ApplyItemDuablilityUsed();
-
-            // 경험치 제공
-            PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
-            UnityEngine.Debug.Log($"AddExp() 호출");
+            target = other.GetComponent<CreatureBase>();
         }
+
+        if (target == null || hitTargets.Contains(target))
+            return;
+
+        hitTargets.Add(target);
+        target.TakeDamage(damage, gameObject);
+        Debug.LogError($"damage : {damage}, this.gameObject : {gameObject}");
+
+        ChangeAnim(playerController.lastMoveDirection);
+        InventoryManager.Instance.ApplyItemDuablilityUsed();
+        PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
+        Debug.Log("AddExp() 호출");
+    }
+
+    private bool IsEnemyTarget(Collider other)
+    {
+        if (other == null)
+            return false;
+
+        if (other.CompareTag("Enemy"))
+            return true;
+
+        return ((1 << other.gameObject.layer) & enemyLayer.value) != 0;
     }
 
     public void PlayAttack(Vector3 dir)
@@ -54,8 +81,8 @@ public class PlayerAttack : MonoBehaviour, IBegin
     {
         if (attackCollider != null)
         {
-            UnityEngine.Debug.Log($">> PlayerAttack.EnableAttackCollider() 호출");
-
+            Debug.Log(">> PlayerAttack.EnableAttackCollider() 호출");
+            hitTargets.Clear();
             attackCollider.enabled = true;
         }
     }
@@ -65,6 +92,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
         if (attackCollider != null)
         {
             attackCollider.enabled = false;
+            hitTargets.Clear();
         }
     }
 
@@ -90,6 +118,5 @@ public class PlayerAttack : MonoBehaviour, IBegin
 
         playerController.ChangeAnimationClip(slots.curAttackClip, target);
         playerController.animator.Play("Attack");
-        //playerController.nextAnimTrigger = "SetAttack";
     }
 }

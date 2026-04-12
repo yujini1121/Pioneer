@@ -105,9 +105,9 @@ public class OceanEventManager : MonoBehaviour
         }
 
         // 전체 선택
-        //int selectedIndex = Random.Range(0, remainingEvents.Count);
-        //currentEvent = remainingEvents[selectedIndex];
-        //remainingEvents.RemoveAt(selectedIndex);
+        int selectedIndex = Random.Range(0, remainingEvents.Count);
+        currentEvent = remainingEvents[selectedIndex];
+        remainingEvents.RemoveAt(selectedIndex);
 
         #region 하나만 선택
         //// 평범 
@@ -116,14 +116,14 @@ public class OceanEventManager : MonoBehaviour
         //// 안개 
         //currentEvent = new OceanEventFog(fogFade);
 
-        // 세이렌
-        currentEvent = new OceanEventSiren(sirenDebuffEffect,
-                                   sirenAppearLeftEffect,
-                                   sirenAppearRightEffect,
-                                   mainCamera,
-                                   sirenCheckInterval,
-                                   sirenCharmDuration,
-                                   sirenProcChance);
+        //// 세이렌
+        //currentEvent = new OceanEventSiren(sirenDebuffEffect,
+        //                           sirenAppearLeftEffect,
+        //                           sirenAppearRightEffect,
+        //                           mainCamera,
+        //                           sirenCheckInterval,
+        //                           sirenCharmDuration,
+        //                           sirenProcChance);
 
         //// 뇌우
         //currentEvent = new OceanEventThunder(thunderEffect,

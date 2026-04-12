@@ -13,7 +13,14 @@ public class ItemTypeManager : MonoBehaviour, IBegin
 
     public SItemTypeSO FindType(SItemStack stack)
     {
-        return itemTypeSearch[stack.id];
+        if (stack == null || stack.id <= 0)
+            return null;
+
+        if (itemTypeSearch == null)
+            return null;
+
+        itemTypeSearch.TryGetValue(stack.id, out SItemTypeSO type);
+        return type;
     }
 
     private void Add(SItemTypeSO type)

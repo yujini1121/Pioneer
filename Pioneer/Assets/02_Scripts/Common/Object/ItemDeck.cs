@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ItemDeck : StructureBase
 {
+    public override bool IsInteractionTarget => false;
     [Header("°©ÆÇ ¼³Á¤")]
     [SerializeField] private bool canBreak = true;
 

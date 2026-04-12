@@ -69,6 +69,9 @@ public class PlayerStatUI : MonoBehaviour
 
     void UpdateUI()
     {
+        if (PlayerCore.Instance == null || GuiltySystem.instance == null)
+            return;
+
         UpdateHpUI(PlayerCore.Instance.hp);
         UpdateFullnessUI(PlayerCore.Instance.currentFullness);
         UpdateMentalUI(PlayerCore.Instance.CurrentMental);
@@ -82,6 +85,9 @@ public class PlayerStatUI : MonoBehaviour
 
     void InitUi()
     {
+        if (PlayerCore.Instance == null || GuiltySystem.instance == null)
+            return;
+
         hpBar.maxValue = PlayerCore.Instance.maxHp;
         fullnessBar.maxValue = PlayerCore.Instance.maxFullness;
         mentalBar.maxValue = PlayerCore.Instance.maxMental;

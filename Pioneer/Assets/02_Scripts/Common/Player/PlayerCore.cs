@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
@@ -6,57 +6,57 @@ using UnityEngine.Playables;
 using UnityEngine.Rendering.VirtualTexturing;
 using static MarinerBase;
 
-#region ê·¸ëƒ¥ ë©”ëª¨
+#region ±×³É ¸Ş¸ğ
 /* =============================================================
- * PlayerStats (CreatureBase ìƒì†) : ì²´ë ¥, ê³µê²©ë ¥ ê°™ì€ í•µì‹¬ ìŠ¤íƒ¯ ë° TakeDamage ê°™ì€ ê¸°ëŠ¥ ê´€ë¦¬
- [ìˆì–´ì•¼ í•  ë³€ìˆ˜]
-int hp = 100;					// ì²´ë ¥
-int fullness = 100;				// í¬ë§Œê°
-int mental = 100;					// ì •ì‹ ë ¥
-int attackDamage = 2; 				// ê³µê²©ë ¥
-float beforeAttackDelay = 0.6f;		// ê³µê²© ì „ ì§€ì—° ì‹œê°„ 
-float AttackCooldown = 0.4f;			// ê³µê²© í›„ ì§€ì—° ì‹œê°„
-float totalAttackTime = 1.0f;			// ì´ ê³µê²© ì‹œê°„
-int attackPerSecond = 1;			// ì´ˆë‹¹ ê³µê²© ê°€ëŠ¥ íšŸìˆ˜
-float attackRange = 0.4f;			// ê³µê²© ê±°ë¦¬
+ * PlayerStats (CreatureBase »ó¼Ó) : Ã¼·Â, °ø°İ·Â °°Àº ÇÙ½É ½ºÅÈ ¹× TakeDamage °°Àº ±â´É °ü¸®
+ [ÀÖ¾î¾ß ÇÒ º¯¼ö]
+int hp = 100;					// Ã¼·Â
+int fullness = 100;				// Æ÷¸¸°¨
+int mental = 100;					// Á¤½Å·Â
+int attackDamage = 2; 				// °ø°İ·Â
+float beforeAttackDelay = 0.6f;		// °ø°İ Àü Áö¿¬ ½Ã°£ 
+float AttackCooldown = 0.4f;			// °ø°İ ÈÄ Áö¿¬ ½Ã°£
+float totalAttackTime = 1.0f;			// ÃÑ °ø°İ ½Ã°£
+int attackPerSecond = 1;			// ÃÊ´ç °ø°İ °¡´É È½¼ö
+float attackRange = 0.4f;			// °ø°İ °Å¸®
 ===============================================================
-25.09.07 ë‚¨ì€ ì¼
-    - ìŒì‹ ì„­ì·¨ í–ˆì„ ë•Œ ì–´ë–»ê²Œ êµ¬í˜„í•  ê²ƒì¸ì§€
-    - ì •ì‹ ë ¥ êµ¬í˜„
-    - ìŠ¤í…Œì´í„°ìŠ¤ ë ˆë²¨ êµ¬í˜„
+25.09.07 ³²Àº ÀÏ
+    - À½½Ä ¼·Ãë ÇßÀ» ¶§ ¾î¶»°Ô ±¸ÇöÇÒ °ÍÀÎÁö
+    - Á¤½Å·Â ±¸Çö
+    - ½ºÅ×ÀÌÅÍ½º ·¹º§ ±¸Çö
 25.09.09
-    - í”Œë ˆì´ì–´ ë°° ë°”ë‹¥ ë°–ìœ¼ë¡œ ëª» ë‚˜ê°€ê²Œ í•´ë†”ì•¼í•¨ 
-    - ì •ì‹ ë ¥ êµ¬í˜„
-    - ìŠ¤í…Œì´í„°ìŠ¤ ë ˆë²¨ êµ¬í˜„
-    - í¬ë§Œê° ë° ì •ì‹ ë ¥ ìµœì†Œ, ìµœëŒ€ ì œí•œ ê±¸ì–´ë‘ê¸°
+    - ÇÃ·¹ÀÌ¾î ¹è ¹Ù´Ú ¹ÛÀ¸·Î ¸ø ³ª°¡°Ô ÇØ³ö¾ßÇÔ 
+    - Á¤½Å·Â ±¸Çö
+    - ½ºÅ×ÀÌÅÍ½º ·¹º§ ±¸Çö
+    - Æ÷¸¸°¨ ¹× Á¤½Å·Â ÃÖ¼Ò, ÃÖ´ë Á¦ÇÑ °É¾îµÎ±â
  ============================================================= */
 #endregion
 
-// TODO : ì£„ì±…ê° ì‹œìŠ¤í…œ.cs : ë©˜íƒˆ ë””ë²„í”„ ìˆì„ë•Œ ì£„ì±…ê° ë ˆë²¨ + 1 / CommonUi.cs : ëŒ€ì„±ê³µ í™•ë¥  -40%;
+// TODO : ÁËÃ¥°¨ ½Ã½ºÅÛ.cs : ¸àÅ» µğ¹öÇÁ ÀÖÀ»¶§ ÁËÃ¥°¨ ·¹º§ + 1 / CommonUi.cs : ´ë¼º°ø È®·ü -40%;
 public class PlayerCore : CreatureBase, IBegin
 {
     public static PlayerCore Instance;
 
-        // í”Œë ˆì´ì–´ í–‰ë™ ìƒíƒœ ì—´ê±°í˜•
+        // ÇÃ·¹ÀÌ¾î Çàµ¿ »óÅÂ ¿­°ÅÇü
     public enum PlayerState
     {
-        Default,            // ê¸°ë³¸
-        ChargingFishing,    // ë‚šì‹œ í‚¤ ëˆ„ë¥´ëŠ” ì¤‘
-        ActionFishing,      // ë‚šì‹œ ì¤‘
-        Dead                // ì‚¬ë§
+        Default,            // ±âº»
+        ChargingFishing,    // ³¬½Ã Å° ´©¸£´Â Áß
+        ActionFishing,      // ³¬½Ã Áß
+        Dead                // »ç¸Á
     }    
 
-    // { ìƒì²´ ì‹œìŠ¤í…œ ë³€ìˆ˜ } //
-    // í¬ë§Œê° ì—´ê±°í˜• (fullness ë³€ìˆ˜ ê°’ì— ë”°ë¥¸ ìƒíƒœ)
+    // { »ıÃ¼ ½Ã½ºÅÛ º¯¼ö } //
+    // Æ÷¸¸°¨ ¿­°ÅÇü (fullness º¯¼ö °ª¿¡ µû¸¥ »óÅÂ)
     public enum FullnessState
     {
-        Full,       // ë°°ë¶€ë¦„ (80 ~ 100)
-        Normal,     // ë³´í†µ (30 ~ 79)
-        Hungry,     // ë°°ê³ í”” (1 ~ 29)
-        Starving    // êµ¶ì£¼ë¦¼ (0)
+        Full,       // ¹èºÎ¸§ (80 ~ 100)
+        Normal,     // º¸Åë (30 ~ 79)
+        Hungry,     // ¹è°íÇÄ (1 ~ 29)
+        Starving    // ±¾ÁÖ¸² (0)
     }
 
-        // [ ê³µê²©ë ¥ ë³€ìˆ˜ ]
+        // [ °ø°İ·Â º¯¼ö ]
     public float AttackDamageCalculated
     {
         get
@@ -78,38 +78,38 @@ public class PlayerCore : CreatureBase, IBegin
 
     private float lastEffectTime = -999f;
 
-    [Header("í¬ë§Œê° ë³€ìˆ˜")]
-    // [ í¬ë§Œê° ë³€ìˆ˜ ]  
-    public int currentFullness;                                            // í˜„ì¬ í¬ë§Œê° ê°’
-    public int maxFullness = 100;                                          // ìµœëŒ€ í¬ë§Œê° ê°’
-    int minFullness = 0;                                            // ìµœì†Œ í¬ë§Œê° ê°’
-    FullnessState currentFullnessState;                             // í˜„ì¬ í¬ë§Œê° ìƒíƒœ
-    int fullnessStarvingMax = 100;                                  // êµ¶ê¸° ìƒíƒœì‹œ ì²´ë ¥ ê¹ì´ëŠ” ìµœëŒ€ íšŸìˆ˜ (100íšŒ)
-    private Coroutine starvationCoroutine;                          // êµ¶ê¸° ìƒíƒœì‹œ ì‹¤í–‰ë˜ëŠ” ì½”ë£¨í‹´
+    [Header("Æ÷¸¸°¨ º¯¼ö")]
+    // [ Æ÷¸¸°¨ º¯¼ö ]  
+    public int currentFullness;                                            // ÇöÀç Æ÷¸¸°¨ °ª
+    public int maxFullness = 100;                                          // ÃÖ´ë Æ÷¸¸°¨ °ª
+    int minFullness = 0;                                            // ÃÖ¼Ò Æ÷¸¸°¨ °ª
+    FullnessState currentFullnessState;                             // ÇöÀç Æ÷¸¸°¨ »óÅÂ
+    int fullnessStarvingMax = 100;                                  // ±¾±â »óÅÂ½Ã Ã¼·Â ±ğÀÌ´Â ÃÖ´ë È½¼ö (100È¸)
+    private Coroutine starvationCoroutine;                          // ±¾±â »óÅÂ½Ã ½ÇÇàµÇ´Â ÄÚ·çÆ¾
 
-    [Header("í¬ë§Œê° ì„¤ì •")]
-    [SerializeField] private float fullnessDecreaseTime = 5f;       // í¬ë§Œê° ê¸°ë³¸ ê°ì†Œ ì†ë„(ì‹œê°„)
-    [SerializeField] private float fullnessModifier = 1.3f;         // í¬ë§Œê° ê°ì†Œ ì†ë„ ì¦ê°€ê°’ => 30%
+    [Header("Æ÷¸¸°¨ ¼³Á¤")]
+    [SerializeField] private float fullnessDecreaseTime = 5f;       // Æ÷¸¸°¨ ±âº» °¨¼Ò ¼Óµµ(½Ã°£)
+    [SerializeField] private float fullnessModifier = 1.3f;         // Æ÷¸¸°¨ °¨¼Ò ¼Óµµ Áõ°¡°ª => 30%
 
-    [Header("ì •ì‹ ë ¥ ë³€ìˆ˜")]
-    //[ ì •ì‹ ë ¥ ë³€ìˆ˜ ]
-    public int currentMental;                                              // í˜„ì¬ ì •ì‹ ë ¥ ê°’
+    [Header("Á¤½Å·Â º¯¼ö")]
+    //[ Á¤½Å·Â º¯¼ö ]
+    public int currentMental;                                              // ÇöÀç Á¤½Å·Â °ª
     public int CurrentMental => currentMental;
-    public int maxMental = 100;                                            // ìµœëŒ€ ì •ì‹ ë ¥ ê°’
-    int minMental = 0;                                              // ìµœì†Œ ì •ì‹ ë ¥ ê°’
-    bool isDrunk = false;                                           // ë§Œì·¨ ìƒíƒœ ì—¬ë¶€
-    private Coroutine enemyExistCoroutine;                          // ì¼ì • ë²”ìœ„ ì•ˆ ì—ë„ˆë¯¸ ì¡´ì¬ì‹œ ì‹¤í–‰ë˜ëŠ” ì½”ë£¨í‹´ 
+    public int maxMental = 100;                                            // ÃÖ´ë Á¤½Å·Â °ª
+    int minMental = 0;                                              // ÃÖ¼Ò Á¤½Å·Â °ª
+    bool isDrunk = false;                                           // ¸¸Ãë »óÅÂ ¿©ºÎ
+    private Coroutine enemyExistCoroutine;                          // ÀÏÁ¤ ¹üÀ§ ¾È ¿¡³Ê¹Ì Á¸Àç½Ã ½ÇÇàµÇ´Â ÄÚ·çÆ¾ 
     bool isApplyDebuff = false;
 
-    [Header("ì •ì‹ ë ¥ ì„¤ì •")]
-    [SerializeField] private float existEnemyMentalCool = 2f;        // ì¼ì • ë²”ìœ„ ì•ˆ ì—ë„ˆë¯¸ ì¡´ì¬ì‹œ ì •ì‹ ë ¥ì´ ê¹ì´ëŠ” ì‹œê°„ í…€
-    [SerializeField] private int existEnemyMentalDecrease = -1;      // ì¼ì • ë²”ìœ„ ì•ˆ ì—ë„ˆë¯¸ ì¡´ì¬ì‹œ ê¹ì´ëŠ” ì •ì‹ ë ¥ ê°’ 
-    [SerializeField] private int attackedFromEnemy = -3;             // ì—ë„ˆë¯¸í•œí…Œ ê³µê²© ë‹¹í–ˆì„ ê²½ìš° ê¹ì´ëŠ” ì •ì‹ ë ¥ ê°’
-    [SerializeField] private float reduceMentalOnMarinerDie = 0.2f; // ìŠ¹ë¬´ì› ì‚¬ë§ì‹œ ê¹ì´ëŠ” ì •ì‹ ë ¥ ê°’
+    [Header("Á¤½Å·Â ¼³Á¤")]
+    [SerializeField] private float existEnemyMentalCool = 2f;        // ÀÏÁ¤ ¹üÀ§ ¾È ¿¡³Ê¹Ì Á¸Àç½Ã Á¤½Å·ÂÀÌ ±ğÀÌ´Â ½Ã°£ ÅÒ
+    [SerializeField] private int existEnemyMentalDecrease = -1;      // ÀÏÁ¤ ¹üÀ§ ¾È ¿¡³Ê¹Ì Á¸Àç½Ã ±ğÀÌ´Â Á¤½Å·Â °ª 
+    [SerializeField] private int attackedFromEnemy = -3;             // ¿¡³Ê¹ÌÇÑÅ× °ø°İ ´çÇßÀ» °æ¿ì ±ğÀÌ´Â Á¤½Å·Â °ª
+    [SerializeField] private float reduceMentalOnMarinerDie = 0.2f; // ½Â¹«¿ø »ç¸Á½Ã ±ğÀÌ´Â Á¤½Å·Â °ª
     [SerializeField] private int eatFoodincreaseMental = 10;
 
-    // ê³µê²© ê´€ë ¨ ì„¤ì • ë³€ìˆ˜
-    [Header("ê³µê²© ì„¤ì •")]
+    // °ø°İ °ü·Ã ¼³Á¤ º¯¼ö
+    [Header("°ø°İ ¼³Á¤")]
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private float attackHeight = 1.0f;
     [SerializeField] private LayerMask enemyLayer;
@@ -125,7 +125,7 @@ public class PlayerCore : CreatureBase, IBegin
     public float AttackHeight => attackHeight;
     public LayerMask EnemyLayer => enemyLayer;
 
-    [Header("ì• ë‹ˆë©”ì´ì…˜ ì„¤ì •")]
+    [Header("¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤")]
     public AnimationSlot slots;
     private Animator animator;
 
@@ -136,17 +136,17 @@ public class PlayerCore : CreatureBase, IBegin
     public int _curFishingHoldIdx = -1; 
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
-	public SItemWeaponTypeSO handAttackCurrentValueRaw; // í•´ë‹¹ ê°’ì„ ì¦‰ì‹œ í˜¸ì¶œí•˜ì§€ ë§ ê²ƒ. CalculatedHandAttack ì‚¬ìš©
+	public SItemWeaponTypeSO handAttackCurrentValueRaw; // ÇØ´ç °ªÀ» Áï½Ã È£ÃâÇÏÁö ¸» °Í. CalculatedHandAttack »ç¿ë
 
     public Transform mast;
 
-    // ë°°ê³ í”” 29 ì´í•˜ ì†Œë¦¬ í•œ ë²ˆ ì¶œë ¥ í™•ì¸ bool ë³€ìˆ˜
+    // ¹è°íÇÄ 29 ÀÌÇÏ ¼Ò¸® ÇÑ ¹ø Ãâ·Â È®ÀÎ bool º¯¼ö
     private bool isPlaySFXHunger = false;
 
-    // ì •ì‹ ë ¥ 29 ì´í•˜ ì†Œë¦¬ í•œ ë²ˆ ì¶œë ¥ í™•ì¸ bool ë³€ìˆ˜
+    // Á¤½Å·Â 29 ÀÌÇÏ ¼Ò¸® ÇÑ ¹ø Ãâ·Â È®ÀÎ bool º¯¼ö
     private bool isPlaySFXMental = false;
 
-    // ì²´ë ¥ 29 ì´í•˜ ì†Œë¦¬ í•œ ë²ˆ ì¶œë ¥ í™•ì¸ bool ë³€ìˆ˜
+    // Ã¼·Â 29 ÀÌÇÏ ¼Ò¸® ÇÑ ¹ø Ãâ·Â È®ÀÎ bool º¯¼ö
     private bool isPlaySFXLowHp = false;
 
     private StunHandler stunHandler;
@@ -155,13 +155,13 @@ public class PlayerCore : CreatureBase, IBegin
     {
         get
         {
-            SItemWeaponTypeSO returnValue = new SItemWeaponTypeSO();
+            SItemWeaponTypeSO returnValue = ScriptableObject.CreateInstance<SItemWeaponTypeSO>();
             returnValue.DeepCopyFrom(handAttackCurrentValueRaw);
             
             if (IsMentalDebuff())
             {
-#warning [ìƒì²´ ì‹œìŠ¤í…œ : ì •ì‹ ë ¥ ì‹œìŠ¤í…œ] ì •ì‹ ë ¥ 40ë¯¸ë§Œ ê³µê²©ë ¥ ê°ì†ŒëŸ‰ êµ¬ì²´ì ìœ¼ë¡œ ì‘ì„±
-				returnValue.weaponDamage /= 2; // ì •ì‹ ì ìœ¼ë¡œ ë¯¸ì³ìˆì„ë•Œë§Œ ì˜í–¥ ì¤Œ. ì›ë˜ëŒ€ë¡œ ë³µêµ¬í•¨. ê°ì†Œê°’ ìˆ˜ì •
+#warning [»ıÃ¼ ½Ã½ºÅÛ : Á¤½Å·Â ½Ã½ºÅÛ] Á¤½Å·Â 40¹Ì¸¸ °ø°İ·Â °¨¼Ò·® ±¸Ã¼ÀûÀ¸·Î ÀÛ¼º
+				returnValue.weaponDamage /= 2; // Á¤½ÅÀûÀ¸·Î ¹ÌÃÄÀÖÀ»¶§¸¸ ¿µÇâ ÁÜ. ¿ø·¡´ë·Î º¹±¸ÇÔ. °¨¼Ò°ª ¼öÁ¤
 			}
 
             return returnValue;
@@ -172,7 +172,7 @@ public class PlayerCore : CreatureBase, IBegin
     public SItemStack dummyHandAttackItem;
 
 
-    // ê¸°ë³¸ ì‹œìŠ¤í…œ ê´€ë ¨ ë²ˆìˆ˜
+    // ±âº» ½Ã½ºÅÛ °ü·Ã ¹ø¼ö
     private Rigidbody playerRb;
     private bool isAttacking = false;
     private float defaultSpeed;
@@ -184,11 +184,11 @@ public class PlayerCore : CreatureBase, IBegin
 
     public PlayerState currentState { get; private set; }
 
-    // ì½”ë£¨í‹´ ë³€ìˆ˜
+    // ÄÚ·çÆ¾ º¯¼ö
     private bool isRunningCoroutineItem = false;
     public bool IsRunningCoroutineItem => isRunningCoroutineItem;
 
-    [Header("ë””ë²„ê¹…")]
+    [Header("µğ¹ö±ë")]
     public bool isDebugging;
 
     void Awake()
@@ -202,7 +202,7 @@ public class PlayerCore : CreatureBase, IBegin
         handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
         dummyHandAttackItem = new SItemStack(-1, -1);
  
-        // ì• ë‹ˆë©”ì´ì…˜
+        // ¾Ö´Ï¸ŞÀÌ¼Ç
         slots = playerController.animSlots;
         animator = playerController.animator;
         playerRb = GetComponent<Rigidbody>();
@@ -215,7 +215,7 @@ public class PlayerCore : CreatureBase, IBegin
         stunHandler = GetComponent<StunHandler>();
 
         UpdateFullnessState();
-        StartCoroutine(FullnessSystemCoroutine());                   // ê²Œì„ ì‹œì‘ì‹œ í¬ë§Œê° ê³„ì† 1ì”© ê°ì†Œ ì‹œì‘
+        StartCoroutine(FullnessSystemCoroutine());                   // °ÔÀÓ ½ÃÀÛ½Ã Æ÷¸¸°¨ °è¼Ó 1¾¿ °¨¼Ò ½ÃÀÛ
     }
 
     void Update()
@@ -244,7 +244,7 @@ public class PlayerCore : CreatureBase, IBegin
         }
         NearEnemy();
         //MentalState();
-        // UnityEngine.Debug.Log($"ì •ì‹ ë ¥ ìˆ˜ì¹˜ : {currentMental}");
+        // UnityEngine.Debug.Log($"Á¤½Å·Â ¼öÄ¡ : {currentMental}");
     }
     public override void WhenDestroy()
     {
@@ -257,22 +257,22 @@ public class PlayerCore : CreatureBase, IBegin
         }
     }
 
-    #region ê¸°ë³¸ ì‹œìŠ¤í…œ
+    #region ±âº» ½Ã½ºÅÛ
     // =============================================================
-    // ìŠ¤í…Œì´í„°ìŠ¤ ê¸°ì´ˆ ê°’ ì„¸íŒ…
+    // ½ºÅ×ÀÌÅÍ½º ±âÃÊ °ª ¼¼ÆÃ
     // =============================================================
     void SetSetAttribute()
     {
         //maxHp = 100;
         maxHp = 40000;
-        hp = maxHp;                 // ì²´ë ¥
-        speed = 4.0f;               // ì´ë™ ì†ë„
+        hp = maxHp;                 // Ã¼·Â
+        speed = 4.0f;               // ÀÌµ¿ ¼Óµµ
         defaultSpeed = speed;
-        currentFullness = 80;              // í¬ë§Œê° (ì‹œì‘ ê°’ 80)
-        currentMental = maxMental;         // ì •ì‹ ë ¥ (ì‹œì‘ ê°’ 100)
-        attackDamage = 2;           // ê³µê²©ë ¥
-        attackDelayTime = 0.4f;     // ê³µê²© ì¿¨íƒ€ì„
-        attackRange = 0.4f;       // ê³µê²© ë²”ìœ„ (ì´ë¯¸ attack box í¬ê¸°ë¥¼ 0.4ë¡œ ì§€ì •í•´ë‘ )
+        currentFullness = 80;              // Æ÷¸¸°¨ (½ÃÀÛ °ª 80)
+        currentMental = maxMental;         // Á¤½Å·Â (½ÃÀÛ °ª 100)
+        attackDamage = 2;           // °ø°İ·Â
+        attackDelayTime = 0.4f;     // °ø°İ ÄğÅ¸ÀÓ
+        attackRange = 0.4f;       // °ø°İ ¹üÀ§ (ÀÌ¹Ì attack box Å©±â¸¦ 0.4·Î ÁöÁ¤ÇØµÒ)
     }
 
     public void SetState(PlayerState state)
@@ -292,7 +292,7 @@ public class PlayerCore : CreatureBase, IBegin
 
     public static int Get2DirIndex(in Vector3 v)
     {
-        if (v.sqrMagnitude < 1e-6f) return -1;   // ì •ì§€ë©´ -1
+        if (v.sqrMagnitude < 1e-6f) return -1;   // Á¤Áö¸é -1
         return (v.x >= 0f) ? 1 : 0;              // 1:Right, 0:Left
     }
 
@@ -326,14 +326,14 @@ public class PlayerCore : CreatureBase, IBegin
     public void ChangeFishingHoldByIndex(int idx)
     {
         if (idx < 0) return;
-        var target = slots.fisingHold[idx];          // â† fisingHold ë¡œ ë°˜ë“œì‹œ
+        var target = slots.fisingHold[idx];          // ¡ç fisingHold ·Î ¹İµå½Ã
 
         playerController.ChangeAnimationClip(slots.curFishingHoldClip, target);
         playerController.nextAnimTrigger = "SetFishingHold";
     }
 
     // =============================================================
-    // ê°€ë§Œíˆìˆì—‡
+    // °¡¸¸È÷ÀÖ¾ù
     // =============================================================
     public void Idle(Vector3 moveInput)
     {
@@ -351,7 +351,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // =============================================================
-    // ì´ë™
+    // ÀÌµ¿
     // =============================================================
     public void Move(Vector3 moveInput)
     {
@@ -369,7 +369,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // =============================================================
-    // ë‡Œìš° ì ìš© : ì´ë™ì†ë„ ê°ì†Œ
+    // ³ú¿ì Àû¿ë : ÀÌµ¿¼Óµµ °¨¼Ò
     // =============================================================
     public void ApplyThunderSpeedModifier(float multiplier)
     {
@@ -384,7 +384,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // =============================================================
-    // ë‚šì‹œ ì¤€ë¹„
+    // ³¬½Ã ÁØºñ
     // =============================================================
     public void FishingReady(Vector3 dir)
     {
@@ -398,7 +398,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // =============================================================
-    // ë‚šì‹œ ì¤‘
+    // ³¬½Ã Áß
     // =============================================================
     public void FishingHold(Vector3 dir)
     {
@@ -413,7 +413,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     // =============================================================
-    // ê³µê²©
+    // °ø°İ
     // =============================================================
 
     public bool IsMentalDebuff()
@@ -459,12 +459,12 @@ public class PlayerCore : CreatureBase, IBegin
         {
             SetState(PlayerState.Default);
 
-            // ++++ ë‚šì‹œ ui ë°”ê¿”ì•¼í•˜ëŠ”ë° ìŒ 
+            // ++++ ³¬½Ã ui ¹Ù²ã¾ßÇÏ´Âµ¥ À½ 
             if (playerController != null)
             {
                 playerController.CancelFishing();
             }
-            UnityEngine.Debug.Log("í”¼ê²©ìœ¼ë¡œ ì¸í•´ ë‚šì‹œê°€ ì·¨ì†Œë˜ì—ˆìŠµë‹ˆë‹¤!");
+            UnityEngine.Debug.Log("ÇÇ°İÀ¸·Î ÀÎÇØ ³¬½Ã°¡ Ãë¼ÒµÇ¾ú½À´Ï´Ù!");
         }
 
         if(hp <= 0)
@@ -474,25 +474,25 @@ public class PlayerCore : CreatureBase, IBegin
     }
     #endregion
 
-    #region í¬ë§Œê°
+    #region Æ÷¸¸°¨
     /* =============================================================
-       { í¬ë§Œê° }
-    - ì‹œì‘ì‹œ 80ìœ¼ë¡œ ì„¤ì •, ìµœëŒ€ 100 ìµœì†Œ 0
-    - í˜„ì‹¤ ì‹œê°„ 5ì´ˆì— í•œ ë²ˆì”© 1ì”© ê°ì†Œ
-    - í”Œë ˆì´ì–´ ì²´ë ¥ì´ 50% ë¯¸ë§Œì´ë©´ ê°ì†Œ ì†ë„ 30% ì¦ê°€ 
-        - 100 ~ 80 ë°°ë¶€ë¦„ ìƒíƒœ : ì†ë„ 20% ì¦ê°€
-        - 79 ~ 30 ë°°ë¶€ë¦„ ìƒíƒœ í•´ì œ
-        - 29 ~ 1 ë°°ê³ í”” ìƒíƒœ : ì†ë„ 30% ê°ì†Œ
-        - 0 êµ¶ì£¼ë¦¼ ìƒíƒœ : ì²´ë ¥ì´ ì´ˆ ë‹¹ 1ì”© ê°ì†Œ (ìµœëŒ€ 100ì´ˆ)
-    - ìŒì‹ ì¢…ë¥˜ì— ë”°ë¼ ìµœì†Œ 5 ~ 80ê¹Œì§€ ì¦ê°€ ê°€ëŠ¥
-        - ìŒì‹ ì¢…ë¥˜ê°€ ë¬´ì—‡ì¸ì§€ ì•Œì•„ì•¼ í•  ë“¯?
+       { Æ÷¸¸°¨ }
+    - ½ÃÀÛ½Ã 80À¸·Î ¼³Á¤, ÃÖ´ë 100 ÃÖ¼Ò 0
+    - Çö½Ç ½Ã°£ 5ÃÊ¿¡ ÇÑ ¹ø¾¿ 1¾¿ °¨¼Ò
+    - ÇÃ·¹ÀÌ¾î Ã¼·ÂÀÌ 50% ¹Ì¸¸ÀÌ¸é °¨¼Ò ¼Óµµ 30% Áõ°¡ 
+        - 100 ~ 80 ¹èºÎ¸§ »óÅÂ : ¼Óµµ 20% Áõ°¡
+        - 79 ~ 30 ¹èºÎ¸§ »óÅÂ ÇØÁ¦
+        - 29 ~ 1 ¹è°íÇÄ »óÅÂ : ¼Óµµ 30% °¨¼Ò
+        - 0 ±¾ÁÖ¸² »óÅÂ : Ã¼·ÂÀÌ ÃÊ ´ç 1¾¿ °¨¼Ò (ÃÖ´ë 100ÃÊ)
+    - À½½Ä Á¾·ù¿¡ µû¶ó ÃÖ¼Ò 5 ~ 80±îÁö Áõ°¡ °¡´É
+        - À½½Ä Á¾·ù°¡ ¹«¾ùÀÎÁö ¾Ë¾Æ¾ß ÇÒ µí?
     ====================================
-    25.09.07 : í¬ë§Œê° êµ¶ì£¼ë¦¼ ì½”ë£¨í‹´ ìˆ˜ì •
+    25.09.07 : Æ÷¸¸°¨ ±¾ÁÖ¸² ÄÚ·çÆ¾ ¼öÁ¤
     ============================================================= */
 
 
     /// <summary>
-    /// ì´ˆë‹¹ í¬ë§Œê° 1ì”© ê°ì†Œ Start í•¨ìˆ˜ì—ì„œ ì‹œì‘ (ì½”ë£¨í‹´)
+    /// ÃÊ´ç Æ÷¸¸°¨ 1¾¿ °¨¼Ò Start ÇÔ¼ö¿¡¼­ ½ÃÀÛ (ÄÚ·çÆ¾)
     /// </summary>
     /// <returns></returns>
     private IEnumerator FullnessSystemCoroutine()
@@ -517,13 +517,13 @@ public class PlayerCore : CreatureBase, IBegin
             }
             if (isDebugging)
             {
-                UnityEngine.Debug.Log($"êµ¶ì£¼ë¦¼ ìˆ˜ì¹˜ : {currentFullness}");
+                UnityEngine.Debug.Log($"±¾ÁÖ¸² ¼öÄ¡ : {currentFullness}");
             }
         }
     }
 
     /// <summary>
-    /// í¬ë§Œê° ìˆ˜ì¹˜ì— ë”°ë¼ ìƒíƒœ ê°±ì‹  í•¨ìˆ˜
+    /// Æ÷¸¸°¨ ¼öÄ¡¿¡ µû¶ó »óÅÂ °»½Å ÇÔ¼ö
     /// </summary>
     private void UpdateFullnessState()
     {
@@ -566,12 +566,12 @@ public class PlayerCore : CreatureBase, IBegin
                 AudioManager.instance?.PlaySfx(AudioManager.SFX.Hunger);
             }
 
-            if (currentFullnessState == FullnessState.Starving)      // êµ¶ì£¼ë¦¼ ìƒíƒœì¼ë•Œ
+            if (currentFullnessState == FullnessState.Starving)      // ±¾ÁÖ¸² »óÅÂÀÏ¶§
             {
                 if(starvationCoroutine == null)
                     starvationCoroutine = StartCoroutine(StarvingDamageCorountine());
             }
-            else                                                    // êµ¶ì£¼ë¦¼ ìƒíƒœê°€ ì•„ë‹ë•Œ
+            else                                                    // ±¾ÁÖ¸² »óÅÂ°¡ ¾Æ´Ò¶§
             {
                 if (starvationCoroutine != null)
                 {
@@ -583,12 +583,12 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// ì´ˆë‹¹ ì²´ë ¥ 1ì”© ê°ì†Œí•˜ëŠ” êµ¶ì£¼ë¦¼ í•¨ìˆ˜ (ì½”ë£¨í‹´)
+    /// ÃÊ´ç Ã¼·Â 1¾¿ °¨¼ÒÇÏ´Â ±¾ÁÖ¸² ÇÔ¼ö (ÄÚ·çÆ¾)
     /// </summary>
     /// <returns></returns>
     private IEnumerator StarvingDamageCorountine()
     {
-        UnityEngine.Debug.Log("êµ¶ì£¼ë¦¼ ìƒíƒœ : ì²´ë ¥ ê°ì†Œ ì‹œì‘");
+        UnityEngine.Debug.Log("±¾ÁÖ¸² »óÅÂ : Ã¼·Â °¨¼Ò ½ÃÀÛ");
         for(int i = 0; i < fullnessStarvingMax; i++)
         {
             yield return new WaitForSeconds(1f);
@@ -600,7 +600,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// ìŒì‹ ì„­ì·¨ì‹œ í¬ë§Œê° ì¦ê°€, ì¦ê°€ê°’ ë§¤ê°œë³€ìˆ˜ë¡œ ì „ë‹¬
+    /// À½½Ä ¼·Ãë½Ã Æ÷¸¸°¨ Áõ°¡, Áõ°¡°ª ¸Å°³º¯¼ö·Î Àü´Ş
     /// </summary>
     /// <param name="increase"></param>
     public void EatFoodFullness(int increase)
@@ -611,7 +611,7 @@ public class PlayerCore : CreatureBase, IBegin
         PlayerFullnessChanged?.Invoke(currentFullness);
     }
 
-    // êµ¶ì£¼ë¦¼ ì œê±° 
+    // ±¾ÁÖ¸² Á¦°Å 
     public void RemoveStarvingIEnumerator()
     {
         if(starvationCoroutine != null)
@@ -622,34 +622,34 @@ public class PlayerCore : CreatureBase, IBegin
     }
     #endregion
 
-    #region ì •ì‹ ë ¥
+    #region Á¤½Å·Â
 
 
     /* =============================================================
-        { ì •ì‹ ë ¥ }
-    - ì‹œì‘ì‹œ 100ìœ¼ë¡œ ì‹œì‘, 0 ~ 100 ì‚¬ì´ì˜ ê°’ì„ ê°€ì§
-    - ì •ì‹ ë ¥ 40 ~ 100 : íš¨ê³¼ ì—†ìŒ
-    - ì •ì‹ ë ¥ 0 ~ 39 : ê³µê²©ë ¥, ì„¤ì¹˜ ì‘ì—… ëŒ€ì„±ê³µ í™•ë¥ , ì£„ì±…ê° ì‹œìŠ¤í…œ ë ˆë²¨ ê°ì†Œ
+        { Á¤½Å·Â }
+    - ½ÃÀÛ½Ã 100À¸·Î ½ÃÀÛ, 0 ~ 100 »çÀÌÀÇ °ªÀ» °¡Áü
+    - Á¤½Å·Â 40 ~ 100 : È¿°ú ¾øÀ½
+    - Á¤½Å·Â 0 ~ 39 : °ø°İ·Â, ¼³Ä¡ ÀÛ¾÷ ´ë¼º°ø È®·ü, ÁËÃ¥°¨ ½Ã½ºÅÛ ·¹º§ °¨¼Ò
 
-    [ì¦ê°€ ì¡°ê±´]
-    - ë‘˜ ë‹¤ ì•„ì´í…œ ì‚¬ìš©ì‹œ ì¦ê°€ê°’ë§Œ ì „ë‹¬í•˜ë©´ ì •ì‹ ë ¥ ì¶”ê°€í•˜ëŠ” í•¨ìˆ˜ë¥¼ ì¶”ê°€
-        - ì•„ì´í…œ ì‚¬ìš©ì— ë”°ë¼ 5 ~ 80ê¹Œì§€ ì¦ê°€ ê°€ëŠ¥
-        - ìŒì‹ ì„­ì·¨ ì‹œ 10ì”© ì¦ê°€ (ì¢…ë¥˜ ìƒê´€ ì—†ìŒ)
+    [Áõ°¡ Á¶°Ç]
+    - µÑ ´Ù ¾ÆÀÌÅÛ »ç¿ë½Ã Áõ°¡°ª¸¸ Àü´ŞÇÏ¸é Á¤½Å·Â Ãß°¡ÇÏ´Â ÇÔ¼ö¸¦ Ãß°¡
+        - ¾ÆÀÌÅÛ »ç¿ë¿¡ µû¶ó 5 ~ 80±îÁö Áõ°¡ °¡´É
+        - À½½Ä ¼·Ãë ½Ã 10¾¿ Áõ°¡ (Á¾·ù »ó°ü ¾øÀ½)
 
-    [ê°ì†Œ ì¡°ê±´]    
-        - í”Œë ˆì´ì–´ ë°˜ê²½ 2M ë‚´ ì—ë„ˆë¯¸ê°€ ì¡´ì¬í•  ê²½ìš° 2ì´ˆë‹¹ 1ì”© ê°ì†Œ
-        - ì—ë„ˆë¯¸ì—ê²Œ ê³µê²© ë°›ì€ ê²½ìš° ê³µê²© 1íšŒë‹¹ 3ì”© ê°ì†Œ (ë°˜ê²½ ë‚´ ì—ë„ˆë¯¸ ì¡´ì¬ ì¡°ê±´ê³¼ ì¤‘ì²© ê°€ëŠ¥)
-        - ìŠ¹ë¬´ì› AI ì‚¬ë§ì‹œ í˜„ì¬ ì •ì‹ ë ¥ì˜ 20% ê°ì†Œ
+    [°¨¼Ò Á¶°Ç]    
+        - ÇÃ·¹ÀÌ¾î ¹İ°æ 2M ³» ¿¡³Ê¹Ì°¡ Á¸ÀçÇÒ °æ¿ì 2ÃÊ´ç 1¾¿ °¨¼Ò
+        - ¿¡³Ê¹Ì¿¡°Ô °ø°İ ¹ŞÀº °æ¿ì °ø°İ 1È¸´ç 3¾¿ °¨¼Ò (¹İ°æ ³» ¿¡³Ê¹Ì Á¸Àç Á¶°Ç°ú ÁßÃ¸ °¡´É)
+        - ½Â¹«¿ø AI »ç¸Á½Ã ÇöÀç Á¤½Å·ÂÀÇ 20% °¨¼Ò
 
-    [ë™ê²° ì¡°ê±´]
-    - ì•„ì´í…œ ì¤‘ ìˆ ì„ ë§ˆì‹œë©´ ë§Œì·¨ ìƒíƒœê°€ ë¨
-    - ë§Œì·¨ ìƒíƒœ : ì •ì‹ ë ¥ ì¦ê°€ ë° ê°ì†Œ ë¶ˆê°€, ë™ê²°ë¨
+    [µ¿°á Á¶°Ç]
+    - ¾ÆÀÌÅÛ Áß ¼úÀ» ¸¶½Ã¸é ¸¸Ãë »óÅÂ°¡ µÊ
+    - ¸¸Ãë »óÅÂ : Á¤½Å·Â Áõ°¡ ¹× °¨¼Ò ºÒ°¡, µ¿°áµÊ
 
     TODO : 
     ============================================================= */
 
     /// <summary>
-    /// ì •ì‹ ë ¥ ê³„ì‚° ? ë©”ì„œë“œ 
+    /// Á¤½Å·Â °è»ê ? ¸Ş¼­µå 
     /// </summary>
     /// <param name="increase"></param>
     public void UpdateMental(int increase)
@@ -690,10 +690,10 @@ public class PlayerCore : CreatureBase, IBegin
 
         PlayerMentalChanged?.Invoke(currentMental);
 
-        // ìˆ˜ì¹˜ì— ë”°ë¼ ë””ë²„í”„ ë¶€ì—¬,,
+        // ¼öÄ¡¿¡ µû¶ó µğ¹öÇÁ ºÎ¿©,,
     }
 
-    // ë°”ë‹¤ì´ë²¤íŠ¸ : ì•ˆê°œ -> ì •ì‹ ë ¥ ê°ì†Œ 
+    // ¹Ù´ÙÀÌº¥Æ® : ¾È°³ -> Á¤½Å·Â °¨¼Ò 
     public void ReduceMentalByFog()
     {
         int reduceValue = Mathf.RoundToInt(maxMental * 0.1f);
@@ -701,7 +701,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// ì—ë„ˆë¯¸ì—ê²Œ ê³µê²© ë°›ì€ ê²½ìš° ì •ì‹ ë ¥ ê°ì†Œ ì‹œí‚¤ëŠ” í•¨ìˆ˜ -3
+    /// ¿¡³Ê¹Ì¿¡°Ô °ø°İ ¹ŞÀº °æ¿ì Á¤½Å·Â °¨¼Ò ½ÃÅ°´Â ÇÔ¼ö -3
     /// </summary>
     public void AttackedFromEnemy()
     {
@@ -709,17 +709,17 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// ìŠ¹ë¬´ì› ì£½ì—ˆì„ë•Œ í˜¸ì¶œ, ì •ì‹ ë ¥ ê°ì†Œ, í˜„ì¬ ì •ì‹ ë ¥ì˜ 20%
+    /// ½Â¹«¿ø Á×¾úÀ»¶§ È£Ãâ, Á¤½Å·Â °¨¼Ò, ÇöÀç Á¤½Å·ÂÀÇ 20%
     /// </summary>
     public void ReduceMentalOnMarinerDie()
     {
         float reduce = currentMental * reduceMentalOnMarinerDie;
-        UpdateMental(Mathf.RoundToInt(-reduce)); // ë°˜ì˜¬ë¦¼í•˜ê³  ì•˜ëŠ”ë° ê·¸ëƒ¥ . ì•„ë˜ ìˆ˜ ë²„ë¦´ê±°ë©´ ìˆ˜ì • ê°€ëŠ¥
+        UpdateMental(Mathf.RoundToInt(-reduce)); // ¹İ¿Ã¸²ÇÏ°í ¾Ò´Âµ¥ ±×³É . ¾Æ·¡ ¼ö ¹ö¸±°Å¸é ¼öÁ¤ °¡´É
         GuiltySystem.instance.CrewDead();
     }
 
     /// <summary>
-    /// ë°˜ê²½ 2m ë‚´ì— ì—ë„ˆë¯¸ê°€ ì¡´ì¬ ì—¬ë¶€ë¥¼ í™•ì¸í•˜ê³  ì •ì‹ ë ¥ ê°ì†Œ ì½”ë£¨í‹´ ì‹¤í–‰ ë° ì¤‘ë‹¨í• ë•Œ í˜¸ì¶œ 
+    /// ¹İ°æ 2m ³»¿¡ ¿¡³Ê¹Ì°¡ Á¸Àç ¿©ºÎ¸¦ È®ÀÎÇÏ°í Á¤½Å·Â °¨¼Ò ÄÚ·çÆ¾ ½ÇÇà ¹× Áß´ÜÇÒ¶§ È£Ãâ 
     /// </summary>
     public void NearEnemy()
     {
@@ -735,7 +735,7 @@ public class PlayerCore : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// ì—ë„ˆë¯¸ ì¡´ì¬ì‹œ 2ì´ˆì— í•œ ë²ˆ ì •ì‹ ë ¥ ê°ì†Œ -1
+    /// ¿¡³Ê¹Ì Á¸Àç½Ã 2ÃÊ¿¡ ÇÑ ¹ø Á¤½Å·Â °¨¼Ò -1
     /// </summary>
     /// <returns></returns>
     private IEnumerator EnemyExist()
@@ -747,7 +747,7 @@ public class PlayerCore : CreatureBase, IBegin
         }        
     }
 
-    public bool IsDrunk() // ë§Œì·¨ìƒíƒœì¸ì§€ë§Œ ë¦¬í„´í•˜ëŠ” ë©”ì„œë“œ 
+    public bool IsDrunk() // ¸¸Ãë»óÅÂÀÎÁö¸¸ ¸®ÅÏÇÏ´Â ¸Ş¼­µå 
     {
         return isDrunk;
     }
@@ -758,7 +758,7 @@ public class PlayerCore : CreatureBase, IBegin
         StartCoroutine(Drunk());
     }
 
-    // ìˆ  ì•„ì´í…œ ì‚¬ìš©ì‹œ í˜¸ì¶œ
+    // ¼ú ¾ÆÀÌÅÛ »ç¿ë½Ã È£Ãâ
     public IEnumerator Drunk()
     {
         isDrunk = true;
@@ -770,7 +770,7 @@ public class PlayerCore : CreatureBase, IBegin
     #endregion
 
     // ==============================================================
-    // í—¬í¼í•¨ìˆ˜
+    // ÇïÆÛÇÔ¼ö
 
     private void AddFullnessUI(FullnessState state)
     {

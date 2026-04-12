@@ -9,6 +9,9 @@ public class DayUI : MonoBehaviour
 
     private void Update()
     {
+        if (currentDay == null || GameManager.Instance == null)
+            return;
+
         currentDay.text = "Day " + GameManager.Instance.currentDay.ToString();
     }
 }

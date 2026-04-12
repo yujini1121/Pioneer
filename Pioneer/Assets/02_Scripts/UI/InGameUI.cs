@@ -107,6 +107,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void ShowDefaultCraftUI()
     {
+        Debug.Log($">> InGameUI.ShowDefaultCraftUI() / start / defaultCraftUI before={defaultCraftUI.activeSelf} / isCraftButtonExist={isCraftButtonExist} / categories={(ItemCategoryManager.Instance != null && ItemCategoryManager.Instance.categories != null ? ItemCategoryManager.Instance.categories.Count : -1)}");
         CommonUI.instance.CloseTab(mainCraft.ui);
         //Clear();
         CloseUI(ID_MAKESHIFT);
@@ -161,6 +162,7 @@ public class InGameUI : MonoBehaviour, IBegin
                 Debug.Assert(mainCraft.ui != null);
                 Debug.Assert(geometryCategoryButton != null);
                 Debug.Assert(geometryItemSelectButton != null);
+                Debug.Log($">> InGameUI.ShowDefaultCraftUI() / create category button / idx={index} / name={ItemCategoryManager.Instance.categories[index].categoryName}");
                 CommonUI.instance.ShowCategoryButton(
                     defaultCraftUiSubPivot,
                     ItemCategoryManager.Instance.categories[index],
@@ -180,6 +182,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
         currentFabricationUi = mainCraft.ui;
         isNearCraft = true;
+        Debug.Log($">> InGameUI.ShowDefaultCraftUI() / end / defaultCraftUI active={defaultCraftUI.activeSelf} / currentFabricationUi active={mainCraft.ui.gameObject.activeSelf} / spawnedSelectUi={mainCraftSelectUi.Count}");
     }
 
     public void CloseDefaultCraftUI()

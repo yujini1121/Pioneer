@@ -1,11 +1,11 @@
-ï»¿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-#region ì„ì‹œ Stats
+#region ÀÓ½Ã Stats
 public class EnemyStats : MonoBehaviour
 {
     public float baseHP = 100f;
@@ -26,14 +26,14 @@ public class GameManager : MonoBehaviour, IBegin
 {
     public static GameManager Instance;
 
-    [Header("ì‹œê°„ ì„¤ì •")]
+    [Header("½Ã°£ ¼³Á¤")]
     public float currentGameTime = 0f;
 
-    [Header("ë‚®ë°¤ ì²´í¬ ë° ì¼ì°¨ìˆ˜ í™•ì¸")]
+    [Header("³·¹ã Ã¼Å© ¹× ÀÏÂ÷¼ö È®ÀÎ")]
     public bool IsDaytime = true;
-    public int currentDay = 1; // 1ì¼ì°¨ ì‹œì‘
+    public int currentDay = 1; // 1ÀÏÂ÷ ½ÃÀÛ
 
-    [Header("ë‚®ë°¤ ìˆœí™˜ ì„¤ì •")]
+    [Header("³·¹ã ¼øÈ¯ ¼³Á¤")]
     public Volume postProcessVolume;
     public Gradient dayToNightGradient;
     public Gradient nightToDayGradient;
@@ -45,71 +45,71 @@ public class GameManager : MonoBehaviour, IBegin
     private ColorAdjustments colorAdjustments;
     private float cycleTime = 0f;
 
-    [Header("ìŠ¤í¬ë„ˆ ì§€ì ")]
+    [Header("½ºÆ÷³Ê ÁöÁ¡")]
     public GameObject[] spawnPoints;
 
-    [Header("ìŠ¹ë¬´ì› ìŠ¤í”„ë¼ì´íŠ¸ ì§€ì •")]
+    [Header("½Â¹«¿ø ½ºÇÁ¶óÀÌÆ® ÁöÁ¤")]
     public Sprite[] marinerSprites;
 
-    [Header("ì—ë„ˆë¯¸ í”„ë¦¬íŒ¹")]
+    [Header("¿¡³Ê¹Ì ÇÁ¸®ÆÕ")]
     public GameObject minion;
     public GameObject crawler;
     public GameObject titan;
 
-    [Header("ê²Œì„ì˜¤ë²„ ê´€ë¦¬")]
+    [Header("°ÔÀÓ¿À¹ö °ü¸®")]
     public int totalMarinerMembers = 0;
     public int deadMarinerMembers = 0;
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
 
-    [Header("ë™ì  ìŠ¤í¬ë„ˆ(EnemySpawnerFinder)")]
-    [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspectorì—ì„œ í• ë‹¹
-    [SerializeField] private float spawnLiftY = 0.05f;                   // ì‚´ì§ ë„ì›Œì„œ ìŠ¤í°
-    [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";   // í•˜ì´ì–´ë¼í‚¤ ì •ë¦¬ìš©
-    private Transform spawnRoot;                                         // ìŠ¤í° í¬ì¸íŠ¸ ë¶€ëª¨
+    [Header("µ¿Àû ½ºÆ÷³Ê(EnemySpawnerFinder)")]
+    [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector¿¡¼­ ÇÒ´ç
+    [SerializeField] private float spawnLiftY = 0.05f;                   // »ìÂ¦ ¶ç¿ö¼­ ½ºÆù
+    [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";   // ÇÏÀÌ¾î¶óÅ° Á¤¸®¿ë
+    private Transform spawnRoot;                                         // ½ºÆù Æ÷ÀÎÆ® ºÎ¸ğ
 
-    [Header("ë°”ë‹¤ì´ë²¤íŠ¸")]
+    [Header("¹Ù´ÙÀÌº¥Æ®")]
     [SerializeField] private OceanEventManager oceanEventManager;
 
-    // EnemySpawnerFinderì—ì„œ ì°¾ì€ ìŠ¤í° í¬ì¸íŠ¸ ìˆ˜
+    // EnemySpawnerFinder¿¡¼­ Ã£Àº ½ºÆù Æ÷ÀÎÆ® ¼ö
     private int activeSpawnCount = 0;
 
-    // ìƒì„±ëœ ì—ë„ˆë¯¸ ë¦¬ìŠ¤íŠ¸
+    // »ı¼ºµÈ ¿¡³Ê¹Ì ¸®½ºÆ®
     private List<GameObject> spawnedEnemies = new List<GameObject>();
     private Transform enemyRoot;
 
     [System.Serializable]
     public struct DayEnemyRow
     {
-        [Tooltip("ì´ ì¶œí˜„ ìˆ˜ = ë¯¸ë‹ˆì–¸ + í¬ë£°ëŸ¬ + íƒ€ì´íƒ„")]
-        public int total;   // ì´ ì¶œí˜„ìˆ˜
-        public int minion;  // ë¯¸ë‹ˆì–¸ ìˆ˜
-        public int crawler; // í¬ë¡¤ëŸ¬ ìˆ˜
-        public int titan;   // íƒ€ì´íƒ„ ìˆ˜
+        [Tooltip("ÃÑ ÃâÇö ¼ö = ¹Ì´Ï¾ğ + Å©·ê·¯ + Å¸ÀÌÅº")]
+        public int total;   // ÃÑ ÃâÇö¼ö
+        public int minion;  // ¹Ì´Ï¾ğ ¼ö
+        public int crawler; // Å©·Ñ·¯ ¼ö
+        public int titan;   // Å¸ÀÌÅº ¼ö
     }
 
     [System.Serializable]
     public struct EnemyScaleRow
     {
-        [Range(0, 200)] public float attackPercent; // ê³µê²©ë ¥ ì¦ê°€ %
-        [Range(0, 200)] public float hpPercent;     // ì²´ë ¥ ì¦ê°€ %
+        [Range(0, 200)] public float attackPercent; // °ø°İ·Â Áõ°¡ %
+        [Range(0, 200)] public float hpPercent;     // Ã¼·Â Áõ°¡ %
     }
 
-    [Header("ì¼ì°¨ë³„ ì—ë„ˆë¯¸ ì¶œí˜„ í‘œ (1~5ì¼ì°¨)")]
+    [Header("ÀÏÂ÷º° ¿¡³Ê¹Ì ÃâÇö Ç¥ (1~5ÀÏÂ÷)")]
     public DayEnemyRow[] enemySpawnTable = new DayEnemyRow[5];
 
-    [Header("ì¼ì°¨ë³„ ëŠ¥ë ¥ì¹˜ ê°•í™” í‘œ (1~5ì¼ì°¨)")]
+    [Header("ÀÏÂ÷º° ´É·ÂÄ¡ °­È­ Ç¥ (1~5ÀÏÂ÷)")]
     public EnemyScaleRow[] enemyScaleTable = new EnemyScaleRow[5];
 
-    [Header("ìŠ¹ë¬´ì› ìŠ¤í°")]
+    [Header("½Â¹«¿ø ½ºÆù")]
     [SerializeField] private GameObject marinerPrefab;   
     [SerializeField] private Transform mast;            
     [SerializeField] private Vector3 marinerSpawnOffset = Vector3.zero;
 
-    [Header("ì „ì²´ ë‘¥ì§€ ê°œìˆ˜ ì²´í¬")]
+    [Header("ÀüÃ¼ µÕÁö °³¼ö Ã¼Å©")]
     public int checkTotalNest;
 
-    #region ì„ì‹œ ì •ë¦¬ 
+    #region ÀÓ½Ã Á¤¸® 
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -130,7 +130,7 @@ public class GameManager : MonoBehaviour, IBegin
         if (InventoryUiMain.instance != null)
             InventoryUiMain.instance.Start();
         else
-            Debug.Log($">> GameManager.Start() : InventoryUiMain ì¸ìŠ¤í„´ìŠ¤ê°€ ì—†ìŒ");
+            Debug.Log($">> GameManager.Start() : InventoryUiMain ÀÎ½ºÅÏ½º°¡ ¾øÀ½");
     }
 
     private void Update()
@@ -146,48 +146,48 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void UpdateDayNightCycle()
     {
-        // í˜„ì¬ í˜ì´ì¦ˆ(ë‚®/ë°¤)ì— ë§ëŠ” ì„¤ì •ì„ í•œ ë²ˆì— ê°€ì ¸ì˜´
+        // ÇöÀç ÆäÀÌÁî(³·/¹ã)¿¡ ¸Â´Â ¼³Á¤À» ÇÑ ¹ø¿¡ °¡Á®¿È
         bool isDay = IsDaytime;
         float duration = isDay ? dayDuration : nightDuration;
         Gradient grad = isDay ? dayToNightGradient : nightToDayGradient;
 
-        // ì§„í–‰ë„ 0~1f
+        // ÁøÇàµµ 0~1f
         float t = Mathf.Clamp01(cycleTime / duration);
 
-        // ì»¬ëŸ¬/ë…¸ì¶œ ë³´ì •
+        // ÄÃ·¯/³ëÃâ º¸Á¤
         colorAdjustments.colorFilter.value = grad.Evaluate(t);
         colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
 
-        // ì•„ì§ í˜ì´ì¦ˆê°€ ëë‚˜ì§€ ì•Šì•˜ìœ¼ë©´ ë¦¬í„´
+        // ¾ÆÁ÷ ÆäÀÌÁî°¡ ³¡³ªÁö ¾Ê¾ÒÀ¸¸é ¸®ÅÏ
         if (cycleTime < duration) return;
 
-        // í˜ì´ì¦ˆ ì¢…ë£Œ ì²˜ë¦¬
+        // ÆäÀÌÁî Á¾·á Ã³¸®
         cycleTime = 0f;
 
         if (isDay)
         {
-            // ë‚® -> ë°¤ ì „í™˜
+            // ³· -> ¹ã ÀüÈ¯
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.To_night2);
 
             AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
 
-            Debug.Log($"ë°¤ì´ ë˜ì—ˆìŠµë‹ˆë‹¤. (Day {currentDay})");
+            Debug.Log($"¹ãÀÌ µÇ¾ú½À´Ï´Ù. (Day {currentDay})");
             IsDaytime = false;
             OnNightStart();
         }
         else
         {
-            // ë°¤ -> ë‚® ì „í™˜
+            // ¹ã -> ³· ÀüÈ¯
             IsDaytime = true;
             currentDay++;
 
             AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
             OnNightEnd();
-            Debug.Log($"ì•„ì¹¨ì´ ë˜ì—ˆìŠµë‹ˆë‹¤. (Day {currentDay})");
+            Debug.Log($"¾ÆÄ§ÀÌ µÇ¾ú½À´Ï´Ù. (Day {currentDay})");
 
-            // ì¼ë°˜ ëª¨ë“œì¼ ë•Œë§Œ 6ì¼ì°¨ ì—”ë”© ë°œìƒ
+            // ÀÏ¹İ ¸ğµåÀÏ ¶§¸¸ 6ÀÏÂ÷ ¿£µù ¹ß»ı
             if (!GameModeState.IsInfiniteMode && currentDay >= 6)
             {
                 TriggerGameOver();
@@ -278,15 +278,15 @@ public class GameManager : MonoBehaviour, IBegin
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
         EnemyScaleRow scale = GetScaleRowForDay(currentDay);
 
-        SpawnOf(minion, row.minion, scale);     // ë¯¸ë‹ˆì–¸
-        SpawnOf(crawler, row.crawler, scale);   // í¬ë¡¤ëŸ¬
-        SpawnOf(titan, row.titan, scale);       // íƒ€ì´íƒ„
+        SpawnOf(minion, row.minion, scale);     // ¹Ì´Ï¾ğ
+        SpawnOf(crawler, row.crawler, scale);   // Å©·Ñ·¯
+        SpawnOf(titan, row.titan, scale);       // Å¸ÀÌÅº
 
         int spawnedCount = row.minion + row.crawler + row.titan;
-        Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (ì´ {spawnedCount})");
+        Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (ÃÑ {spawnedCount})");
     }
 
-    // ë°”ë‹¤ì´ë²¤íŠ¸ : ì•ˆê°œ ë‚® íš¨ê³¼ -> ë¯¸ë‹ˆì–¸ ì¶”ê°€ ìŠ¤í°
+    // ¹Ù´ÙÀÌº¥Æ® : ¾È°³ ³· È¿°ú -> ¹Ì´Ï¾ğ Ãß°¡ ½ºÆù
     public void SpawnFogMinions(int count)
     {
         if (spawnPoints == null || spawnPoints.Length == 0) return;
@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviour, IBegin
     {
         Time.timeScale = 1f;
 
-        // í”Œë ˆì´ì–´ ë‹¤ì‹œ ë³´ì´ê²Œ
+        // ÇÃ·¹ÀÌ¾î ´Ù½Ã º¸ÀÌ°Ô
         if (ThisIsPlayer.Player != null)
         {
             Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
@@ -313,17 +313,17 @@ public class GameManager : MonoBehaviour, IBegin
             }
         }
 
-        // ìˆ¨ê²¼ë˜ UI ë‹¤ì‹œ ì¼œê¸°
+        // ¼û°å´ø UI ´Ù½Ã ÄÑ±â
         ShowAllUI();
 
-        // ê²Œì„ì˜¤ë²„ íŒ¨ë„ ë‹«ê¸°
+        // °ÔÀÓ¿À¹ö ÆĞ³Î ´İ±â
         if (gameOverUI != null)
             gameOverUI.HideGameOverScreen();
 
-        Debug.Log("[GameMode] ë¬´í•œ ëª¨ë“œë¡œ ì „í™˜ë˜ì–´ ê²Œì„ì„ ì´ì–´ì„œ ì§„í–‰í•©ë‹ˆë‹¤.");
+        Debug.Log("[GameMode] ¹«ÇÑ ¸ğµå·Î ÀüÈ¯µÇ¾î °ÔÀÓÀ» ÀÌ¾î¼­ ÁøÇàÇÕ´Ï´Ù.");
     }
 
-    // ì¼ì°¨ë³„ ê³µê²©ë ¥ ì ìš©ëœ ì—ë„ˆë¯¸ ìƒì„±
+    // ÀÏÂ÷º° °ø°İ·Â Àû¿ëµÈ ¿¡³Ê¹Ì »ı¼º
     private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
     {
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
@@ -331,14 +331,14 @@ public class GameManager : MonoBehaviour, IBegin
 
         if (prefab == null || count <= 0) return;
 
-        // ë¶€ëª¨ ì»¨í…Œì´ë„ˆ 
+        // ºÎ¸ğ ÄÁÅ×ÀÌ³Ê 
         EnsureEnemyRoot();
 
         for (int i = 0; i < count; i++)
         {
-            if (spawnPoints == null || activeSpawnCount == 0) { Debug.LogWarning("[Spawn] í™œì„± ìŠ¤í° í¬ì¸íŠ¸ ì—†ìŒ"); return; }
+            if (spawnPoints == null || activeSpawnCount == 0) { Debug.LogWarning("[Spawn] È°¼º ½ºÆù Æ÷ÀÎÆ® ¾øÀ½"); return; }
 
-            // í™œì„±í™” ëœ ê²ƒë§Œ ëŒ€ìƒìœ¼ë¡œ ëœë¤(Found=trueì¸ ì¸ë±ìŠ¤ ì„ íƒ)
+            // È°¼ºÈ­ µÈ °Í¸¸ ´ë»óÀ¸·Î ·£´ı(Found=trueÀÎ ÀÎµ¦½º ¼±ÅÃ)
             int spIndex = -1;
             for (int safe = 0; safe < 16; safe++)
             {
@@ -348,7 +348,7 @@ public class GameManager : MonoBehaviour, IBegin
                     spIndex = tryIdx; break;
                 }
             }
-            if (spIndex == -1) { Debug.LogWarning("[Spawn] í™œì„± ìŠ¤í° í¬ì¸íŠ¸ ì„ íƒ ì‹¤íŒ¨"); return; }
+            if (spIndex == -1) { Debug.LogWarning("[Spawn] È°¼º ½ºÆù Æ÷ÀÎÆ® ¼±ÅÃ ½ÇÆĞ"); return; }
 
             Transform p = spawnPoints[spIndex].transform;
             Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
@@ -366,7 +366,7 @@ public class GameManager : MonoBehaviour, IBegin
                 float hpMul = 1f + (scale.hpPercent * 0.01f);
                 stats.ApplyScaling(atkMul, hpMul);
 
-                Debug.Log($"[Scale] Day {currentDay} {e.name} ATK {stats.baseATK}â†’{stats.atk} (x{atkMul:0.00}), HP {stats.baseHP}â†’{stats.hp} (x{hpMul:0.00})");
+                Debug.Log($"[Scale] Day {currentDay} {e.name} ATK {stats.baseATK}¡æ{stats.atk} (x{atkMul:0.00}), HP {stats.baseHP}¡æ{stats.hp} (x{hpMul:0.00})");
             }
         }
     }
@@ -378,17 +378,17 @@ public class GameManager : MonoBehaviour, IBegin
             if (e != null) Destroy(e);
 
         spawnedEnemies.Clear();*/
-		Debug.Log($"DespawnAllEnemies ë“¤ì–´ì˜´ / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
+		Debug.Log($"DespawnAllEnemies µé¾î¿È / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
 
 		foreach (GameObject one in GameObject.FindGameObjectsWithTag("Enemy"))
         {
             Debug.Log($"DespawnAllEnemies : {one.name}");
             Destroy(one);
-			Debug.Log($"DespawnAllEnemies one ì‚­ì œ");
+			Debug.Log($"DespawnAllEnemies one »èÁ¦");
 		}
 
 
-        Debug.Log("[Despawn] ë°¤ ì¢…ë£Œë¡œ ëª¨ë“  ì—ë„ˆë¯¸ ì œê±°");
+        Debug.Log("[Despawn] ¹ã Á¾·á·Î ¸ğµç ¿¡³Ê¹Ì Á¦°Å");
     }
 
     private DayEnemyRow GetSpawnRowForDay(int day)
@@ -396,21 +396,21 @@ public class GameManager : MonoBehaviour, IBegin
         if (enemySpawnTable == null || enemySpawnTable.Length == 0)
             return new DayEnemyRow { total = 0, minion = 0, crawler = 0, titan = 0 };
 
-        // 1~5ì¼ì°¨ëŠ” ê¸°ì¡´ í‘œ ê·¸ëŒ€ë¡œ ì‚¬ìš©
+        // 1~5ÀÏÂ÷´Â ±âÁ¸ Ç¥ ±×´ë·Î »ç¿ë
         if (day <= enemySpawnTable.Length)
         {
             int idx = Mathf.Clamp(day - 1, 0, enemySpawnTable.Length - 1);
             return enemySpawnTable[idx];
         }
 
-        // ë¬´í•œ ëª¨ë“œê°€ ì•„ë‹ˆë©´ ë§ˆì§€ë§‰(5ì¼ì°¨) ê°’ ìœ ì§€
+        // ¹«ÇÑ ¸ğµå°¡ ¾Æ´Ï¸é ¸¶Áö¸·(5ÀÏÂ÷) °ª À¯Áö
         if (!GameModeState.IsInfiniteMode)
             return enemySpawnTable[enemySpawnTable.Length - 1];
 
-        // ë¬´í•œ ëª¨ë“œ 6ì¼ì°¨ ì´ìƒ:
-        // 5ì¼ì°¨ ê°’ì„ ê¸°ì¤€ìœ¼ë¡œ ë§¤ì¼ ë¯¸ë‹ˆì–¸/í¬ë¡¤ëŸ¬/íƒ€ì´íƒ„ ê°ê° +1
+        // ¹«ÇÑ ¸ğµå 6ÀÏÂ÷ ÀÌ»ó:
+        // 5ÀÏÂ÷ °ªÀ» ±âÁØÀ¸·Î ¸ÅÀÏ ¹Ì´Ï¾ğ/Å©·Ñ·¯/Å¸ÀÌÅº °¢°¢ +1
         DayEnemyRow baseRow = enemySpawnTable[enemySpawnTable.Length - 1];
-        int extraDays = day - enemySpawnTable.Length; // 6ì¼ì°¨=1, 7ì¼ì°¨=2, ...
+        int extraDays = day - enemySpawnTable.Length; // 6ÀÏÂ÷=1, 7ÀÏÂ÷=2, ...
 
         DayEnemyRow result = new DayEnemyRow
         {
@@ -434,23 +434,23 @@ public class GameManager : MonoBehaviour, IBegin
     }
 
     // ==========================
-    // ì•„ì¹¨ ìŠ¹ë¬´ì› ìŠ¤í° ê·œì¹™ ì ìš©
+    // ¾ÆÄ§ ½Â¹«¿ø ½ºÆù ±ÔÄ¢ Àû¿ë
     // ==========================
     private void ApplyMarinerEmbarkRule()
     {
         int add = CalcMarinerEmbarkCount(currentDay, totalMarinerMembers);
         if (add <= 0)
         {
-            Debug.Log($"[Mariner] Day {currentDay} ì•„ì¹¨: ìŠ¹ì„  0ëª… â†’ ì´ {totalMarinerMembers}ëª…");
+            Debug.Log($"[Mariner] Day {currentDay} ¾ÆÄ§: ½Â¼± 0¸í ¡æ ÃÑ {totalMarinerMembers}¸í");
             return;
         }
 
         SpawnMariner(add);
-        Debug.Log($"[Mariner] Day {currentDay} ì•„ì¹¨: ìŠ¹ì„  {add}ëª… â†’ ì´ {totalMarinerMembers}ëª…");
+        Debug.Log($"[Mariner] Day {currentDay} ¾ÆÄ§: ½Â¼± {add}¸í ¡æ ÃÑ {totalMarinerMembers}¸í");
     }
 
-    // 1ì¼ì°¨ 0ëª…, 2ì¼ì°¨ 1ëª…, 3ì¼ì°¨ 2ëª…, 4ì¼ì°¨ 3ëª…,
-    // 5ì¼ì°¨: í˜„ì¬ ìŠ¹ë¬´ì› ìˆ˜ â‰¤3 â†’ 4ëª…, í˜„ì¬ ìŠ¹ë¬´ì› ìˆ˜ â‰¥4 â†’ 5ëª…
+    // 1ÀÏÂ÷ 0¸í, 2ÀÏÂ÷ 1¸í, 3ÀÏÂ÷ 2¸í, 4ÀÏÂ÷ 3¸í,
+    // 5ÀÏÂ÷: ÇöÀç ½Â¹«¿ø ¼ö ¡Â3 ¡æ 4¸í, ÇöÀç ½Â¹«¿ø ¼ö ¡Ã4 ¡æ 5¸í
     private int CalcMarinerEmbarkCount(int day, int marinerNow)
     {
         switch (Mathf.Clamp(day, 1, 5))
@@ -461,7 +461,7 @@ public class GameManager : MonoBehaviour, IBegin
             case 4: return 1;
             case 5: return 1;
             default:
-                // 6ì¼ì°¨ ì´ìƒì€ ë§ˆì§€ë§‰ ê°’ì„ ìœ ì§€í•˜ê±°ë‚˜, í•„ìš” ì‹œ ê·œì¹™ í™•ì¥
+                // 6ÀÏÂ÷ ÀÌ»óÀº ¸¶Áö¸· °ªÀ» À¯ÁöÇÏ°Å³ª, ÇÊ¿ä ½Ã ±ÔÄ¢ È®Àå
                 return 1;
         }
     }
@@ -474,7 +474,7 @@ public class GameManager : MonoBehaviour, IBegin
 
     public void CollectResource(string type)
     {
-        Debug.Log($"ìì› íšë“: {type}");
+        Debug.Log($"ÀÚ¿ø È¹µæ: {type}");
     }
     #endregion
 
@@ -489,17 +489,17 @@ public class GameManager : MonoBehaviour, IBegin
 
     private GameObject CreateOrGetSpawnPoint(int index)
     {
-        // ê¸°ì¡´ public GameObject[] spawnPoints ë¥¼ ê·¸ëŒ€ë¡œ ì‚¬ìš©
+        // ±âÁ¸ public GameObject[] spawnPoints ¸¦ ±×´ë·Î »ç¿ë
         if (spawnPoints == null || spawnPoints.Length < 4)
         {
-            // ê¸¸ì´ê°€ 4ê°€ ì•„ë‹ˆë©´ 4ë¡œ ë§ì¶° ì¬í• ë‹¹(ê¸°ì¡´ ê°’ì€ ìœ ì§€ ë¶ˆê°€ â†’ ìƒˆë¡œ ì±„ì›€)
+            // ±æÀÌ°¡ 4°¡ ¾Æ´Ï¸é 4·Î ¸ÂÃç ÀçÇÒ´ç(±âÁ¸ °ªÀº À¯Áö ºÒ°¡ ¡æ »õ·Î Ã¤¿ò)
             spawnPoints = new GameObject[4];
         }
 
         if (spawnPoints[index] == null)
         {
             EnsureSpawnRoot();
-            var go = new GameObject($"SP_{index}"); // ì„ì‹œ íë¸Œ ëŒ€ì‹  ë¹ˆ ì˜¤ë¸Œì íŠ¸ë¡œ ê´€ë¦¬
+            var go = new GameObject($"SP_{index}"); // ÀÓ½Ã Å¥ºê ´ë½Å ºó ¿ÀºêÁ§Æ®·Î °ü¸®
             go.transform.SetParent(spawnRoot);
             spawnPoints[index] = go;
         }
@@ -507,22 +507,22 @@ public class GameManager : MonoBehaviour, IBegin
     }
 
     /// <summary>
-    /// EnemySpawnerFinderì˜ 4ë°©í–¥ ê²°ê³¼ë¥¼ ì½ì–´ì™€ spawnPointsë¥¼ â€˜í˜„ì¬ í”Œë«í¼ ìƒíƒœâ€™ë¡œ ë™ê¸°í™”.
-    /// 4ê°œ ì „ë¶€ ì„±ê³µí•˜ë©´ true, ì¼ë¶€ë§Œ ìˆìœ¼ë©´ false(ìˆëŠ” ê²ƒë§Œ í™œì„±).
+    /// EnemySpawnerFinderÀÇ 4¹æÇâ °á°ú¸¦ ÀĞ¾î¿Í spawnPoints¸¦ ¡®ÇöÀç ÇÃ·§Æû »óÅÂ¡¯·Î µ¿±âÈ­.
+    /// 4°³ ÀüºÎ ¼º°øÇÏ¸é true, ÀÏºÎ¸¸ ÀÖÀ¸¸é false(ÀÖ´Â °Í¸¸ È°¼º).
     /// </summary>
     private bool RefreshSpawnPointsFromFinder()
     {
         if (spawnerFinder == null)
         {
-            Debug.LogWarning("[Spawner] EnemySpawnerFinderê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
+            Debug.LogWarning("[Spawner] EnemySpawnerFinder°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
             activeSpawnCount = 0;
             return false;
         }
 
-        // ìµœì‹  í”Œë«í¼ ë°°ì¹˜ ë°˜ì˜
+        // ÃÖ½Å ÇÃ·§Æû ¹èÄ¡ ¹İ¿µ
         bool ok = spawnerFinder.Refresh();
 
-        // Finderì—ì„œ ì°¾ì€ ë°©í–¥ë“¤ë§Œ ë°˜ì˜(ìµœëŒ€ 4)
+        // Finder¿¡¼­ Ã£Àº ¹æÇâµé¸¸ ¹İ¿µ(ÃÖ´ë 4)
         int count = 0;
         for (int i = 0; i < 4; i++)
         {
@@ -535,12 +535,12 @@ public class GameManager : MonoBehaviour, IBegin
             count++;
         }
 
-        // ëª» ì°¾ì€ ë°©í–¥ì€ null ì²˜ë¦¬(ìŠ¤í° ëŒ€ìƒì—ì„œ ì œì™¸)
+        // ¸ø Ã£Àº ¹æÇâÀº null Ã³¸®(½ºÆù ´ë»ó¿¡¼­ Á¦¿Ü)
         for (int i = 0; i < 4; i++)
         {
             if (!spawnerFinder.found[i] && spawnPoints != null && i < spawnPoints.Length)
             {
-                // êµ³ì´ ì‚­ì œê¹Œì§„ ì•ˆ í•´ë„ ë˜ì§€ë§Œ, ì‹¤ìˆ˜ ìŠ¤í° ë°©ì§€ìš©ìœ¼ë¡œ ë¹„í™œì„±í™” ê°€ëŠ¥
+                // ±»ÀÌ »èÁ¦±îÁø ¾È ÇØµµ µÇÁö¸¸, ½Ç¼ö ½ºÆù ¹æÁö¿ëÀ¸·Î ºñÈ°¼ºÈ­ °¡´É
                 if (spawnPoints[i] != null) spawnPoints[i].SetActive(false);
             }
             else if (spawnerFinder.found[i] && spawnPoints[i] != null)
@@ -551,19 +551,19 @@ public class GameManager : MonoBehaviour, IBegin
 
         activeSpawnCount = count;
         if (count == 0)
-            Debug.LogWarning("[Spawner] ì‚¬ìš© ê°€ëŠ¥í•œ ë™ì  ìŠ¤í° í¬ì¸íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤. í”Œë«í¼ì„ ì„¤ì¹˜í•˜ì„¸ìš”.");
+            Debug.LogWarning("[Spawner] »ç¿ë °¡´ÉÇÑ µ¿Àû ½ºÆù Æ÷ÀÎÆ®°¡ ¾ø½À´Ï´Ù. ÇÃ·§ÆûÀ» ¼³Ä¡ÇÏ¼¼¿ä.");
 
-        // 4ê°œ ëª¨ë‘ ì±„ì›Œì¡ŒëŠ”ì§€ ë°˜í™˜
+        // 4°³ ¸ğµÎ Ã¤¿öÁ³´ÂÁö ¹İÈ¯
         return ok;
     }
 
-    // ì–´ë””ì„œë“  í˜¸ì¶œ ê°€ëŠ¥: í”Œë«í¼ ë°°ì¹˜ ë³€ê²½ í›„ ìŠ¤í° í¬ì¸íŠ¸ ì¦‰ì‹œ ê°±ì‹ 
+    // ¾îµğ¼­µç È£Ãâ °¡´É: ÇÃ·§Æû ¹èÄ¡ º¯°æ ÈÄ ½ºÆù Æ÷ÀÎÆ® Áï½Ã °»½Å
     public void NotifyPlatformLayoutChanged()
     {
         RefreshSpawnPointsFromFinder();
     }
 
-    #region í•˜ì´ì–´ë¼í‚¤ì°½ì—ì„œ ë³´ê¸° ì‰½ê²Œ ì •ë¦¬ (ë¶€ëª¨ ë³´ì¥)
+    #region ÇÏÀÌ¾î¶óÅ°Ã¢¿¡¼­ º¸±â ½±°Ô Á¤¸® (ºÎ¸ğ º¸Àå)
     private void EnsureEnemyRoot()
     {
         if (enemyRoot == null)
@@ -575,38 +575,55 @@ public class GameManager : MonoBehaviour, IBegin
     #endregion
 
     // ==========================
-    // ì‹¤ì œ ìŠ¹ë¬´ì› ìƒì„± ë¡œì§
+    // ½ÇÁ¦ ½Â¹«¿ø »ı¼º ·ÎÁ÷
     // ==========================
+
     private void SpawnMariner(int count)
     {
         if (count <= 0) return;
 
         if (marinerPrefab == null)
         {
-            Debug.LogWarning("[Mariner] marinerPrefabì´ ë¹„ì–´ ìˆìŠµë‹ˆë‹¤. í”„ë¦¬íŒ¹ì„ í• ë‹¹í•˜ì„¸ìš”.");
+            Debug.LogWarning("[Mariner] marinerPrefabÀÌ ºñ¾î ÀÖ½À´Ï´Ù. ÇÁ¸®ÆÕÀ» ÇÒ´çÇÏ¼¼¿ä.");
             return;
         }
 
-        // ìŠ¤í° ê¸°ì¤€ ìœ„ì¹˜ = mast
-        Vector3 basePos = Vector3.zero;
-        if (mast != null) basePos = mast.position;
-        else if (ThisIsPlayer.Player != null) basePos = ThisIsPlayer.Player.transform.position; 
+        if (spawnPoints == null || activeSpawnCount == 0)
+        {
+            Debug.LogWarning("[Mariner] È°¼º ½ºÆù Æ÷ÀÎÆ®°¡ ¾ø½À´Ï´Ù.");
+            return;
+        }
 
         for (int i = 0; i < count; i++)
         {
-            // ê²¹ì¹¨ ë°©ì§€
-            Vector3 jitter = new Vector3(Random.Range(-0.6f, 0.6f), 0f, Random.Range(-0.6f, 0.6f));
-            Vector3 pos = basePos + marinerSpawnOffset + jitter;
+            int spIndex = -1;
+            for (int safe = 0; safe < 16; safe++)
+            {
+                int tryIdx = Random.Range(0, Mathf.Max(4, spawnPoints.Length));
+                if (tryIdx < spawnPoints.Length && spawnPoints[tryIdx] != null && spawnPoints[tryIdx].activeSelf)
+                {
+                    spIndex = tryIdx;
+                    break;
+                }
+            }
+
+            if (spIndex == -1)
+            {
+                Debug.LogWarning("[Mariner] È°¼º ½ºÆù Æ÷ÀÎÆ® ¼±ÅÃ ½ÇÆĞ");
+                return;
+            }
+
+            Transform p = spawnPoints[spIndex].transform;
+            Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
+            Vector3 pos = p.position + marinerSpawnOffset + offset;
 
             var go = Instantiate(marinerPrefab, pos, Quaternion.identity);
             go.name = $"Mariner_Day{currentDay}_#{totalMarinerMembers + 1}";
 
-            // ì¹´ìš´íŠ¸ ë°˜ì˜
             AddMarinerMember();
         }
     }
-
-    // ì „ì²´ ë‘¥ì§€ ìˆ˜ ì œí•œ
+    // ÀüÃ¼ µÕÁö ¼ö Á¦ÇÑ
     public bool LimitsNest()
     {
         if (checkTotalNest < 2)

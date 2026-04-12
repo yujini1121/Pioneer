@@ -18,7 +18,6 @@ public class RepairUI : MonoBehaviour
         instance = this;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         itemSlotUIs = new ItemSlotUI[slotGameObjects.Count];
@@ -26,16 +25,16 @@ public class RepairUI : MonoBehaviour
         {
             itemSlotUIs[index] = slotGameObjects[index].GetComponent<ItemSlotUI>();
         }
-        //IconRefresh();
-        // repairWindow.SetActive(false);
         cg.alpha = 0f;
         cg.interactable = false;
         cg.blocksRaycasts = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (remainRepairToolAmount == null || RepairSystem.instance == null)
+            return;
+
         remainRepairToolAmount.text = $"{RepairSystem.instance.remainRepairCount}";
     }
 
@@ -78,14 +77,12 @@ public class RepairUI : MonoBehaviour
         }
         else
         {
-            // slot == 0
             if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory) == false &&
                 InventoryManager.Instance.mouseInventory.itemBaseType.categories != EDataType.WeaponItem)
             {
                 return;
             }
         }
-
 
         if (index == 0 &&
             SItemStack.IsEmpty(RepairSystem.instance.slot.itemLists[1]) == false &&
@@ -95,7 +92,6 @@ public class RepairUI : MonoBehaviour
             RepairSystem.instance.Collect();
         }
         RepairSystem.instance.slot.MouseSwitch(index);
-
 
         InventoryUiMain.instance.MouseUI.Show(InventoryManager.Instance.mouseInventory);
         itemSlotUIs[index].Show(RepairSystem.instance.slot.itemLists[index]);
@@ -124,18 +120,10 @@ public class RepairUI : MonoBehaviour
 
     }
 
-    // 입력
-    // 인벤토리 UI에서 마우스 다운 ->
-
     public void IconRefresh()
     {
-        // 모든 아이템을
-        // + 선택되지 않은 상태로 바꿈
-        // + 내구도 체크
         for (int index = 0; index < slotGameObjects.Count; ++index)
         {
-            //if (InventoryManager.Instance.itemLists[index] == null) continue;
-
             ItemSlotUI _forUi = slotGameObjects[index].GetComponent<ItemSlotUI>();
 
             _forUi.Show(RepairSystem.instance.slot.itemLists[index]);

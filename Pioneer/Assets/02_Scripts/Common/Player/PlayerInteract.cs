@@ -11,6 +11,11 @@ public class PlayerInteract : MonoBehaviour
 
 	public static void Add(StructureBase one)
 	{
+		if (instance == null || one == null || one.IsInteractionTarget == false)
+		{
+			return;
+		}
+
 		instance.ready.Add(one);
 	}
 

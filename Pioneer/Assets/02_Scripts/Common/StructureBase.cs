@@ -81,6 +81,8 @@ public class StructureBase : CommonBase
     #endregion
 
     #region 상호작용
+    public virtual bool IsInteractionTarget => true;
+
     public virtual void Interactive() { }
     public virtual void Use() {
         Debug.Log(">> StructureBase.Use()");
@@ -91,6 +93,9 @@ public class StructureBase : CommonBase
     {
         get
         {
+            if (ThisIsPlayer.Player == null)
+                return false;
+
             return (transform.position - ThisIsPlayer.Player.transform.position).sqrMagnitude < interactRange * interactRange;
         }
     }

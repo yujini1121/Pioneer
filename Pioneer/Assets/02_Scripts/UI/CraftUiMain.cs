@@ -43,7 +43,6 @@ public class CraftUiMain : MonoBehaviour, IBegin
         instance = this;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         //textMeshProUGUI.tex
