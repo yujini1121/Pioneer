@@ -669,6 +669,11 @@ MonoBehaviour:
   IsDead: 0
   attacker: {fileID: 0}
   dropOffset: {x: 0, y: 0, z: 0}
+  hitFlashAmount: 1
+  hitFlashDurations: 0.2
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  hitFlashEmission: 2
+  spriteRenderer: {fileID: 0}
   objectData: {fileID: 11400000, guid: ac880c82d9423e245a56ddc237748984, type: 2}
   <isUsing>k__BackingField: 0
   interactRange: 1.5
@@ -680,7 +685,7 @@ MonoBehaviour:
   attackPower: 25
   attackRange: 3
   attackCooldown: 2
-  attackSpeed: 4
+  attackSpeed: 6
   boltHalfSize: {x: 0.5, y: 0.5, z: 1}
   gunnerPos: {fileID: 7667971923933810913}
   boltPool: {fileID: 7619030109788409699}

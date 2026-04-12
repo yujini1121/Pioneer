@@ -34,6 +34,7 @@ public class Ballista : StructureBase, IBegin
     private int poolIndex = 0;
     private float curCooldown = 0f;
     private bool isDestroyed = false;
+    private PlayerCore gunnerCore;
 
     protected override void Awake()
     {
@@ -99,6 +100,7 @@ public class Ballista : StructureBase, IBegin
 
         gunner = player;
         gunnerController = gunner.GetComponent<PlayerController>();
+        gunnerCore = gunner.GetComponent<PlayerCore>();
         gunnerRb = gunner.GetComponent<Rigidbody>();
 
         if (gunnerController != null)
@@ -161,7 +163,25 @@ public class Ballista : StructureBase, IBegin
 
         gunner = null;
         gunnerController = null;
+        gunnerCore = null;
         gunnerRb = null;
+    }
+
+    private void UpdateGunnerAimAnimation(Vector3 dir)
+    {
+        if (gunner == null || gunnerCore == null)
+            return;
+
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.0001f)
+            return;
+
+        dir.Normalize();
+
+        if (gunnerController != null)
+            gunnerController.lastMoveDirection = dir;
+
+        gunnerCore.Idle(dir);
     }
 
     private void LookAt()
@@ -196,6 +216,8 @@ public class Ballista : StructureBase, IBegin
 
         Quaternion targetRot = Quaternion.LookRotation(dir.normalized);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+
+        UpdateGunnerAimAnimation(dir);
     }
 
     private void Fire()
