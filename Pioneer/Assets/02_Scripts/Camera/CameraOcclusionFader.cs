@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[DefaultExecutionOrder(1000)] // CinemachineBrain Àû¿ë ÈÄ ½ÇÇàµÇµµ·Ï(¿É¼Ç)
+[DefaultExecutionOrder(1000)] // CinemachineBrain ì ìš© í›„ ì‹¤í–‰ë˜ë„ë¡(ì˜µì…˜)
 public class CameraOcclusionFader : MonoBehaviour
 {
     [Header("Targets")]
@@ -9,18 +9,18 @@ public class CameraOcclusionFader : MonoBehaviour
     public LayerMask occluderMask;
 
     [Header("Fade Settings")]
-    [Range(0f, 1f)] public float fadeAlpha = 0.35f; // ¸ñÇ¥ ¹İÅõ¸íµµ
-    [Range(0f, 1f)] public float minAlpha = 0.30f; // Àı´ë ÃÖ¼Ò ¾ËÆÄ(¾Èº¸ÀÏ Á¤µµ·Î ³»·Á°¡Áö ¾Ê°Ô)
+    [Range(0f, 1f)] public float fadeAlpha = 0.35f; // ëª©í‘œ ë°˜íˆ¬ëª…ë„
+    [Range(0f, 1f)] public float minAlpha = 0.30f; // ì ˆëŒ€ ìµœì†Œ ì•ŒíŒŒ(ì•ˆë³´ì¼ ì •ë„ë¡œ ë‚´ë ¤ê°€ì§€ ì•Šê²Œ)
     public float fadeSpeed = 10f;
     public float sphereRadius = 0.35f;
 
-    // ¼º´É¿ë NonAlloc ¹öÆÛ (ÇÊ¿ä½Ã Å©±â Å°¿ì±â)
+    // ì„±ëŠ¥ìš© NonAlloc ë²„í¼ (í•„ìš”ì‹œ í¬ê¸° í‚¤ìš°ê¸°)
     const int MaxHits = 64;
     static readonly RaycastHit[] _hitsBuffer = new RaycastHit[MaxHits];
 
-    readonly Dictionary<Renderer, float> _current = new();   // ÇöÀç Àû¿ë Áß ¾ËÆÄ
-    readonly HashSet<Renderer> _hitsThisFrame = new();       // ÀÌ¹ø ÇÁ·¹ÀÓ¿¡ °É¸° ·»´õ·¯
-    readonly List<Renderer> _toRestore = new();              // º¹¿ø ¿¹Á¤ ÀÓ½Ã ¸®½ºÆ®
+    readonly Dictionary<Renderer, float> _current = new();   // í˜„ì¬ ì ìš© ì¤‘ ì•ŒíŒŒ
+    readonly HashSet<Renderer> _hitsThisFrame = new();       // ì´ë²ˆ í”„ë ˆì„ì— ê±¸ë¦° ë Œë”ëŸ¬
+    readonly List<Renderer> _toRestore = new();              // ë³µì› ì˜ˆì • ì„ì‹œ ë¦¬ìŠ¤íŠ¸
     MaterialPropertyBlock _mpb;
 
     void Awake()
@@ -39,7 +39,7 @@ public class CameraOcclusionFader : MonoBehaviour
 
         _hitsThisFrame.Clear();
 
-        // Ä«¸Ş¶ó ¡æ ÇÃ·¹ÀÌ¾î ¹æÇâÀ¸·Î Ä³½ºÆ®
+        // ì¹´ë©”ë¼ â†’ í”Œë ˆì´ì–´ ë°©í–¥ìœ¼ë¡œ ìºìŠ¤íŠ¸
         var camPos = transform.position;
         var dir = player.position - camPos;
         var dist = dir.magnitude;
@@ -47,26 +47,26 @@ public class CameraOcclusionFader : MonoBehaviour
 
         var ray = new Ray(camPos, dir / dist);
 
-        // NonAlloc Ä³½ºÆ® (GC ¾øÀ½)
+        // NonAlloc ìºìŠ¤íŠ¸ (GC ì—†ìŒ)
         int hitCount = Physics.SphereCastNonAlloc(
             ray, sphereRadius, _hitsBuffer, dist,
             occluderMask, QueryTriggerInteraction.Ignore);
 
-        // ¸ÂÀº Äİ¶óÀÌ´õµéÀÇ ¸ğµç Renderer ¼öÁı
+        // ë§ì€ ì½œë¼ì´ë”ë“¤ì˜ ëª¨ë“  Renderer ìˆ˜ì§‘
         for (int i = 0; i < hitCount; i++)
         {
             var col = _hitsBuffer[i].collider;
-            // ÀÚ½Ä±îÁö ¸ğµÎ Æ÷ÇÔ (¸Ş½Ã¿¡ ÀÚ½ÄÀÌ ¸¹À¸¸é Ä³½Ì ±¸Á¶ °í·Á)
+            // ìì‹ê¹Œì§€ ëª¨ë‘ í¬í•¨ (ë©”ì‹œì— ìì‹ì´ ë§ìœ¼ë©´ ìºì‹± êµ¬ì¡° ê³ ë ¤)
             var renderers = col.GetComponentsInChildren<Renderer>(includeInactive: false);
             for (int r = 0; r < renderers.Length; r++)
             {
                 var rend = renderers[r];
                 _hitsThisFrame.Add(rend);
-                if (!_current.ContainsKey(rend)) _current[rend] = 1f; // ÃÖÃÊ µî·Ï½Ã ±âº» ¾ËÆÄ 1
+                if (!_current.ContainsKey(rend)) _current[rend] = 1f; // ìµœì´ˆ ë“±ë¡ì‹œ ê¸°ë³¸ ì•ŒíŒŒ 1
             }
         }
 
-        // 1) °É¸° ·»´õ·¯´Â ¸ñÇ¥ ¾ËÆÄ±îÁö °¨¼Ò
+        // 1) ê±¸ë¦° ë Œë”ëŸ¬ëŠ” ëª©í‘œ ì•ŒíŒŒê¹Œì§€ ê°ì†Œ
         foreach (var rend in _hitsThisFrame)
         {
             float a0 = GetAlpha(rend);
@@ -74,7 +74,7 @@ public class CameraOcclusionFader : MonoBehaviour
             ApplyAlpha(rend, a1);
         }
 
-        // 2) ¾È °É¸° ·»´õ·¯´Â 1.0À¸·Î º¹¿ø (³¡³ª¸é µñ¼Å³Ê¸® Á¦°Å)
+        // 2) ì•ˆ ê±¸ë¦° ë Œë”ëŸ¬ëŠ” 1.0ìœ¼ë¡œ ë³µì› (ëë‚˜ë©´ ë”•ì…”ë„ˆë¦¬ ì œê±°)
         _toRestore.Clear();
         foreach (var kv in _current)
         {
@@ -93,15 +93,15 @@ public class CameraOcclusionFader : MonoBehaviour
     }
 
     float GetAlpha(Renderer r)
-        => _current.TryGetValue(r, out float a) ? a : 1f; // ±âº»°ª 1·Î ¼öÁ¤
+        => _current.TryGetValue(r, out float a) ? a : 1f; // ê¸°ë³¸ê°’ 1ë¡œ ìˆ˜ì •
 
     void ApplyAlpha(Renderer r, float a)
     {
-        // ÃÖ¼Ò/ÃÖ´ë ¹üÀ§ °íÁ¤ (¿ÏÀü Åõ¸í ¹æÁö)
+        // ìµœì†Œ/ìµœëŒ€ ë²”ìœ„ ê³ ì • (ì™„ì „ íˆ¬ëª… ë°©ì§€)
         a = Mathf.Clamp(a, minAlpha, 1f);
         _current[r] = a;
 
-        // 2D ½ºÇÁ¶óÀÌÆ®ÀÎ °æ¿ì(°¡Àå È®½Ç): SpriteRenderer.color
+        // 2D ìŠ¤í”„ë¼ì´íŠ¸ì¸ ê²½ìš°(ê°€ì¥ í™•ì‹¤): SpriteRenderer.color
         if (r is SpriteRenderer sr)
         {
             var c = sr.color;
@@ -110,8 +110,8 @@ public class CameraOcclusionFader : MonoBehaviour
             return;
         }
 
-        // ÀÏ¹İ Renderer: ¸ÓÆ¼¸®¾ó ½½·Ô(¼­ºê¸Ş½Ã)º°·Î MPB Àû¿ë
-        // ÁÖÀÇ: Opaque ¸ÓÆ¼¸®¾óÀº ¾ËÆÄ°¡ ·»´õ¸µ¿¡ ¹İ¿µµÇÁö ¾ÊÀ½(Transparent/µğ´õ ¼ÎÀÌ´õ ÇÊ¿ä)
+        // ì¼ë°˜ Renderer: ë¨¸í‹°ë¦¬ì–¼ ìŠ¬ë¡¯(ì„œë¸Œë©”ì‹œ)ë³„ë¡œ MPB ì ìš©
+        // ì£¼ì˜: Opaque ë¨¸í‹°ë¦¬ì–¼ì€ ì•ŒíŒŒê°€ ë Œë”ë§ì— ë°˜ì˜ë˜ì§€ ì•ŠìŒ(Transparent/ë””ë” ì…°ì´ë” í•„ìš”)
         var mats = r.sharedMaterials;
         int matCount = mats != null ? mats.Length : 0;
         for (int i = 0; i < matCount; i++)
@@ -121,10 +121,10 @@ public class CameraOcclusionFader : MonoBehaviour
 
             bool wrote = false;
 
-            // URP Lit °è¿­
+            // URP Lit ê³„ì—´
             if (m.HasProperty("_BaseColor"))
             {
-                // ¿øº» »ö À¯Áö + ¾ËÆÄ¸¸ ±³Ã¼
+                // ì›ë³¸ ìƒ‰ ìœ ì§€ + ì•ŒíŒŒë§Œ êµì²´
                 Color c = m.GetColor("_BaseColor");
                 c.a = a;
                 _mpb.Clear();
@@ -132,7 +132,7 @@ public class CameraOcclusionFader : MonoBehaviour
                 r.SetPropertyBlock(_mpb, i);
                 wrote = true;
             }
-            // ·¹°Å½Ã ¶Ç´Â Ä¿½ºÅÒ ÄÃ·¯
+            // ë ˆê±°ì‹œ ë˜ëŠ” ì»¤ìŠ¤í…€ ì»¬ëŸ¬
             else if (m.HasProperty("_Color"))
             {
                 Color c = m.GetColor("_Color");
@@ -143,8 +143,8 @@ public class CameraOcclusionFader : MonoBehaviour
                 wrote = true;
             }
 
-            // ¾î¶² ÇÁ·ÎÆÛÆ¼µµ ¸ø½è´Ù¸é(¼ÎÀÌ´õ°¡ ¾ËÆÄ¸¦ ³ëÃâ ¾È ÇÔ) - ¾Æ¹«°Íµµ ÇÏÁö ¾ÊÀ½
-            // ÇÊ¿ä½Ã: µğ¹ö±× ·Î±×¸¦ ³Ö¾î ¹®Á¦ ¸ÓÆ¼¸®¾ó ÃßÀû °¡´É
+            // ì–´ë–¤ í”„ë¡œí¼í‹°ë„ ëª»ì¼ë‹¤ë©´(ì…°ì´ë”ê°€ ì•ŒíŒŒë¥¼ ë…¸ì¶œ ì•ˆ í•¨) - ì•„ë¬´ê²ƒë„ í•˜ì§€ ì•ŠìŒ
+            // í•„ìš”ì‹œ: ë””ë²„ê·¸ ë¡œê·¸ë¥¼ ë„£ì–´ ë¬¸ì œ ë¨¸í‹°ë¦¬ì–¼ ì¶”ì  ê°€ëŠ¥
             // if (!wrote) Debug.Log($"[OcclusionFader] No _BaseColor/_Color on {r.name} (mat:{m.name})");
         }
     }

@@ -4,11 +4,11 @@ using UnityEngine.UI;
 
 public class TitleInfiniteModeUI : MonoBehaviour
 {
-    [Header("¹öÆ° ¿¬°á")]
+    [Header("ë²„íŠ¼ ì—°ê²°")]
     [SerializeField] private Button normalStartButton;
     [SerializeField] private Button infiniteModeButton;
 
-    [Header("°ÔÀÓ ¾À ÀÌ¸§")]
+    [Header("ê²Œì„ ì”¬ ì´ë¦„")]
     [SerializeField] private string gameSceneName = "GameScene";
 
     private void Start()

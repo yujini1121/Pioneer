@@ -8,7 +8,7 @@ public class TitleManager : MonoBehaviour
     [SerializeField] private GameObject optionUI;
     [SerializeField] private GameObject infiniteModeButton;
 
-    [Header("»ç¿îµå ½½¶óÀÌ´õ")]
+    [Header("ì‚¬ìš´ë“œ ìŠ¬ë¼ì´ë”")]
     public Slider bgmVolSlider;
     public Slider sfxVolSlider;
 
@@ -18,7 +18,7 @@ public class TitleManager : MonoBehaviour
     {
         SetDeactiveTitleButton();
 
-        // ÃÖÃÊ ¿£µù Àü±îÁö´Â ¹«ÇÑ ¸ğµå ¹öÆ° ¼û±è
+        // ìµœì´ˆ ì—”ë”© ì „ê¹Œì§€ëŠ” ë¬´í•œ ëª¨ë“œ ë²„íŠ¼ ìˆ¨ê¹€
         RefreshInfiniteModeButton();
 
         if (AudioManager.instance != null)
@@ -38,7 +38,7 @@ public class TitleManager : MonoBehaviour
 
     private void Update()
     {
-        // Å¸ÀÌÆ² ¹öÆ° ¿­±â
+        // íƒ€ì´í‹€ ë²„íŠ¼ ì—´ê¸°
         if (!readyToStart && Input.GetKeyDown(KeyCode.Space))
         {
             if (AudioManager.instance != null)
@@ -51,7 +51,7 @@ public class TitleManager : MonoBehaviour
             readyToStart = true;
         }
 
-        // F10 : ¹«ÇÑ ¸ğµå ÇØ±İ ÃÊ±âÈ­
+        // F10 : ë¬´í•œ ëª¨ë“œ í•´ê¸ˆ ì´ˆê¸°í™”
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F10))
         {
@@ -62,14 +62,14 @@ public class TitleManager : MonoBehaviour
 
     public void StartGameActive()
     {
-        Debug.Log("ÀÏ¹İ ½ÃÀÛ ¹öÆ° ´©¸§");
+        Debug.Log("ì¼ë°˜ ì‹œì‘ ë²„íŠ¼ ëˆ„ë¦„");
         GameModeState.StartNormalMode();
         SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
     }
 
     public void StartInfiniteGame()
     {
-        Debug.Log("¹«ÇÑ ¸ğµå ¹öÆ° ´©¸§");
+        Debug.Log("ë¬´í•œ ëª¨ë“œ ë²„íŠ¼ ëˆ„ë¦„");
         GameModeState.StartInfiniteMode();
         SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
     }
@@ -84,7 +84,7 @@ public class TitleManager : MonoBehaviour
         GameModeState.ResetInfiniteModeUnlock();
         RefreshInfiniteModeButton();
 
-        Debug.Log("[TitleManager] F10 ÀÔ·Â: ¹«ÇÑ ¸ğµå ÇØ±İ »óÅÂ¸¦ ÃÊ±âÈ­Çß½À´Ï´Ù.");
+        Debug.Log("[TitleManager] F10 ì…ë ¥: ë¬´í•œ ëª¨ë“œ í•´ê¸ˆ ìƒíƒœë¥¼ ì´ˆê¸°í™”í–ˆìŠµë‹ˆë‹¤.");
     }
 
     public void SetActiveTitleButton() => titleButton.SetActive(true);
@@ -94,11 +94,11 @@ public class TitleManager : MonoBehaviour
 
     public void QuitGame()
     {
-        Debug.Log("°ÔÀÓ Á¾·á ¹öÆ° Å¬¸¯!");
-        // À¯´ÏÆ¼ ¿¡µğÅÍ¿¡¼­ Å×½ºÆ®ÇÒ °æ¿ì (Play ¸ğµå ÁßÁö)
+        Debug.Log("ê²Œì„ ì¢…ë£Œ ë²„íŠ¼ í´ë¦­!");
+        // ìœ ë‹ˆí‹° ì—ë””í„°ì—ì„œ í…ŒìŠ¤íŠ¸í•  ê²½ìš° (Play ëª¨ë“œ ì¤‘ì§€)
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        // ½ÇÁ¦ ºôµåµÈ °ÔÀÓ¿¡¼­ ½ÇÇàÇÒ °æ¿ì (¾îÇÃ¸®ÄÉÀÌ¼Ç Á¾·á)
+        // ì‹¤ì œ ë¹Œë“œëœ ê²Œì„ì—ì„œ ì‹¤í–‰í•  ê²½ìš° (ì–´í”Œë¦¬ì¼€ì´ì…˜ ì¢…ë£Œ)
 #else
         Application.Quit();
 #endif

@@ -11,7 +11,7 @@ public class OceanEventFog : OceanEventBase
 
     public OceanEventFog(FogFade fogFade)
     {
-        EventName = "¾È°³";
+        EventName = "ì•ˆê°œ";
         this.fogFade = fogFade;
     }
 
@@ -19,7 +19,7 @@ public class OceanEventFog : OceanEventBase
     {
         base.EventRun();
 
-        Debug.Log("[OceanEventFog][ÀÌº¥Æ® ½ÃÀÛ]");
+        Debug.Log("[OceanEventFog][ì´ë²¤íŠ¸ ì‹œì‘]");
 
         if (fogFade != null)
             fogFade.ShowFog();
@@ -31,7 +31,7 @@ public class OceanEventFog : OceanEventBase
 
     public override void EnterNight()
     {
-        Debug.Log("[OceanEventFog][¹ã È¿°ú Àû¿ë]");
+        Debug.Log("[OceanEventFog][ë°¤ íš¨ê³¼ ì ìš©]");
 
         RemoveDayFogVision();
         ApplyNightFogVision();
@@ -49,26 +49,26 @@ public class OceanEventFog : OceanEventBase
         RemoveNightFogVision();
         StopDayEffects();
 
-        Debug.Log("[OceanEventFog][ÀÌº¥Æ® Á¾·á]");
+        Debug.Log("[OceanEventFog][ì´ë²¤íŠ¸ ì¢…ë£Œ]");
     }
 
     private void ApplyMentalPenalty()
     {
-        Debug.Log("[OceanEventFog][Á¤½Å·Â °¨¼Ò·® 10% Ãß°¡ Àû¿ë]");
+        Debug.Log("[OceanEventFog][ì •ì‹ ë ¥ ê°ì†ŒëŸ‰ 10% ì¶”ê°€ ì ìš©]");
         if (PlayerCore.Instance != null)
         {
             PlayerCore.Instance.ReduceMentalByFog();
         }
     }
 
-    #region ½Ã¾ß È¿°ú (ºó²®µ¥±â) 
+    #region ì‹œì•¼ íš¨ê³¼ (ë¹ˆê»ë°ê¸°) 
     private void ApplyDayFogVision()
     {
         if (isDayFogApplied) return;
         isDayFogApplied = true;
 
-        Debug.Log("[OceanEventFog][³· ½Ã¾ß¿¡ ¹ã ½Ã¾ß È¿°ú Àû¿ë]");
-        // TODO : ½Ã¾ß ½Ã½ºÅÛ ¿¬°á
+        Debug.Log("[OceanEventFog][ë‚® ì‹œì•¼ì— ë°¤ ì‹œì•¼ íš¨ê³¼ ì ìš©]");
+        // TODO : ì‹œì•¼ ì‹œìŠ¤í…œ ì—°ê²°
     }
 
     private void RemoveDayFogVision()
@@ -76,8 +76,8 @@ public class OceanEventFog : OceanEventBase
         if (!isDayFogApplied) return;
         isDayFogApplied = false;
 
-        Debug.Log("[OceanEventFog][³· ½Ã¾ß È¿°ú ÇØÁ¦]");
-        // TODO : ½Ã¾ß ½Ã½ºÅÛ ¿øº¹
+        Debug.Log("[OceanEventFog][ë‚® ì‹œì•¼ íš¨ê³¼ í•´ì œ]");
+        // TODO : ì‹œì•¼ ì‹œìŠ¤í…œ ì›ë³µ
     }
 
     private void ApplyNightFogVision()
@@ -85,8 +85,8 @@ public class OceanEventFog : OceanEventBase
         if (isNightFogApplied) return;
         isNightFogApplied = true;
 
-        Debug.Log("[OceanEventFog][¹ã ½Ã¾ß ¹üÀ§ 20% °¨¼Ò]");
-        // TODO : ¹ã ½Ã¾ß 20% °¨¼Ò Àû¿ë
+        Debug.Log("[OceanEventFog][ë°¤ ì‹œì•¼ ë²”ìœ„ 20% ê°ì†Œ]");
+        // TODO : ë°¤ ì‹œì•¼ 20% ê°ì†Œ ì ìš©
     }
 
     private void RemoveNightFogVision()
@@ -94,14 +94,14 @@ public class OceanEventFog : OceanEventBase
         if (!isNightFogApplied) return;
         isNightFogApplied = false;
 
-        Debug.Log("[OceanEventFog][¹ã ½Ã¾ß È¿°ú ÇØÁ¦]");
-        // TODO : ¹ã ½Ã¾ß ¿øº¹
+        Debug.Log("[OceanEventFog][ë°¤ ì‹œì•¼ íš¨ê³¼ í•´ì œ]");
+        // TODO : ë°¤ ì‹œì•¼ ì›ë³µ
     }
     #endregion  
 
     private void ApplyNightGuiltBonus()
     {
-        Debug.Log("[OceanEventFog][ÇöÀç ÁËÃ¥°¨ °¡ÁßÄ¡ÀÇ 20% Ãß°¡ Áõ°¡]");
+        Debug.Log("[OceanEventFog][í˜„ì¬ ì£„ì±…ê° ê°€ì¤‘ì¹˜ì˜ 20% ì¶”ê°€ ì¦ê°€]");
         if (GuiltySystem.instance != null)
         {
             GuiltySystem.instance.AddFogNightWeight();
@@ -116,7 +116,7 @@ public class OceanEventFog : OceanEventBase
 
     private void StopDayEffects()
     {
-        // ÄÚ·çÆ¾ Á¤Áö´Â OceanEventManager.EndCurrentEvent()¿¡¼­ ÀÏ°ı Á¤Áö
+        // ì½”ë£¨í‹´ ì •ì§€ëŠ” OceanEventManager.EndCurrentEvent()ì—ì„œ ì¼ê´„ ì •ì§€
     }
 
     private IEnumerator DayMinionSpawnLoop()
@@ -133,7 +133,7 @@ public class OceanEventFog : OceanEventBase
                 {
                     int spawnCount = Random.Range(1, 3);
 
-                    // ¹Ù´ÙÀÌº¥Æ® : ¾È°³ ³· È¿°ú -> 30ÃÊ¸¶´Ù 50% È®·ü·Î ¹Ì´Ï¾ğ 1~2¸¶¸® ½ºÆù
+                    // ë°”ë‹¤ì´ë²¤íŠ¸ : ì•ˆê°œ ë‚® íš¨ê³¼ -> 30ì´ˆë§ˆë‹¤ 50% í™•ë¥ ë¡œ ë¯¸ë‹ˆì–¸ 1~2ë§ˆë¦¬ ìŠ¤í°
                     GameManager.Instance.SpawnFogMinions(spawnCount);
                 }
             }
@@ -148,7 +148,7 @@ public class OceanEventFog : OceanEventBase
 
             if (!IsRunning) yield break;
 
-            Debug.Log("[OceanEventFog][ÁËÃ¥°¨ °¡ÁßÄ¡ 1 Áõ°¡]");
+            Debug.Log("[OceanEventFog][ì£„ì±…ê° ê°€ì¤‘ì¹˜ 1 ì¦ê°€]");
             if (GuiltySystem.instance != null)
             {
                 GuiltySystem.instance.AddFogDayWeight();

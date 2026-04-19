@@ -68,7 +68,7 @@ public class SceneController : MonoBehaviour, IBegin
 
         isLoading = false;
 
-        Destroy(gameObject); // ¾À ÀÌµ¿ ¿Ï·á ÈÄ ÀÚ±â ÀÚ½Å Á¦°Å
+        Destroy(gameObject); // ì”¬ ì´ë™ ì™„ë£Œ í›„ ìê¸° ìì‹  ì œê±°
     }
 
 

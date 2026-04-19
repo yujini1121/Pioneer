@@ -17,8 +17,8 @@ public class GuiltyCanvas : MonoBehaviour
 
     public void CurseView(string word)
     {
-        Debug.Log($">> GuiltyCanvas.CurseView(string word) : È£ÃâµÊ");
-        Debug.Log($">> GuiltyCanvas.CurseView(string word) : ³Î°ªÀÎ°¡ ? {coroutineCarkMarinerCurseText == null}");
+        Debug.Log($">> GuiltyCanvas.CurseView(string word) : í˜¸ì¶œë¨");
+        Debug.Log($">> GuiltyCanvas.CurseView(string word) : ë„ê°’ì¸ê°€ ? {coroutineCarkMarinerCurseText == null}");
 
         if (darkMarinerCurseText.gameObject.activeSelf == false)
         {
@@ -50,7 +50,7 @@ public class GuiltyCanvas : MonoBehaviour
         float mTime = 0.0f;
         while (mTime < curseTime)
         {
-            Debug.Log($">> GuiltyCanvas.CoroutineCarkMarinerCurse() : ½ÃÀÛ -> {mTime}, {curseTime}");
+            Debug.Log($">> GuiltyCanvas.CoroutineCarkMarinerCurse() : ì‹œì‘ -> {mTime}, {curseTime}");
 
             mTime += Time.deltaTime;
             yield return null;
@@ -58,7 +58,7 @@ public class GuiltyCanvas : MonoBehaviour
         darkMarinerCurseText.gameObject.SetActive(false);
     }
 
-    // ´Ù¸¸ ¸Å ÇÁ·¹ÀÓ¸¶´Ù È£ÃâµÇ¾î¾ß ÇÔ.
+    // ë‹¤ë§Œ ë§¤ í”„ë ˆì„ë§ˆë‹¤ í˜¸ì¶œë˜ì–´ì•¼ í•¨.
     IEnumerator CoroutineCurseShake()
     {
         float mTime = 0.0f;

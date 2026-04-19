@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class DefaultFabrication : MonoBehaviour
 {
-    public const string CraftStart = "Á¦ÀÛ ½ÃÀÛ";
-    public const string CraftEnd = "Á¦ÀÛ Áß´Ü";
+    public const string CraftStart = "ì œìž‘ ì‹œìž‘";
+    public const string CraftEnd = "ì œìž‘ ì¤‘ë‹¨";
 
     [Header("UI")]
     public GameObject pivotMaterial1;

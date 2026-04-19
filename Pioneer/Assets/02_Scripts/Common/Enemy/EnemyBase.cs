@@ -205,7 +205,7 @@ public class EnemyBase : CreatureBase, IBegin
         visualRoot.localScale = scale;
     }
 
-    // PlayerController??ChangeAnimationClip 洹몃?濡?蹂듬텤, ?뺣━ ?꾩슂
+    // PlayerController의 ChangeAnimationClip을 그대로 가져온 코드, 추후 정리 필요
     public void ChangeAnimationClip(AnimationClip oldAnim, AnimationClip newAnim)
     {
         if (aoc == null || oldAnim == null || newAnim == null) return;
@@ -273,8 +273,8 @@ public class EnemyBase : CreatureBase, IBegin
     {
         Gizmos.color = Color.red;
 
-        // DetectAttackRange()? ?숈씪?섍쾶 以묒떖 怨꾩궛
-        // float debugAttackRange = 5f; // ?뺤씤?? ?ㅼ젣 ?뚯뒪?명븷 怨듦꺽 踰붿쐞
+        // DetectAttackRange()와 동일하게 중심 계산
+        // float debugAttackRange = 5f; // 확인용, 실제 테스트할 공격 범위
         Vector3 boxCenter = transform.position
             + transform.right * attackBoxCenterOffset.x
             + transform.forward * attackBoxCenterOffset.z
@@ -282,10 +282,11 @@ public class EnemyBase : CreatureBase, IBegin
 
         Vector3 halfBoxSize = new Vector3(0.25f, 0.25f, attackRange / 2f);
 
-        // ?뚯쟾 ?곸슜
+        // 회전 적용
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(boxCenter, transform.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
 
-        // OverlapBox? ?숈씪???ш린??諛뺤뒪 洹몃━湲?        Gizmos.DrawWireCube(Vector3.zero, halfBoxSize * 2); // halfSize * 2 = ?꾩껜 ?ш린
+        // OverlapBox와 동일한 크기의 박스를 그린다.
+        Gizmos.DrawWireCube(Vector3.zero, halfBoxSize * 2); // halfSize * 2 = 전체 크기
     }
 }

@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class InGameUiChunk
 {
-    public List<GameObject> UiGameobjects = new List<GameObject>(); // UI °ÔÀÓ ¿ÀºêÁ§Æ® ¸®½ºÆ®
-    public bool isNeedCloseAction = false; // ´İÀ» ¶§ ÀÛ¾÷ÀÌ ÇÊ¿äÇÑ°¡
-    public System.Action CloseAction = () => { }; // ´İÀ» ¶§ ÀÛ¾÷
+    public List<GameObject> UiGameobjects = new List<GameObject>(); // UI ê²Œì„ ì˜¤ë¸Œì íŠ¸ ë¦¬ìŠ¤íŠ¸
+    public bool isNeedCloseAction = false; // ë‹«ì„ ë•Œ ì‘ì—…ì´ í•„ìš”í•œê°€
+    public System.Action CloseAction = () => { }; // ë‹«ì„ ë•Œ ì‘ì—…
     public int id = -1;
 
     public InGameUiChunk() { }

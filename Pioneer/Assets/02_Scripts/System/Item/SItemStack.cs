@@ -7,9 +7,9 @@ public class SItemStack
 {
     public int id;
     public int amount;
-    public int duability; // ³»±¸µµ
+    public int duability; // ë‚´êµ¬ë„
     //public bool isCanStack;
-    public bool isUseCoroutineEnd = true; // ÇØ´ç Å¬·¡½º°¡ Á¶ÀÛÇÏÁö ¾ÊÀ½. SItemTypeSO µî ¿ÜºÎ Å¬·¡½º°¡ Á¢±Ù
+    public bool isUseCoroutineEnd = true; // í•´ë‹¹ í´ëž˜ìŠ¤ê°€ ì¡°ìž‘í•˜ì§€ ì•ŠìŒ. SItemTypeSO ë“± ì™¸ë¶€ í´ëž˜ìŠ¤ê°€ ì ‘ê·¼
 
     public SItemTypeSO itemBaseType => ItemTypeManager.Instance.FindType(this);
 
@@ -47,10 +47,10 @@ public class SItemStack
     }
 
 
-    // ¾ÆÀÌÅÛÀÌ ÀÖ´Â °÷¿¡¼­´Â Á¾·ù¿Í °¹¼ö¸¦ °¡¸®Å°´Â °Í°ú ¾î¶² ¾ÆÀÌÅÛÀÌ ¾²ÀÌ´ÂÁö °­ÇÏ°Ô ¿¬°áµÇ¾îÀÖÀ» °ÍÀ¸·Î º¸ÀÔ´Ï´Ù.
+    // ì•„ì´í…œì´ ìžˆëŠ” ê³³ì—ì„œëŠ” ì¢…ë¥˜ì™€ ê°¯ìˆ˜ë¥¼ ê°€ë¦¬í‚¤ëŠ” ê²ƒê³¼ ì–´ë–¤ ì•„ì´í…œì´ ì“°ì´ëŠ”ì§€ ê°•í•˜ê²Œ ì—°ê²°ë˜ì–´ìžˆì„ ê²ƒìœ¼ë¡œ ë³´ìž…ë‹ˆë‹¤.
     public virtual void Use()
     {
-        // ¹«±â ¾ÆÀÌÅÛÀÎ °æ¿ì
+        // ë¬´ê¸° ì•„ì´í…œì¸ ê²½ìš°
 
         // 
     }

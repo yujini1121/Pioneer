@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /*
-[ ¹Ù´ÙÀÌº¥Æ® - ³ìÁ¶ ]
-- ÇÏ·çÁ¾ÀÏ Àû¿ëµÊ
+[ ë°”ë‹¤ì´ë²¤íŠ¸ - ë…¹ì¡° ]
+- í•˜ë£¨ì¢…ì¼ ì ìš©ë¨
 
-- ¹Ù´Ù¿¡¼­ ÆÄ¹Ö½Ã 80% È®·ü·Î ¾ÆÀÌÅÛ Ãß°¡ È¹µæ
-- ±Õµî ·£´ı È®·ü·Î ¹Ù´Ù ÆÄ¹ÖÀ¸·Î ¾òÀ» ¼ö ÀÖ´Â ¸ğµç ¾ÆÀÌÅÛ Áß 1°³ Ãß°¡ È¹µæ
+- ë°”ë‹¤ì—ì„œ íŒŒë°ì‹œ 80% í™•ë¥ ë¡œ ì•„ì´í…œ ì¶”ê°€ íšë“
+- ê· ë“± ëœë¤ í™•ë¥ ë¡œ ë°”ë‹¤ íŒŒë°ìœ¼ë¡œ ì–»ì„ ìˆ˜ ìˆëŠ” ëª¨ë“  ì•„ì´í…œ ì¤‘ 1ê°œ ì¶”ê°€ íšë“
 */
 
 public class OceanEventWaterBloom : OceanEventBase
@@ -18,19 +18,19 @@ public class OceanEventWaterBloom : OceanEventBase
 
     public OceanEventWaterBloom()
     {
-        EventName = "³ìÁ¶";
+        EventName = "ë…¹ì¡°";
     }
 
     public override void EventRun()
     {
         base.EventRun();
-        Debug.Log("[OceanEventWaterBloom][³ìÁ¶ ÀÌº¥Æ® ½ÃÀÛ]");
+        Debug.Log("[OceanEventWaterBloom][ë…¹ì¡° ì´ë²¤íŠ¸ ì‹œì‘]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
-        Debug.Log("[OceanEventWaterBloom][³ìÁ¶ ÀÌº¥Æ® Á¾·á]");
+        Debug.Log("[OceanEventWaterBloom][ë…¹ì¡° ì´ë²¤íŠ¸ ì¢…ë£Œ]");
     }
 
     public SItemTypeSO GetMoreItem()
@@ -43,7 +43,7 @@ public class OceanEventWaterBloom : OceanEventBase
 
             PlayerFishing.FishingDropItem bonusItem = getMoreDropItems[randomIndex];
 
-            Debug.Log($"[OceanEventWaterBloom][³ìÁ¶ Ãß°¡ ¾ÆÀÌÅÛ È¹µæ : {bonusItem.itemData.name}]");
+            Debug.Log($"[OceanEventWaterBloom][ë…¹ì¡° ì¶”ê°€ ì•„ì´í…œ íšë“ : {bonusItem.itemData.name}]");
             return bonusItem.itemData;
         }
 

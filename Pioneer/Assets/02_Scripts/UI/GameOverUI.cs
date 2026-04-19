@@ -5,15 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class GameOverUI : MonoBehaviour
 {
-    [Header("UI ¿ä¼Ò")]
+    [Header("UI ìš”ì†Œ")]
     public GameObject gameOverPanel;
-    public GameObject[] otherUIPanels;      // ¼û±æ ´Ù¸¥ UI ÆĞ³Îµé
+    public GameObject[] otherUIPanels;      // ìˆ¨ê¸¸ ë‹¤ë¥¸ UI íŒ¨ë„ë“¤
 
-    [Header("ÅØ½ºÆ®")]
+    [Header("í…ìŠ¤íŠ¸")]
     public TextMeshProUGUI survivalTimeText;
     public TextMeshProUGUI crewStatsText;
 
-    [Header("¹öÆ°")]
+    [Header("ë²„íŠ¼")]
     public Button continueButton;
     public Button titleButton;
 
@@ -42,7 +42,7 @@ public class GameOverUI : MonoBehaviour
 
         UpdateGameOverTexts(totalCrewMembers, deadCrewMembers);
 
-        // ÃÖÃÊ ¿£µùÀ» ºÃ´Ù¸é ¹«ÇÑ ¸ğµå ÇØ±İ 
+        // ìµœì´ˆ ì—”ë”©ì„ ë´¤ë‹¤ë©´ ë¬´í•œ ëª¨ë“œ í•´ê¸ˆ 
         GameModeState.UnlockInfiniteMode();
     }
 
@@ -54,23 +54,23 @@ public class GameOverUI : MonoBehaviour
 
     private void UpdateGameOverTexts(int totalCrewMembers, int deadCrewMembers)
     {
-        // GameManager¿¡¼­ ÀÏ¼ö¿Í ½Ã°£ °¡Á®¿À±â
+        // GameManagerì—ì„œ ì¼ìˆ˜ì™€ ì‹œê°„ ê°€ì ¸ì˜¤ê¸°
         int days, hours;
         GameManager.Instance.GetGameTimeInfo(out days, out hours);
 
-        // »ıÁ¸ ½Ã°£ ÅØ½ºÆ®
+        // ìƒì¡´ ì‹œê°„ í…ìŠ¤íŠ¸
         if (survivalTimeText != null)
         {
             if (days > 0)
-                survivalTimeText.text = $"´ç½ÅÀº {days}ÀÏ {hours}½Ã°£ µ¿¾È Ç×ÇØÇß½À´Ï´Ù.";
+                survivalTimeText.text = $"ë‹¹ì‹ ì€ {days}ì¼ {hours}ì‹œê°„ ë™ì•ˆ í•­í•´í–ˆìŠµë‹ˆë‹¤.";
             else
-                survivalTimeText.text = $"´ç½ÅÀº {hours}½Ã°£ µ¿¾È Ç×ÇØÇß½À´Ï´Ù.";
+                survivalTimeText.text = $"ë‹¹ì‹ ì€ {hours}ì‹œê°„ ë™ì•ˆ í•­í•´í–ˆìŠµë‹ˆë‹¤.";
         }
 
-        // ½Â¹«¿ø Åë°è ÅØ½ºÆ®
+        // ìŠ¹ë¬´ì› í†µê³„ í…ìŠ¤íŠ¸
         if (crewStatsText != null)
         {
-            crewStatsText.text = $"´ç½ÅÀº Ç×ÇØÇÏ´Â µ¿¾È ½Â¹«¿ø ÃÑ {totalCrewMembers}¸í°ú ÇÔ²²ÇÏ°í, {deadCrewMembers}¸íÀ» Á×À½À¸·Î ³»¸ô¾Ò½À´Ï´Ù.";
+            crewStatsText.text = $"ë‹¹ì‹ ì€ í•­í•´í•˜ëŠ” ë™ì•ˆ ìŠ¹ë¬´ì› ì´ {totalCrewMembers}ëª…ê³¼ í•¨ê»˜í•˜ê³ , {deadCrewMembers}ëª…ì„ ì£½ìŒìœ¼ë¡œ ë‚´ëª°ì•˜ìŠµë‹ˆë‹¤.";
         }
     }
 

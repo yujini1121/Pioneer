@@ -14,7 +14,7 @@ public class CheckBottom : MonoBehaviour, IBegin
     public KeyCode returnKey = KeyCode.B;
     public Vector3 shipPosition = Vector3.zero;
 
-    public LayerMask seaLayerMask; // ¹Ù´Ù °¨Áö¿ë ·¹ÀÌ¾î
+    public LayerMask seaLayerMask; // ë°”ë‹¤ ê°ì§€ìš© ë ˆì´ì–´
 
     private bool isInSea = false;
     private float seaTimer = 0f;
@@ -69,7 +69,7 @@ public class CheckBottom : MonoBehaviour, IBegin
         isReturning = true;
         agent.isStopped = false;
         agent.SetDestination(shipPosition);
-        Debug.Log("¹è·Î º¹±Í Áß...");
+        Debug.Log("ë°°ë¡œ ë³µê·€ ì¤‘...");
     }
 
     void CheckArrivalAtShip()
@@ -82,7 +82,7 @@ public class CheckBottom : MonoBehaviour, IBegin
                 isInSea = false;
                 seaTimer = 0f;
                 damageTimer = 0f;
-                agent.ResetPath();      // º¹±Í ¿Ï·á : ´ë±â »óÅÂ·Î ÀüÈ¯ (¾ğÁ¦µçÁö ´Ù½Ã ¿òÁ÷ÀÏ ¼ö ÀÖ°Ô)
+                agent.ResetPath();      // ë³µê·€ ì™„ë£Œ : ëŒ€ê¸° ìƒíƒœë¡œ ì „í™˜ (ì–¸ì œë“ ì§€ ë‹¤ì‹œ ì›€ì§ì¼ ìˆ˜ ìˆê²Œ)
             }
         }
     }
@@ -97,7 +97,7 @@ public class CheckBottom : MonoBehaviour, IBegin
                 isInSea = true;
                 seaTimer = 0f;
                 damageTimer = 0f;
-                //Debug.Log("¹Ù´Ù¿¡ ÁøÀÔ");
+                //Debug.Log("ë°”ë‹¤ì— ì§„ì…");
             }
         }
         else
@@ -107,7 +107,7 @@ public class CheckBottom : MonoBehaviour, IBegin
                 isInSea = false;
                 seaTimer = 0f;
                 damageTimer = 0f;
-                //Debug.Log("¹Ù´Ù¿¡¼­ ³ª¿È");
+                //Debug.Log("ë°”ë‹¤ì—ì„œ ë‚˜ì˜´");
             }
         }
     }
@@ -122,6 +122,6 @@ public class CheckBottom : MonoBehaviour, IBegin
             hpBar.value = playerHp;
         }
 
-        //Debug.Log($"HP °¨¼Ò: {amount}, ÇöÀç HP: {playerHp}");
+        //Debug.Log($"HP ê°ì†Œ: {amount}, í˜„ì¬ HP: {playerHp}");
     }
 }

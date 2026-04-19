@@ -45,7 +45,7 @@ public class WindAirborne : MonoBehaviour
 
         Vector3 endPosition = startPosition + flatDirection * horizontalDistance;
 
-        // Æ÷¹°¼±Ã³·³ º¸ÀÌµµ·Ï Áß°£ Á¦¾îÁ¡À» »ç¿ë
+        // í¬ë¬¼ì„ ì²˜ëŸ¼ ë³´ì´ë„ë¡ ì¤‘ê°„ ì œì–´ì ì„ ì‚¬ìš©
         Vector3 middlePosition = (startPosition + endPosition) * 0.5f + Vector3.up * height;
 
         if (agent == null)

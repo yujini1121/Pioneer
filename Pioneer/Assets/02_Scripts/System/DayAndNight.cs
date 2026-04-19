@@ -10,7 +10,7 @@ public class DayAndNight : MonoBehaviour, IBegin
     public Gradient dayToNight;
     public Gradient nightToDay;
     public AnimationCurve exposureByTime;
-    public float dayDuration = 60f; // ÇÏ·ç ½Ã°£ (ÃÊ)
+    public float dayDuration = 60f; // í•˜ë£¨ ì‹œê°„ (ì´ˆ)
 
     private float timer;
 

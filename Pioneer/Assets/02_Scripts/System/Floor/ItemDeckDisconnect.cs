@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 /// <summary>
-/// ?? ???? ??
+/// 갑판 연결성 정보
 /// </summary>
 [System.Serializable]
 class DeckInfo
@@ -11,10 +11,10 @@ class DeckInfo
     public bool isConnected;
 }
 /// <summary>
-/// ?? ?? ???:
-/// - ? ?? ? "Platform" ???? ?? ?? ?? ??
-/// - ?? ??/?? ?? BFS? ??? ?? ?? ??
-/// - isConnected = true/false ? ??
+/// 갑판 연결성 관리:
+/// - 씬 전체의 "Platform" 레이어 갑판을 스캔해서 좌표로 저장
+/// - 마스트 위치를 기준으로 BFS를 돌려 연결 여부를 계산
+/// - isConnected = true/false 로 상태를 유지
 /// </summary>
 public class ItemDeckDisconnect : MonoBehaviour
 {
@@ -63,7 +63,7 @@ public class ItemDeckDisconnect : MonoBehaviour
         var root = WorldToCoord(mast.position);
         if (!decks.ContainsKey(root))
         {
-            Debug.Log($"[ItemDeckDisconnect] ?? ?? {root}? ??? ????. gridSize/?? ?? ??.");
+            Debug.Log($"[ItemDeckDisconnect] 루트 좌표 {root}를 찾지 못했습니다. gridSize 또는 마스트 위치를 확인하세요.");
             RefreshDebugView();
             return;
         }

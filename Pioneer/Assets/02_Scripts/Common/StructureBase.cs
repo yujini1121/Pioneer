@@ -8,13 +8,13 @@ using UnityEditor;
 #endif
 public class StructureBase : CommonBase
 {
-    [Header("?? ???")]
+    [Header("설치 데이터")]
     [SerializeField] protected SInstallableObjectDataSO objectData;
     public SInstallableObjectDataSO ObjectData => objectData;
     [field: SerializeField] public bool isUsing { get; private set; }
-    [Header("???? ???? ??")]
+    [Header("플레이어 상호작용 범위")]
     [SerializeField] protected float interactRange = 3f;
-    [Header("? ??")]
+    [Header("적 레이어")]
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected Collider[] detectedEnemies;
     private NavMeshSurface nav;
@@ -40,7 +40,7 @@ public class StructureBase : CommonBase
     {
         if (CanInteract) PlayerInteract.Add(this);
     }
-    #region HP ??
+    #region HP 관리
     public void Heal(int amount)
     {
         if (amount <= 0) return;
@@ -60,7 +60,7 @@ public class StructureBase : CommonBase
         }
     }
     #endregion
-    #region ????
+    #region 상호작용
     public virtual bool IsInteractionTarget => true;
     public virtual void Interactive() { }
     public virtual void Use()

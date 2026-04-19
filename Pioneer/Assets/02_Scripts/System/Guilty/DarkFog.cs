@@ -56,7 +56,7 @@ public class DarkFog : MonoBehaviour
             IEnumerator destroyCoroutine()
             {
                 yield return new WaitForSeconds(1.0f);
-                // �ı�
+                // 파괴
                 GuiltySystem.instance.ReleasePoolObject(poolObjectSelf);
             }
             StartCoroutine(destroyCoroutine());

@@ -6,15 +6,15 @@ public class DarkMariner : MonoBehaviour
 {
     string[] curseList = new string[]
     {
-        "ÀÌ±âÀûÀÎ ³ğ",
-        "¾îÂ°¼­ ¸ø º» Ã¤ ÇÒ ¼ö°¡ ÀÖ´Â°ÅÁö?",
-        "¿ª°Ü¿ö",
-        "´õ ÀÌ»ó µ¹¾Æ°¥ ¼ö ¾ø¾î",
-        "¿Ö ±×·¨Áö?",
-        "ÀÌ¹Ì ´Ê¾ú¾î",
-        "³Êµµ ±×·¸°Ô µÉ°Å¾ß",
-        "³Êµµ ¾ó¸¶ ¾È ³²¾Ò¾î",
-        "°ğ ³Ê¿¡°Ô °¥°Ô"
+        "ì´ê¸°ì ì¸ ë†ˆ",
+        "ì–´ì§¸ì„œ ëª» ë³¸ ì±„ í•  ìˆ˜ê°€ ìˆëŠ”ê±°ì§€?",
+        "ì—­ê²¨ì›Œ",
+        "ë” ì´ìƒ ëŒì•„ê°ˆ ìˆ˜ ì—†ì–´",
+        "ì™œ ê·¸ë¬ì§€?",
+        "ì´ë¯¸ ëŠ¦ì—ˆì–´",
+        "ë„ˆë„ ê·¸ë ‡ê²Œ ë ê±°ì•¼",
+        "ë„ˆë„ ì–¼ë§ˆ ì•ˆ ë‚¨ì•˜ì–´",
+        "ê³§ ë„ˆì—ê²Œ ê°ˆê²Œ"
     };
 
     public void Curse() => GuiltyCanvas.instance.CurseView(SelectCurse());
@@ -22,7 +22,7 @@ public class DarkMariner : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) : È£ÃâµÊ, Ãæµ¹Ã¼ {collision.collider.name}");
+        Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) : í˜¸ì¶œë¨, ì¶©ëŒì²´ {collision.collider.name}");
 
         if (ThisIsPlayer.IsThisPlayer(collision) || collision.collider.GetComponent<PlayerAttack>() != null)
         {

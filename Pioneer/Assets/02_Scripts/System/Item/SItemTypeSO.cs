@@ -20,7 +20,7 @@ public class SItemTypeSO : ScriptableObject, IItemUse<CommonBase, SItemStack>
 
     public virtual IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
-        Debug.Log(">> ¾ÆÀÌÅÛ_ÀÏ¹İ : »ç¿ëµÊ");
+        Debug.Log(">> ì•„ì´í…œ_ì¼ë°˜ : ì‚¬ìš©ë¨");
 
 
         itemWithState.isUseCoroutineEnd = false;

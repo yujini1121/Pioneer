@@ -93,9 +93,9 @@ public class BoxUI : MonoBehaviour
 
     public void IconRefresh()
     {
-        // ╦П╣Г ╬фюлешю╩
-        // + ╪╠ец╣гаЖ ╬йю╨ ╩Себ╥н ╧ы╡ч
-        // + Ё╩╠╦╣╣ ц╪е╘
+        // К╙╗К⌠═ Л∙└Л²╢М┘°Л²└
+        // + Л└═М┐²К░≤Л╖─ Л∙┼Л²─ Л┐│М┐°К║° К╟■Й©┬
+        // + К┌╢Й╣╛К▐└ Л╡╢М│╛
         for (int index = 0; index < slotGameObjects.Count; ++index)
         {
             //if (InventoryManager.Instance.itemLists[index] == null) continue;

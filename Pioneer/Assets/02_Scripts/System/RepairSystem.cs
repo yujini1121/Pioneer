@@ -22,13 +22,13 @@ public class RepairSystem : MonoBehaviour
         }
         if (slot.itemLists[0].duability > 50)
         {
-            Debug.Log("¼ö¸®°¡ ÇÊ¿äÇÏÁö ¾Ê½À´Ï´Ù.");
+            Debug.Log("ìˆ˜ë¦¬ê°€ í•„ìš”í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
             return;
         }
         //if (InventoryManager.Instance.Get(40007) < 1)
         if (remainRepairCount < 1)
         {
-            Debug.Log("¼ö¸® µµ±¸°¡ ºÎÁ·ÇÕ´Ï´Ù.");
+            Debug.Log("ìˆ˜ë¦¬ ë„êµ¬ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤.");
             return;
         }
 

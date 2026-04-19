@@ -22,6 +22,6 @@ public class ThisIsPlayer : MonoBehaviour
 
     private void OnDestroy()
     {
-        Debug.LogError("!!!>>วรทนภฬพ๎ ฦฤฑซ!");
+        Debug.LogError("!!!>>ํ”๋ ์ด์–ด ํ๊ดด!");
     }
 }

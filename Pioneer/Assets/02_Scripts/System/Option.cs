@@ -123,12 +123,12 @@ public class Option : MonoBehaviour, IBegin
 
     public void QuitGame()
     {
-        Debug.Log("���� ���� ��ư Ŭ��!");
+        Debug.Log("게임 종료 버튼 클릭!");
 
-        // ����Ƽ �����Ϳ��� �׽�Ʈ�� ��� (Play ��� ����)
+        // 유니티 에디터에서는 테스트를 위해 Play 모드를 종료
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        // ���� ���� ���ӿ��� ������ ��� (���ø����̼� ����)
+        // 빌드된 게임에서는 애플리케이션을 종료
 #else
         Application.Quit();
 #endif

@@ -41,7 +41,7 @@ public class PlayerInteract : MonoBehaviour
 			{
 				Debug.Log("PlayerInteract");
 
-				// °¡Àå °¡±î¿î ¾Ö ¼±ÅÃ
+				// ê°€ì¥ ê°€ê¹Œìš´ ì•  ì„ íƒ
 
 				StructureBase closest = null;
 				float distanceSqr = float.MaxValue;

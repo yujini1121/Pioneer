@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class MinionNest : EnemyBase
 {
-    [Header("»ı¼º ¹Ì´Ï¾ğ ¼³Á¤")]
+    [Header("ìƒì„± ë¯¸ë‹ˆì–¸ ì„¤ì •")]
     [SerializeField] private GameObject minionPrefab;
     [SerializeField] private int maxMinionCount = 1;
 
-    [Header("»ı¼º ½Ã°£ ¼³Á¤")]
+    [Header("ìƒì„± ì‹œê°„ ì„¤ì •")]
     [SerializeField] float initDelay = 5.0f;
 
 	private void Start()

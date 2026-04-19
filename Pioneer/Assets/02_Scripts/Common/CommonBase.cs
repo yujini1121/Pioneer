@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// ÃÖ»óÀ§ ºÎ¸ğ ½ºÅ©¸³Æ®
+// ìµœìƒìœ„ ë¶€ëª¨ ìŠ¤í¬ë¦½íŠ¸
 public class CommonBase : MonoBehaviour, IBegin
 {
     public int hp;
@@ -18,7 +18,7 @@ public class CommonBase : MonoBehaviour, IBegin
     public Color hitFlashColor = Color.white;
     public float hitFlashEmission = 2f;
 
-    // publicÀ¸·Î º¯°æÇØ¼­ ¿ÜºÎ¿¡¼­ ¼³Á¤ °¡´ÉÇÏ°Ô
+    // publicìœ¼ë¡œ ë³€ê²½í•´ì„œ ì™¸ë¶€ì—ì„œ ì„¤ì • ê°€ëŠ¥í•˜ê²Œ
     [HideInInspector] public SpriteRenderer spriteRenderer;
     private Material material;
     private Coroutine hitFlashCoroutine;
@@ -31,7 +31,7 @@ public class CommonBase : MonoBehaviour, IBegin
     {
         hp = maxHp;
 
-        // SpriteRenderer¸¦ Ã£¾Æ¼­ ÃÊ±âÈ­
+        // SpriteRendererë¥¼ ì°¾ì•„ì„œ ì´ˆê¸°í™”
         if (spriteRenderer == null)
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -40,7 +40,7 @@ public class CommonBase : MonoBehaviour, IBegin
         InitializeHitEffect();
     }
 
-    // ³ªÁß¿¡ ÃÊ±âÈ­µÉ ¼öµµ ÀÖÀ¸´Ï º°µµ ÇÔ¼ö·Î ºĞ¸®
+    // ë‚˜ì¤‘ì— ì´ˆê¸°í™”ë  ìˆ˜ë„ ìˆìœ¼ë‹ˆ ë³„ë„ í•¨ìˆ˜ë¡œ ë¶„ë¦¬
     public void InitializeHitEffect()
     {
         if (spriteRenderer == null)
@@ -50,17 +50,17 @@ public class CommonBase : MonoBehaviour, IBegin
 
         if (spriteRenderer != null)
         {
-            Debug.Log($"[{gameObject.name}] SpriteRenderer Ã£À½! ¿ÀºêÁ§Æ®: {spriteRenderer.gameObject.name}");
+            Debug.Log($"[{gameObject.name}] SpriteRenderer ì°¾ìŒ! ì˜¤ë¸Œì íŠ¸: {spriteRenderer.gameObject.name}");
 
-            // MaterialÀ» ÀÎ½ºÅÏ½ºÈ­
+            // Materialì„ ì¸ìŠ¤í„´ìŠ¤í™”
             if (material == null)
             {
                 material = new Material(spriteRenderer.material);
                 spriteRenderer.material = material;
-                Debug.Log($"[{gameObject.name}] Material »ı¼º ¿Ï·á!");
+                Debug.Log($"[{gameObject.name}] Material ìƒì„± ì™„ë£Œ!");
             }
 
-            // ¼ÎÀÌ´õ ÇÁ·ÎÆÛÆ¼ ±âº»°ª ÃÊ±âÈ­
+            // ì…°ì´ë” í”„ë¡œí¼í‹° ê¸°ë³¸ê°’ ì´ˆê¸°í™”
             if (material.HasProperty(FlashColorID))
                 material.SetColor(FlashColorID, hitFlashColor);
 
@@ -72,7 +72,7 @@ public class CommonBase : MonoBehaviour, IBegin
         }
         else
         {
-            // SpriteRenderer°¡ ¾ø´Â ¿ÀºêÁ§Æ®´Â ÇÇ°İ ÀÌÆåÆ® »ı·«
+            // SpriteRendererê°€ ì—†ëŠ” ì˜¤ë¸Œì íŠ¸ëŠ” í”¼ê²© ì´í™íŠ¸ ìƒëµ
             return;
         }
     }
@@ -82,29 +82,29 @@ public class CommonBase : MonoBehaviour, IBegin
 
     }
 
-    // µ¥¹ÌÁö ¹Ş´Â ÇÔ¼ö
+    // ë°ë¯¸ì§€ ë°›ëŠ” í•¨ìˆ˜
     public virtual void TakeDamage(int damage, GameObject attacker)
     {
         if (IsDead) return;
 
         hp -= damage;
-        Debug.Log(gameObject.name + "°¡ " + damage + "ÀÇ µ¥¹ÌÁö¸¦ ÀÔ¾ú½À´Ï´Ù! ÇöÀç Ã¼·Â: " + hp);
+        Debug.Log(gameObject.name + "ê°€ " + damage + "ì˜ ë°ë¯¸ì§€ë¥¼ ì…ì—ˆìŠµë‹ˆë‹¤! í˜„ì¬ ì²´ë ¥: " + hp);
         this.attacker = attacker;
 
-        // MaterialÀÌ nullÀÌ¸é ´Ù½Ã ÃÊ±âÈ­ ½Ãµµ
+        // Materialì´ nullì´ë©´ ë‹¤ì‹œ ì´ˆê¸°í™” ì‹œë„
         if (material == null)
         {
             InitializeHitEffect();
         }
 
-        // ÇÇ°İ È¿°ú ½ÇÇà
+        // í”¼ê²© íš¨ê³¼ ì‹¤í–‰
         if (material != null && spriteRenderer != null)
         {
             if (hitFlashCoroutine != null)
             {
                 StopCoroutine(hitFlashCoroutine);
 
-                // ¿¬¼Ó ÇÇ°İ ½Ã ÀÌÀü ÇÃ·¡½Ã°¡ ³²Áö ¾Êµµ·Ï Áï½Ã ÃÊ±âÈ­
+                // ì—°ì† í”¼ê²© ì‹œ ì´ì „ í”Œë˜ì‹œê°€ ë‚¨ì§€ ì•Šë„ë¡ ì¦‰ì‹œ ì´ˆê¸°í™”
                 if (material.HasProperty(FlashAmountID))
                     material.SetFloat(FlashAmountID, 0f);
             }
@@ -119,7 +119,7 @@ public class CommonBase : MonoBehaviour, IBegin
         }
     }
 
-    // ÇÇ°İ È¿°ú
+    // í”¼ê²© íš¨ê³¼
     private IEnumerator HitFlashEffect()
     {
         if (material == null)
@@ -142,10 +142,10 @@ public class CommonBase : MonoBehaviour, IBegin
         hitFlashCoroutine = null;
     }
 
-    // »ç¶óÁ³À»¶§ È£ÃâÇÏ´Â º¯¼ö (»ı¸íÃ¼ÀÎ °æ¿ì »ç¸ÁÇßÀ» ¶§)
+    // ì‚¬ë¼ì¡Œì„ë•Œ í˜¸ì¶œí•˜ëŠ” ë³€ìˆ˜ (ìƒëª…ì²´ì¸ ê²½ìš° ì‚¬ë§í–ˆì„ ë•Œ)
     public virtual void WhenDestroy()
     {
-        Debug.Log($"{gameObject.name} ¿ÀºêÁ§Æ® ÆÄ±«");
+        Debug.Log($"{gameObject.name} ì˜¤ë¸Œì íŠ¸ íŒŒê´´");
         ItemDropper dropper = GetComponent<ItemDropper>();
         if (dropper != null)
         {

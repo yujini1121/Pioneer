@@ -20,7 +20,7 @@ public class TreasureBoxUI : MonoBehaviour
 
     public void ShowItem(SItemStack sItemStack)
     {
-        Debug.Log(">> TreasureBoxUI.ShowItem : º¸»ó ¹ŞÀ½");
+        Debug.Log(">> TreasureBoxUI.ShowItem : ë³´ìƒ ë°›ìŒ");
 
         SItemTypeSO itemType = ItemTypeManager.Instance.FindType(sItemStack);
 

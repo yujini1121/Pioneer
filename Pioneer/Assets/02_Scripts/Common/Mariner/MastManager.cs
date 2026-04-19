@@ -8,13 +8,13 @@ public class MastManager : MonoBehaviour
 {
     public static MastManager Instance;
 
-    [Header("°©ÆÇ °ü¸®")]
+    [Header("ê°‘íŒ ê´€ë¦¬")]
     public int currentDeckCount = 0;
-    public LayerMask platformLayerMask; // ÇÃ·§Æû ·¹ÀÌ¾î¸¶½ºÅ©
+    public LayerMask platformLayerMask; // í”Œë«í¼ ë ˆì´ì–´ë§ˆìŠ¤í¬
 
-    [Header("¾ÆÀÌÅÛ ID ¼³Á¤")]
-    public int woodItemID = 30001; // Åë³ª¹« ¾ÆÀÌÅÛ ID
-    public int clothItemID = 30003; // Ãµ ¾ÆÀÌÅÛ ID
+    [Header("ì•„ì´í…œ ID ì„¤ì •")]
+    public int woodItemID = 30001; // í†µë‚˜ë¬´ ì•„ì´í…œ ID
+    public int clothItemID = 30003; // ì²œ ì•„ì´í…œ ID
 
     void Awake()
     {
@@ -29,21 +29,21 @@ public class MastManager : MonoBehaviour
         UpdateCurrentDeckCount();
     }
 
-    // ÇöÀç °©ÆÇ °³¼ö ¾÷µ¥ÀÌÆ® (CreateObject¿¡¼­ È£Ãâ)
+    // í˜„ì¬ ê°‘íŒ ê°œìˆ˜ ì—…ë°ì´íŠ¸ (CreateObjectì—ì„œ í˜¸ì¶œ)
     public void UpdateCurrentDeckCount()
     {
         Collider[] platformColliders = Physics.OverlapSphere(Vector3.zero, 1000f, platformLayerMask);
         currentDeckCount = platformColliders.Length;
 
-        Debug.Log($"=== °©ÆÇ Ä«¿îÆ® µğ¹ö±× ===");
-        Debug.Log($"·¹ÀÌ¾î¸¶½ºÅ© °ª: {platformLayerMask.value}");
-        Debug.Log($"°Ë»öµÈ Äİ¶óÀÌ´õ ¼ö: {platformColliders.Length}");
-        Debug.Log($"ÇöÀç °©ÆÇ °³¼ö: {currentDeckCount}");
+        Debug.Log($"=== ê°‘íŒ ì¹´ìš´íŠ¸ ë””ë²„ê·¸ ===");
+        Debug.Log($"ë ˆì´ì–´ë§ˆìŠ¤í¬ ê°’: {platformLayerMask.value}");
+        Debug.Log($"ê²€ìƒ‰ëœ ì½œë¼ì´ë” ìˆ˜: {platformColliders.Length}");
+        Debug.Log($"í˜„ì¬ ê°‘íŒ ê°œìˆ˜: {currentDeckCount}");
 
-        // °¢ °©ÆÇ Á¤º¸ Ãâ·Â
+        // ê° ê°‘íŒ ì •ë³´ ì¶œë ¥
         for (int i = 0; i < platformColliders.Length; i++)
         {
-            Debug.Log($"°©ÆÇ {i}: {platformColliders[i].name} at {platformColliders[i].transform.position}");
+            Debug.Log($"ê°‘íŒ {i}: {platformColliders[i].name} at {platformColliders[i].transform.position}");
         }
     }
 
@@ -57,10 +57,10 @@ public class MastManager : MonoBehaviour
         }
 
     }
-    // °ÔÀÓ¿À¹ö Ã³¸®
+    // ê²Œì„ì˜¤ë²„ ì²˜ë¦¬
     public void GameOver()
     {
-        Debug.Log("°ÔÀÓ¿À¹ö! µÀ´ë°¡ ÆÄ±«µÇ¾ú½À´Ï´Ù.");
+        Debug.Log("ê²Œì„ì˜¤ë²„! ë›ëŒ€ê°€ íŒŒê´´ë˜ì—ˆìŠµë‹ˆë‹¤.");
         Time.timeScale = 0f;
     }
 }

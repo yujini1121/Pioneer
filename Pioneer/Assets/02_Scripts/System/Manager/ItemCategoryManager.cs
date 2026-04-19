@@ -10,7 +10,7 @@ public class ItemCategoryManager : MonoBehaviour, IBegin
     public Dictionary<int, SItemCategorySO> itemCategoriesSearchInt;
     public Dictionary<ETypes, SItemCategorySO> itemCategoriesSearchEnum;
 
-    // ÇöÀç´Â ¾²ÀÌÁö ¾Ê°í, ¼öµ¿À¸·Î Å×½ºÆ®¿ë ÀÓ½Ã ÇÔ¼ö¸¦ ¸¸µé¾î¼­ Ä«Å×°í¸®¸¦ ³Ö°í ½ÍÀº °æ¿ì ÀÌ ÇÔ¼ö¸¦ »ç¿ëÇÏ½Ã¿À.
+    // í˜„ì¬ëŠ” ì“°ì´ì§€ ì•Šê³ , ìˆ˜ë™ìœ¼ë¡œ í…ŒìŠ¤íŠ¸ìš© ì„ì‹œ í•¨ìˆ˜ë¥¼ ë§Œë“¤ì–´ì„œ ì¹´í…Œê³ ë¦¬ë¥¼ ë„£ê³  ì‹¶ì€ ê²½ìš° ì´ í•¨ìˆ˜ë¥¼ ì‚¬ìš©í•˜ì‹œì˜¤.
     private void Add(SItemCategorySO category)
     {
         categories.Add(category);

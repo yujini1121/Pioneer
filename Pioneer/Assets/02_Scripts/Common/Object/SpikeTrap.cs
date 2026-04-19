@@ -6,7 +6,7 @@ public class SpikeTrap : MonoBehaviour
 {
     [SerializeField] private SInstallableObjectDataSO objectData;
 
-    [Header("Æ®·¦ ¿É¼Ç")]
+    [Header("íŠ¸ë© ì˜µì…˜")]
     [SerializeField] private float timeToStart;
     [SerializeField] private float duration;
     [SerializeField] private float timeToReset;
@@ -19,7 +19,7 @@ public class SpikeTrap : MonoBehaviour
     [SerializeField] private GameObject niddles;
     [SerializeField] private AnimationCurve curve;
 
-    [Header("µğ¹ö±×")]
+    [Header("ë””ë²„ê·¸")]
     [SerializeField] private int numberOfUses = 0;
     [SerializeField] private bool isTriggerd;
 
@@ -35,7 +35,7 @@ public class SpikeTrap : MonoBehaviour
     {
         isTriggerd = true;
 
-        //¹ßµ¿
+        //ë°œë™
         float elapsed = 0f;
         while (elapsed < timeToStart)
         {
@@ -47,19 +47,19 @@ public class SpikeTrap : MonoBehaviour
         }
         niddles.transform.localPosition = triggeredPos;
 
-        //À¯Áö
+        //ìœ ì§€
         elapsed = 0f;
         while (elapsed < duration)
         {
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.ActivatedSpiketrap);
 
-            Debug.Log("µû²û");
+            Debug.Log("ë”°ë”");
             elapsed += 1f;
             yield return new WaitForSeconds(1f);
         }
 
-        //Á¾·á
+        //ì¢…ë£Œ
         elapsed = 0f;
         while (elapsed < timeToReset)
         {

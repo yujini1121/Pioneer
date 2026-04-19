@@ -40,14 +40,14 @@ public class PlayerRepair : MonoBehaviour
     {
         if (isAction) return;
 
-        Debug.Log($"¼ö¸® ¹öÆ° ´­¸²");
+        Debug.Log($"ìˆ˜ë¦¬ ë²„íŠ¼ ëˆŒë¦¼");
 
         StartCoroutine(RepairCoroutine(target));
     }
 
     IEnumerator RepairCoroutine(StructureBase target)
     {
-        Debug.Log($"¼ö¸® ¹öÆ° ´­¸²");
+        Debug.Log($"ìˆ˜ë¦¬ ë²„íŠ¼ ëˆŒë¦¼");
 
         isAction = true;
 

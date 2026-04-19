@@ -3,36 +3,36 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-// 250805 : ½Ã¾ß °¨Áö°¡ ÇÊ¿äÇÑ °¢ ½ºÅ©¸³Æ®¿¡¼­ DetectTargets ÇÔ¼ö¿¡ °¨ÁöÇÒ ·¹ÀÌ¾î¸¦ ¸Å°³º¯¼ö·Î Àü´ŞÇÏ¿© È£ÃâÇÏ¿© »ç¿ëÇÏµµ·Ï ¼öÁ¤
+// 250805 : ì‹œì•¼ ê°ì§€ê°€ í•„ìš”í•œ ê° ìŠ¤í¬ë¦½íŠ¸ì—ì„œ DetectTargets í•¨ìˆ˜ì— ê°ì§€í•  ë ˆì´ì–´ë¥¼ ë§¤ê°œë³€ìˆ˜ë¡œ ì „ë‹¬í•˜ì—¬ í˜¸ì¶œí•˜ì—¬ ì‚¬ìš©í•˜ë„ë¡ ìˆ˜ì •
 
 public class FOVController : MonoBehaviour, IBegin
 {
-    [Header("½Ã¾ß ¹üÀ§(¿ø)")]
+    [Header("ì‹œì•¼ ë²”ìœ„(ì›)")]
     public float viewRadius = 10f;
 
-    [Header("½Ã¾ß °¢")]
+    [Header("ì‹œì•¼ ê°")]
     [Range(0, 360)]
     public float viewAngle = 360f;
 
-    [Header("½Ã¾ß °¨Áö °£°İ")]
+    [Header("ì‹œì•¼ ê°ì§€ ê°„ê²©")]
     private float detectionInterval = 0.2f;
 
-    [Header("Àå¾Ö¹° ·¹ÀÌ¾î ¼³Á¤")]
+    [Header("ì¥ì• ë¬¼ ë ˆì´ì–´ ì„¤ì •")]
     private LayerMask obstacleMask;
 
     public List<Transform> visibleTargets = new List<Transform>();
 
     public void Start()
     {
-        obstacleMask = LayerMask.GetMask("Obstacle"); // ·¹ÀÌ¾î ÀÌ¸§ ¼öÁ¤ ÇÊ¿ä
+        obstacleMask = LayerMask.GetMask("Obstacle"); // ë ˆì´ì–´ ì´ë¦„ ìˆ˜ì • í•„ìš”
     }
 
     /// <summary>
-    /// 1.¿øÇü ¹üÀ§ ¾È¿¡¼­ ´ë»ó Ã£±â
-    /// 2. ½Ã¾ß°¢ ³»¿¡ ÀÖ´ÂÁö È®ÀÎ
-    /// 3. Àå¾Ö¹° ÀÖ´ÂÁö ·¹ÀÌÄ³½ºÆ® °Ë»ç
+    /// 1.ì›í˜• ë²”ìœ„ ì•ˆì—ì„œ ëŒ€ìƒ ì°¾ê¸°
+    /// 2. ì‹œì•¼ê° ë‚´ì— ìˆëŠ”ì§€ í™•ì¸
+    /// 3. ì¥ì• ë¬¼ ìˆëŠ”ì§€ ë ˆì´ìºìŠ¤íŠ¸ ê²€ì‚¬
     /// </summary>
-    /// <param name="targetLayer">Å½ÁöÇÒ ¿ÀºêÁ§Æ®ÀÇ ·¹ÀÌ¾î</param>
+    /// <param name="targetLayer">íƒì§€í•  ì˜¤ë¸Œì íŠ¸ì˜ ë ˆì´ì–´</param>
     public void DetectTargets(LayerMask targetLayer)
     {
         visibleTargets.Clear();
@@ -55,7 +55,7 @@ public class FOVController : MonoBehaviour, IBegin
         }
     }
 
-    #region µğ¹ö±ë¿ë ±âÁî¸ğ ±×¸®±â
+    #region ë””ë²„ê¹…ìš© ê¸°ì¦ˆëª¨ ê·¸ë¦¬ê¸°
     private Vector3 DirFromAngle(float angleInDegrees, bool angleIsGlobal)
     {
         if (!angleIsGlobal)
@@ -66,11 +66,11 @@ public class FOVController : MonoBehaviour, IBegin
 
     private void OnDrawGizmosSelected()
     {
-        // °¨Áö ¹İ°æ (¿øÇü ¹üÀ§)
+        // ê°ì§€ ë°˜ê²½ (ì›í˜• ë²”ìœ„)
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, viewRadius);
 
-        // ½Ã¾ß°¢ ¼± µÎ °³
+        // ì‹œì•¼ê° ì„  ë‘ ê°œ
         Vector3 leftBoundary = DirFromAngle(-viewAngle / 2, false);
         Vector3 rightBoundary = DirFromAngle(viewAngle / 2, false);
 
@@ -78,7 +78,7 @@ public class FOVController : MonoBehaviour, IBegin
         Gizmos.DrawLine(transform.position, transform.position + leftBoundary * viewRadius);
         Gizmos.DrawLine(transform.position, transform.position + rightBoundary * viewRadius);
 
-        // ¹Ù¶óº¸´Â Á¤¸é ¹æÇâ (Á¤È®ÇÑ forward)
+        // ë°”ë¼ë³´ëŠ” ì •ë©´ ë°©í–¥ (ì •í™•í•œ forward)
         Gizmos.color = Color.red;
         Gizmos.DrawLine(transform.position, transform.position + transform.forward * viewRadius);
     }

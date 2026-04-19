@@ -32,14 +32,14 @@ public class ItemSlotUI : MonoBehaviour,
         [CallerLineNumber] int line = 0,
         [CallerMemberName] string member = "")
     {
-        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : È£ÃâµÊ");
+        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : í˜¸ì¶œë¨");
 
         if (item == null || item.id == 0)
         {
             Clear();
             return;
         }
-        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : ³»±¸µµ = {item.duability}");
+        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : ë‚´êµ¬ë„ = {item.duability}");
 
 
         Debug.Assert(item != null);
@@ -73,7 +73,7 @@ public class ItemSlotUI : MonoBehaviour,
     }
     public void Clear()
     {
-        //Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : È£ÃâµÊ");
+        //Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : í˜¸ì¶œë¨");
         
         image.enabled = false;
         count.text = "";
@@ -99,7 +99,7 @@ public class ItemSlotUI : MonoBehaviour,
             }
             else if (eventData.button == PointerEventData.InputButton.Right)
             {
-                // ¿ìÅ¬¸¯ ½Ã
+                // ìš°í´ë¦­ ì‹œ
                 InventoryUiMain.instance.RightClickSlot(index);
             }
 

@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Common UIÀÇ Craft ·ÎÁ÷À» ¿©±â·Î ÀÌµ¿
-// ÇÃ·¹ÀÌ¾î°¡ ¾ÆÀÌÅÛÀ» Á¶ÇÔÇÏ°Å³ª ¼³Ä¡Çü ¿ÀºêÁ§Æ®¸¦ ¸¸µé°í ½Ã°£°ú ÀÚ¿øÀ» ¼Ò¸ğÇÏ´Â ·ÎÁ÷À» ¿©±â¼­ ´Ù Ã³¸®ÇÔ.
+// Common UIì˜ Craft ë¡œì§ì„ ì—¬ê¸°ë¡œ ì´ë™
+// í”Œë ˆì´ì–´ê°€ ì•„ì´í…œì„ ì¡°í•¨í•˜ê±°ë‚˜ ì„¤ì¹˜í˜• ì˜¤ë¸Œì íŠ¸ë¥¼ ë§Œë“¤ê³  ì‹œê°„ê³¼ ìì›ì„ ì†Œëª¨í•˜ëŠ” ë¡œì§ì„ ì—¬ê¸°ì„œ ë‹¤ ì²˜ë¦¬í•¨.
 public class ItemPlayerCraftManager : MonoBehaviour
 {
 

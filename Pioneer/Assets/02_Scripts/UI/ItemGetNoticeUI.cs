@@ -7,9 +7,9 @@ public class ItemGetNoticeUI : MonoBehaviour
 {
     public static ItemGetNoticeUI Instance;
 
-    // ¿ø¼Ò 4°³Â¥¸® ¸®½ºÆ®
-    // ¸®½ºÆ® ¿ø¼Ò => ³ªÅ¸³ª±â / »ç¶óÁö±â
-    // ÀÌ¹Ì ²Ë Âü -> ÀÌÀü ¿ø¼Ò »ç¶óÁö±â(ÇÊ¿äÇÑ ¸¸Å­¸¸) -> ½¬ÇÁÆ® -> ³ªÅ¸³ª±â
+    // ì›ì†Œ 4ê°œì§œë¦¬ ë¦¬ìŠ¤íŠ¸
+    // ë¦¬ìŠ¤íŠ¸ ì›ì†Œ => ë‚˜íƒ€ë‚˜ê¸° / ì‚¬ë¼ì§€ê¸°
+    // ì´ë¯¸ ê½‰ ì°¸ -> ì´ì „ ì›ì†Œ ì‚¬ë¼ì§€ê¸°(í•„ìš”í•œ ë§Œí¼ë§Œ) -> ì‰¬í”„íŠ¸ -> ë‚˜íƒ€ë‚˜ê¸°
 
     public GameObject prefab;
 
@@ -19,7 +19,7 @@ public class ItemGetNoticeUI : MonoBehaviour
 
     public void Add(SItemStack item)
     {
-        Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : ½ÃÀÛ {item.id}");
+        Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : ì‹œìž‘ {item.id}");
 
 
         //if ()
@@ -49,8 +49,8 @@ public class ItemGetNoticeUI : MonoBehaviour
         
         for (int uiListIndex = uiList.Count - 1; uiListIndex > 0; --uiListIndex)
         {
-            // ¸¸¾à 4¹øÂ°(ÀÎµ¦½º3)ÀÇ ´ë»óÀº Ä¡¿ö¹ö¸²
-            // ±× ¹Ì¸¸ÀÇ ´ë»óµéÀº ¾Æ·¡·Î ÀÌµ¿
+            // ë§Œì•½ 4ë²ˆì§¸(ì¸ë±ìŠ¤3)ì˜ ëŒ€ìƒì€ ì¹˜ì›Œë²„ë¦¼
+            // ê·¸ ë¯¸ë§Œì˜ ëŒ€ìƒë“¤ì€ ì•„ëž˜ë¡œ ì´ë™
             ItemGetNoticeSingleUI one = uiList[uiListIndex];
 
 
@@ -63,10 +63,10 @@ public class ItemGetNoticeUI : MonoBehaviour
                 continue;
             }
             objectPool[one.index].transform.localPosition += new Vector3(0, -72, 0);
-            Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : Áß°£ - {objectPool[one.index].transform.localPosition}");
+            Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : ì¤‘ê°„ - {objectPool[one.index].transform.localPosition}");
         }
 
-        Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : Á¾·á {item.id}");
+        Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : ì¢…ë£Œ {item.id}");
 
     }
 

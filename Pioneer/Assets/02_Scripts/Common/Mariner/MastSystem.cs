@@ -6,30 +6,30 @@ using UnityEngine.UI;
 
 public class MastSystem : CommonBase
 {
-    [Header("µÀ´ë ¼³Á¤")]
+    [Header("ë›ëŒ€ ì„¤ì •")]
     public int mastLevel = 1;
     public float interactionRange = 1.5f;
     public LayerMask playerLayer;
 
-    [Header("Ã¹ ¹øÂ° UI - ±âº» Á¤º¸")]
+    [Header("ì²« ë²ˆì§¸ UI - ê¸°ë³¸ ì •ë³´")]
     public GameObject mastUI;
     public TextMeshProUGUI hpPercentageText;
     public Button upgradeMenuButton;
     public Button closeButton;
     public Slider hpSlider;
 
-    [Header("µÎ ¹øÂ° UI - °­È­ »ó¼¼")]
+    [Header("ë‘ ë²ˆì§¸ UI - ê°•í™” ìƒì„¸")]
     public GameObject upgradeUI;
     public Button enhanceButton;
     public Button backButton;
     public TextMeshProUGUI material1CountText;
     public TextMeshProUGUI material2CountText;
 
-    [Header("°­È­ Àç·á ¿ä±¸Ä¡")]
+    [Header("ê°•í™” ì¬ë£Œ ìš”êµ¬ì¹˜")]
     [SerializeField] private int requiredWood = 30;
     [SerializeField] private int requiredCloth = 15;
 
-    [Header("¸Ş½ÃÁö ½Ã½ºÅÛ")]
+    [Header("ë©”ì‹œì§€ ì‹œìŠ¤í…œ")]
     public GameObject messagePanel;
     public TextMeshProUGUI messageText;
 
@@ -44,12 +44,12 @@ public class MastSystem : CommonBase
     private void Awake()
     {
         Instance = this;
-        Debug.Log("[MastSystem] Awake ½ÇÇàµÊ");
+        Debug.Log("[MastSystem] Awake ì‹¤í–‰ë¨");
     }
 
     void Start()
     {
-        Debug.Log("[MastSystem] Start ÃÊ±âÈ­");
+        Debug.Log("[MastSystem] Start ì´ˆê¸°í™”");
 
         SetMastLevel(mastLevel);
         hp = maxHp;
@@ -62,7 +62,7 @@ public class MastSystem : CommonBase
         if (closeButton) closeButton.onClick.AddListener(CloseAllUI);
         if (backButton) backButton.onClick.AddListener(BackToMainUI);
 
-        Debug.Log("[MastSystem] Start ¿Ï·á");
+        Debug.Log("[MastSystem] Start ì™„ë£Œ");
     }
 
     void Update()
@@ -91,13 +91,13 @@ public class MastSystem : CommonBase
         bool newState = hits.Length > 0;
 
         if (newState != playerInRange)
-            Debug.Log($"[MastSystem] playerInRange º¯°æ: {playerInRange} ¡æ {newState}");
+            Debug.Log($"[MastSystem] playerInRange ë³€ê²½: {playerInRange} â†’ {newState}");
 
         playerInRange = newState;
 
         if (!playerInRange && isUIOpen)
         {
-            Debug.Log("[MastSystem] ÇÃ·¹ÀÌ¾î ¹üÀ§ ¹ş¾î³² ¡æ UI ´İÀ½");
+            Debug.Log("[MastSystem] í”Œë ˆì´ì–´ ë²”ìœ„ ë²—ì–´ë‚¨ â†’ UI ë‹«ìŒ");
             CloseAllUI();
         }
     }
@@ -108,11 +108,11 @@ public class MastSystem : CommonBase
 
         if (Input.GetMouseButtonDown(1))
         {
-            Debug.Log("[MastSystem] ¿ìÅ¬¸¯ °¨ÁöµÊ");
+            Debug.Log("[MastSystem] ìš°í´ë¦­ ê°ì§€ë¨");
 
             if (!isUIOpen)
             {
-                Debug.Log("[MastSystem] UI Open Á¶°Ç ¸¸Á· ¡æ OpenUI ½ÇÇà");
+                Debug.Log("[MastSystem] UI Open ì¡°ê±´ ë§Œì¡± â†’ OpenUI ì‹¤í–‰");
                 OpenUI();
 
                 InGameUI.instance.OpenUI(new System.Collections.Generic.List<GameObject>() { },
@@ -125,7 +125,7 @@ public class MastSystem : CommonBase
             }
             else
             {
-                Debug.Log("[MastSystem] UI ÀÌ¹Ì ¿­·ÁÀÖÀ½ (¹«½Ã)");
+                Debug.Log("[MastSystem] UI ì´ë¯¸ ì—´ë ¤ìˆìŒ (ë¬´ì‹œ)");
             }
         }
     }
@@ -137,8 +137,8 @@ public class MastSystem : CommonBase
         isUIOpen = true;
         //isUpgradeMenuOpen = false;
 
-        if (mastUI == null) Debug.LogError("[MastSystem] mastUI °¡ Inspector¿¡ ¿¬°áµÇÁö ¾ÊÀ½!");
-        if (upgradeUI == null) Debug.LogError("[MastSystem] upgradeUI °¡ Inspector¿¡ ¿¬°áµÇÁö ¾ÊÀ½!");
+        if (mastUI == null) Debug.LogError("[MastSystem] mastUI ê°€ Inspectorì— ì—°ê²°ë˜ì§€ ì•ŠìŒ!");
+        if (upgradeUI == null) Debug.LogError("[MastSystem] upgradeUI ê°€ Inspectorì— ì—°ê²°ë˜ì§€ ì•ŠìŒ!");
 
         mastUI?.SetActive(true);
         //upgradeUI?.SetActive(false);
@@ -209,13 +209,13 @@ public class MastSystem : CommonBase
             if (hpPercentageText != null)
             {
                 float percent = (float)hp / maxHp * 100f;
-                hpPercentageText.text = $"³»±¸µµ: {percent:F0}%";
+                hpPercentageText.text = $"ë‚´êµ¬ë„: {percent:F0}%";
                 hpSlider.value = (float)hp / maxHp;
             }
             return;
         }
 
-        // °­È­ È­¸é UI
+        // ê°•í™” í™”ë©´ UI
         int woodId = MastManager.Instance?.woodItemID ?? 0;
         int clothId = MastManager.Instance?.clothItemID ?? 0;
 
@@ -250,7 +250,7 @@ public class MastSystem : CommonBase
     {
         while (true)
         {
-            ShowMessage("µÀ´ë°¡ ºÒ¾ÈÁ¤ÇØ º¸ÀÎ´Ù.", 4f);
+            ShowMessage("ë›ëŒ€ê°€ ë¶ˆì•ˆì •í•´ ë³´ì¸ë‹¤.", 4f);
             yield return new WaitForSeconds(10f);
         }
     }
@@ -276,11 +276,11 @@ public class MastSystem : CommonBase
 
     void EnhanceMast()
     {
-        Debug.Log("[MastSystem] EnhanceMast() ½Ãµµ");
+        Debug.Log("[MastSystem] EnhanceMast() ì‹œë„");
 
         if (mastLevel >= 2)
         {
-            ShowMessage("ÀÌ¹Ì ÃÖ´ë ´Ü°èÀÔ´Ï´Ù.", 3f);
+            ShowMessage("ì´ë¯¸ ìµœëŒ€ ë‹¨ê³„ì…ë‹ˆë‹¤.", 3f);
             return;
         }
 
@@ -292,7 +292,7 @@ public class MastSystem : CommonBase
 
         if (woodCount < requiredWood || clothCount < requiredCloth)
         {
-            ShowMessage("Àç·á°¡ ºÎÁ·ÇÕ´Ï´Ù.", 3f);
+            ShowMessage("ì¬ë£Œê°€ ë¶€ì¡±í•©ë‹ˆë‹¤.", 3f);
             return;
         }
 
@@ -307,7 +307,7 @@ public class MastSystem : CommonBase
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.FortifyObject);
 
-        ShowMessage("µÀ´ë°¡ °­È­µÇ¾ú½À´Ï´Ù.", 3f);
+        ShowMessage("ë›ëŒ€ê°€ ê°•í™”ë˜ì—ˆìŠµë‹ˆë‹¤.", 3f);
         InventoryUiMain.instance?.IconRefresh();
         UpdateUI();
     }
@@ -317,7 +317,7 @@ public class MastSystem : CommonBase
         if (IsDead) return;
 
         hp -= damage;
-        Debug.Log($"[MastSystem] µÀ´ë µ¥¹ÌÁö {damage}, ÇöÀç HP {hp}");
+        Debug.Log($"[MastSystem] ë›ëŒ€ ë°ë¯¸ì§€ {damage}, í˜„ì¬ HP {hp}");
 
         this.attacker = attacker;
 
@@ -334,7 +334,7 @@ public class MastSystem : CommonBase
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
 
-        Debug.Log("[MastSystem] WhenDestroy() ¡æ °ÔÀÓ¿À¹ö È£Ãâ");
+        Debug.Log("[MastSystem] WhenDestroy() â†’ ê²Œì„ì˜¤ë²„ í˜¸ì¶œ");
         GameManager.Instance?.TriggerGameOver();
     }
 }

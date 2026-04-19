@@ -8,7 +8,7 @@ public class DefenseObject : MonoBehaviour
     public void Repair(int amount)
     {
         currentHP = Mathf.Min(currentHP + amount, maxHP);
-        Debug.Log(" ¿ÀºêÁ§Æ® ¼ö¸® ¿Ï·á HP + 30 (ÀÓ½Ã)");
+        Debug.Log(" ì˜¤ë¸Œì íŠ¸ ìˆ˜ë¦¬ ì™„ë£Œ HP + 30 (ì„ì‹œ)");
     }
 
     public bool IsRepaired()

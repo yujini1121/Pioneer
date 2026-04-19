@@ -42,20 +42,20 @@ public class SItemWeaponTypeSO : SItemTypeSO
 
     public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
-        Debug.Log(">> ¾ÆÀÌÅÛ_¹«±â : »ç¿ëµÊ");
+        Debug.Log(">> ì•„ì´í…œ_ë¬´ê¸° : ì‚¬ìš©ë¨");
 
         itemWithState.isUseCoroutineEnd = false;
 
         if (itemWithState.duability > 0)
         {
-            // ³»±¸µµ 1 ÀÌ»ó ¹«±â °ø°İ
-            Debug.Log(">> ¾ÆÀÌÅÛ_¹«±â : WeaponUseUtils.AttackCoroutine");
+            // ë‚´êµ¬ë„ 1 ì´ìƒ ë¬´ê¸° ê³µê²©
+            Debug.Log(">> ì•„ì´í…œ_ë¬´ê¸° : WeaponUseUtils.AttackCoroutine");
             yield return WeaponUseUtils.AttackCoroutine(userGameObject, itemWithState, this);
         }
         else
         {
-            // ³»±¸µµ 0 ÁÖ¸Ô °ø°İ
-            Debug.Log(">> ¾ÆÀÌÅÛ_¹«±â : Fist Attack");
+            // ë‚´êµ¬ë„ 0 ì£¼ë¨¹ ê³µê²©
+            Debug.Log(">> ì•„ì´í…œ_ë¬´ê¸° : Fist Attack");
 
             yield return WeaponUseUtils.AttackCoroutine(userGameObject, PlayerCore.Instance.dummyHandAttackItem,
                 PlayerCore.Instance.CalculatedHandAttack);

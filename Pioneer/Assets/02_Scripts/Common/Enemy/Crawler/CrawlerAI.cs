@@ -48,7 +48,7 @@ public class CrawlerAI : EnemyBase, IBegin
 
         float dt = Time.deltaTime;
         // 공격 쿨타임에도 애니메이션 트리거는 계속 갱신해서 멈춘 것처럼 보이지 않게 유지
-        // 怨듦꺽 荑⑦??꾩씠?대룄 ?좊땲硫붿씠???몃━嫄곕뒗 怨꾩냽 媛깆떊(??洹몃윭硫??щ·?ш? 硫덉텣 寃껋쿂??蹂댁씪 ???덉쓬)
+        // 공격 쿨타임 중에도 애니메이션 트리거를 갱신해야 멈춘 것처럼 보이지 않는다.
         if (attackTimer > 0f)
         {
             attackTimer -= dt;

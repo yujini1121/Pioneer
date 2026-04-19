@@ -6,18 +6,18 @@ public class OceanEventNormal : OceanEventBase
 {
     public OceanEventNormal()
     {
-        EventName = "Æò¹ü";
+        EventName = "í‰ë²”";
     }
 
     public override void EventRun()
     {
         base.EventRun();
-        Debug.Log("[OceanEventNormal][Æò¹ü ÀÌº¥Æ® ½ÃÀÛ]");
+        Debug.Log("[OceanEventNormal][í‰ë²” ì´ë²¤íŠ¸ ì‹œì‘]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
-        Debug.Log("[OceanEventNormal][Æò¹ü ÀÌº¥Æ® Á¾·á]");
+        Debug.Log("[OceanEventNormal][í‰ë²” ì´ë²¤íŠ¸ ì¢…ë£Œ]");
     }
 }

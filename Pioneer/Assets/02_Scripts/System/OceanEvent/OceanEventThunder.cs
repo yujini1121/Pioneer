@@ -12,7 +12,7 @@ public class OceanEventThunder : OceanEventBase
     private float stunDuration;
 
 
-    // 2¹ø ¼±ÅÃµÇ´Â °Í ¹æÁö¿ë
+    // 2ë²ˆ ì„ íƒë˜ëŠ” ê²ƒ ë°©ì§€ìš©
     private bool isThunderLoopRunning = false;
 
     public OceanEventThunder(GameObject thunderEffectPrefab,
@@ -22,7 +22,7 @@ public class OceanEventThunder : OceanEventBase
                              float thunderRadius,
                              float stunDuration)
     {
-        EventName = "³ú¿ì";
+        EventName = "ë‡Œìš°";
 
         this.thunderEffectPrefab = thunderEffectPrefab;
         this.rainEffect = rainEffect;
@@ -143,7 +143,7 @@ public class OceanEventThunder : OceanEventBase
             ItemDeck targetDeck = GetRandomDeck();
             if (targetDeck == null) continue;
 
-            // ¹Ù´ÙÀÌº¥Æ® : °©ÆÇ »ö»ó º¯°æÀ¸·Î ³«·Ú ¿¹°í
+            // ë°”ë‹¤ì´ë²¤íŠ¸ : ê°‘íŒ ìƒ‰ìƒ ë³€ê²½ìœ¼ë¡œ ë‚™ë¢° ì˜ˆê³ 
             targetDeck.BeginThunderWarning(warningDuration);
 
             yield return new WaitForSeconds(warningDuration);
@@ -158,7 +158,7 @@ public class OceanEventThunder : OceanEventBase
 
             Vector3 strikePosition = targetDeck.transform.position;
 
-            // ¹Ù´ÙÀÌº¥Æ® : ½ÇÁ¦ ³ú¿ì ÀÌÆåÆ® »ı¼º
+            // ë°”ë‹¤ì´ë²¤íŠ¸ : ì‹¤ì œ ë‡Œìš° ì´í™íŠ¸ ìƒì„±
             if (thunderEffectPrefab != null)
             {
                 GameObject.Instantiate(thunderEffectPrefab, strikePosition, Quaternion.identity);
@@ -212,12 +212,12 @@ public class OceanEventThunder : OceanEventBase
 
             processedTargets.Add(commonBase);
 
-            // °©ÆÇÀº ¹üÀ§ ÇÇÇØ ´ë»ó¿¡¼­ Á¦¿Ü
+            // ê°‘íŒì€ ë²”ìœ„ í”¼í•´ ëŒ€ìƒì—ì„œ ì œì™¸
             ItemDeck deck = commonBase as ItemDeck;
             if (deck != null)
                 continue;
 
-            // ¼³Ä¡Çü ¿ÀºêÁ§Æ® : ÃÖ´ë Ã¼·ÂÀÇ 10% °¨¼Ò
+            // ì„¤ì¹˜í˜• ì˜¤ë¸Œì íŠ¸ : ìµœëŒ€ ì²´ë ¥ì˜ 10% ê°ì†Œ
             StructureBase structure = commonBase as StructureBase;
             if (structure != null)
             {
@@ -226,7 +226,7 @@ public class OceanEventThunder : OceanEventBase
                 continue;
             }
 
-            // »ı¸íÃ¼ : ÃÖ´ë Ã¼·ÂÀÇ 30% °¨¼Ò + 2ÃÊ °æÁ÷
+            // ìƒëª…ì²´ : ìµœëŒ€ ì²´ë ¥ì˜ 30% ê°ì†Œ + 2ì´ˆ ê²½ì§
             CreatureBase creature = commonBase as CreatureBase;
             if (creature != null)
             {

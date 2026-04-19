@@ -9,15 +9,15 @@ public class EnemySpawnIntro : MonoBehaviour
     [Header("Intro")]
     [Min(0f)] public float fadeDuration = 1.0f;
     public bool playOnEnable = true;
-    [Tooltip("ÆäÀÌµå Áß ÀÌµ¿ ¸ØÃã")]
+    [Tooltip("í˜ì´ë“œ ì¤‘ ì´ë™ ë©ˆì¶¤")]
     public bool stopAgentDuringIntro = true;
 
-    // ³»ºÎ Ä³½Ã
-    SpriteRenderer sprite;             // Ã¹ ¹øÂ° ÀÚ½Ä "2D Sprite"ÀÇ SR
-    NavMeshAgent agent;                // Ç×»ó Á¦¿Ü
+    // ë‚´ë¶€ ìºì‹œ
+    SpriteRenderer sprite;             // ì²« ë²ˆì§¸ ìì‹ "2D Sprite"ì˜ SR
+    NavMeshAgent agent;                // í•­ìƒ ì œì™¸
     readonly List<Behaviour> toToggleBehaviours = new();
     readonly List<Collider> toToggleColliders = new();
-    readonly List<Renderer> toToggleRenderers = new(); // SpriteRenderer Á¦¿Ü
+    readonly List<Renderer> toToggleRenderers = new(); // SpriteRenderer ì œì™¸
     bool cached;
 
     void Awake()
@@ -30,7 +30,7 @@ public class EnemySpawnIntro : MonoBehaviour
         if (playOnEnable) StartCoroutine(IntroCo());
     }
 
-    /// <summary>½ºÆù Á÷ÈÄ ¼öµ¿À¸·Î È£ÃâÇÏ°í ½ÍÀ» ¶§</summary>
+    /// <summary>ìŠ¤í° ì§í›„ ìˆ˜ë™ìœ¼ë¡œ í˜¸ì¶œí•˜ê³  ì‹¶ì„ ë•Œ</summary>
     public void TriggerNow() => StartCoroutine(IntroCo());
 
     void Cache()
@@ -40,7 +40,7 @@ public class EnemySpawnIntro : MonoBehaviour
 
         agent = GetComponent<NavMeshAgent>();
 
-        // === Ã¹ ¹øÂ° ÀÚ½Ä "2D Sprite" °¡Á¤ ===
+        // === ì²« ë²ˆì§¸ ìì‹ "2D Sprite" ê°€ì • ===
         if (transform.childCount > 0)
         {
             var child = transform.GetChild(0);
@@ -48,22 +48,22 @@ public class EnemySpawnIntro : MonoBehaviour
         }
 
         if (sprite == null)
-            Debug.LogWarning($"[EnemySpawnIntro] '{name}'¿¡ Ã¹ ¹øÂ° ÀÚ½Ä SpriteRenderer°¡ ¾ø½À´Ï´Ù. (\"2D Sprite\" ÇüÅÂ¸¦ ±â´ë)");
+            Debug.LogWarning($"[EnemySpawnIntro] '{name}'ì— ì²« ë²ˆì§¸ ìì‹ SpriteRendererê°€ ì—†ìŠµë‹ˆë‹¤. (\"2D Sprite\" í˜•íƒœë¥¼ ê¸°ëŒ€)");
 
-        // ²ô°í/ÄÑÁÙ Behaviour ¼öÁı (NavMeshAgent, ÀÚ½Å Á¦¿Ü)
+        // ë„ê³ /ì¼œì¤„ Behaviour ìˆ˜ì§‘ (NavMeshAgent, ìì‹  ì œì™¸)
         var behaviours = GetComponentsInChildren<Behaviour>(true);
         foreach (var b in behaviours)
         {
             if (b == null) continue;
             if (ReferenceEquals(b, this)) continue;
-            if (b is NavMeshAgent) continue;     // ¿ä±¸»çÇ×: Agent´Â Á¦¿Ü
+            if (b is NavMeshAgent) continue;     // ìš”êµ¬ì‚¬í•­: AgentëŠ” ì œì™¸
             toToggleBehaviours.Add(b);
         }
 
-        // Colliderµé ¼öÁı
+        // Colliderë“¤ ìˆ˜ì§‘
         GetComponentsInChildren(true, toToggleColliders);
 
-        // ´Ù¸¥ Renderer´Â ¸ğµÎ ¼û±è (SpriteRenderer´Â ÆäÀÌµå·Î¸¸ Ã³¸®)
+        // ë‹¤ë¥¸ RendererëŠ” ëª¨ë‘ ìˆ¨ê¹€ (SpriteRendererëŠ” í˜ì´ë“œë¡œë§Œ ì²˜ë¦¬)
         var renderers = GetComponentsInChildren<Renderer>(true);
         foreach (var r in renderers)
         {
@@ -76,17 +76,17 @@ public class EnemySpawnIntro : MonoBehaviour
     {
         Cache();
 
-        // 0) »çÀü »óÅÂ ¼¼ÆÃ
+        // 0) ì‚¬ì „ ìƒíƒœ ì„¸íŒ…
         foreach (var b in toToggleBehaviours) if (b) b.enabled = false;
         foreach (var c in toToggleColliders) if (c) c.enabled = false;
         foreach (var r in toToggleRenderers) if (r) r.enabled = false;
 
         if (stopAgentDuringIntro && agent) agent.isStopped = true;
 
-        // ½ºÇÁ¶óÀÌÆ® ¾ËÆÄ 0À¸·Î ½ÃÀÛ
+        // ìŠ¤í”„ë¼ì´íŠ¸ ì•ŒíŒŒ 0ìœ¼ë¡œ ì‹œì‘
         SetAlpha(0f);
 
-        // 1) ÆäÀÌµå 0¡æ1
+        // 1) í˜ì´ë“œ 0â†’1
         float t = 0f;
         while (t < fadeDuration)
         {
@@ -97,7 +97,7 @@ public class EnemySpawnIntro : MonoBehaviour
         }
         SetAlpha(1f);
 
-        // 2) ¸ğµÎ È°¼ºÈ­
+        // 2) ëª¨ë‘ í™œì„±í™”
         foreach (var r in toToggleRenderers) if (r) r.enabled = true;
         foreach (var c in toToggleColliders) if (c) c.enabled = true;
         foreach (var b in toToggleBehaviours) if (b) b.enabled = true;

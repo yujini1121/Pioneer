@@ -14,10 +14,10 @@ public class GuiltyPool<T>
 {
     int elementCount = 0;
 
-    // �غ�� ��ü
+    // 대기 중 객체
     private readonly List<GuiltyPoolItem<T>> _readyList;
 
-    // ��� �� ��ü (ID ���� ����)
+    // 사용 중 객체 (ID 기준 관리)
     private readonly SortedDictionary<int, T> _inUse
         = new SortedDictionary<int, T>();
 
@@ -37,13 +37,13 @@ public class GuiltyPool<T>
         elementCount = initialItems.Count;
     }
 
-    // �ʱ� �߰�
+    // 초기 추가
     public void Add(T item)
     {
         _readyList.Add(new GuiltyPoolItem<T>() { id = elementCount, Value = item });
         elementCount++;
     }
-    // �ʱ� �߰�
+    // 초기 추가
     public void Add(T item, out GuiltyPoolItem<T> self)
     {
         self = new GuiltyPoolItem<T>() { id = elementCount, Value = item };
@@ -51,7 +51,7 @@ public class GuiltyPool<T>
         elementCount++;
     }
 
-    // ��� ȹ��
+    // 객체 획득
     public GuiltyPoolItem<T> Possess()
     {
         if (_readyList.Count == 0)
@@ -64,14 +64,14 @@ public class GuiltyPool<T>
         int id = item.id;
 
         if (_inUse.ContainsKey(id))
-            throw new InvalidOperationException("�ߺ� ID�� ������ ����");
+            throw new InvalidOperationException("중복 ID가 존재할 수 없습니다");
 
         _inUse.Add(id, item.Value);
 
         return item;
     }
 
-    // ��ȯ (Ʈ�� Ž�� �ð�)
+    // 반환 (트래킹 갱신)
     public void Release(GuiltyPoolItem<T> item)
     {
         if (item == null)
@@ -83,6 +83,6 @@ public class GuiltyPool<T>
         {
             _readyList.Add(item);
         }
-        // ������ ���� (Ȥ�� ���� ó�� ����)
+        // 필요하면 로그 추가 (혹은 예외 처리 가능)
     }
 }

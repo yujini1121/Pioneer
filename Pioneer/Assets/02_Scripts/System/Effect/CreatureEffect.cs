@@ -6,14 +6,14 @@ public class CreatureEffect : MonoBehaviour
 {
     public static CreatureEffect Instance;
 
-    [Header("°ÔÀÓ ¿ÀºêÁ§Æ®¿¡ ³ÖÀ» ÀÌÆåÆ®")]
+    [Header("ê²Œì„ ì˜¤ë¸Œì íŠ¸ì— ë„£ì„ ì´í™íŠ¸")]
     public ParticleSystem[] Effects;
 
-    [Header("ÀÚ½Å È¤Àº ¸Õ ´Ù¸¥ °ÔÀÓ¿ÀºêÁ§Æ®¿¡ ¼ÒÈ¯½ÃÅ³ ÀÌÆåÆ®¸¦ ´ãÀº ÇÁ¸®Æé")]
+    [Header("ìì‹  í˜¹ì€ ë¨¼ ë‹¤ë¥¸ ê²Œì„ì˜¤ë¸Œì íŠ¸ì— ì†Œí™˜ì‹œí‚¬ ì´í™íŠ¸ë¥¼ ë‹´ì€ í”„ë¦¬í©")]
     public GameObject prefabForEffect;
-    // ÀÌÈÄ¿¡ ´õ Ãß°¡ÇÒ °Í
-    // ±×·¯³ª °ÔÀÓ¿ÀºêÁ§Æ®´Â ¹İµå½Ã ÇÁ·ÎÁ§Æ® Ã¢¿¡ ÀÖ´Â ÇÁ¸®ÆéÀÌ¿©¾ßÁö.
-    // Àı´ë·Î ¾À¿¡ À§Ä¡ÇÑ, ¾î¶² °ÔÀÓ¿ÀºêÁ§Æ®ÀÇ ÀÚ½Ä °ÔÀÓ¿ÀºêÁ§Æ®¸¦ ±Ü¾î¿Í¼± ¾È µÊ
+    // ì´í›„ì— ë” ì¶”ê°€í•  ê²ƒ
+    // ê·¸ëŸ¬ë‚˜ ê²Œì„ì˜¤ë¸Œì íŠ¸ëŠ” ë°˜ë“œì‹œ í”„ë¡œì íŠ¸ ì°½ì— ìˆëŠ” í”„ë¦¬í©ì´ì—¬ì•¼ì§€.
+    // ì ˆëŒ€ë¡œ ì”¬ì— ìœ„ì¹˜í•œ, ì–´ë–¤ ê²Œì„ì˜¤ë¸Œì íŠ¸ì˜ ìì‹ ê²Œì„ì˜¤ë¸Œì íŠ¸ë¥¼ ê¸ì–´ì™€ì„  ì•ˆ ë¨
 
     void Awake()
     {
@@ -32,7 +32,7 @@ public class CreatureEffect : MonoBehaviour
 
         if (pooled.gameObject.activeInHierarchy)
         {
-            // ÀÌ¹Ì ´©±º°¡ ¾²´Â Áß ¡æ º¹Á¦º» »ı¼º ÈÄ ÀÚµ¿ ¼Ò¸ê
+            // ì´ë¯¸ ëˆ„êµ°ê°€ ì“°ëŠ” ì¤‘ â†’ ë³µì œë³¸ ìƒì„± í›„ ìë™ ì†Œë©¸
             var clone = Instantiate(pooled, pos, pooled.transform.rotation);
             SetOneShot(clone);
             clone.Clear(true);
@@ -41,7 +41,7 @@ public class CreatureEffect : MonoBehaviour
             return;
         }
 
-        // ³î°í ÀÖÀ¸¸é Ç®¸µ °³Ã¼ Àç»ç¿ë + Å¸ÀÓ¾Æ¿ôÀ¸·Î ²¨ÁÖ±â
+        // ë†€ê³  ìˆìœ¼ë©´ í’€ë§ ê°œì²´ ì¬ì‚¬ìš© + íƒ€ì„ì•„ì›ƒìœ¼ë¡œ êº¼ì£¼ê¸°
         pooled.transform.position = pos;
         SetPooled(pooled);
         pooled.gameObject.SetActive(true);
@@ -56,14 +56,14 @@ public class CreatureEffect : MonoBehaviour
     {
         var m = ps.main;
         m.loop = false;
-        m.stopAction = ParticleSystemStopAction.Destroy; // ³¡³ª¸é ÆÄ±«
+        m.stopAction = ParticleSystemStopAction.Destroy; // ëë‚˜ë©´ íŒŒê´´
     }
 
     void SetPooled(ParticleSystem ps)
     {
         var m = ps.main;
         m.loop = false;
-        m.stopAction = ParticleSystemStopAction.None; // ³¡³ª¸é Á÷Á¢ ºñÈ°¼ºÈ­
+        m.stopAction = ParticleSystemStopAction.None; // ëë‚˜ë©´ ì§ì ‘ ë¹„í™œì„±í™”
     }
 
     IEnumerator DisableAfter(GameObject go, float t)
@@ -72,7 +72,7 @@ public class CreatureEffect : MonoBehaviour
         if (go) go.SetActive(false);
     }
 
-    // ÀÚ½Ä Æ÷ÇÔ °¡Àå ±ä Àç»ı ½Ã°£ °è»ê(°î¼±/·£´ı ´ëÀÀ)
+    // ìì‹ í¬í•¨ ê°€ì¥ ê¸´ ì¬ìƒ ì‹œê°„ ê³„ì‚°(ê³¡ì„ /ëœë¤ ëŒ€ì‘)
     float GetTotalDuration(GameObject root)
     {
         float maxT = 0f;
@@ -97,26 +97,26 @@ public class CreatureEffect : MonoBehaviour
         return maxT;
     }
 
-    // CreatureEffect ¾È¿¡ Ãß°¡
+    // CreatureEffect ì•ˆì— ì¶”ê°€
     public void PlayEffectFollow(ParticleSystem pooled, Transform target, Vector3 localOffset)
     {
         if (!pooled || !target) return;
 
-        // Àç»ı ÁßÀÌ¸é º¹Á¦º» »ı¼º (³¡³ª¸é ÀÚµ¿ ÆÄ±«)
+        // ì¬ìƒ ì¤‘ì´ë©´ ë³µì œë³¸ ìƒì„± (ëë‚˜ë©´ ìë™ íŒŒê´´)
         if (pooled.gameObject.activeInHierarchy)
         {
             var clone = Instantiate(pooled, target.position, pooled.transform.rotation, target);
             clone.transform.localPosition = localOffset;
             var m = clone.main;
             m.loop = false;
-            m.simulationSpace = ParticleSystemSimulationSpace.Local; // ºÎ¸ğ ±âÁØÀ¸·Î µû¶ó°¨
+            m.simulationSpace = ParticleSystemSimulationSpace.Local; // ë¶€ëª¨ ê¸°ì¤€ìœ¼ë¡œ ë”°ë¼ê°
             m.stopAction = ParticleSystemStopAction.Destroy;
             clone.Clear(true);
             clone.Play(true);
             return;
         }
 
-        // Ç®¸µµÈ °³Ã¼ Àç»ç¿ë
+        // í’€ë§ëœ ê°œì²´ ì¬ì‚¬ìš©
         pooled.transform.SetParent(target);
         pooled.transform.localPosition = localOffset;
         var main = pooled.main;
@@ -135,7 +135,7 @@ public class CreatureEffect : MonoBehaviour
     {
         yield return new WaitForSeconds(t);
         if (!go) yield break;
-        go.transform.SetParent(Instance.transform, worldPositionStays: true); // Ç®·Î µÇµ¹¸²(¿øÇÏ¸é Àü¿ë ºÎ¸ğ »ç¿ë)
+        go.transform.SetParent(Instance.transform, worldPositionStays: true); // í’€ë¡œ ë˜ëŒë¦¼(ì›í•˜ë©´ ì „ìš© ë¶€ëª¨ ì‚¬ìš©)
         go.SetActive(false);
     }
     /*public void PlayEffect(GameObject effectPrefab, Vector3 position)
@@ -146,7 +146,7 @@ public class CreatureEffect : MonoBehaviour
         }
         else
         {
-            Debug.Log("ÀÌÆåÆ® ³Î ¹ö±×");
+            Debug.Log("ì´í™íŠ¸ ë„ ë²„ê·¸");
         }
     }*/
 }

@@ -7,15 +7,15 @@ public class UnitBase : MonoBehaviour
 
     void Start()
     {
-        // SpriteRenderer Ã£±â
+        // SpriteRenderer ì°¾ê¸°
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // ºÎ¸ğ¿¡¼­ CommonBase Ã£±â
+        // ë¶€ëª¨ì—ì„œ CommonBase ì°¾ê¸°
         commonBase = GetComponentInParent<CommonBase>();
 
         if (commonBase != null && spriteRenderer != null)
         {
-            // CommonBase¿¡ SpriteRenderer Àü´Ş
+            // CommonBaseì— SpriteRenderer ì „ë‹¬
             commonBase.spriteRenderer = spriteRenderer;
             commonBase.InitializeHitEffect();
         }
@@ -26,7 +26,7 @@ public class UnitBase : MonoBehaviour
         var cam = Camera.main;
         if (!cam) return;
 
-        // Ä«¸Ş¶óÀÇ Àü¹æÀ» XZ Æò¸éÀ¸·Î Åõ¿µ ¡æ YÃà¸¸ µµ´Â ºôº¸µå
+        // ì¹´ë©”ë¼ì˜ ì „ë°©ì„ XZ í‰ë©´ìœ¼ë¡œ íˆ¬ì˜ â†’ Yì¶•ë§Œ ë„ëŠ” ë¹Œë³´ë“œ
         Vector3 fwd = cam.transform.forward;
         fwd.y = 0f;
         if (fwd.sqrMagnitude < 1e-6f) return;

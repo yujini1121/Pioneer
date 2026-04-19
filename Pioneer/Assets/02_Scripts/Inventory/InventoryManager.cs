@@ -6,7 +6,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-// ÀÌ³à¼® ¹é¾ØµåÀÓ. ÇÁ·ĞÆ®¾ØµåÀÇ ÅëÁ¦¸¦ ¹ŞÀ½.
+// ì´ë…€ì„ ë°±ì•¤ë“œì„. í”„ë¡ íŠ¸ì•¤ë“œì˜ í†µì œë¥¼ ë°›ìŒ.
 public class InventoryManager : InventoryBase
 {
     public static InventoryManager Instance;
@@ -18,7 +18,7 @@ public class InventoryManager : InventoryBase
     //public Dictionary<int, SItemStack> fastSearch;
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
-    private Vector3 dropOffset = new Vector3(0.5f, -0.75f, -0.5f); // ¿ÀÇÁ¼Â
+    private Vector3 dropOffset = new Vector3(0.5f, -0.75f, -0.5f); // ì˜¤í”„ì…‹
     private bool isThisFrameReloadCraft = false;
 
     [Header("DEBUG")]
@@ -80,7 +80,7 @@ public class InventoryManager : InventoryBase
 
     public void MouseDrop()
     {
-        Debug.Log($">> InventoryManager.MouseDrop() : È£ÃâµÊ");
+        Debug.Log($">> InventoryManager.MouseDrop() : í˜¸ì¶œë¨");
 
         // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
         ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
@@ -95,14 +95,14 @@ public class InventoryManager : InventoryBase
 
     public void MouseSingle(int index)
     {
-        // ¸¶¿ì½º´Â ºñ¾îÀÖ°í ÀÎº¥Àº ¾ÆÀÌÅÛÀÌ ÀÖ´Â°ÍÀ» ¼±ÅÃÇÒ ¶§
-        // ¸¶¿ì½º¿¡ Á¸ÀçÇÏ°í ÀÎº¥Àº ºó °ø°£À» ¼±ÅÃÇÒ ¶§
+        // ë§ˆìš°ìŠ¤ëŠ” ë¹„ì–´ìˆê³  ì¸ë²¤ì€ ì•„ì´í…œì´ ìˆëŠ”ê²ƒì„ ì„ íƒí•  ë•Œ
+        // ë§ˆìš°ìŠ¤ì— ì¡´ì¬í•˜ê³  ì¸ë²¤ì€ ë¹ˆ ê³µê°„ì„ ì„ íƒí•  ë•Œ
 
         if (mouseInventory != null && itemLists[index] != null && (mouseInventory.id != itemLists[index].id))
         {
             return;
         }
-        // ¿©·¯ °³ÀÇ ¾ÆÀÌÅÛÀÌ ¸¶¿ì½º À§¿¡ Á¸ÀçÇÒ ¶§ , ctrl¸¦ ´©¸¥ »óÅÂ·Î ÁÂÅ¬¸¯ ½Ã ÇÑ °³ ¾¿ ±× Ä­¿¡ ³õ¾ÆÁø´Ù.
+        // ì—¬ëŸ¬ ê°œì˜ ì•„ì´í…œì´ ë§ˆìš°ìŠ¤ ìœ„ì— ì¡´ì¬í•  ë•Œ , ctrlë¥¼ ëˆ„ë¥¸ ìƒíƒœë¡œ ì¢Œí´ë¦­ ì‹œ í•œ ê°œ ì”© ê·¸ ì¹¸ì— ë†“ì•„ì§„ë‹¤.
         else if (mouseInventory != null)
         {
             if (itemLists[index] == null)
@@ -134,7 +134,7 @@ public class InventoryManager : InventoryBase
     {
         if (IsDebuggingAdd)
         {
-            Debug.Log($">> InventoryManager.Add(SItemStack item) => ¾ÆÀÌÅÛ Ãß°¡µÊ : {item.id}¸¦ {item.amount}°¹¼ö¸¸Å­ Ãß°¡");
+            Debug.Log($">> InventoryManager.Add(SItemStack item) => ì•„ì´í…œ ì¶”ê°€ë¨ : {item.id}ë¥¼ {item.amount}ê°¯ìˆ˜ë§Œí¼ ì¶”ê°€");
         }
         isThisFrameReloadCraft = true;
 
@@ -160,8 +160,8 @@ public class InventoryManager : InventoryBase
 
     public void SortSelf()
     {
-        // ¿ÏÀüÈ÷ ÇÕÄ§
-        // ±×µÚ ¾ÆÀÌÅÛ Ãß°¡
+        // ì™„ì „íˆ í•©ì¹¨
+        // ê·¸ë’¤ ì•„ì´í…œ ì¶”ê°€
         for (int index = 0; index < inventoryCount; index++)
         {
             if (itemLists[index] == null) continue;
@@ -186,7 +186,7 @@ public class InventoryManager : InventoryBase
             itemLists[index] = null;
         }
 
-        // ¿©±â¼­ºÎÅÍ Á¤·Ä
+        // ì—¬ê¸°ì„œë¶€í„° ì •ë ¬
 
         list = list
             .OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].categories)
@@ -201,7 +201,7 @@ public class InventoryManager : InventoryBase
         {
             list.Add(itemLists[index]);
         }
-        // 9¹øºÎÅÍ Ã¤¿ìµµ·Ï ÀÌµ¿ÇÔ
+        // 9ë²ˆë¶€í„° ì±„ìš°ë„ë¡ ì´ë™í•¨
         for (int index = 9; index < inventoryCount; index++)
         {
             itemLists[index] = list[index - 9];
@@ -224,7 +224,7 @@ public class InventoryManager : InventoryBase
     public void ApplyItemDuablilityUsed()
     {
         if (SelectedSlotInventory == null) return;
-        // data´Â SItemWeaponTypeÀÓ
+        // dataëŠ” SItemWeaponTypeì„
         SelectedSlotInventory.duability = Mathf.Max(0, SelectedSlotInventory.duability -
                     Mathf.Max(0, (SelectedSlotInventory.itemBaseType as SItemWeaponTypeSO).duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
         SafeClean();
@@ -285,12 +285,12 @@ public class InventoryManager : InventoryBase
     {
         if (isThisFrameReloadCraft)
         {
-            Debug.Log("¾ÆÀÌÅÛ È¹µæ ¾÷µ¥ÀÌÆ®");
+            Debug.Log("ì•„ì´í…œ íšë“ ì—…ë°ì´íŠ¸");
 
             isThisFrameReloadCraft = false;
             if (MakeshiftCraftUiMain.instance.isOpened)
             {
-                Debug.Log("¾ÆÀÌÅÛ È¹µæ ¾÷µ¥ÀÌÆ® ¿Ï·á");
+                Debug.Log("ì•„ì´í…œ íšë“ ì—…ë°ì´íŠ¸ ì™„ë£Œ");
 
                 MakeshiftCraftUiMain.instance.UpdateRecipe();
             }

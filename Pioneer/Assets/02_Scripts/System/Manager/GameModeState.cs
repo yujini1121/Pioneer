@@ -4,10 +4,10 @@ public static class GameModeState
 {
     private const string InfiniteUnlockedKey = "InfiniteModeUnlocked";
 
-    // ÇöÀç ÇÃ·¹ÀÌ ÁßÀÎ °ÔÀÓÀÌ ¹«ÇÑ ¸ðµåÀÎÁö ¾Æ´ÑÁö ¿©ºÎ
+    // í˜„ìž¬ í”Œë ˆì´ ì¤‘ì¸ ê²Œìž„ì´ ë¬´í•œ ëª¨ë“œì¸ì§€ ì•„ë‹Œì§€ ì—¬ë¶€
     public static bool IsInfiniteMode { get; private set; }
 
-    // ÃÖÃÊ ¿£µù ÀÌÈÄ ¹«ÇÑ ¸ðµå ÇØ±Ý ¿©ºÎ
+    // ìµœì´ˆ ì—”ë”© ì´í›„ ë¬´í•œ ëª¨ë“œ í•´ê¸ˆ ì—¬ë¶€
     public static bool IsInfiniteModeUnlocked
     {
         get => PlayerPrefs.GetInt(InfiniteUnlockedKey, 0) == 1;

@@ -59,7 +59,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
             material3iconImage,
         };
 
-        //ShowButton(); // ¿ÜºÎ ÄÄÆ÷³ÍÆ®¿¡ Á¢±ÙÇÏ¹Ç·Î ¹İµå½Ã ¾î¿şÀÌÅ©°¡ ¾Æ´Ñ ½ºÅ¸µå¿¡ ÀÖ¾î¾ß ÇÕ´Ï´Ù.
+        //ShowButton(); // ì™¸ë¶€ ì»´í¬ë„ŒíŠ¸ì— ì ‘ê·¼í•˜ë¯€ë¡œ ë°˜ë“œì‹œ ì–´ì›¨ì´í¬ê°€ ì•„ë‹Œ ìŠ¤íƒ€ë“œì— ìˆì–´ì•¼ í•©ë‹ˆë‹¤.
         ClearIcon();
     }
 
@@ -89,7 +89,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
     //    }
     //}
 
-    // ÇØ´ç ¸Ş¼­µå´Â ¾²ÀÌÁö ¾ÊÀ½
+    // í•´ë‹¹ ë©”ì„œë“œëŠ” ì“°ì´ì§€ ì•ŠìŒ
 //    void ItemRender()
 //    {
 //        void mButtonAvailable(GameObject target, SItemRecipeSO pRecipe)
@@ -108,7 +108,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
 //        }
 
 
-//        // ¾ÆÀÌÅÛÀ» º¸¿©ÁÜ.
+//        // ì•„ì´í…œì„ ë³´ì—¬ì¤Œ.
 //        for (int index = 0; index < ItemRecipeManager.Instance.recipes.Count; ++index)
 //        {
 //            SItemRecipeSO recipe = ItemRecipeManager.Instance.recipes[index];
@@ -145,15 +145,15 @@ public class CraftUiMain : MonoBehaviour, IBegin
 
 //            mShowItemButton();
 
-//            button.onClick.AddListener(() => // ÁÂÃø ¾ÆÀÌÅÛ ¾ÆÀÌÄÜÀ» ´­·ÈÀ» ¶§ º¸¿©ÁÖ±â.
+//            button.onClick.AddListener(() => // ì¢Œì¸¡ ì•„ì´í…œ ì•„ì´ì½˜ì„ ëˆŒë ¸ì„ ë•Œ ë³´ì—¬ì£¼ê¸°.
 //            {
-//                // ·¹½ÃÇÇ¸¦ º¸¿©ÁÖ´Â ¶÷´Ù½Ä
+//                // ë ˆì‹œí”¼ë¥¼ ë³´ì—¬ì£¼ëŠ” ëŒë‹¤ì‹
 
-//                // °á°ú º¸¿©ÁÖ±â
+//                // ê²°ê³¼ ë³´ì—¬ì£¼ê¸°
 //                craftName.text = recipeResult.typeName;
 //                craftLore.text = recipeResult.infomation;
 
-//                // ·¹½ÃÇÇ º¸¿©ÁÖ±â
+//                // ë ˆì‹œí”¼ ë³´ì—¬ì£¼ê¸°
 //                void mShowText()
 //                {
 //                    for (int rIndex = 0; rIndex < 3; ++rIndex)
@@ -199,10 +199,10 @@ public class CraftUiMain : MonoBehaviour, IBegin
 //                }
 //                mSetButtonTransparency();
 
-//                // ¿ìÃø Å©·¡ÇÁÆÃ ¹öÆ° ÀÛ¾÷
-//#warning ¿ìÃø ¹öÆ° ÀÛ¾÷ ±¸ÇöÇÒ °Í
-//                // ¹öÆ°À» ´­·¶À» ¶§, ¾ÆÀÌÅÛ Á¶ÇÕ °¡´ÉÇÑÁö ÆÇ´Ü
-//                // ±×µÚ ¾ÆÀÌÅÛ Â÷°¨ ÈÄ Áö±Ş
+//                // ìš°ì¸¡ í¬ë˜í”„íŒ… ë²„íŠ¼ ì‘ì—…
+//#warning ìš°ì¸¡ ë²„íŠ¼ ì‘ì—… êµ¬í˜„í•  ê²ƒ
+//                // ë²„íŠ¼ì„ ëˆŒë €ì„ ë•Œ, ì•„ì´í…œ ì¡°í•© ê°€ëŠ¥í•œì§€ íŒë‹¨
+//                // ê·¸ë’¤ ì•„ì´í…œ ì°¨ê° í›„ ì§€ê¸‰
 //                rightCraftButton.onClick.RemoveAllListeners();
 //                rightCraftButton.onClick.AddListener(() =>
 //                {
@@ -220,7 +220,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
 //                        }
 //                        else
 //                        {
-//                            Debug.LogWarning("CreateObject ¼³Ä¡ ½Ã½ºÅÛÀÌ ¾À¿¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+//                            Debug.LogWarning("CreateObject ì„¤ì¹˜ ì‹œìŠ¤í…œì´ ì”¬ì— ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.");
 //                        }
 //                    }
 //                    else
@@ -235,18 +235,18 @@ public class CraftUiMain : MonoBehaviour, IBegin
 //                });
 //            });
 
-//            // ¾ÆÀÌÅÛ Á¶ÇÕ °¡´ÉÇÑÁö ÆÇ´Ü
+//            // ì•„ì´í…œ ì¡°í•© ê°€ëŠ¥í•œì§€ íŒë‹¨
 //            mButtonAvailable(buttonObject, recipe);
 
 //        }
 //    }
 
-    // °£ÀÌ Á¶ÇÕ´ë
+    // ê°„ì´ ì¡°í•©ëŒ€
     public void ShowSmallCraft()
     {
 
     }
-    // ¸ŞÀÎ Á¶ÇÕ´ë
+    // ë©”ì¸ ì¡°í•©ëŒ€
     public void ShowLargeCraft()
     {
 

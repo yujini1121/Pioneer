@@ -13,7 +13,7 @@ public class DroppedItem : MonoBehaviour
 
     public void SetItem(SItemStack item, float pickUpTime)
     {
-        Debug.Log($">> DroppedItem.SetItem(SItemStack item) : È£ÃâµÊ / isItemNull : {item == null}");
+        Debug.Log($">> DroppedItem.SetItem(SItemStack item) : í˜¸ì¶œë¨ / isItemNull : {item == null}");
 
         itemValue = item;
         slotUI.Show(item);

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SkyboxRotator : MonoBehaviour
 {
-    [SerializeField] private Material material; // ·±Å¸ÀÓ Àü¿ë(¿øº» º¹Á¦ÇÔ) ¸ÓÆ¼¸®¾ó ÂüÁ¶ÇÏ±â 
+    [SerializeField] private Material material; // ëŸ°íƒ€ì„ ì „ìš©(ì›ë³¸ ë³µì œí•¨) ë¨¸í‹°ë¦¬ì–¼ ì°¸ì¡°í•˜ê¸° 
     [SerializeField] private float degreesPerSecond = 2f;
 
     static readonly int RotationID = Shader.PropertyToID("_Rotation");

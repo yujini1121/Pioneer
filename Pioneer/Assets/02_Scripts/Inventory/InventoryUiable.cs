@@ -61,7 +61,7 @@ public class InventoryUiable : InventoryBase
 
     public void MouseDrop()
     {
-        Debug.Log($">> MouseDrop() : È£ÃâµÊ");
+        Debug.Log($">> MouseDrop() : í˜¸ì¶œë¨");
 
         // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
         ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
@@ -76,14 +76,14 @@ public class InventoryUiable : InventoryBase
 
     public void MouseSingle(int index)
     {
-        // ¸¶¿ì½º´Â ºñ¾îÀÖ°í ÀÎº¥Àº ¾ÆÀÌÅÛÀÌ ÀÖ´Â°ÍÀ» ¼±ÅÃÇÒ ¶§
-        // ¸¶¿ì½º¿¡ Á¸ÀçÇÏ°í ÀÎº¥Àº ºó °ø°£À» ¼±ÅÃÇÒ ¶§
+        // ë§ˆìš°ìŠ¤ëŠ” ë¹„ì–´ìˆê³  ì¸ë²¤ì€ ì•„ì´í…œì´ ìˆëŠ”ê²ƒì„ ì„ íƒí•  ë•Œ
+        // ë§ˆìš°ìŠ¤ì— ì¡´ì¬í•˜ê³  ì¸ë²¤ì€ ë¹ˆ ê³µê°„ì„ ì„ íƒí•  ë•Œ
 
         if (mouseInventory != null && itemLists[index] != null && (mouseInventory.id != itemLists[index].id))
         {
             return;
         }
-        // ¿©·¯ °³ÀÇ ¾ÆÀÌÅÛÀÌ ¸¶¿ì½º À§¿¡ Á¸ÀçÇÒ ¶§ , ctrl¸¦ ´©¸¥ »óÅÂ·Î ÁÂÅ¬¸¯ ½Ã ÇÑ °³ ¾¿ ±× Ä­¿¡ ³õ¾ÆÁø´Ù.
+        // ì—¬ëŸ¬ ê°œì˜ ì•„ì´í…œì´ ë§ˆìš°ìŠ¤ ìœ„ì— ì¡´ì¬í•  ë•Œ , ctrlë¥¼ ëˆ„ë¥¸ ìƒíƒœë¡œ ì¢Œí´ë¦­ ì‹œ í•œ ê°œ ì”© ê·¸ ì¹¸ì— ë†“ì•„ì§„ë‹¤.
         else if (mouseInventory != null)
         {
             if (itemLists[index] == null)
@@ -112,7 +112,7 @@ public class InventoryUiable : InventoryBase
     {
         if (IsDebuggingAdd)
         {
-            Debug.Log($">> Add(SItemStack item) => ¾ÆÀÌÅÛ Ãß°¡µÊ : {item.id}¸¦ {item.amount}°¹¼ö¸¸Å­ Ãß°¡");
+            Debug.Log($">> Add(SItemStack item) => ì•„ì´í…œ ì¶”ê°€ë¨ : {item.id}ë¥¼ {item.amount}ê°¯ìˆ˜ë§Œí¼ ì¶”ê°€");
         }
 
         Debug.Assert(InventoryUiMain.instance != null);
@@ -131,8 +131,8 @@ public class InventoryUiable : InventoryBase
 
     public void SortSelf()
     {
-        // ¿ÏÀüÈ÷ ÇÕÄ§
-        // ±×µÚ ¾ÆÀÌÅÛ Ãß°¡
+        // ì™„ì „íˆ í•©ì¹¨
+        // ê·¸ë’¤ ì•„ì´í…œ ì¶”ê°€
         for (int index = 0; index < inventoryCount; index++)
         {
             if (itemLists[index] == null) continue;
@@ -157,7 +157,7 @@ public class InventoryUiable : InventoryBase
             itemLists[index] = null;
         }
 
-        // ¿©±â¼­ºÎÅÍ Á¤·Ä
+        // ì—¬ê¸°ì„œë¶€í„° ì •ë ¬
 
         list = list
             .OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].categories)

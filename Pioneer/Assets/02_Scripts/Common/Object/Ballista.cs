@@ -8,10 +8,10 @@ using UnityEditor;
 
 public class Ballista : StructureBase, IBegin
 {
-    [Header("È¸Àü")]
+    [Header("íšŒì „")]
     [SerializeField] private float rotationSpeed = 50f;
 
-    [Header("¹ß¸®½ºÅ¸ ¿É¼Ç")]
+    [Header("ë°œë¦¬ìŠ¤íƒ€ ì˜µì…˜")]
     [SerializeField] private float attackPower = 25f;
     [SerializeField] private float attackRange = 8f;
     [SerializeField] private float attackCooldown = 2f;
@@ -20,7 +20,7 @@ public class Ballista : StructureBase, IBegin
     [SerializeField] private Transform gunnerPos;
     [SerializeField] private Transform boltPool;
 
-    [Header("µð¹ö±×")]
+    [Header("ë””ë²„ê·¸")]
     [SerializeField] private bool drawGizmos = true;
     [SerializeField] private bool enemyDetect;
     [SerializeField] private Collider[] colliders;

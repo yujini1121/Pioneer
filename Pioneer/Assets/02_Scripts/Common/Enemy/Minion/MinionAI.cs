@@ -331,7 +331,7 @@ public class MinionAI : EnemyBase, IBegin
             agent.speed = speed;
     }
 
-    // ---------------- ?좊땲硫붿씠???좏떥 ----------------
+    // ---------------- 애니메이션 유틸 ----------------
 
     private void UpdateLocomotionAnim()
     {

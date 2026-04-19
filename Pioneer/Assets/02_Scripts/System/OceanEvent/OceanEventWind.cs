@@ -23,7 +23,7 @@ public class OceanEventWind : OceanEventBase
                           float windKnockUpDuration,
                           float windStunDuration)
     {
-        EventName = "µ¹Ç³";
+        EventName = "ëŒí’";
 
         this.windEffectPrefab = windEffectPrefab;
         this.windInterval = windInterval;
@@ -41,14 +41,14 @@ public class OceanEventWind : OceanEventBase
 
         OceanEventManager.instance.BeginCoroutine(WindLoop());
 
-        Debug.Log("[OceanEventWind][µ¹Ç³ ÀÌº¥Æ® ½ÃÀÛ]");
+        Debug.Log("[OceanEventWind][ëŒí’ ì´ë²¤íŠ¸ ì‹œì‘]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
 
-        Debug.Log("[OceanEventWind][µ¹Ç³ ÀÌº¥Æ® Á¾·á]");
+        Debug.Log("[OceanEventWind][ëŒí’ ì´ë²¤íŠ¸ ì¢…ë£Œ]");
     }
 
     private IEnumerator WindLoop()

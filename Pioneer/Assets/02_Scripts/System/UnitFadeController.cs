@@ -50,7 +50,7 @@ public class UnitFadeController : MonoBehaviour
             if (b == null) continue;
             if (ReferenceEquals(b, this)) continue;
             if (b is NavMeshAgent) continue;
-            if (b is Animator) continue; // ¾Ö´Ï¸ŞÀÌ¼ÇÀº À¯Áö
+            if (b is Animator) continue; // ì• ë‹ˆë©”ì´ì…˜ì€ ìœ ì§€
             toToggleBehaviours.Add(b);
         }
 

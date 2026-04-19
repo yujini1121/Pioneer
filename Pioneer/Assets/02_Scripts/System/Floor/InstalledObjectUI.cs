@@ -7,36 +7,36 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// ��Ŭ������ ��ġ�� ������Ʈ�� �����ϰ�,
-/// �г�(ȸ��/�̵�/����/�ݱ�/������)�� ��� ��ġ�� ǥ���Ѵ�.
-/// - ȸ��: A/D Ű
-/// - �̵�/����/�ݱ�: ��ư Ŭ��
-/// �г��� ��Ʈ(InstalledObjectUI �ڽ�)���� ���� ��Ʈ�� ��Ȱ��ȭ���� �ʴ´�(������Ʈ ���� ����).
+/// 클릭한 설치 오브젝트를 선택하고,
+/// 패널(회전/이동/삭제/닫기/수리)을 해당 오브젝트 위에 표시한다.
+/// - 회전: A/D 키 또는 마우스 휠
+/// - 이동/삭제/닫기: 버튼 클릭
+/// 패널이 루트(InstalledObjectUI 자신)일 때는 오브젝트를 비활성화하지 않고 CanvasGroup으로 숨긴다.
 /// </summary>
 public class InstalledObjectUI : MonoBehaviour
 {
     public static InstalledObjectUI Instance { get; private set; }
 
-    [Header("UI ����(���� Ȱ��ȭ ���)")]
-    [SerializeField] RectTransform panel;      // �޴� ��Ʈ(�ڽ� ����). ����θ� �ڵ����� �ڽ�(transform)�� ���.
+    [Header("UI 설정(루트 활성화 방식)")]
+    [SerializeField] RectTransform panel;      // 메뉴 루트(자식 권장). 비워두면 자동으로 자신(transform)을 사용.
     [SerializeField] Button rotationButton;
     //[SerializeField] Button moveButton;
     [SerializeField] Button removeButton;
     [SerializeField] Button closeButton;
     [SerializeField] Button repairButton;
-    [SerializeField] GameObject durabilityUI;  // �ʿ�� ����(ǥ�ø�)
+    [SerializeField] GameObject durabilityUI;  // 내구도 표시용(옵션)
     [SerializeField] TextMeshProUGUI durabilityText;
     [SerializeField] Image repairImage1;
     [SerializeField] Image repairImage2;
 
-    [Header("����/����ĳ��Ʈ")]
-    [SerializeField] LayerMask interactableMask; // ��ġ ������Ʈ ���̾�
+    [Header("선택/레이캐스트")]
+    [SerializeField] LayerMask interactableMask; // 설치 오브젝트 레이어
 
-    [Header("ȸ�� Ű")]
+    [Header("회전 키")]
     [SerializeField] KeyCode keyRotateLeft = KeyCode.A; // -90
     [SerializeField] KeyCode keyRotateRight = KeyCode.D; // +90
 
-    [Header("�ƿ����")]
+    [Header("아웃라인")]
     [SerializeField] Material outlineMat;
 
     private enum Mode { Idle, Rotate, Move }
@@ -46,7 +46,7 @@ public class InstalledObjectUI : MonoBehaviour
     InstalledObject current;
     StructureBase structure;
 
-    // �г��� ��Ʈ�� ��츦 ���� ���ü� ��ۿ�
+    // 패널이 루트일 때를 위한 상태 캐시
     CanvasGroup panelCg;
     bool panelIsRoot => panel && panel.gameObject == gameObject;
     private NavMeshSurface nav;
@@ -55,26 +55,26 @@ public class InstalledObjectUI : MonoBehaviour
 
     void Awake()
     {
-        // �̱���
+        // 싱글톤
         if (Instance && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
-        // �⺻ ����
-        if (!panel) panel = (RectTransform)transform; // ����� ��� ��Ʈ ���
+        // 기본 설정
+        if (!panel) panel = (RectTransform)transform; // 비워두면 자기 자신을 루트로 사용
         cam = Camera.main;
 
-        // ��Ʈ ��Ȱ��ȭ ����: �гο� CanvasGroup ����(������ �߰�)
+        // 루트 패널 숨김 처리: 패널에 CanvasGroup 보장(없으면 추가)
         panelCg = panel.GetComponent<CanvasGroup>();
         if (!panelCg) panelCg = panel.gameObject.AddComponent<CanvasGroup>();
 
-        // ��ư ������
+        // 버튼 이벤트 연결
         rotationButton.onClick.AddListener(() => { if (current) mode = Mode.Rotate; });
         //moveButton.onClick.AddListener(() => { if (current) { current.BeginMove(); mode = Mode.Move; } });
         removeButton.onClick.AddListener(() => { if (current) { current.Remove(); Hide(); RebuildStart(); } });
         closeButton.onClick.AddListener(Hide);
         repairButton.onClick.AddListener(Repair);
 
-        Hide(); // ���� �� �г��� ����(��Ʈ�� Ȱ�� ���� ����)
+        Hide(); // 시작 시 패널 숨김(루트면 활성 상태만 유지)
     }
 
     private void Start()
@@ -91,7 +91,7 @@ public class InstalledObjectUI : MonoBehaviour
             Hide();
         }
 
-        // ��Ŭ��: ��� ���� + ��ü UI Ȱ��ȭ + ��ġ ����
+        // 좌클릭: 대상 선택 + 오브젝트 UI 활성화 + 위치 갱신
         if (Input.GetMouseButtonDown(0))
         {
             
@@ -99,14 +99,14 @@ public class InstalledObjectUI : MonoBehaviour
             {
                 SetSelection(obj);
                 selectedThisFrame = true;
-                ShowAt(current.transform.position);   // �� Ȱ��ȭ + ��ġ ����
+                ShowAt(current.transform.position);   // UI 활성화 + 위치 갱신
                 
                 structure = current.gameObject.GetComponent<StructureBase>();
                 UpdateDurability();
             }
             else Hide();
         }
-        // ��Ŭ��: �ش� ��� ����
+        // 우클릭: 대상 즉시 수리
         if (Input.GetMouseButtonDown(1))
         {
             if (TryPick<StructureBase>(out var structureBase))
@@ -117,10 +117,10 @@ public class InstalledObjectUI : MonoBehaviour
 
         if (!current) return;
 
-        // ��� �����ӿ� ���� �г� ��ġ ����
+        // 현재 선택 대상에 맞춰 패널 위치 갱신
         RepositionToCurrent();
 
-        // ��� ó��
+        // 모드 처리
         switch (mode)
         {
             case Mode.Rotate:
@@ -128,11 +128,11 @@ public class InstalledObjectUI : MonoBehaviour
                 //if (Input.GetKeyDown(keyRotateRight)) current.RotateRight();
 
                 float scroll = Input.GetAxis("Mouse ScrollWheel");
-                if (scroll > 0f) // ����
+                if (scroll > 0f) // 위로
                 {
                     current.RotateLeft();
                 }
-                else if (scroll < 0f) // �Ʒ���
+                else if (scroll < 0f) // 아래로
                 {
                     current.RotateRight();
                 }
@@ -140,9 +140,9 @@ public class InstalledObjectUI : MonoBehaviour
                 break;
 
             case Mode.Move:
-                Debug.Log("���� �̵� �������ݾƿ�");
+                Debug.Log("설치물 이동 모드 진행 중");
                 current.TickRelocate(cam);
-                if (!current.IsRelocating)          // �̵� ���� �� Idle ����
+                if (!current.IsRelocating)          // 이동 종료 시 Idle 복귀
                 {
                     mode = Mode.Idle;
                     RepositionToCurrent();
@@ -150,7 +150,7 @@ public class InstalledObjectUI : MonoBehaviour
                 break;
         }
 
-        // �г� �� Ŭ�� or ESCŰ�� �ݱ�
+        // 패널 밖 클릭 또는 ESC 키로 닫기
         if (!selectedThisFrame && IsPanelVisible() && Input.GetMouseButtonDown(0))
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(panel, Input.mousePosition, null) &&
@@ -205,7 +205,7 @@ public class InstalledObjectUI : MonoBehaviour
 
 
     /// <summary>
-    /// �г� �ٽ� ���̰� Ȱ��ȭ 
+    /// 패널을 다시 보이게 하고 활성화
     /// </summary>
     /// <param name="worldPos"></param>
     void ShowAt(Vector3 worldPos)
@@ -231,7 +231,7 @@ public class InstalledObjectUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ���� ���� ��� ��ġ�� �г� ����
+    /// 현재 선택된 대상 위치로 패널 재배치
     /// </summary>
     void RepositionToCurrent()
     {
@@ -240,7 +240,7 @@ public class InstalledObjectUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ���� ��ǥ �� ���� ��ǥ�� ��ȯ
+    /// 월드 좌표를 패널 좌표로 변환
     /// </summary>
     void Reposition(Vector3 worldPos)
     {
@@ -296,7 +296,7 @@ public class InstalledObjectUI : MonoBehaviour
         if (RepairSystem.instance == null || structure == null) return;
         if (RepairSystem.instance.remainRepairCount <= 0) return;
 
-        Debug.Log($"���� ��ư ����");
+        Debug.Log("수리 버튼 클릭");
 
         if (structure.ObjectData != null && structure.ObjectData.id == 50005)
         {

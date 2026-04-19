@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class FogFade : MonoBehaviour
 {
-    [Header("¾È°³ ÆÄÆ¼Å¬")]
+    [Header("ì•ˆê°œ íŒŒí‹°í´")]
     [SerializeField] private ParticleSystem[] fogParticles;
 
-    [Header("ÆäÀÌµå ¼³Á¤")]
+    [Header("í˜ì´ë“œ ì„¤ì •")]
     [SerializeField] private float fadeInDuration = 1.5f;
     [SerializeField] private float fadeOutDuration = 1.5f;
 

@@ -28,7 +28,7 @@ public class AutoButtonSfx : MonoBehaviour
 
         foreach (var btn in FindObjectsOfType<ItemSlotUI>(true))
         {
-            if (target.Contains(btn.gameObject)) continue; // Áßº¹ Á¦°Å
+            if (target.Contains(btn.gameObject)) continue; // ì¤‘ë³µ ì œê±°
 
             btn.buttonClickAction.Add(() =>
             {

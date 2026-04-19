@@ -15,7 +15,7 @@ public class SItemConsumeTypeSO : SItemTypeSO
 
     public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
-        Debug.Log(">> ¾ÆÀÌÅÛ_¼Ò¸ğ : »ç¿ëµÊ");
+        Debug.Log(">> ì•„ì´í…œ_ì†Œëª¨ : ì‚¬ìš©ë¨");
 
         itemWithState.isUseCoroutineEnd = false;
 
@@ -51,26 +51,26 @@ public class SItemConsumeTypeSO : SItemTypeSO
 
         switch (ConsumeEffect)
         {
-            //Ã¼·Â »ó½Â
+            //ì²´ë ¥ ìƒìŠ¹
             case 801: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 15);
-                var ps = CreatureEffect.Instance.Effects[3]; // Heal ÀÌÆåÆ®
+                var ps = CreatureEffect.Instance.Effects[3]; // Heal ì´í™íŠ¸
                 CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break; 
             case 802: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 40);
-                var ps1 = CreatureEffect.Instance.Effects[3]; // Heal ÀÌÆåÆ®
+                var ps1 = CreatureEffect.Instance.Effects[3]; // Heal ì´í™íŠ¸
                 CreatureEffect.Instance.PlayEffectFollow(ps1, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             case 803:
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 70);
-                var ps2 = CreatureEffect.Instance.Effects[3]; // Heal ÀÌÆåÆ®
+                var ps2 = CreatureEffect.Instance.Effects[3]; // Heal ì´í™íŠ¸
                 CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
-            //¹è°íÇÄ ÇØ¼Ò
+            //ë°°ê³ í”” í•´ì†Œ
             case 804://
                 PlayerCore.Instance.currentFullness = Mathf.Min
                     (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 5);
@@ -87,7 +87,7 @@ public class SItemConsumeTypeSO : SItemTypeSO
                 PlayerCore.Instance.currentFullness = Mathf.Min
                     (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 70);
                 break;
-            //Á¤½Å·Â »ó½Â?
+            //ì •ì‹ ë ¥ ìƒìŠ¹?
             case 808:
                 PlayerCore.Instance.UpdateMental(10);
                 break;
@@ -97,13 +97,13 @@ public class SItemConsumeTypeSO : SItemTypeSO
             case 810://
                 PlayerCore.Instance.UpdateMental(60);
                 break;
-            // ÀÌÈÄ ·ÎÁ÷Àº ¹öÇÁ µğ¹öÇÁ ½Ã½ºÅÛ ¸¸µé¾î¼­ Àû¿ëÇÏ´Â°Ô ÁÁ°Ú½À´Ï´Ù.
+            // ì´í›„ ë¡œì§ì€ ë²„í”„ ë””ë²„í”„ ì‹œìŠ¤í…œ ë§Œë“¤ì–´ì„œ ì ìš©í•˜ëŠ”ê²Œ ì¢‹ê² ìŠµë‹ˆë‹¤.
             case 811: break;
             case 812: break;
             case 813://
                 PlayerCore.Instance.StartDrunk();
                 break;
-            // ±Ùµ¥ ÀÌ°Ç »ç½Ç»ó ¿©ºÎÀÇ ·ÎÁ÷À» ÅëÇØ¼­ ¼¼ÆÃÇÏ¹Ç·Î ¿ÜºÎ ¾ÆÀÌÅÛ Å¬¸¯À» ÅëÇØ ÀÛµ¿µÇÁö ¾ÊÀ½
+            // ê·¼ë° ì´ê±´ ì‚¬ì‹¤ìƒ ì—¬ë¶€ì˜ ë¡œì§ì„ í†µí•´ì„œ ì„¸íŒ…í•˜ë¯€ë¡œ ì™¸ë¶€ ì•„ì´í…œ í´ë¦­ì„ í†µí•´ ì‘ë™ë˜ì§€ ì•ŠìŒ
             case 814: break;//
             default:
                 break;

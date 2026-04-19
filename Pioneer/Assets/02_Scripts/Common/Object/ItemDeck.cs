@@ -4,9 +4,9 @@ using UnityEngine;
 public class ItemDeck : StructureBase
 {
     public override bool IsInteractionTarget => false;
-    [Header("?? ??")]
+    [Header("íŒŒê´´ ì˜µì…˜")]
     [SerializeField] private bool canBreak = true;
-    [Header("?? ?? ??")]
+    [Header("ë²ˆê°œ ê²½ê³  ìƒ‰ìƒ")]
     [SerializeField] private Color thunderWarningColor = Color.red;
     [SerializeField] private MeshRenderer[] warningRenderers;
     private bool isHitByThunder = false;
@@ -14,7 +14,7 @@ public class ItemDeck : StructureBase
     private Color[] originColors;
     private bool isCached = false;
 
-    [Header("»óºÎ ¼³Ä¡ ¿ÀºêÁ§Æ® Á¤¸®")]
+    [Header("ìƒë¶€ ì„¤ì¹˜ ì˜¤ë¸Œì íŠ¸ ì •ë¦¬")]
     [SerializeField] private Vector3 installedObjectCheckHalfExtents = new Vector3(0.9f, 2f, 0.9f);
     [SerializeField] private Vector3 installedObjectCheckCenterOffset = new Vector3(0f, 1.2f, 0f);
     private void CacheDefaultState()

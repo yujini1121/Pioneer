@@ -5,19 +5,19 @@ using UnityEngine;
 [System.Serializable]
 public class AnimationSlot
 {
-	[Header("°øÅë")]
+	[Header("ê³µí†µ")]
 	public List<AnimationClip> idle;
 	public List<AnimationClip> run;
 	public List<AnimationClip> attack;
 
-	[Header("ÇÃ·¹ÀÌ¾î Àü¿ë")]
+	[Header("í”Œë ˆì´ì–´ ì „ìš©")]
 	public List<AnimationClip> fising;
 	public List<AnimationClip> fisingHold;
 	public List<AnimationClip> woodenSword;
 	public List<AnimationClip> ironSword;
 	public List<AnimationClip> conchSword;
 
-	[Header("¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³")]
+	[Header("ì• ë‹ˆë©”ì´ì…˜ í´ë¦½")]
 	public AnimationClip curIdleClip;
 	public AnimationClip curRunClip;
 	public AnimationClip curAttackClip;

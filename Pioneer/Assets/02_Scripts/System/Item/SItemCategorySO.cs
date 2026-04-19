@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ItemCategory", menuName = "ScriptableObjects/Items/ItemCategory", order = 1)]
 public class SItemCategorySO : ScriptableObject
 {
-    public int typeInt; // ¸¸¾à Ä«Å×°í¸® ¼ø¼­¸¦ ¹Ù²ã¾ß ÇÏ´Â »çÅÂ°¡ ¹ú¾îÁú ¶§¸¶´Ù ÀÌ·± °ªÀ» ¼öÁ¤ÇÕ´Ï´Ù.
+    public int typeInt; // ë§Œì•½ ì¹´í…Œê³ ë¦¬ ìˆœì„œë¥¼ ë°”ê¿”ì•¼ í•˜ëŠ” ì‚¬íƒœê°€ ë²Œì–´ì§ˆ ë•Œë§ˆë‹¤ ì´ëŸ° ê°’ì„ ìˆ˜ì •í•©ë‹ˆë‹¤.
     public string categoryName;
     public ETypes categoryType;
     public Sprite categorySprite;
