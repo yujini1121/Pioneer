@@ -8,6 +8,7 @@ using UnityEngine.UI; // UI 레이캐스트용
 
 #warning TODO : CreateObject 정리 필요
 // 흐름: 마우스 위치 확인 -> 설치 프리뷰 표시 -> 이동 -> 설치 완료
+// 목표: 설치 모드 진입 후 프리뷰 표시, 배치 가능 여부 확인, 이동 후 설치까지 한 번에 처리
 
 public class CreateObject : MonoBehaviour, IBegin
 {
