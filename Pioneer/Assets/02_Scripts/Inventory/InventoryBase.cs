@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -37,6 +37,14 @@ public class InventoryBase : MonoBehaviour
             }
         }
 
+        // í”Œë ˆì´ì–´ ì¸ë²¤í† ë¦¬ëŠ” ë§ˆìš°ìŠ¤ë¡œ ì§‘ê³  ìˆëŠ” ìŠ¤íƒë„ ë³´ìœ  ì¬ë£Œë¡œ ì·¨ê¸‰í•œë‹¤.
+        if (this == InventoryManager.Instance &&
+            InventoryManager.Instance.mouseInventory != null &&
+            InventoryManager.Instance.mouseInventory.id == id)
+        {
+            sum += InventoryManager.Instance.mouseInventory.amount;
+        }
+
         return sum;
     }
 
@@ -63,15 +71,15 @@ public class InventoryBase : MonoBehaviour
 
         for (int inventoryIndex = 0; inventoryIndex < itemLists.Count; ++inventoryIndex)
         {
-            if (SItemStack.IsEmpty(itemLists[inventoryIndex])) continue;// ºó ½½·Ô
-            if (itemLists[inventoryIndex].id == itemStack.id && maxStack > 1) // °°Àº ¾ÆÀÌÅÛ ½½·Ô && ½ºÅÃ °¡´ÉÇÔ.
+            if (SItemStack.IsEmpty(itemLists[inventoryIndex])) continue;// ë¹ˆ ìŠ¬ë¡¯
+            if (itemLists[inventoryIndex].id == itemStack.id && maxStack > 1) // ê°™ì€ ì•„ì´í…œ ìŠ¬ë¡¯ && ìŠ¤íƒ ê°€ëŠ¥í•¨.
             {
                 itemLists[inventoryIndex].amount += amount;
-                if (itemLists[inventoryIndex].amount <= maxStack) // amount´Â »ç½Ç»ó ÀÌÁ¦ 0ÀÌ µÊ
+                if (itemLists[inventoryIndex].amount <= maxStack) // amountëŠ” ì‚¬ì‹¤ìƒ ì´ì œ 0ì´ ë¨
                 {
                     return true;
                 }
-                amount = itemLists[inventoryIndex].amount - maxStack; // »ç½Ç»ó °¨¼ÒÇÔ.
+                amount = itemLists[inventoryIndex].amount - maxStack; // ì‚¬ì‹¤ìƒ ê°ì†Œí•¨.
                 itemLists[inventoryIndex].amount = maxStack;
                 continue;
             }
@@ -82,11 +90,11 @@ public class InventoryBase : MonoBehaviour
             if (SItemStack.IsEmpty(itemLists[inventoryIndex]))
             {
                 itemLists[inventoryIndex] = new SItemStack(itemStack.id, amount, itemStack.duability);
-                if (itemLists[inventoryIndex].amount <= maxStack) // amount´Â »ç½Ç»ó ÀÌÁ¦ 0ÀÌ µÊ
+                if (itemLists[inventoryIndex].amount <= maxStack) // amountëŠ” ì‚¬ì‹¤ìƒ ì´ì œ 0ì´ ë¨
                 {
                     return true;
                 }
-                amount = itemLists[inventoryIndex].amount - maxStack; // »ç½Ç»ó °¨¼ÒÇÔ.
+                amount = itemLists[inventoryIndex].amount - maxStack; // ì‚¬ì‹¤ìƒ ê°ì†Œí•¨.
                 itemLists[inventoryIndex].amount = maxStack;
             }
         }
@@ -117,7 +125,25 @@ public class InventoryBase : MonoBehaviour
                         continue;
                     }
                     itemLists[inventoryIndex].amount -= targetAmount;
+                    targetAmount = 0;
                     break;
+                }
+            }
+
+            if (targetAmount > 0 &&
+                this == InventoryManager.Instance &&
+                InventoryManager.Instance.mouseInventory != null &&
+                InventoryManager.Instance.mouseInventory.id == removeTargets[targetIndex].id)
+            {
+                if (targetAmount >= InventoryManager.Instance.mouseInventory.amount)
+                {
+                    targetAmount -= InventoryManager.Instance.mouseInventory.amount;
+                    InventoryManager.Instance.mouseInventory = null;
+                }
+                else
+                {
+                    InventoryManager.Instance.mouseInventory.amount -= targetAmount;
+                    targetAmount = 0;
                 }
             }
         }
@@ -139,3 +165,4 @@ public class InventoryBase : MonoBehaviour
         }
     }
 }
+

@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 모든 게임 Ui???�기???�결?�니??
-// ?��???조작?� ?�당 컴포?�트�?경유?�서 ?�팅?�니??
+// 모든 게임 UI 열기/닫기 연결 스크립트
+// 각종 조작은 이 컴포넌트를 경유해서 처리합니다
 public class InGameUI : MonoBehaviour, IBegin
 {
     static public InGameUI instance;
@@ -20,7 +20,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
     [Header("Sub UI GameObjects")]
     public GameObject gameObjectBarChart;
-    public GameObject gameObjectGuiltyBarChart; // 죄책�?
+    public GameObject gameObjectGuiltyBarChart; // 죄책감
     public GameObject gameObjectBuffEffect;
     public GameObject gameObjectItemGet;
     public GameObject gameObjectClock;
@@ -41,19 +41,18 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject gameObjectInventory;
     public GameObject ManuUI;
     public GameObject ManuDenyUI;
-    public List<GameObject> gameObjectListExpandedInventory; // ?�벤?�리 �?/ ?�렬 버튼 / 버리�?버튼
+    public List<GameObject> gameObjectListExpandedInventory; // 인벤토리 칸 / 정렬 버튼 / 버리기 버튼
+
     [Header("Sub UI Logic")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
-    [HideInInspector]
-    public DefaultFabrication currentFabricationUi;
+    [HideInInspector] public DefaultFabrication currentFabricationUi;
     public PlayerStatUI playerStatUi;
 
     public List<GameObject> currentOpenedUI = new List<GameObject>();
     public List<InGameUiChunk> uiChunkStack = new List<InGameUiChunk>();
     private List<GameObject> mainCraftSelectUi;
 
-    //Coroutine coroutineDenyESC = null;
     float denyUiEndTime = 0.0f;
     float denyUiLifeTime = 2.0f;
     bool isCraftButtonExist = false;
@@ -65,25 +64,18 @@ public class InGameUI : MonoBehaviour, IBegin
     {
         instance = this;
         mainCraftSelectUi = new List<GameObject>();
-
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        //OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
-        //    () => { Debug.Log("InGameUI.CloseAction �??�기 - makeshiftCraftUI"); makeshiftCraftUI.SetActive(false); });
         UseTab();
-
     }
 
-    // Update is called once per frame
     void Update()
     {
-
         if (Input.GetKeyDown(KeyCode.J))
         {
-            Debug.Log($"InGameUI - makeshiftCraftUI ?�태 : {makeshiftCraftUI.activeInHierarchy}");
+            Debug.Log($"InGameUI - makeshiftCraftUI 상태 : {makeshiftCraftUI.activeInHierarchy}");
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -94,7 +86,7 @@ public class InGameUI : MonoBehaviour, IBegin
         {
             UseTab();
         }
-        
+
         if (Time.time < denyUiEndTime)
         {
             ManuDenyUI.SetActive(true);
@@ -109,19 +101,17 @@ public class InGameUI : MonoBehaviour, IBegin
     {
         Debug.Log($">> InGameUI.ShowDefaultCraftUI() / start / defaultCraftUI before={defaultCraftUI.activeSelf} / isCraftButtonExist={isCraftButtonExist} / categories={(ItemCategoryManager.Instance != null && ItemCategoryManager.Instance.categories != null ? ItemCategoryManager.Instance.categories.Count : -1)}");
         CommonUI.instance.CloseTab(mainCraft.ui);
-        //Clear();
         CloseUI(ID_MAKESHIFT);
-        // ?�기???�팅
 
         defaultCraftUI.SetActive(true);
         ApplyPanelExpandState();
         OpenUI(new List<GameObject>() { defaultCraftUI }, ID_CRAFTTABLE,
             () =>
             {
-                Debug.Log("InGameUI.CloseAction �??�기 - defaultCraftUI");
+                Debug.Log("InGameUI.CloseAction 닫기 - defaultCraftUI");
                 defaultCraftUI.SetActive(false);
             }
-            );
+        );
 
         if (isCraftButtonExist == false)
         {
@@ -172,12 +162,6 @@ public class InGameUI : MonoBehaviour, IBegin
                     geometryItemSelectButton,
                     mainCraftSelectUi);
             }
-
-
-
-
-            //CommonUI.instance.ShowCategoryButton(defaultCraftUI, );
-
         }
 
         currentFabricationUi = mainCraft.ui;
@@ -188,22 +172,6 @@ public class InGameUI : MonoBehaviour, IBegin
     public void CloseDefaultCraftUI()
     {
         Debug.Log("InGameUI.CloseDefaultCraftUI() called");
-        //CommonUI.instance.CloseTab(makeshiftCraft.ui);
-        //Clear();
-        
-        //if (isPannelExpand && (IsOpened(ID_MAKESHIFT) == false))
-        //{
-        //    OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
-        //    () =>
-        //    {
-        //        Debug.Log("InGameUI.CloseAction �??�기 - makeshiftCraftUI");
-        //        CommonUI.instance.CloseTab(makeshiftCraft.ui);
-        //        makeshiftCraftUI.SetActive(false);
-        //    }
-        //    );
-        //}
-
-        // makeshiftCraftUI.SetActive(isPannelExpand);
         InventoryUiMain.instance.IconRefresh();
         currentFabricationUi = makeshiftCraft.ui;
         isNearCraft = false;
@@ -212,47 +180,22 @@ public class InGameUI : MonoBehaviour, IBegin
         ApplyPanelExpandState();
     }
 
-    //public void Show(GameObject UiGo)
-    //{
-    //    UiGo.SetActive(true);
-    //    currentOpenedUI.Add(UiGo);
-    //}
-
-    //public void Clear() // 모든 ?�린 UI ?�기
-    //{
-    //    foreach (GameObject go in currentOpenedUI)
-    //    {
-    //        go.SetActive(false);
-    //    }
-    //}
-
     public void UseESC()
     {
         CreateObject.instance.ExitInstallMode();
-
-
 
         if (uiChunkStack.Count > 0)
         {
             CloseUI();
         }
-
-        //if (defaultCraftUI.activeInHierarchy)
-        //{
-        //    CloseDefaultCraftUI();
-        //    return;
-        //}
-
         else if (ManuUI.activeInHierarchy)
         {
-            //ManuUI.SetActive(false);
             Option.instance.SetDeactivateEscUI();
         }
         else
         {
             if (GuiltySystem.instance.canUseESC)
             {
-                //ManuUI.SetActive(true);
                 Option.instance.SetActivateEscUI();
             }
             else
@@ -277,12 +220,12 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void UseTab()
     {
-        // 간이 ?�작 ??�� ?�림
-        // ?�벤?�리 ??�� ?�장??
-        // ?�렬 버튼
-        // 버리�?버튼
-        // ?�비 �?
-        // ?�레?�어 ?�탯 �?
+        // 간이 제작 UI 열림
+        // 인벤토리 UI 확장
+        // 정렬 버튼
+        // 버리기 버튼
+        // 장비 창
+        // 플레이어 스탯 창
 
         isPannelExpand = !isPannelExpand;
         MakeshiftCraftUiMain.instance.isOpened = isPannelExpand;
@@ -291,44 +234,40 @@ public class InGameUI : MonoBehaviour, IBegin
         if (isPannelExpand == false)
         {
             if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
-            
+
             makeshiftCraftUI.SetActive(false);
             gameObjectPlayerStatUiParent.SetActive(false);
             CloseUI(ID_MAKESHIFT);
             CloseUI(ID_CHAR_PANNEL);
 
-
-            Debug.Log(">> ?�기");
+            Debug.Log(">> 닫기");
         }
-        if (isPannelExpand == true && isNearCraft == false) //
+        if (isPannelExpand == true && isNearCraft == false)
         {
-            Debug.Log(">> InGameUI.UseTab() ?�기");
+            Debug.Log(">> InGameUI.UseTab() 열기");
 
             OpenUI(new List<GameObject>() { gameObjectPlayerStatUiParent }, ID_CHAR_PANNEL,
                 () => {
-                    Debug.Log("InGameUI.CloseAction �??�기 - gameObjectPlayerStatUiParent");
-                    gameObjectPlayerStatUiParent.SetActive(false); }
-                );
+                    Debug.Log("InGameUI.CloseAction 닫기 - gameObjectPlayerStatUiParent");
+                    gameObjectPlayerStatUiParent.SetActive(false);
+                }
+            );
             OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
                 () => {
-                    Debug.Log("InGameUI.CloseAction �??�기 - makeshiftCraftUI");
+                    Debug.Log("InGameUI.CloseAction 닫기 - makeshiftCraftUI");
                     makeshiftCraftUI.SetActive(false);
                     Debug.Assert(makeshiftCraftUI.activeInHierarchy == false);
-                    Debug.Log($"InGameUI.CloseAction �??�기 - makeshiftCraftUI ?�태 : {makeshiftCraftUI.activeInHierarchy}");
+                    Debug.Log($"InGameUI.CloseAction 닫기 - makeshiftCraftUI 상태 : {makeshiftCraftUI.activeInHierarchy}");
                 }
-                );
-            
-            // -> ?�기???�장 ?�당
+            );
+
+            // 열기/확장 상태 반영
             MakeshiftCraftUiMain.instance.isOpened = true;
             makeshiftCraftUI.SetActive(true);
             gameObjectPlayerStatUiParent.SetActive(true);
             MakeshiftCraftUiMain.instance.UpdateRecipe();
         }
     }
-    //public void ApplyUiStack(List<GameObject> uiGameobjects) =>
-    //    uiChunkStack.Add(new InGameUiChunk(uiGameobjects));
-    //public void ApplyUiStack(List<GameObject> uiGameobjects, bool isNeedCloseAction, System.Action closeAction) =>
-    //    uiChunkStack.Add(new InGameUiChunk(uiGameobjects, isNeedCloseAction, closeAction));
 
     public bool IsOpened(int id)
     {
@@ -339,18 +278,20 @@ public class InGameUI : MonoBehaviour, IBegin
         }
         return false;
     }
+
     public void OpenUI(List<GameObject> uiGameobjects, int id)
     {
         OpenUI(uiGameobjects, id,
             () =>
             {
-                Debug.Log("InGameUI.CloseAction �??�기");
+                Debug.Log("InGameUI.CloseAction 닫기");
                 foreach (GameObject go in uiGameobjects) { go.SetActive(false); }
             });
     }
+
     public void OpenUI(List<GameObject> uiGameobjects, int id, System.Action closeAction)
     {
-        Debug.Log("InGameUI.OpenUI �??�기");
+        Debug.Log("InGameUI.OpenUI 열기");
 
         foreach (GameObject g in uiGameobjects)
         {
@@ -360,6 +301,7 @@ public class InGameUI : MonoBehaviour, IBegin
         one.id = id;
         uiChunkStack.Add(one);
     }
+
     public void CloseUI(int id)
     {
         for (int index = 0; index < uiChunkStack.Count; ++index)
@@ -369,6 +311,7 @@ public class InGameUI : MonoBehaviour, IBegin
             uiChunkStack.RemoveAt(index);
         }
     }
+
     public void CloseUI()
     {
         Debug.Log($"InGameUI.CloseUI() / Count = {uiChunkStack.Count}");
@@ -378,8 +321,4 @@ public class InGameUI : MonoBehaviour, IBegin
         uiChunkStack[uiChunkStack.Count - 1].CloseAction();
         uiChunkStack.RemoveAt(uiChunkStack.Count - 1);
     }
-
 }
-
-
-

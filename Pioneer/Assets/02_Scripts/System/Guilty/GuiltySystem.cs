@@ -23,7 +23,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
 
     [Header("Dark Object")]
-    public Vector3 forwardVector; // ī�޶� �缱���� ��ġ�� ���, �̴� �߿��մϴ�.
+    public Vector3 forwardVector; // 카메라 시선 방향 기준 배치에 사용
     public Vector3 rightVector;
     [SerializeField] AudioSource AudioSourceScream;
     [SerializeField] GameObject prefabDarkObject;
@@ -50,8 +50,8 @@ public class GuiltySystem : MonoBehaviour, IBegin
     private Vector2 mSize;
     private float slowEndTime = 0.0f;
     private int deadCount = 0;
-    public int maxAttackWeight = 30; // ������ ���۷��� : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
-    public int currentAttackWeight = 0; // ������ ���۷��� : https://www.notion.so/2025e8a380a580c7abe6c8c80736cb6e?v=2025e8a380a580feb76f000c763770ff&p=1e970641e0a78013a100caebc2a28a4d&pm=s
+    public int maxAttackWeight = 30; // 죄책감 최대 수치
+    public int currentAttackWeight = 0; // 현재 죄책감 수치
     private int level = 0;
     private GuiltyPool<DarkFog> darkFogPool;
 
@@ -111,8 +111,12 @@ public class GuiltySystem : MonoBehaviour, IBegin
             if (screamCoroutine != null)
             {
                 StopCoroutine(screamCoroutine);
+                screamCoroutine = null;
             }
-                
+
+            if (AudioSourceScream != null && AudioSourceScream.isPlaying)
+                AudioSourceScream.Stop();
+
             volumeScreenTransformation.enabled = false;
         }
         if (GuiltyLevel >= 1)
@@ -127,6 +131,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
             if (darkObjectCoroutine != null)
             {
                 StopCoroutine(darkObjectCoroutine);
+                darkObjectCoroutine = null;
             }
         }
     }
@@ -280,10 +285,8 @@ public class GuiltySystem : MonoBehaviour, IBegin
             if (Random.Range(0.0f, 1.0f) < screamSoundChance[level])
             {
                 AudioSourceScream.volume = screamSoundVolume[level];
+                AudioSourceScream.Stop();
                 AudioSourceScream.Play();
-
-                if (AudioManager.instance != null)
-                    AudioManager.instance.PlaySfx(AudioManager.SFX.grunt_effort_struggle_male_b_17);
             }
         }
     }
@@ -298,13 +301,13 @@ public class GuiltySystem : MonoBehaviour, IBegin
         }
     }
 
-    // �ٴ��̺�Ʈ : �Ȱ� �� ȿ�� -> ��å�� ����ġ 1 ����
+    // 바다 이벤트: 안개 낮 효과 -> 죄책감 1 증가
     public void AddFogDayWeight()
     {
         ChangeWeight(1);
     }
 
-    // �ٴ��̺�Ʈ : �Ȱ� �� ȿ�� -> ��å�� ����ġ addValue��ŭ ����
+    // 바다 이벤트: 안개 밤 효과 -> 현재 죄책감의 20%만큼 증가
     public void AddFogNightWeight()
     {
         int addValue = Mathf.RoundToInt(currentAttackWeight * 0.2f);

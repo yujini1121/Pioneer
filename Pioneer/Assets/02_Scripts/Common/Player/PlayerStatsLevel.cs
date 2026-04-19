@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -6,101 +6,101 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using UnityEngine;
 
-// PlayerLevelSystem : ÀüÅõ, Á¦ÀÛ, Ã¤Áı µî ·¹º§°ú °æÇèÄ¡ °ü¸®
-// TODO : ³¬½Ã¸¦ Á¦¿ÜÇÑ ÀüÅõ, Á¦ÀÛÀº °æÇèÄ¡ È¹µæ ÄÚµå Ãß°¡ ¿Ï·á, ³¬½Ã °æÇèÄ¡ Ãß°¡ÇØ¾ßÇÔ
+// PlayerLevelSystem : ì „íˆ¬, ì œì‘, ì±„ì§‘ ë“± ë ˆë²¨ê³¼ ê²½í—˜ì¹˜ ê´€ë¦¬
+// TODO : ë‚šì‹œë¥¼ ì œì™¸í•œ ì „íˆ¬, ì œì‘ì€ ê²½í—˜ì¹˜ íšë“ ì½”ë“œ ì¶”ê°€ ì™„ë£Œ, ë‚šì‹œ ê²½í—˜ì¹˜ ì¶”ê°€í•´ì•¼í•¨
 
-#region ¼ºÀå ½ºÅ×ÀÌÅÍ½º ±âÈ¹ ¿ä¾à
+#region ì„±ì¥ ìŠ¤í…Œì´í„°ìŠ¤ ê¸°íš ìš”ì•½
 /* =============================================================
-- switch¹®µé ¸®½ºÆ® ¹æ½ÄÀ¸·Î ¹Ù²ã¾ßÇÔ 
+- switchë¬¸ë“¤ ë¦¬ìŠ¤íŠ¸ ë°©ì‹ìœ¼ë¡œ ë°”ê¿”ì•¼í•¨ 
 
-    [[ ÀüÅõ ·¹º§ ]] => ¿¡³Ê¹Ì º£ÀÌ½º¿¡¼­ ÇØ¾ßÇÏ³ª..
-- ¿¡³Ê¹Ì¸¦ ÇÑ ´ë Á÷Á¢ ¶§¸±¶§¸¶´Ù, °æÇèÄ¡ È¹µæ *
+    [[ ì „íˆ¬ ë ˆë²¨ ]] => ì—ë„ˆë¯¸ ë² ì´ìŠ¤ì—ì„œ í•´ì•¼í•˜ë‚˜..
+- ì—ë„ˆë¯¸ë¥¼ í•œ ëŒ€ ì§ì ‘ ë•Œë¦´ë•Œë§ˆë‹¤, ê²½í—˜ì¹˜ íšë“ *
     
-    { ¿¡³Ê¹Ì Ã³Ä¡½Ã È¹µæ °¡´ÉÇÑ °æÇèÄ¡ ·® }
-    * µÕÁö : 3
-    * ¹Ì´Ï¾ğ : 5
-    * Á»ºñ ½Â¹«¿ø : 5                => Á»ºñ ½Â¹«¿øÀº ¿¡³Ê¹Ì°¡ ¾Æ´Ï¶ó µû·Î Ãß°¡ ±¸Çö µé¾î°¡¾ßÇÒµí..
-    * Å¸ÀÌÅº : 8
-    * Å©·Ñ·¯ : 10
+    { ì—ë„ˆë¯¸ ì²˜ì¹˜ì‹œ íšë“ ê°€ëŠ¥í•œ ê²½í—˜ì¹˜ ëŸ‰ }
+    * ë‘¥ì§€ : 3
+    * ë¯¸ë‹ˆì–¸ : 5
+    * ì¢€ë¹„ ìŠ¹ë¬´ì› : 5                => ì¢€ë¹„ ìŠ¹ë¬´ì›ì€ ì—ë„ˆë¯¸ê°€ ì•„ë‹ˆë¼ ë”°ë¡œ ì¶”ê°€ êµ¬í˜„ ë“¤ì–´ê°€ì•¼í• ë“¯..
+    * íƒ€ì´íƒ„ : 8
+    * í¬ë¡¤ëŸ¬ : 10
      
-    { ÀüÅõ ·¹º§ }
-    * 0 : È¿°ú ¾øÀ½
-    * 1 : °ø°İ·Â 10% »ó½Â / ¹«±â ¾ÆÀÌÅÛ ³»±¸µµ °¨¼Ò·® -0.1
-    * 2 : °ø°İ·Â 15% »ó½Â / ¹«±â ¾ÆÀÌÅÛ ³»±¸µµ °¨¼Ò·® -0.3
-    * 3 : °ø°İ·Â 20% »ó½Â / ¹«±â ¾ÆÀÌÅÛ ³»±¸µµ °¨¼Ò·® -0.5
-    * 4 : °ø°İ·Â 25% »ó½Â / ¹«±â ¾ÆÀÌÅÛ ³»±¸µµ °¨¼Ò·® -0.8
-    * 5 : °ø°İ·Â 30% »ó½Â / ¹«±â ¾ÆÀÌÅÛ ³»±¸µµ °¨¼Ò·® -1.0
+    { ì „íˆ¬ ë ˆë²¨ }
+    * 0 : íš¨ê³¼ ì—†ìŒ
+    * 1 : ê³µê²©ë ¥ 10% ìƒìŠ¹ / ë¬´ê¸° ì•„ì´í…œ ë‚´êµ¬ë„ ê°ì†ŒëŸ‰ -0.1
+    * 2 : ê³µê²©ë ¥ 15% ìƒìŠ¹ / ë¬´ê¸° ì•„ì´í…œ ë‚´êµ¬ë„ ê°ì†ŒëŸ‰ -0.3
+    * 3 : ê³µê²©ë ¥ 20% ìƒìŠ¹ / ë¬´ê¸° ì•„ì´í…œ ë‚´êµ¬ë„ ê°ì†ŒëŸ‰ -0.5
+    * 4 : ê³µê²©ë ¥ 25% ìƒìŠ¹ / ë¬´ê¸° ì•„ì´í…œ ë‚´êµ¬ë„ ê°ì†ŒëŸ‰ -0.8
+    * 5 : ê³µê²©ë ¥ 30% ìƒìŠ¹ / ë¬´ê¸° ì•„ì´í…œ ë‚´êµ¬ë„ ê°ì†ŒëŸ‰ -1.0
 ==================================================================   
 ==================================================================  
-    [[ ¼ÕÀçÁÖ ]] => ÅÂÀ±¾¾ÇÑÅ× Áú¹®ÇØ¾ßÇÒµí..
-- ¼³Ä¡Çü ¿ÀºêÁ§Æ®¸¦ ¼³Ä¡ ¿Ï·á ÇßÀ»¶§ craftExp È¹µæ
-- ÀÏ¹İ ¾ÆÀÌÅÛ Á¦ÀÛ ¿Ï·á½Ã craftExp È¹µæ *
-    - Á¦ÀÛµÈ ÈÄ ½Ç¹°ÀÌ Á¸ÀçÇØ¾ßÇÔ
-    - Á¦ÀÛÇÏ´Âµ¥ ÇÊ¿äÇÑ ¾ÆÀÌÅÛÀÌ 1ÀÌ»ó ¼Ò¸ğ
+    [[ ì†ì¬ì£¼ ]] => íƒœìœ¤ì”¨í•œí…Œ ì§ˆë¬¸í•´ì•¼í• ë“¯..
+- ì„¤ì¹˜í˜• ì˜¤ë¸Œì íŠ¸ë¥¼ ì„¤ì¹˜ ì™„ë£Œ í–ˆì„ë•Œ craftExp íšë“
+- ì¼ë°˜ ì•„ì´í…œ ì œì‘ ì™„ë£Œì‹œ craftExp íšë“ *
+    - ì œì‘ëœ í›„ ì‹¤ë¬¼ì´ ì¡´ì¬í•´ì•¼í•¨
+    - ì œì‘í•˜ëŠ”ë° í•„ìš”í•œ ì•„ì´í…œì´ 1ì´ìƒ ì†Œëª¨
     
-    { Á¦ÀÛ ·¹½ÃÇÇ¿¡ µû¸¥ °æÇèÄ¡ ·® }
-    * ÀÏ¹İ Àç·á ¾ÆÀÌÅÛ : 5
-    * ¼ÒºñÇü ¾ÆÀÌÅÛ : 10
-    * ¼³Ä¡Çü ¿ÀºêÁ§Æ® : 15
-    * °©ÆÇ : 4
+    { ì œì‘ ë ˆì‹œí”¼ì— ë”°ë¥¸ ê²½í—˜ì¹˜ ëŸ‰ }
+    * ì¼ë°˜ ì¬ë£Œ ì•„ì´í…œ : 5
+    * ì†Œë¹„í˜• ì•„ì´í…œ : 10
+    * ì„¤ì¹˜í˜• ì˜¤ë¸Œì íŠ¸ : 15
+    * ê°‘íŒ : 4
     
-    { ¼ÕÀçÁÖ ·¹º§ } 
-    * 0 : È¿°ú ¾øÀ½
-    * 1 : ´ë¼º°ø È®·ü 5%
-    * 2 : ´ë¼º°ø È®·ü 10%
-    * 3 : ´ë¼º°ø È®·ü 15%
-    * 4 : ´ë¼º°ø È®·ü 20%
-    * 5 : ´ë¼º°ø È®·ü 30%
+    { ì†ì¬ì£¼ ë ˆë²¨ } 
+    * 0 : íš¨ê³¼ ì—†ìŒ
+    * 1 : ëŒ€ì„±ê³µ í™•ë¥  5%
+    * 2 : ëŒ€ì„±ê³µ í™•ë¥  10%
+    * 3 : ëŒ€ì„±ê³µ í™•ë¥  15%
+    * 4 : ëŒ€ì„±ê³µ í™•ë¥  20%
+    * 5 : ëŒ€ì„±ê³µ í™•ë¥  30%
     
-    // ¿©±â º¸¼¼¿ä!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // ´ë¼º°ø ½Ã½ºÅÛ Á¦ÀÛÇØ¾ßÇÔ;
-    = ´ë¼º°øÀÌ¶õ? = 
-    - ¾ÆÀÌÅÛ Á¦ÀÛ½Ã 1°³ ´õ È¹µæ
-    - Á¦ÀÛ½Ã ¼Ò¸ğÇØ¾ß ÇÒ Àç·á ¾ÆÀÌÅÛ 40% ÆäÀÌ¹é..?
+    // ì—¬ê¸° ë³´ì„¸ìš”!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // ëŒ€ì„±ê³µ ì‹œìŠ¤í…œ ì œì‘í•´ì•¼í•¨;
+    = ëŒ€ì„±ê³µì´ë€? = 
+    - ì•„ì´í…œ ì œì‘ì‹œ 1ê°œ ë” íšë“
+    - ì œì‘ì‹œ ì†Œëª¨í•´ì•¼ í•  ì¬ë£Œ ì•„ì´í…œ 40% í˜ì´ë°±..?
 ==================================================================    
 ==================================================================  
-    [[ ³¬½Ã ·¹º§ ]] => ³¬½Ã´Â..?
-- ÇÃ·¹ÀÌ¾î°¡ Á÷Á¢ ³¬½Ã¸¦ ÅëÇØ ÀÏ¹İ ¾ÆÀÌÅÛÀ» È¹µæÇÒ °æ¿ì gratheringExp È¹µæ
+    [[ ë‚šì‹œ ë ˆë²¨ ]] => ë‚šì‹œëŠ”..?
+- í”Œë ˆì´ì–´ê°€ ì§ì ‘ ë‚šì‹œë¥¼ í†µí•´ ì¼ë°˜ ì•„ì´í…œì„ íšë“í•  ê²½ìš° gratheringExp íšë“
 
-    { ³¬½Ã¸¦ ÅëÇÑ ¾ÆÀÌÅÛ È¹µæ¿¡ µû¸¥ °æÇèÄ¡ ·® }
-    * ³¬½Ã·Î ¾òÀ» ¼ö ÀÖ´Â ¾ÆÀÌÅÛ : 5
-    * º¸¹°»óÀÚ : 10
+    { ë‚šì‹œë¥¼ í†µí•œ ì•„ì´í…œ íšë“ì— ë”°ë¥¸ ê²½í—˜ì¹˜ ëŸ‰ }
+    * ë‚šì‹œë¡œ ì–»ì„ ìˆ˜ ìˆëŠ” ì•„ì´í…œ : 5
+    * ë³´ë¬¼ìƒì : 10
     
-    { ³¬½Ã ·¹º§ }
-    * 0 : È¿°ú ¾øÀ½
-    * 1 : 5% È®·ü·Î ÀÚ¿ø 1°³ Ãß°¡ È¹µæ
-    * 2 : 7% È®·ü·Î ÀÚ¿ø 1°³ Ãß°¡ È¹µæ
-    * 3 : 10% È®·ü·Î ÀÚ¿ø 1°³ Ãß°¡ È¹µæ / 30% È®·ü·Î º¸¹°»óÀÚ 1°³ È¹µæ (³¬½Ã·Î º¸¹°»óÀÚ¸¦ ¾ò¾ú¾îµµ ¹ŞÀ» ¼ö ÀÖÀ½
-    * 4 : 12% È®·ü·Î ÀÚ¿ø 1°³ Ãß°¡ È¹µæ / 40% È®·ü·Î º¸¹°»óÀÚ 1°³ È¹µæ (³¬½Ã·Î º¸¹°»óÀÚ¸¦ ¾ò¾ú¾îµµ ¹ŞÀ» ¼ö ÀÖÀ½
-    * 5 : 15% È®·ü·Î ÀÚ¿ø 1°³ Ãß°¡ È¹µæ / 50% È®·ü·Î º¸¹°»óÀÚ 1°³ È¹µæ (³¬½Ã·Î º¸¹°»óÀÚ¸¦ ¾ò¾ú¾îµµ ¹ŞÀ» ¼ö ÀÖÀ½
+    { ë‚šì‹œ ë ˆë²¨ }
+    * 0 : íš¨ê³¼ ì—†ìŒ
+    * 1 : 5% í™•ë¥ ë¡œ ìì› 1ê°œ ì¶”ê°€ íšë“
+    * 2 : 7% í™•ë¥ ë¡œ ìì› 1ê°œ ì¶”ê°€ íšë“
+    * 3 : 10% í™•ë¥ ë¡œ ìì› 1ê°œ ì¶”ê°€ íšë“ / 30% í™•ë¥ ë¡œ ë³´ë¬¼ìƒì 1ê°œ íšë“ (ë‚šì‹œë¡œ ë³´ë¬¼ìƒìë¥¼ ì–»ì—ˆì–´ë„ ë°›ì„ ìˆ˜ ìˆìŒ
+    * 4 : 12% í™•ë¥ ë¡œ ìì› 1ê°œ ì¶”ê°€ íšë“ / 40% í™•ë¥ ë¡œ ë³´ë¬¼ìƒì 1ê°œ íšë“ (ë‚šì‹œë¡œ ë³´ë¬¼ìƒìë¥¼ ì–»ì—ˆì–´ë„ ë°›ì„ ìˆ˜ ìˆìŒ
+    * 5 : 15% í™•ë¥ ë¡œ ìì› 1ê°œ ì¶”ê°€ íšë“ / 50% í™•ë¥ ë¡œ ë³´ë¬¼ìƒì 1ê°œ íšë“ (ë‚šì‹œë¡œ ë³´ë¬¼ìƒìë¥¼ ì–»ì—ˆì–´ë„ ë°›ì„ ìˆ˜ ìˆìŒ
 ============================================================= */
 #endregion
 
 public enum GrowStatType
 {
-    Combat,         // ÀüÅõ
-    Crafting,       // Á¦ÀÛ
-    Fishing,        // ³¬½Ã
+    Combat,         // ì „íˆ¬
+    Crafting,       // ì œì‘
+    Fishing,        // ë‚šì‹œ
 }
 
 [System.Serializable]
 public class GrowState
 {
-    public GrowStatType Type;      // ½ºÅ×ÀÌÅÍ½º Á¾·ù
-    public int level;               // ÇöÀç ·¹º§
-    public float currentExp;        // ÇöÀç º¸À¯ÁßÀÎ °æÇèÄ¡ °ª
-    public int[] maxExp;            // ·¹º§¿¡ µû¸¥ °æÇèÄ¡ ÃÖ´ë°ª
+    public GrowStatType Type;      // ìŠ¤í…Œì´í„°ìŠ¤ ì¢…ë¥˜
+    public int level;               // í˜„ì¬ ë ˆë²¨
+    public float currentExp;        // í˜„ì¬ ë³´ìœ ì¤‘ì¸ ê²½í—˜ì¹˜ ê°’
+    public int[] maxExp;            // ë ˆë²¨ì— ë”°ë¥¸ ê²½í—˜ì¹˜ ìµœëŒ€ê°’
 
-    public GrowState(GrowStatType type, int[] maxExp)
+    public GrowState(GrowStatType type, int[] maxExp, int defaultLevel = 0)
     {
         this.Type = type;
         this.maxExp = maxExp;
-        this.level = 0;
+        this.level = defaultLevel;
         this.currentExp = 0;
     }
 }
 
-// ·¹º§¾÷À¸·Î ÀÎÇÑ È®·ü switch ºÎºĞ ¸®½ºÆ®·Î º¯°æÇÏ±â
+// ë ˆë²¨ì—…ìœ¼ë¡œ ì¸í•œ í™•ë¥  switch ë¶€ë¶„ ë¦¬ìŠ¤íŠ¸ë¡œ ë³€ê²½í•˜ê¸°
 public class PlayerStatsLevel : MonoBehaviour
 {
     public static PlayerStatsLevel Instance { get; private set; }
@@ -110,15 +110,15 @@ public class PlayerStatsLevel : MonoBehaviour
     public PlayerCore player;
 
     public List<(float attack, float durability)> combatList 
-        = new List<(float attack, float durability)> { (0f, 0f), (0.10f, -0.1f), (0.15f, -0.3f), (0.20f, -0.5f), (0.25f, -0.8f), (0.30f, -1) };
-    public List<float> craftingList = new List<float> { 0f, 0.05f, 0.10f, 0.15f, 0.20f, 0.30f };
+        = new List<(float attack, float durability)> { (0f, 0f), (0.3f, 0.3f), (0.15f, -0.3f), (0.20f, -0.5f), (0.25f, -0.8f), (0.30f, -1) };
+    public List<float> craftingList = new List<float> { 0f, 0.3f, 0.10f, 0.15f, 0.20f, 0.30f };
     public List<(float count, float chest)> fishingList 
-        = new List<(float count, float chest)> { (0.0f, 0f), (0.05f, 0f), (0.1f, 0.3f), (0.12f, 0.4f), (0.15f, 0.5f) };
+        = new List<(float count, float chest)> { (0.0f, 0f), (0.3f, 0.3f), (0.1f, 0.3f), (0.12f, 0.4f), (0.15f, 0.5f) };
 
     public static event Action<GrowStatType> StatLevelUp;
      
 
-    // =============== µğ¹ö±ë¿ë ÀÎ½ºÆåÅÍÃ¢¿¡¼­ ·¹º§°ú °æÇèÄ¡µé º¸ÀÌµµ·Ï ==================
+    // =============== ë””ë²„ê¹…ìš© ì¸ìŠ¤í™í„°ì°½ì—ì„œ ë ˆë²¨ê³¼ ê²½í—˜ì¹˜ë“¤ ë³´ì´ë„ë¡ ==================
     [SerializeField] private List<GrowState> growStateForInspector;
 
     private void Awake()
@@ -127,7 +127,7 @@ public class PlayerStatsLevel : MonoBehaviour
             Instance = this;
         else
         {
-            Debug.LogError($"!!!>> ÀÌ¹Ì PlayerStatsLevel°¡ Á¸ÀçÇÔ. ÇöÀç °ÔÀÓ¿ÉÁ§Æ® {gameObject.name} / ÀÖ´Â °ÔÀÓ¿ÀºêÁ§Æ® {Instance.gameObject.name}");
+            Debug.LogError($"!!!>> ì´ë¯¸ PlayerStatsLevelê°€ ì¡´ì¬í•¨. í˜„ì¬ ê²Œì„ì˜µì íŠ¸ {gameObject.name} / ìˆëŠ” ê²Œì„ì˜¤ë¸Œì íŠ¸ {Instance.gameObject.name}");
             Destroy(Instance);
         }
 
@@ -137,7 +137,7 @@ public class PlayerStatsLevel : MonoBehaviour
         InitGrowState();
     }
 
-    // =============== µğ¹ö±ë¿ë ÀÎ½ºÆåÅÍÃ¢¿¡¼­ ·¹º§°ú °æÇèÄ¡µé º¸ÀÌµµ·Ï ==================
+    // =============== ë””ë²„ê¹…ìš© ì¸ìŠ¤í™í„°ì°½ì—ì„œ ë ˆë²¨ê³¼ ê²½í—˜ì¹˜ë“¤ ë³´ì´ë„ë¡ ==================
     private void Update()
     {
         if (Application.isEditor)
@@ -155,23 +155,23 @@ public class PlayerStatsLevel : MonoBehaviour
 #endif
     }
 
-    // ½ºÅ×ÀÌÅÍ½º ÃÊ±â »óÅÂ ¼³Á¤
+    // ìŠ¤í…Œì´í„°ìŠ¤ ì´ˆê¸° ìƒíƒœ ì„¤ì •
     void InitGrowState()
     {
         growStates.Clear();
-        growStates.Add(GrowStatType.Combat, new GrowState(GrowStatType.Combat, new int[] { 50, 100, 150, 200, 250 }));
-        growStates.Add(GrowStatType.Crafting, new GrowState(GrowStatType.Crafting, new int[] { 50, 100, 150, 200, 250 }));
-        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 60, 90, 120, 150, 180 }));
+        growStates.Add(GrowStatType.Combat, new GrowState(GrowStatType.Combat, new int[] { 50, 100, 150, 200, 250 }, 1));
+        growStates.Add(GrowStatType.Crafting, new GrowState(GrowStatType.Crafting, new int[] { 50, 100, 150, 200, 250 }, 1));
+        growStates.Add(GrowStatType.Fishing, new GrowState(GrowStatType.Fishing, new int[] { 60, 90, 120, 150, 180 }, 1));
     }
 
     /// <summary>
-    /// °æÇèÄ¡ È¹µæ
+    /// ê²½í—˜ì¹˜ íšë“
     /// </summary>
-    /// <param name="type">½ºÅ×ÀÌÅÍ½º Á¾·ù</param>
-    /// <param name="amount">°æÇèÄ¡ °ª</param>
+    /// <param name="type">ìŠ¤í…Œì´í„°ìŠ¤ ì¢…ë¥˜</param>
+    /// <param name="amount">ê²½í—˜ì¹˜ ê°’</param>
     public void AddExp(GrowStatType type, int amount)
     {
-        UnityEngine.Debug.Log($"AddExp() ½ÃÀÛ");
+        UnityEngine.Debug.Log($"AddExp() ì‹œì‘");
         GrowState growState = growStates[type];
 
         if (growState.level >= growState.maxExp.Length)
@@ -183,27 +183,27 @@ public class PlayerStatsLevel : MonoBehaviour
         {
             growState.currentExp -= growState.maxExp[growState.level];
             growState.level++;
-            UnityEngine.Debug.Log($"{type} ·¹º§¾÷ -> {growState.level}");
+            UnityEngine.Debug.Log($"{type} ë ˆë²¨ì—… -> {growState.level}");
 
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);
 
-            // switch ¹®À¸·Î ¼öÁ¤
+            // switch ë¬¸ìœ¼ë¡œ ìˆ˜ì •
             if (type == GrowStatType.Combat)
             {
-                CombatLevelUp(type); // ·¹º§ ¾÷ ¼ø°£
+                CombatLevelUp(type); // ë ˆë²¨ ì—… ìˆœê°„
             }
             // ===========================================
-            StatLevelUp?.Invoke(type); // ui ¾÷µ¥ÀÌÆ® ÀÌº¥Æ°
+            StatLevelUp?.Invoke(type); // ui ì—…ë°ì´íŠ¸ ì´ë²¤íŠ¼
         }
-        UnityEngine.Debug.Log($"{type} ½ºÅÈ °æÇèÄ¡ {amount} È¹µæ");
+        UnityEngine.Debug.Log($"{type} ìŠ¤íƒ¯ ê²½í—˜ì¹˜ {amount} íšë“");
     }
 
     /// <summary>
-    /// [[ ÀüÅõ ]] ·¹º§¾÷ ½Ã È¿°ú Àû¿ë
+    /// [[ ì „íˆ¬ ]] ë ˆë²¨ì—… ì‹œ íš¨ê³¼ ì ìš©
     /// </summary>
     /// <param name="type"></param>
-    /// È£Ãâ ½ÃÁ¡ : °æÇèÄ¡¸¦ ¾ò´Â ½ÃÁ¡ && ·¹º§ ¾÷ / not °ø°İ·ÂÀ» ¾ò
+    /// í˜¸ì¶œ ì‹œì  : ê²½í—˜ì¹˜ë¥¼ ì–»ëŠ” ì‹œì  && ë ˆë²¨ ì—… / not ê³µê²©ë ¥ì„ ì–»
     private void CombatLevelUp(GrowStatType type)
     {
         int combatLevel = growStates[GrowStatType.Combat].level;
@@ -222,13 +222,13 @@ public class PlayerStatsLevel : MonoBehaviour
         int prevDamage = (int)player.handAttackCurrentValueRaw.weaponDamage;
 
         player.handAttackCurrentValueRaw.weaponDamage =
-            Mathf.RoundToInt(prevDamage * (1 + increaseAttackDamage)); // ·¹º§ ¾÷¿¡ µû¸¥ ¿øº» º¯°æ
+            Mathf.RoundToInt(prevDamage * (1 + increaseAttackDamage)); // ë ˆë²¨ ì—…ì— ë”°ë¥¸ ì›ë³¸ ë³€ê²½
 
 		//player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
 	}
 
     /// <summary>
-    /// [[ ¼ÕÀçÁÖ (¾ÆÀÌÅÛ Á¦ÀÛ) ]] È®·ü Àû¿ë
+    /// [[ ì†ì¬ì£¼ (ì•„ì´í…œ ì œì‘) ]] í™•ë¥  ì ìš©
     /// </summary>
     /// <returns></returns>
     public float CraftingChance()
@@ -248,10 +248,10 @@ public class PlayerStatsLevel : MonoBehaviour
     }
 
     /// <summary>
-    /// [[ ³¬½Ã ]] ÆÄ¹Ö Àç·á ¹× º¸¹°»óÀÚ Ãß°¡ È¹µæ È®·ü Àû¿ë
+    /// [[ ë‚šì‹œ ]] íŒŒë° ì¬ë£Œ ë° ë³´ë¬¼ìƒì ì¶”ê°€ íšë“ í™•ë¥  ì ìš©
     /// </summary>
     /// <returns></returns>
-    public (float count, float chest) FishingChance()      // C#ÀÇ Æ©ÇÃÀÌ¶ó´Â ¹æ½ÄÀÇ ±¸Çö
+    public (float count, float chest) FishingChance()      // C#ì˜ íŠœí”Œì´ë¼ëŠ” ë°©ì‹ì˜ êµ¬í˜„
     {
         int level = growStates[GrowStatType.Fishing].level;
 
@@ -260,13 +260,15 @@ public class PlayerStatsLevel : MonoBehaviour
 
         if (level >= 0 && level < fishingList.Count)
         {
-            return fishingList[level]; // Á¤»ó Ãâ·Â
+            return fishingList[level]; // ì •ìƒ ì¶œë ¥
         }
 
-        return (0.0f, 0f); // ÀÌ°Ç ¾Æ¸¶ ¿¡·¯¿ë
+        return (0.0f, 0f); // ì´ê±´ ì•„ë§ˆ ì—ëŸ¬ìš©
     }
 
 
 
 
 }
+
+

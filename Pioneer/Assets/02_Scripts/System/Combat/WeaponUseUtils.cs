@@ -1,113 +1,86 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class WeaponUseUtils
 {
-    //public static IEnumerator AttackCoroutine(CommonBase userGameObject, SItemStack itemWithState, SItemWeaponTypeSO data)
-    //{
-    //    // ÈÖµÎ¸£´Â ¾Ö´Ï¸ÞÀÌ¼Ç
-    //    // ÇÃ·¹ÀÌ¾î Çàµ¿ »çÀÌÅ¬Å¸ÀÓ
-    //    // ÇÃ·¹ÀÌ¾î Å¬¸¯ ¹æÇâ °¨Áö
-    //    // °ø°Ý ¹üÀ§ »ý¼º
-    //    // ³»±¸µµ ´â±â
-    //    // ¾ÆÀÌÅÛ ÀÎº¥Åä¸® ¾÷µ¥ÀÌÆ®
-    //
-    //    // ¸ð¼Ç ½ÃÀÛ
-    //    // ¿©±â ¾Ö´Ï¸ÞÀÌ¼Ç ÄÚµå ³Ö±â
-    //    yield return new WaitForSeconds(data.weaponAnimation);
-    //    // ¸ð¼Ç Á¾·á
-    //
-    //    // ÇÃ·¹ÀÌ¾î Å¬¸¯ ¹æÇâ
-    //    Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //    RaycastHit m_hitOnMap;
-    //    Vector3 direction;
-    //    LayerMask mapMaskLayer = LayerMask.NameToLayer("MouseClickArea");
-    //
-    //    // °ø°Ý ¹üÀ§ »ý¼º
-    //    if (Physics.Raycast(
-    //        m_rayFromMouse.origin,
-    //        m_rayFromMouse.direction,
-    //        out m_hitOnMap,
-    //        maxDistance: 200.0f,
-    //        mapMaskLayer))
-    //    {
-    //        m_hitOnMap.point = new Vector3(
-    //            m_hitOnMap.point.x,
-    //            userGameObject.transform.position.y,
-    //            m_hitOnMap.point.z);
-    //
-    //        // ... RayCastHit m_hitOnMapÀÇ Á¤º¸¸¦ È°¿ëÇÑ ÄÚµå
-    //        direction = (m_hitOnMap.point - userGameObject.transform.position).normalized;
-    //    }
+    private static bool HasAttackTarget(CommonBase userGameObject, SItemWeaponTypeSO data, Vector3 dir)
+    {
+        if (userGameObject == null || data == null)
+            return false;
 
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f)
+            return false;
 
+        LayerMask enemyMask = PlayerCore.Instance != null ? PlayerCore.Instance.EnemyLayer : 0;
+        Vector3 origin = userGameObject.transform.position;
+        float range = Mathf.Max(data.weaponRange, 0.5f);
+        Collider[] hits = Physics.OverlapSphere(origin, range, enemyMask, QueryTriggerInteraction.Ignore);
 
+        foreach (Collider hit in hits)
+        {
+            if (hit == null)
+                continue;
 
-    //    // ³»±¸µµ ´â±â
-    //    itemWithState.duability -= data.duabilityRedutionPerHit;
+            Vector3 toTarget = hit.bounds.center - origin;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude > range * range)
+                continue;
 
-    //    // ÀÎº¥Åä¸® ¾÷µ¥ÀÌÆ® 
-    //    InventoryUiMain.instance.IconRefresh();
+            if (Vector3.Dot(dir.normalized, toTarget.normalized) < 0.2f)
+                continue;
 
-    //    // °ø°Ý µô·¹ÀÌ
-    //    yield return new WaitForSeconds(data.weaponDelay);
-    //    //
+            CommonBase target = hit.GetComponentInParent<CommonBase>();
+            if (target == null)
+                target = hit.GetComponent<CommonBase>();
 
-    //}
+            if (target != null && !target.IsDead)
+                return true;
+        }
+
+        return false;
+    }
 
     public static IEnumerator AttackCoroutine(CommonBase userGameObject, SItemStack itemWithState, SItemWeaponTypeSO data)
     {
-        Debug.Log($">> WeaponUseUtils.AttackCoroutine : ÇÔ¼ö È£ÃâµÊ ³»±¸µµ ´â±â : {data.duabilityRedutionPerHit}");
+        Debug.Log($">> WeaponUseUtils.AttackCoroutine : í•¨ìˆ˜ í˜¸ì¶œë¨ ë‚´êµ¬ë„ ë‹³ê¸° : {data.duabilityRedutionPerHit}");
         Debug.Assert(itemWithState != null);
         Debug.Assert(data != null);
 
-        switch (data.id) // »ç¿îµå ½ºÀ§Ä¡ ¹®
-        {
-            case 20001:
-            case 20002:
-            case 20003:
-                if (AudioManager.instance != null) // Ä® »ç¿ë
-                    AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
-                break;
-            default:
-                if (AudioManager.instance != null) // ÁÖ¸Ô»ç¿ë
-                    AudioManager.instance.PlaySfx(AudioManager.SFX.Punch3_Player);
-                break;
-        }
-
-        // ÈÖµÎ¸£´Â ¾Ö´Ï¸ÞÀÌ¼Ç
-        // ÇÃ·¹ÀÌ¾î Çàµ¿ »çÀÌÅ¬Å¸ÀÓ
-        // ÇÃ·¹ÀÌ¾î Å¬¸¯ ¹æÇâ °¨Áö
-        // °ø°Ý ¹üÀ§ »ý¼º
-        // ³»±¸µµ ´â±â
-        // ¾ÆÀÌÅÛ ÀÎº¥Åä¸® ¾÷µ¥ÀÌÆ®
-
-        // ÇÃ·¹ÀÌ¾î ÀÌµ¿ Á¦ÇÑ
         float originalSpeed = PlayerCore.Instance.speed;
 
         try
         {
             PlayerCore.Instance.speed = 0f;
+            Debug.Log($"í”Œë ˆì´ì–´ ì´ë™ ë©ˆì¶¤ : {PlayerCore.Instance.speed}");
 
-            Debug.Log($"ÇÃ·¹ÀÌ¾î ÀÌµ¿ ¸ØÃã : {PlayerCore.Instance.speed}");
-            // ¸ð¼Ç ½ÃÀÛ
-
-            // ÇÃ·¹ÀÌ¾î Å¬¸¯ ¹æÇâ
             Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit m_hitOnMap;
-            Vector3 direction;
-            LayerMask mapMaskLayer = LayerMask.NameToLayer("MouseClickArea");
 
-            // °ø°Ý ¹üÀ§ »ý¼º
             if (Physics.Raycast(m_rayFromMouse, out m_hitOnMap, Mathf.Infinity))
             {
-                Debug.Log($">> WeaponUseUtils.AttackCoroutine : ³»±¸µµ ´â±â : {data.duabilityRedutionPerHit}");
-                //data.weaponRange;
                 Vector3 dir = (m_hitOnMap.point - userGameObject.transform.position).normalized;
                 dir.y = 0f;
+
+                if (!HasAttackTarget(userGameObject, data, dir))
+                    yield break;
+
+                switch (data.id)
+                {
+                    case 20001:
+                    case 20002:
+                    case 20003:
+                        if (AudioManager.instance != null)
+                            AudioManager.instance.PlaySfx(AudioManager.SFX.SamshSound);
+                        break;
+                    default:
+                        if (AudioManager.instance != null)
+                            AudioManager.instance.PlaySfx(AudioManager.SFX.Punch3_Player);
+                        break;
+                }
+
                 userGameObject.transform.rotation = Quaternion.LookRotation(dir);
 
                 Vector3 position = userGameObject.transform.position + dir * 0.5f;
@@ -117,38 +90,22 @@ public class WeaponUseUtils
                 PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
                 PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
                 PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
-                // °ø°Ý ¹üÀ§ ¼¼ÆÃ
                 PlayerCore.Instance.PlayerAttack.SetAttackRange(data.weaponRange);
 
-                // ¿©±â ¾Ö´Ï¸ÞÀÌ¼Ç ÄÚµå ³Ö±â
                 yield return new WaitForSeconds(data.weaponAnimation);
-                // ¸ð¼Ç Á¾·á
-
-
-                // ³»±¸µµ ´â±â
-                //itemWithState.duability = Mathf.Max(0, itemWithState.duability -
-                //    Mathf.Max(0, data.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
 
                 PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
                 PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
-                // ÀÎº¥Åä¸® ¾÷µ¥ÀÌÆ® 
                 InventoryUiMain.instance.IconRefresh();
-
-                // ... RayCastHit m_hitOnMapÀÇ Á¤º¸¸¦ È°¿ëÇÑ ÄÚµå
-                direction = (m_hitOnMap.point - userGameObject.transform.position).normalized;
             }
 
-            // ÀÎº¥Åä¸® ¾÷µ¥ÀÌÆ® 
             InventoryUiMain.instance.IconRefresh();
-		    
         }
-		finally
+        finally
         {
-            // ÇÃ·¹ÀÌ¾î ¼Óµµ º¹±¸
             PlayerCore.Instance.speed = originalSpeed;
         }
-        
-        // °ø°Ý µô·¹ÀÌ
+
         yield return new WaitForSeconds(data.weaponDelay);
     }
 }

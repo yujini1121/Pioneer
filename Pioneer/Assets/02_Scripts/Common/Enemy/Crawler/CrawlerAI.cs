@@ -1,14 +1,14 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class CrawlerAI : EnemyBase, IBegin
 {
-    // ³×ºê ¸Ş½Ã
+    // ë„¤ë¹„ ë©”ì‹œ
     private NavMeshAgent agent;
 
-    // °¨ÁöµÈ ¿ÀºêÁ§Æ® °¡±î¿î ¼øÀ¸·Î Á¤·ÄÇÒ ¸®½ºÆ®
+    // ê°ì§€ëœ ì˜¤ë¸Œì íŠ¸ë¥¼ ê°€ê¹Œìš´ ìˆœì„œë¡œ ì •ë ¬í•œ ë¦¬ìŠ¤íŠ¸
     List<Transform> sortedTarget;
 
     private int closeTarget = 0;
@@ -28,6 +28,7 @@ public class CrawlerAI : EnemyBase, IBegin
     void Start()
     {
         base.Start();
+        InitializeAnimationSystem();
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
         if (agent != null) agent.speed = speed;
@@ -46,15 +47,15 @@ public class CrawlerAI : EnemyBase, IBegin
             return;
 
         float dt = Time.deltaTime;
-
-        // °ø°İ ÄğÅ¸ÀÓÀÌ¾îµµ ¾Ö´Ï¸ŞÀÌ¼Ç Æ®¸®°Å´Â °è¼Ó °»½Å(¾È ±×·¯¸é Å©·Ñ·¯°¡ ¸ØÃá °ÍÃ³·³ º¸ÀÏ ¼ö ÀÖÀ½)
+        // ê³µê²© ì¿¨íƒ€ì„ì—ë„ ì• ë‹ˆë©”ì´ì…˜ íŠ¸ë¦¬ê±°ëŠ” ê³„ì† ê°±ì‹ í•´ì„œ ë©ˆì¶˜ ê²ƒì²˜ëŸ¼ ë³´ì´ì§€ ì•Šê²Œ ìœ ì§€
+        // æ€¨ë“¦êº½ è‘â‘¦??ê¾©ì” ?ëŒ€ë£„ ?ì¢Šë•²ï§ë¶¿ì” ???ëªƒâ”å«„ê³•ë’— æ€¨ê¾©ëƒ½ åª›ê¹†ë–Š(??æ´¹ëªƒìœ­ï§??Ñ‰Â·?Ñˆ? ï§ë‰í…£ å¯ƒê»‹ì¿‚??è¹‚ëŒì”ª ???ë‰ì“¬)
         if (attackTimer > 0f)
         {
             attackTimer -= dt;
             ChangeIdleByIndex(lastMoveDirection);
             ApplyAnimTrigger();
 
-            // ÄğÅ¸ÀÓ ³¡³ª¸é ´Ù½Ã ÀÌµ¿ Çã¿ë
+            // ì¿¨íƒ€ì„ì´ ëë‚˜ë©´ ë‹¤ì‹œ ì´ë™ í—ˆìš©
             if (attackTimer <= 0f && agent != null) agent.isStopped = false;
             return;
         }
@@ -87,7 +88,7 @@ public class CrawlerAI : EnemyBase, IBegin
 
     }
 
-    // ±âº» ¼¼ÆÃ
+    // ê¸°ë³¸ ì„¸íŒ…
     protected override void SetAttribute()
     {
         maxHp = 50;
@@ -130,14 +131,14 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private void Attack()
     {
-        //°ø°İ ½ÃÀÛÇÏ¸é RunÀ¸·Î ÀÌµ¿ÇÏ´Â °æ·Î¸¦ ²÷¾î¹ö¸² (desiredVelocity·Î Run Æ®¸®°Å ³ª°¡´Â °Í ¹æÁö)
+        // ê³µê²© ì‹œì‘ ì‹œ Run ìª½ìœ¼ë¡œ ì„ì—¬ ë“¤ì–´ê°€ëŠ” ê²ƒì„ ë°©ì§€
         if (agent != null)
         {
             agent.isStopped = true;
             agent.ResetPath();
         }
 
-        // °ø°İ ¹æÇâÀ» Å¸°Ù ÂÊÀ» ¹Ù¶óº¸°Ô °»½Å (¿¡³Ê¹Ì´Â ÁÂ, ¿ì 2ÇÁ·¹ÀÓ!!)
+        // ê³µê²© ë°©í–¥ì„ íƒ€ê²Ÿ ìª½ìœ¼ë¡œ ê°±ì‹  (ì¢Œìš° 2ë°©í–¥ ì‚¬ìš©)
         if (currentAttackTarget != null)
         {
             Vector3 look = currentAttackTarget.transform.position - transform.position;
@@ -195,13 +196,13 @@ public class CrawlerAI : EnemyBase, IBegin
             agent.speed = speed;
     }
 
-    // ---------------- ¾Ö´Ï¸ŞÀÌ¼Ç À¯Æ¿ ----------------
+    // ---------------- ì• ë‹ˆë©”ì´ì…˜ ë³´ì¡° ----------------
 
     private void UpdateLocomotionAnim()
     {
         if (agent == null) return;
 
-        Vector3 v = agent.desiredVelocity;
+        Vector3 v = agent.velocity;
         v.y = 0f;
 
         if (v.sqrMagnitude > 0.0001f)

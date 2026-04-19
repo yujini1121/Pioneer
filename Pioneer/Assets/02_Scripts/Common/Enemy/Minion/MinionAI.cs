@@ -1,24 +1,24 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class MinionAI : EnemyBase, IBegin
 {
-    [Header("µÕÁö ÇÁ¸®ÆÕ")]
+    [Header("ë‘¥ì§€ í”„ë¦¬íŒ¹")]
     [SerializeField] private GameObject nestPrefab;
 
-    // ³×ºê ¸Ş½Ã 
+    // ë„¤ë¹„ ë©”ì‹œ
     private NavMeshAgent agent;
 
-    // µÕÁö °ü·Ã º¯¼ö
+    // ë‘¥ì§€ ê´€ë ¨ ë³€ìˆ˜
     public bool isNestCreated = false;
     private float nestCool = 15f;
     private float nestCreationTime = -1f;
 
-    // Å¸°Ù º¯¼öµé
-    private GameObject revengeTarget;   // ³ª¸¦ °ø°İÇÑ Àû
-    // ÃÖÁ¾ ¸ñÇ¥ : currentAttackTarget
+    // íƒ€ê²Ÿ ê´€ë ¨ ë³€ìˆ˜ë“¤
+    private GameObject revengeTarget;   // ë‚˜ë¥¼ ê³µê²©í•œ ëŒ€ìƒ
+    // ìµœì¢… ëª©í‘œ : currentAttackTarget
 
     private float attackTimer = 0f;
 
@@ -33,6 +33,7 @@ public class MinionAI : EnemyBase, IBegin
     void Start()
     {
         base.Start();
+        InitializeAnimationSystem();
         stunHandler = GetComponent<StunHandler>();
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
@@ -61,21 +62,21 @@ public class MinionAI : EnemyBase, IBegin
 
         float dt = Time.deltaTime;
 
-        // °ø°İ ÄğÅ¸ÀÓÀÌ¾îµµ ¾Ö´Ï¸ŞÀÌ¼Ç Æ®¸®°Å´Â °è¼Ó °»½Å(¾È ±×·¯¸é ¹Ì´Ï¾ğÀÌ ¸ØÃá °ÍÃ³·³ º¸ÀÏ ¼ö ÀÖÀ½)
+        // ê³µê²© ì¿¨íƒ€ì„ì—ë„ ì• ë‹ˆë©”ì´ì…˜ íŠ¸ë¦¬ê±°ëŠ” ê³„ì† ê°±ì‹ í•´ì„œ ë©ˆì¶˜ ê²ƒì²˜ëŸ¼ ë³´ì´ì§€ ì•Šê²Œ ìœ ì§€
         if (attackTimer > 0f)
         {
             attackTimer -= dt;
             ChangeIdleByIndex(lastMoveDirection);
             ApplyAnimTrigger();
 
-            // ÄğÅ¸ÀÓ ³¡³ª¸é ´Ù½Ã ÀÌµ¿ Çã¿ë
+            // ì¿¨íƒ€ì„ì´ ëë‚˜ë©´ ë‹¤ì‹œ ì´ë™ í—ˆìš©
             if (attackTimer <= 0f && agent != null) agent.isStopped = false;
             return;
         }
 
         fov.DetectTargets(detectMask);
 
-        // °ø°İÇÒ Å¸°Ù ¼³Á¤
+        // ê³µê²© ëŒ€ìƒ ì„¤ì •
         UpdateTarget();
 
         Collider[] targetsInAttackRange = DetectAttackRange();
@@ -162,7 +163,7 @@ public class MinionAI : EnemyBase, IBegin
     }
 
     // =============================================================
-    // Çàµ¿ Á¶°Ç
+    // í–‰ë™ ì¡°ê±´
     // =============================================================
     private bool CanCreateNest(bool isAttackable)
     {
@@ -194,7 +195,7 @@ public class MinionAI : EnemyBase, IBegin
     }
 
     // =============================================================
-    // µÕÁö »ı¼º
+    // ë‘¥ì§€ ìƒì„±
     // =============================================================
     void CreateNest()
     {
@@ -204,18 +205,18 @@ public class MinionAI : EnemyBase, IBegin
     }
 
     // =============================================================
-    // °ø°İ : ÀÌ¹Ì °ø°İÀÌ °¡´ÉÇÔÀ» ÀüÁ¦·Î ÇÔ. °ø°İ ¹üÀ§ ¾È¿¡ µé¾î¿Ô´Ù´Â ¶æ
+    // ê³µê²© : ë²”ìœ„ ì•ˆì˜ íƒ€ê²Ÿì—ê²Œ ì‹¤ì œ ë°ë¯¸ì§€ë¥¼ ì ìš©
     // =============================================================
     private void Attack()
     {
-        // °ø°İ ½ÃÀÛÇØµµ Run ¾Ö´Ï¸ŞÀÌ¼ÇÀ¸·Î ÀÌµ¿ÇÏ´Â °É ¸·±â À§ÇÔ
+        // ê³µê²© ì‹œì‘ ì‹œ Run ì• ë‹ˆë©”ì´ì…˜ìœ¼ë¡œ ì„ì—¬ ë“¤ì–´ê°€ëŠ” ê²ƒì„ ë°©ì§€
         if (agent != null)
         {
             agent.isStopped = true;
             agent.ResetPath();
         }
 
-        // °ø°İ ¹æÇâ °»½Å (ÁÂ/¿ì 2ÇÁ·¹ÀÓ)
+        // ê³µê²© ë°©í–¥ ê°±ì‹  (ì¢Œìš° 2ë°©í–¥ ì‚¬ìš©)
         if (currentAttackTarget != null)
         {
             Vector3 look = currentAttackTarget.transform.position - transform.position;
@@ -241,7 +242,7 @@ public class MinionAI : EnemyBase, IBegin
     }
 
     // =============================================================
-    // ÀÌµ¿
+    // ì´ë™
     // =============================================================
     void Move()
     {
@@ -260,7 +261,7 @@ public class MinionAI : EnemyBase, IBegin
 
 
     // =============================================================
-    // À¯Æ¿¸®Æ¼ ¸Ş¼­µå
+    // ìœ í‹¸ë¦¬í‹° ë©”ì„œë“œ
     // =============================================================
 
     private Transform FindClosestTargetInDetect(List<Transform> targets)
@@ -330,13 +331,13 @@ public class MinionAI : EnemyBase, IBegin
             agent.speed = speed;
     }
 
-    // ---------------- ¾Ö´Ï¸ŞÀÌ¼Ç À¯Æ¿ ----------------
+    // ---------------- ?ì¢Šë•²ï§ë¶¿ì” ???ì¢ë–¥ ----------------
 
     private void UpdateLocomotionAnim()
     {
         if (agent == null) return;
 
-        Vector3 v = agent.desiredVelocity;
+        Vector3 v = agent.velocity;
         v.y = 0f;
 
         if (v.sqrMagnitude > 0.0001f)

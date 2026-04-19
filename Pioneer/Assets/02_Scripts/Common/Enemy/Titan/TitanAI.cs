@@ -12,6 +12,7 @@ public class TitanAI : EnemyBase, IBegin
 
     private bool isAttack = false;
     private float attackTimer = 0f;
+    private Vector3 previousPosition;
 
     private StunHandler stunHandler;
     private float originalSpeed;
@@ -24,6 +25,7 @@ public class TitanAI : EnemyBase, IBegin
     void Start()
     {
         base.Start();
+        InitializeAnimationSystem();
 
         stunHandler = GetComponent<StunHandler>();
 
@@ -44,6 +46,8 @@ public class TitanAI : EnemyBase, IBegin
         {
             ApplyThunderSpeedModifier(0.8f);
         }
+
+        previousPosition = transform.position;
     }
 
     void Update()
@@ -212,7 +216,9 @@ public class TitanAI : EnemyBase, IBegin
         }
 
         isAttack = false;
+        previousPosition = transform.position;
     }
+
     public void ApplyThunderSpeedModifier(float multiplier)
     {
         speed = originalSpeed * multiplier;
@@ -231,14 +237,15 @@ public class TitanAI : EnemyBase, IBegin
 
     private void UpdateLocomotionAnim()
     {
+        Vector3 v = transform.position - previousPosition;
+        previousPosition = transform.position;
+        v.y = 0f;
+
         if (currentAttackTarget == null)
         {
             ChangeIdleByIndex(lastMoveDirection);
             return;
         }
-
-        Vector3 v = currentAttackTarget.transform.position - transform.position;
-        v.y = 0f;
 
         if (v.sqrMagnitude > 0.0001f)
         {

@@ -4,11 +4,10 @@ using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
-using UnityEngine.UI; // UI ����ĳ��Ʈ��
+using UnityEngine.UI; // UI 레이캐스트용
 
-#warning TODO : CreateObject ������ �ʿ�
-// ���� : ���콺 ���� -> �Ǽ� ���� ���� -> �̵� -> ��ġ
-// �ʿ� : �����ǿ��� ���� ���� ���� -> ���� ��ư ���� -> ���� UI ��� -> �Ǽ� UI ��ȯ -> ���콺 ���� -> �Ǽ� ���� ���� -> �̵� -> �ð� �Ҹ� �� ���ع��� �ʴ��� �׻� üũ -> ������ �Ҹ� -> ��ġ
+#warning TODO : CreateObject 정리 필요
+// 흐름: 마우스 위치 확인 -> 설치 프리뷰 표시 -> 이동 -> 설치 완료
 
 public class CreateObject : MonoBehaviour, IBegin
 {
@@ -32,48 +31,49 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public bool IsBuilding => onHand != null;
 
-    [Header("�⺻ ����")]
+    [Header("기본 설정")]
     [SerializeField] private Transform worldSpaceParent;
     private Transform playerTrans;
     private Camera mainCamera;
 
-    [Header("��ġ ������Ʈ ����")]
+    [Header("설치 오브젝트 설정")]
     public CreationType creationType;
     [SerializeField] private float maxDistance = 5f;
     [SerializeField] private LayerMask platformLayer;
     [SerializeField] private LayerMask creationLayer;
     [SerializeField] private Color rejectColor = Color.red;
     [SerializeField] private Color permitColor = Color.green;
+    [SerializeField, Range(0f, 1f)] private float previewAlpha = 0.55f;
     [SerializeField] private CreationList creationList;
     private GameObject onHand;
     private GameObject tempObj;
-    private Renderer creationRender;  // MeshRenderer ���� ������� ����
+    private Renderer creationRender;  // 프리뷰 색상 표시용 렌더러
     private readonly Dictionary<CreationType, GameObject> creationDict = new Dictionary<CreationType, GameObject>();
     private int rotateN = 0;
 
-    [Header("�׺�޽� ����")]
+    [Header("네브메시 설정")]
     [SerializeField] public NavMeshSurface navMeshSurface;
     [SerializeField] private float stopDistance = 1.5f;
     private NavMeshAgent playerAgent;
 
-    [Header("UI ����ĳ��Ʈ ����")]
-    [SerializeField] private GraphicRaycaster uiRaycaster;  // null�̾�� �����۵�; �Ϻη� �Ҵ� �� �ص� �̤�..
+    [Header("UI 레이캐스트 설정")]
+    [SerializeField] private GraphicRaycaster uiRaycaster;  // 없어도 동작하지만 있으면 UI 위 클릭 차단 가능
     [SerializeField] private GameObject uiOutside;
 
-    [Header("�̵� ��� ����")]
+    [Header("이동 잠금 설정")]
     [SerializeField] private bool lockMovementWhileOrienting = true;
     [SerializeField] private bool alsoZeroPlayerSpeed = true;
     private bool isOrienting = false;
     private bool movementLocked = false;
     private float originalPlayerSpeed = -1f;
 
-    [Header("�����ذ��ϰ�;��")]
-    [SerializeField] private float arrivedSpeedEps;   // �� �ӵ����� ������ "����"���� ����
-    [SerializeField] private float arrivedHoldTime;    // ������ �� �ð� �̻� ���ӵǸ� ��ġ
+    [Header("도착 판정 설정")]
+    [SerializeField] private float arrivedSpeedEps;   // 이 속도 이하이면 거의 도착으로 간주
+    [SerializeField] private float arrivedHoldTime;   // 일정 시간 이상 유지되면 설치 시작
     private float arrivedTimer = 0f;
 
-    [Header("���� ���")]
-    [SerializeField] private float installTimeSec = 2f; // Installable SO���� ���Խ�Ű��
+    [Header("설치 진행 UI")]
+    [SerializeField] private float installTimeSec = 2f; // Installable SO에서 덮어쓸 수 있음
     [SerializeField] private Image ringBackground;
     [SerializeField] private Image ringFill;
 
@@ -87,7 +87,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private SItemStack[] cost;
 
-    // Footprint/Anchor ��� ������ ���� ������ ���� ����
+    // 현재 설치형 오브젝트의 Footprint / Anchor 계산 기준
     private SInstallableObjectDataSO _activeInstallableSO;
 
     private void HideInstallProgressUi()
@@ -124,7 +124,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
 
-        // ������ ��ųʸ� ��� (�̷��� �� �ϸ� �ȵ�....)
+        // 생성 프리팹 딕셔너리 구성
         creationDict.Add(CreationType.Platform, creationList.platform);
         creationDict.Add(CreationType.Wall, creationList.wall);
         creationDict.Add(CreationType.Door, creationList.door);
@@ -140,7 +140,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Start()
     {
-        ExitInstallMode(); // ���� ���� �� ��ġ ��� OFF
+        ExitInstallMode(); // 시작 시 설치 모드 비활성화
 
         if (uiOutside == null)
         {
@@ -188,12 +188,14 @@ public class CreateObject : MonoBehaviour, IBegin
         if (hasPendingPlacement)
         {
             Trim();
+            UpdateBuildMoveAnimation();
             return;
         }
 
         CheckCreatable();
         HandleOrientationInput();
         Trim();
+        UpdateBuildMoveAnimation();
 
         if (tempObj != null
             && !isOrienting
@@ -212,7 +214,7 @@ public class CreateObject : MonoBehaviour, IBegin
         onHand.transform.localPosition = Vector3.zero;
         onHand.layer = 0;
 
-        creationRender = onHand.GetComponent<Renderer>(); // MeshRenderer ���
+        creationRender = onHand.GetComponent<Renderer>(); // 프리뷰 렌더러 캐싱
         var col = onHand.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
@@ -226,32 +228,32 @@ public class CreateObject : MonoBehaviour, IBegin
         return new Vector3(x * cellSize, 0f, z * cellSize);
     }
 
-    // ���� Ÿ���� �� ũ��
+    // 현재 설치형 오브젝트의 셀 크기
     private float GetActiveCellSize()
     {
-        // SO�� ������ SO �켱
+        // SO 값 우선
         if (_activeInstallableSO != null && _activeInstallableSO.gridCellSize > 0f)
             return _activeInstallableSO.gridCellSize;
 
-        // SO�� ���ų� 0�̸� default ���
+        // SO가 없거나 0이면 기본값 사용
         return defaultCellSize;
     }
 
-    // Anchor ������ ��������
+    // 현재 Anchor 오프셋 계산
     private Vector2 GetActiveAnchorOffsetCells()
     {
         if (_activeInstallableSO == null) return Vector2.zero;
         return _activeInstallableSO.GetAnchorOffsetCellsByRotateN(rotateN);
     }
 
-    // Footprint �� ��������
+    // 현재 Footprint 계산
     private Vector2Int GetActiveFootprint()
     {
         if (_activeInstallableSO == null) return Vector2Int.one;
         return _activeInstallableSO.GetFootprintByRotateN(rotateN);
     }
 
-    // Anchor�� �ݿ��� ����
+    // Anchor를 반영한 그리드 스냅
     private Vector3 SnapToGridWithAnchor(Vector3 localPos)
     {
         float cellSize = GetActiveCellSize();
@@ -295,7 +297,10 @@ public class CreateObject : MonoBehaviour, IBegin
     private void SetPreviewColor(Color c)
     {
         if (creationRender != null && creationRender.material != null)
+        {
+            c.a = previewAlpha;
             creationRender.material.color = c;
+        }
     }
 
     private void TryPlaceIfPermitted(Vector3 worldPos, Vector3 localPos)
@@ -313,7 +318,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void CheckCreatable()
     {
-        #region UI ������ ��ġ���� ���� ��������� ������ �ʰ� ó���� 
+        #region UI 위 클릭이면 설치 프리뷰 갱신 중지
         if (IsBlockedByUI())
         {
             SetPreviewVisible(false);
@@ -327,8 +332,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (!TryGetMouseGroundPoint(out var mouseWorldPos)) return;
 
-        // ����: SnapToGrid(worldSpaceParent.InverseTransformPoint(mouseWorldPos))
-        // Anchor �ݿ� ����(��ġ ���� ����)
+        // Anchor를 반영한 스냅 좌표 계산
         Vector3 localMouse = worldSpaceParent.InverseTransformPoint(mouseWorldPos);
         Vector3 localPos = SnapToGridWithAnchor(localMouse);
 
@@ -341,13 +345,13 @@ public class CreateObject : MonoBehaviour, IBegin
     private void HandleOrientationInput()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f) // ����
+        if (scroll > 0f) // 위로
         {
             rotateAngleIndex++;
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.RotateInstallTypeObject);
         }
-        else if (scroll < 0f) // �Ʒ���
+        else if (scroll < 0f) // 아래로
         {
             rotateAngleIndex--;
             if (AudioManager.instance != null)
@@ -417,7 +421,7 @@ public class CreateObject : MonoBehaviour, IBegin
         Vector2Int fp = GetActiveFootprint();
         float cellSize = GetActiveCellSize();
 
-        // ������ ����: ix - w/2 + 0.5 
+        // 셀 중심 기준 계산
         for (int ix = 0; ix < fp.x; ix++)
         {
             float ox = (ix - (fp.x / 2f) + 0.5f) * cellSize;
@@ -431,7 +435,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private bool CheckFootprintSupportAndOverlap(Vector3 pivotCenterWorld)
     {
-        //maxDistance���� �ָ� ��ġ �Ұ���
+        // 최대 거리 밖이면 설치 불가
         if (Vector3.SqrMagnitude(pivotCenterWorld - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
         {
             return false;
@@ -442,13 +446,13 @@ public class CreateObject : MonoBehaviour, IBegin
 
         foreach (var cellCenter in EnumerateFootprintCellCenters(pivotCenterWorld))
         {
-            // �÷��� üũ
+            // 바닥 체크
             if (!Physics.CheckBox(cellCenter, halfSize, orientation, platformLayer))
             {
                 return false;
             }
 
-            // ��ħ üũ(�ٸ� ��ġ��)
+            // 겹침 체크(다른 설치물)
             if (Physics.CheckBox(cellCenter, halfSize, orientation, creationLayer))
             {
                 return false;
@@ -460,60 +464,53 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private bool CheckNear(Vector3 center)
     {
-        float[] xArr; //x��ġ
-        float[] zArr; //y��ġ
-        float[] xSign; //x��ȣ
-        float[] zSign; //y��ȣ
+        float[] xArr; // x 위치
+        float[] zArr; // z 위치
+        float[] xSign; // x 부호
+        float[] zSign; // z 부호
 
-        //maxDistance���� �ָ� ��ġ �Ұ���
+        // 최대 거리 밖이면 설치 불가
         if (Vector3.SqrMagnitude(center - SnapToGrid(playerTrans.position)) > maxDistance * maxDistance)
         {
             return false;
         }
 
-        #region ������Ʈ�� ���� �ɼ� ����
+        #region 오브젝트별 설치 가능 판정
         switch (creationType)
         {
             case CreationType.Platform:
-                // (�߷�) ? ������Ʈ�� �ݿ��Ͻ� MeshRenderer/���� ���� ���� ����, ���� �״�� ����
-                // 1) MastManager / MastSystem �ִ� ���� üũ
-                // 2) �ֺ� �ڽ� üũ ����
-                // 3) ��ġ ����/�Ұ� ��ȯ
-                // ---- �Ʒ��� ���ε庻 �״�� ���� ----
-
-                // ���� �߰�
+                // 플랫폼은 기존 갑판 확장 규칙을 그대로 사용
                 if (MastManager.Instance != null)
                 {
                     int currentDeckCount = MastManager.Instance.currentDeckCount;
-                    int maxDeckCount = 30; // 1���� �ִ� ����
+                    int maxDeckCount = 30; // 기본 최대 개수
 
-                    // ���� ������ ���� �ִ� ���� Ȯ��
+                    // 마스트가 있으면 실제 최대치 사용
                     MastSystem[] masts = FindObjectsOfType<MastSystem>();
                     if (masts.Length > 0)
                     {
                         maxDeckCount = masts[0].GetMaxDeckCount();
                     }
 
-                    // �ִ� ���� �ʰ� �� ��ġ �Ұ�
+                    // 최대 개수 초과 시 설치 불가
                     if (currentDeckCount >= maxDeckCount)
                     {
-                        Debug.Log($"���� ��ġ �Ұ�: {currentDeckCount}/{maxDeckCount}�� (�ִ� ����)");
+                        Debug.Log($"갑판 설치 불가: {currentDeckCount}/{maxDeckCount}개 (최대치)");
                         return false;
                     }
                 }
-                // �������
 
                 //1.414213 * 0.5
                 xArr = new float[] { 0.707106f, 0.707106f, -0.707106f, -0.707106f };
                 zArr = new float[] { 0.707106f, -0.707106f, -0.707106f, 0.707106f };
 
-                //���콺 ��ġ�� �÷��� ������ ��ġ �Ұ�
+                // 현재 위치에 이미 플랫폼이 있으면 설치 불가
                 if (Physics.CheckBox(center, new Vector3(0.99f, 0.5f, 0.99f), Quaternion.Euler(new Vector3(0f, 45f, 0f)), platformLayer))
                 {
                     return false;
                 }
 
-                //���콺 ��ġ ���� 4���⿡ ������ü(1.98, 1, 0.48) ������ �÷��� ������ ��ġ ����
+                // 주변 4방향 중 기존 플랫폼과 이어지면 설치 가능
                 for (int i = 0; i < 4; i++)
                 {
                     Vector3 offset = new Vector3(xArr[i], 0f, zArr[i]);
@@ -576,7 +573,7 @@ public class CreateObject : MonoBehaviour, IBegin
         Vector3 dir = (world - playerTrans.position).normalized;
         Vector3 stopPos = world - dir * stopDistance;
 
-        // ���� : ���� ���� !!
+        // 이동 목적지 설정
         playerAgent.stoppingDistance = stopDistance;
 
         UnlockPlayerMovement();
@@ -584,7 +581,7 @@ public class CreateObject : MonoBehaviour, IBegin
         playerAgent.ResetPath();
         playerAgent.SetDestination(stopPos);
 
-        // �� �̵� �����̹Ƿ� Ÿ�̸� ����
+        // 새 이동이므로 타이머 초기화
         arrivedTimer = 0f;
     }
 
@@ -598,7 +595,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         if (nearEnough || almostStopped)
         {
-            // ����: ���� Ÿ�̸� ��� ���۽ð� �ڷ�ƾ 1ȸ ����
+            // 도착 판정이 나면 설치 카운트다운 시작
             if (!isCountingDown && installRoutine == null)
             {
                 installRoutine = StartCoroutine(InstallCountdownRoutine());
@@ -607,7 +604,7 @@ public class CreateObject : MonoBehaviour, IBegin
         else
         {
             arrivedTimer = 0f;
-            // �̵� �簳: ���� ���̸� ���
+            // 다시 움직이면 카운트다운 취소
             if (installRoutine != null)
             {
                 CancelInstallCountdown();
@@ -615,14 +612,39 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-    // EnterInstallMode(SInstallableObjectDataSO installableSO)�� ȣ��Ǿ����Ŷ�� �����ϰ� ȣ���մϴ�.
+    private void UpdateBuildMoveAnimation()
+    {
+        if (PlayerCore.Instance == null || PlayerController.instance == null || playerAgent == null)
+            return;
+
+        bool isArriving = !playerAgent.pathPending &&
+                          playerAgent.remainingDistance <= playerAgent.stoppingDistance + 0.1f;
+
+        Vector3 moveDir = playerAgent.desiredVelocity;
+        moveDir.y = 0f;
+
+        if (tempObj != null && !isArriving && moveDir.sqrMagnitude > 0.04f)
+        {
+            Vector3 dir = moveDir.normalized;
+            PlayerController.instance.lastMoveDirection = dir;
+            PlayerCore.Instance.Move(dir);
+            return;
+        }
+
+        if (tempObj != null || isCountingDown || onHand != null)
+        {
+            PlayerCore.Instance.Idle(PlayerController.instance.lastMoveDirection);
+        }
+    }
+
+    // 설치 모드 진입
     private IEnumerator InstallCountdownRoutine()
     {
         Debug.Assert(cost != null);
 
         isCountingDown = true;
         arrivedTimer = 0f;
-        // UI ����
+        // UI 초기화
         if (ringFill != null)
         {
             ringFill.fillAmount = 0f;
@@ -632,14 +654,14 @@ public class CreateObject : MonoBehaviour, IBegin
         float t = 0f;
         while (t < installTimeSec)
         {
-            // ��� �Է�: ��Ŭ��/ F
+            // 취소 입력: 우클릭 / F
             if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.F))
             {
                 CancelInstallCountdown();
                 yield break;
             }
 
-            //// �̵� �Է����ε� ���
+            //// 이동 입력이 들어오면 취소
             //if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
             //{
             //    CancelInstallCountdown();
@@ -660,17 +682,17 @@ public class CreateObject : MonoBehaviour, IBegin
         navMeshSurface.BuildNavMesh();
         GameManager.Instance?.NotifyPlatformLayoutChanged();
 
-        // ���� �߰�: ���� ���� ����
+        // 플랫폼 설치 수 갱신
         if (creationType == CreationType.Platform && MastManager.Instance != null)
         {
             MastManager.Instance.UpdateCurrentDeckCount();
-            Debug.Log($"���� ���� ����: {MastManager.Instance.currentDeckCount}");
+            Debug.Log($"현재 갑판 수 갱신: {MastManager.Instance.currentDeckCount}");
         }
 
         tempObj.GetComponent<InstalledObject>()?.OnPlaced();
-        Debug.Log("[��ġ �Ϸ��]");
+        Debug.Log("[설치 완료]");
 
-        // <<���⼭ ��Ḧ ���� ����
+        // 여기서 재료 차감
         InventoryManager.Instance.Remove(cost);
         InventoryUiMain.instance.IconRefresh();
 
@@ -709,7 +731,7 @@ public class CreateObject : MonoBehaviour, IBegin
         arrivedTimer = 0f;
     }
 
-    // InGameUI���� Ŭ���� ���� ������. (�ش� �Լ� ȣ���� �����մϴ�.)
+    // InGameUI에서 설치형 아이템 선택 시 호출
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
 
@@ -729,21 +751,21 @@ public class CreateObject : MonoBehaviour, IBegin
 
         Debug.Assert(cost.Length > 0);
 
-        // ���� �� ī��Ʈ�ٿ� ����
+        // 진행 중인 카운트다운 취소
         if (installRoutine != null) CancelInstallCountdown();
 
-        // ���� ������/�ӽ� ������Ʈ ����
+        // 기존 프리뷰 / 임시 오브젝트 제거
         if (onHand != null) { Destroy(onHand); onHand = null; }
         if (tempObj != null) { Destroy(tempObj); tempObj = null; }
 
-        // NavMeshAgent ����
+        // NavMeshAgent 준비
         if (playerAgent == null) playerAgent = GetComponent<NavMeshAgent>();
         if (playerAgent != null && !playerAgent.enabled) playerAgent.enabled = true;
 
-        // ��ġ Ÿ��/���۽ð� ����(SO ����)
+        // 설치 타입 / 시간 설정 (SO 기준)
         if (installableSO != null)
         {
-            _activeInstallableSO = installableSO; // ���� ��ġ SO ����
+            _activeInstallableSO = installableSO; // 현재 설치 SO 저장
             creationType = (CreationType)(int)installableSO.installType;
             installTimeSec = Mathf.Max(0.1f, installableSO.buildTime);
         }
@@ -752,7 +774,7 @@ public class CreateObject : MonoBehaviour, IBegin
             _activeInstallableSO = null;
         }
 
-        // UI/���� �ʱ�ȭ
+        // UI / 상태 초기화
         if (ringFill != null)
         {
             ringFill.fillAmount = 0f;
@@ -764,7 +786,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         CreateObjectInit();
 
-        Debug.Log($"[��ġ��� ����] {creationType}, ���� {installTimeSec:F2}s");
+        Debug.Log($"[설치 모드 시작] {creationType}, 시간 {installTimeSec:F2}s");
     }
 
     public void ExitInstallMode()
@@ -791,7 +813,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         _activeInstallableSO = null;
 
-        Debug.Log("[��ġ ��� �����]");
+        Debug.Log("[설치 모드 종료]");
     }
 
     private void LockPlayerMovement()
@@ -837,7 +859,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     public bool EvaluatePlacement(CreationType type, Vector3 worldPos, Quaternion rot)
     {
-        // onHand/rotateN�� ��� ��� ���Ƿ� ���-����
+        // onHand / rotateN 상태를 임시로 바꿔 평가
         var bakType = creationType;
         var bakOnHand = onHand;
         var bakRotateN = rotateN;
@@ -847,18 +869,18 @@ public class CreateObject : MonoBehaviour, IBegin
         {
             creationType = type;
 
-            // onHand ��ü�� ���� Ʈ������
+            // onHand 대체용 더미 트랜스폼
             if (_evalDummy == null) _evalDummy = new GameObject("~EvalDummy");
             onHand = _evalDummy;
             onHand.transform.rotation = rot;
 
-            // rotateN�� 90�� ���� ȸ�� ��ǥ
+            // 90도 단위 회전 인덱스 계산
             rotateN = Mathf.RoundToInt(rot.eulerAngles.y / 90f) % 4;
             return CheckNear(worldPos);
         }
         finally
         {
-            // ����
+            // 복구
             creationType = bakType;
             onHand = bakOnHand;
             rotateN = bakRotateN;

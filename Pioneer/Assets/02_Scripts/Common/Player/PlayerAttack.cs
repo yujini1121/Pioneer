@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+Ôªøusing System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour, IBegin
@@ -7,7 +7,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
     public Collider attackCollider;
     public LayerMask enemyLayer;
 
-    [Header("æ÷¥œ∏ﬁ¿Ãº« º≥¡§")]
+    [Header("Ïï†ÎãàÎ©îÏù¥ÏÖò ÏÑ§Ï†ï")]
     [SerializeField] PlayerController playerController;
     AnimationSlot slots;
     readonly HashSet<CreatureBase> hitTargets = new HashSet<CreatureBase>();
@@ -53,7 +53,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
         ChangeAnim(playerController.lastMoveDirection);
         InventoryManager.Instance.ApplyItemDuablilityUsed();
         PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
-        Debug.Log("AddExp() »£√‚");
+        Debug.Log("AddExp() Ìò∏Ï∂ú");
     }
 
     private bool IsEnemyTarget(Collider other)
@@ -65,6 +65,43 @@ public class PlayerAttack : MonoBehaviour, IBegin
             return true;
 
         return ((1 << other.gameObject.layer) & enemyLayer.value) != 0;
+    }
+
+    public bool HasEnemyInDirection(Vector3 dir, float range)
+    {
+        if (playerController == null)
+            return false;
+
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f)
+            return false;
+
+        Vector3 origin = playerController.transform.position;
+        Collider[] hits = Physics.OverlapSphere(origin, Mathf.Max(range, 0.5f), enemyLayer, QueryTriggerInteraction.Ignore);
+
+        foreach (Collider hit in hits)
+        {
+            if (hit == null)
+                continue;
+
+            Vector3 toTarget = hit.bounds.center - origin;
+            toTarget.y = 0f;
+
+            if (toTarget.sqrMagnitude > range * range)
+                continue;
+
+            if (Vector3.Dot(dir.normalized, toTarget.normalized) < 0.2f)
+                continue;
+
+            CreatureBase target = hit.GetComponentInParent<CreatureBase>();
+            if (target == null)
+                target = hit.GetComponent<CreatureBase>();
+
+            if (target != null && !target.IsDead)
+                return true;
+        }
+
+        return false;
     }
 
     public void PlayAttack(Vector3 dir)
@@ -81,7 +118,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
     {
         if (attackCollider != null)
         {
-            Debug.Log(">> PlayerAttack.EnableAttackCollider() »£√‚");
+            Debug.Log(">> PlayerAttack.EnableAttackCollider() Ìò∏Ï∂ú");
             hitTargets.Clear();
             attackCollider.enabled = true;
         }

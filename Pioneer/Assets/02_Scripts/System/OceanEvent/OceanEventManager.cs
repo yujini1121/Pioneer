@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -14,7 +14,7 @@ public class OceanEventManager : MonoBehaviour
 
     private readonly List<Coroutine> runningCoroutines = new List<Coroutine>();
 
-    [Header("³ú¿ì")]
+    [Header("ë‡Œìš°")]
     [SerializeField] private GameObject thunderEffect;
     [SerializeField] private GameObject rainEffect;
     [SerializeField] private float thunderInterval = 30f;
@@ -22,7 +22,7 @@ public class OceanEventManager : MonoBehaviour
     [SerializeField] private float thunderRadius = 3f;
     [SerializeField] private float thunderStunDuration = 2f;
     
-    [Header("¼¼ÀÌ·»")]
+    [Header("ì„¸ì´ë Œ")]
     [SerializeField] private GameObject sirenDebuffEffect;
     [SerializeField] private GameObject sirenAppearLeftEffect;
     [SerializeField] private GameObject sirenAppearRightEffect;
@@ -31,10 +31,10 @@ public class OceanEventManager : MonoBehaviour
     [SerializeField] private float sirenCharmDuration = 10f;
     [SerializeField] private float sirenProcChance = 0.5f;
 
-    [Header("¾È°³")]
+    [Header("ì•ˆê°œ")]
     [SerializeField] private FogFade fogFade;
 
-    [Header("µ¹Ç³")]
+    [Header("ëŒí’")]
     [SerializeField] private GameObject windEffect;
     [SerializeField] private float windInterval = 10f;
     [SerializeField] private float windMoveSpeed = 16f;
@@ -89,11 +89,11 @@ public class OceanEventManager : MonoBehaviour
 
         RemoveNormalFromRemainingEvents();
 
-        Debug.Log($"[OceanEventManager][Ã¹³¯ ÀÌº¥Æ® : {currentEvent.EventName}]");
+        Debug.Log($"[OceanEventManager][ì²«ë‚  ì´ë²¤íŠ¸ : {currentEvent.EventName}]");
         currentEventName.text = currentEvent.EventName;
     }
 
-    // Ã¹³¯¿¡ ÇØ´ç ÇÔ¼ö¸¦ ½ÇÇàÇØ¼± ¾ÈµË´Ï´Ù.
+    // ì²«ë‚ ì— í•´ë‹¹ í•¨ìˆ˜ë¥¼ ì‹¤í–‰í•´ì„  ì•ˆë©ë‹ˆë‹¤.
     public void EnterDay()
     {
         EndCurrentEvent();
@@ -101,22 +101,22 @@ public class OceanEventManager : MonoBehaviour
         if (remainingEvents.Count == 0)
         {
             ResetRemainingEvents();
-            Debug.Log("[OceanEventManager][ÀÌº¥Æ® ¸ñ·Ï ÃÊ±âÈ­]");
+            Debug.Log("[OceanEventManager][ì´ë²¤íŠ¸ ëª©ë¡ ì´ˆê¸°í™”]");
         }
 
-        // ÀüÃ¼ ¼±ÅÃ
-        //int selectedIndex = Random.Range(0, remainingEvents.Count);
-        //currentEvent = remainingEvents[selectedIndex];
-        //remainingEvents.RemoveAt(selectedIndex);
+        // ì „ì²´ ì„ íƒ
+        int selectedIndex = Random.Range(0, remainingEvents.Count);
+        currentEvent = remainingEvents[selectedIndex];
+        remainingEvents.RemoveAt(selectedIndex);
 
-        #region ÇÏ³ª¸¸ ¼±ÅÃ
-        //// Æò¹ü 
+        #region í•˜ë‚˜ë§Œ ì„ íƒ
+        //// í‰ë²” 
         //currentEvent = new OceanEventNormal();
 
-        //// ¾È°³ 
+        //// ì•ˆê°œ 
         //currentEvent = new OceanEventFog(fogFade);
 
-        //// ¼¼ÀÌ·»
+        //// ì„¸ì´ë Œ
         //currentEvent = new OceanEventSiren(sirenDebuffEffect,
         //                           sirenAppearLeftEffect,
         //                           sirenAppearRightEffect,
@@ -125,18 +125,18 @@ public class OceanEventManager : MonoBehaviour
         //                           sirenCharmDuration,
         //                           sirenProcChance);
 
-        // ³ú¿ì
-        currentEvent = new OceanEventThunder(thunderEffect,
-                                     rainEffect,
-                                     thunderInterval,
-                                     thunderWarningDuration,
-                                     thunderRadius,
-                                     thunderStunDuration);
+        //// ë‡Œìš°
+        //currentEvent = new OceanEventThunder(thunderEffect,
+        //                             rainEffect,
+        //                             thunderInterval,
+        //                             thunderWarningDuration,
+        //                             thunderRadius,
+        //                             thunderStunDuration);
 
-        //// ³ìÁ¶
+        //// ë…¹ì¡°
         //currentEvent = new OceanEventWaterBloom();
 
-        //// µ¹Ç³
+        //// ëŒí’
         //currentEvent = new OceanEventWind(windEffect,
         //                          windInterval,
         //                          windMoveSpeed,
@@ -146,13 +146,13 @@ public class OceanEventManager : MonoBehaviour
         //                          windAirborneDuration,
         //                          windStunDuration);
         #endregion
-        Debug.Log($"[OceanEventManager][¿À´ÃÀÇ ¹Ù´ÙÀÌº¥Æ® : {currentEvent.EventName}]");
+        Debug.Log($"[OceanEventManager][ì˜¤ëŠ˜ì˜ ë°”ë‹¤ì´ë²¤íŠ¸ : {currentEvent.EventName}]");
         currentEventName.text = currentEvent.EventName;
 
         currentEvent.EventRun();
     }
     
-    // Ã¹³¯ Æò¹üÇÑ ³¯ ¿¹¿Ü¶§¹®¿¡ ÀÌ·¸°Ô ¸¸µé¾ú´Âµ¥ ºĞ¸í ´õ ÁÁÀº ¹æ¹ıÀÌ ÀÖÀ»°Å °°À½
+    // ì²«ë‚  í‰ë²”í•œ ë‚  ì˜ˆì™¸ë•Œë¬¸ì— ì´ë ‡ê²Œ ë§Œë“¤ì—ˆëŠ”ë° ë¶„ëª… ë” ì¢‹ì€ ë°©ë²•ì´ ìˆì„ê±° ê°™ìŒ
     private void RemoveNormalFromRemainingEvents()
     {
         for (int i = remainingEvents.Count - 1; i >= 0; i--)
@@ -169,7 +169,7 @@ public class OceanEventManager : MonoBehaviour
     {
         if (currentEvent == null) return;
 
-        Debug.Log($"[OceanEventManager][¹ã ÁøÀÔ : {currentEvent.EventName}]");
+        Debug.Log($"[OceanEventManager][ë°¤ ì§„ì… : {currentEvent.EventName}]");
         currentEvent.EnterNight();
     }
 
@@ -184,7 +184,7 @@ public class OceanEventManager : MonoBehaviour
 
         if (currentEvent == null) return;
 
-        Debug.Log($"[OceanEventManager][ÀÌº¥Æ® Á¾·á : {currentEvent.EventName}]");
+        Debug.Log($"[OceanEventManager][ì´ë²¤íŠ¸ ì¢…ë£Œ : {currentEvent.EventName}]");
         currentEvent.EventEnd();
     }
 

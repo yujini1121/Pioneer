@@ -1,38 +1,39 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyBase : CreatureBase, IBegin
 {
-    [Header("±âº» ¼Ó¼º")]
+    [Header("ê¸°ë³¸ ì†ì„±")]
     protected float idleTime;
     // public GameObject targetObject;
     public GameObject currentAttackTarget;
     [SerializeField] protected float detectionRange;
 
-    [Header("°¨ÁöÇÒ Àû ·¹ÀÌ¾î")]
+    [Header("ê°ì§€ ëŒ€ìƒ ë ˆì´ì–´")]
     [SerializeField] protected LayerMask detectMask;
 
-    [Header("¹è ¹Ù´Ú ·¹ÀÌ¾î")]
+    [Header("ë°”ë‹¥ ì²´í¬ ë ˆì´ì–´")]
     [SerializeField] protected LayerMask groundLayer;
 
-    // ¹Ù´Ú È®ÀÎ º¯¼ö
+    // ë°”ë‹¥ íŒì • ìƒíƒœ
     protected bool isOnGround = false;
-
-    [Header("Attack Box Áß½É ¿ÀÇÁ¼Â Á¶Á¤")]
+    [Header("Attack Box ì¤‘ì‹¬ ì˜¤í”„ì…‹ ì¡°ì •")]
     [SerializeField] private Vector3 attackBoxCenterOffset;
 
 
-    [Header("¸¶½ºÆ® °ÔÀÓ¿ÀºêÁ§Æ®")]
+    [Header("ë§ˆìŠ¤íŠ¸ ê²Œì„ì˜¤ë¸Œì íŠ¸")]
     public GameObject mast;
 
-    // ===== Animation (°øÅë) =====
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç")]
+    // ===== Animation (ê³µí†µ) =====
+    [Header("ì• ë‹ˆë©”ì´ì…˜")]
     [SerializeField] protected AnimationSlot slots;
     [SerializeField] protected Animator animator;
     [SerializeField] protected string nextAnimTrigger = "SetIdle";
     [SerializeField] protected Vector3 lastMoveDirection = Vector3.back;
 
     private AnimatorOverrideController aoc;
+    private Vector3 defaultAnimatorScale;
+    private bool hasDefaultAnimatorScale = false;
     private readonly List<KeyValuePair<AnimationClip, AnimationClip>> overridesList = new();
 
     protected int _curIdleIdx = -1;
@@ -40,24 +41,53 @@ public class EnemyBase : CreatureBase, IBegin
     protected int _curAttackIdx = -1;
 
     /// <summary>
-    /// ¼Ó¼º º¯¼ö¿¡ °ª ÇÒ´ç
+    /// ê¸°ë³¸ ì†ì„± ê°’ì„ ì„¤ì •í•©ë‹ˆë‹¤.
     /// </summary>
     protected virtual void SetAttribute()
     {
 
     }
 
+    protected void InitializeAnimationSystem()
+    {
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
+        if (animator == null || animator.runtimeAnimatorController == null)
+            return;
+
+        if (aoc == null)
+        {
+            if (animator.runtimeAnimatorController is AnimatorOverrideController overrideController)
+            {
+                aoc = overrideController;
+            }
+            else
+            {
+                aoc = new AnimatorOverrideController(animator.runtimeAnimatorController);
+                animator.runtimeAnimatorController = aoc;
+            }
+        }
+
+        overridesList.Clear();
+        aoc.GetOverrides(overridesList);
+
+        SyncSlotBaseClip(ref slots.curIdleClip, slots.idle);
+        SyncSlotBaseClip(ref slots.curRunClip, slots.run);
+        SyncSlotBaseClip(ref slots.curAttackClip, slots.attack);
+    }
+
     /// <summary>
-    /// µÀ´ë Å¸°ÙÀ¸·Î ¼³Á¤
+    /// ë§ˆìŠ¤íŠ¸ë¥¼ ê³µê²© ëŒ€ìƒìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
     /// </summary>
     protected GameObject SetMastTarget()
     {
         mast = GameObject.FindWithTag("Mast");
-		return mast;
+        return mast;
     }
 
     /// <summary>
-    /// °ø°İ ¹üÀ§ ³» ¸ğµç Äİ¶óÀÌ´õ¸¦ Ã£¾Æ ¹è¿­·Î ¹İÈ¯
+    /// ê³µê²© ë²”ìœ„ ì•ˆì˜ ëª¨ë“  ì½œë¼ì´ë”ë¥¼ ë°°ì—´ë¡œ ë°˜í™˜í•©ë‹ˆë‹¤.
     /// </summary>
     protected Collider[] DetectAttackRange()
     {
@@ -73,7 +103,7 @@ public class EnemyBase : CreatureBase, IBegin
     }
 
     /// <summary>
-    /// ¹è ÇÃ·¿Æû À§ÀÎÁö °Ë»ç
+    /// ë°”ë‹¥ì— ë‹¿ì•„ìˆëŠ”ì§€ ê²€ì‚¬í•©ë‹ˆë‹¤.
     /// </summary>
     /// <returns></returns>
     protected virtual bool CheckOnGround()
@@ -81,9 +111,7 @@ public class EnemyBase : CreatureBase, IBegin
         if (Physics.Raycast(transform.position, Vector3.down, 2f, groundLayer))
         {
             if (!isOnGround)
-            {
                 isOnGround = true;
-            }
         }
         else
         {
@@ -93,7 +121,7 @@ public class EnemyBase : CreatureBase, IBegin
         return isOnGround;
     }
 
-    #region ¾Ö´Ï¸ŞÀÌ¼Ç
+    #region ì• ë‹ˆë©”ì´ì…˜
     protected void ChangeIdleByIndex(Vector3 dir)
     {
         int idx = PlayerCore.Get4DirIndex(dir);
@@ -105,6 +133,8 @@ public class EnemyBase : CreatureBase, IBegin
             ChangeAnimationClip(slots.curIdleClip, slots.idle[idx]);
             _curIdleIdx = idx;
         }
+
+        UpdateSpriteFacing(dir);
 
         nextAnimTrigger = "SetIdle";
     }
@@ -121,6 +151,8 @@ public class EnemyBase : CreatureBase, IBegin
             _curRunIdx = idx;
         }
 
+        UpdateSpriteFacing(dir);
+
         nextAnimTrigger = "SetRun";
     }
 
@@ -136,6 +168,8 @@ public class EnemyBase : CreatureBase, IBegin
             _curAttackIdx = idx;
         }
 
+        UpdateSpriteFacing(dir);
+
         animator.Play("Attack");
         nextAnimTrigger = "SetAttack";
     }
@@ -150,7 +184,28 @@ public class EnemyBase : CreatureBase, IBegin
         animator.SetTrigger(nextAnimTrigger);
     }
 
-    // PlayerControllerÀÇ ChangeAnimationClip ±×´ë·Î º¹ºÙ, Á¤¸® ÇÊ¿ä
+    protected void UpdateSpriteFacing(Vector3 dir)
+    {
+        if (animator == null) return;
+
+        Transform visualRoot = animator.transform;
+        if (visualRoot == null) return;
+
+    // PlayerControllerì˜ ChangeAnimationClip íë¦„ì„ ê°€ì ¸ì˜¨ ì½”ë“œì…ë‹ˆë‹¤. ì¶”í›„ ì •ë¦¬ í•„ìš”.
+        {
+            defaultAnimatorScale = visualRoot.localScale;
+            hasDefaultAnimatorScale = true;
+        }
+
+        if (Mathf.Abs(dir.x) < 0.0001f)
+            return;
+
+        Vector3 scale = defaultAnimatorScale;
+        scale.x = Mathf.Abs(defaultAnimatorScale.x) * (dir.x > 0f ? -1f : 1f);
+        visualRoot.localScale = scale;
+    }
+
+    // PlayerController??ChangeAnimationClip æ´¹ëªƒ?æ¿¡?è¹‚ë“¬í…¤, ?ëº£â” ?ê¾©ìŠ‚
     public void ChangeAnimationClip(AnimationClip oldAnim, AnimationClip newAnim)
     {
         if (aoc == null || oldAnim == null || newAnim == null) return;
@@ -170,8 +225,44 @@ public class EnemyBase : CreatureBase, IBegin
         }
 
         aoc.ApplyOverrides(overridesList);
-        animator.Rebind();
-        animator.Update(0f);
+
+        // Rebind() resets the whole state machine and can swallow short enemy attack states.
+        // For enemy anims we only need the next state play to pick up the new override.
+        if (animator != null)
+            animator.Update(0f);
+    }
+
+    private void SyncSlotBaseClip(ref AnimationClip currentClip, List<AnimationClip> candidates)
+    {
+        if (candidates == null || candidates.Count == 0)
+            return;
+
+        if (ContainsOverrideKey(currentClip))
+            return;
+
+        for (int i = 0; i < overridesList.Count; i++)
+        {
+            AnimationClip key = overridesList[i].Key;
+            if (key != null && candidates.Contains(key))
+            {
+                currentClip = key;
+                return;
+            }
+        }
+    }
+
+    private bool ContainsOverrideKey(AnimationClip clip)
+    {
+        if (clip == null)
+            return false;
+
+        for (int i = 0; i < overridesList.Count; i++)
+        {
+            if (overridesList[i].Key == clip)
+                return true;
+        }
+
+        return false;
     }
     #endregion
 
@@ -182,8 +273,8 @@ public class EnemyBase : CreatureBase, IBegin
     {
         Gizmos.color = Color.red;
 
-        // DetectAttackRange()¿Í µ¿ÀÏÇÏ°Ô Áß½É °è»ê
-        // float debugAttackRange = 5f; // È®ÀÎ¿ë, ½ÇÁ¦ Å×½ºÆ®ÇÒ °ø°İ ¹üÀ§
+        // DetectAttackRange()?Â€ ?ìˆˆì”ª?ì„ì¾¶ ä»¥ë¬’ë–– æ€¨ê¾©ê¶›
+        // float debugAttackRange = 5f; // ?ëº¤ì”¤?? ?ã…¼ì £ ?ëš¯ë’ª?ëª…ë¸· æ€¨ë“¦êº½ è¸°ë¶¿ì
         Vector3 boxCenter = transform.position
             + transform.right * attackBoxCenterOffset.x
             + transform.forward * attackBoxCenterOffset.z
@@ -191,11 +282,10 @@ public class EnemyBase : CreatureBase, IBegin
 
         Vector3 halfBoxSize = new Vector3(0.25f, 0.25f, attackRange / 2f);
 
-        // È¸Àü Àû¿ë
+        // ?ëš¯ìŸ¾ ?ê³¸ìŠœ
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(boxCenter, transform.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
 
-        // OverlapBox¿Í µ¿ÀÏÇÑ Å©±âÀÇ ¹Ú½º ±×¸®±â
-        Gizmos.DrawWireCube(Vector3.zero, halfBoxSize * 2); // halfSize * 2 = ÀüÃ¼ Å©±â
+        // OverlapBox?Â€ ?ìˆˆì”ª???Ñˆë¦°??è«›ëº¤ë’ª æ´¹ëªƒâ”æ¹²?        Gizmos.DrawWireCube(Vector3.zero, halfBoxSize * 2); // halfSize * 2 = ?ê¾©ê»œ ?Ñˆë¦°
     }
 }

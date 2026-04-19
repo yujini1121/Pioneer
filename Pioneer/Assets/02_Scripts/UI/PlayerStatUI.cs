@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
@@ -50,7 +50,7 @@ public class PlayerStatUI : MonoBehaviour
         UpdateUI();
     }
 
-#warning ¹ö±× ÅÍÁö¸é ¼öÁ¤ÇØ¾ßÇÒ ºÎºĞ
+#warning ë²„ê·¸ í„°ì§€ë©´ ìˆ˜ì •í•´ì•¼í•  ë¶€ë¶„
     private void OnEnable()
     {
         PlayerStatsLevel.StatLevelUp += UpdatePlayerGrowStatUI;
@@ -143,7 +143,7 @@ public class PlayerStatUI : MonoBehaviour
 		}
         else
         {
-            // ¹«±â°¡ ¾Æ´Ï±â¿¡ ¸Ç¼Õ ±âÁØ Àû¿ë
+            // ë¬´ê¸°ê°€ ì•„ë‹ˆê¸°ì— ë§¨ì† ê¸°ì¤€ ì ìš©
 
 			playerAttackDamage.text = $"{PlayerCore.Instance.CalculatedHandAttack.weaponDamage}";
 			playerAttackSpeed.text = $"{PlayerCore.Instance.attackDelayTime}";
@@ -161,21 +161,21 @@ public class PlayerStatUI : MonoBehaviour
         switch (type)
         {
             case GrowStatType.Combat:
-                combatLevel.text = $"Lv. {currentLv}";     // ÀüÅõ ·¹º§                
-                additionCombat.text = $"{statLevel.combatList[currentLv].attack * 100:F0} %";        // °ø°İ·Â + Ãß°¡ °ø°İ·Â ÆÛ¼¾Æ®                
-                additionCombat_WeaponDurability.text = $"{statLevel.combatList[currentLv].durability} %";   // ¹«±â ³»±¸µµ °¨¼ÒÄ¡ + Ãß°¡ ¹«±â ³»±¸µµ °¨¼ÒÄ¡
+                combatLevel.text = $"Lv. {currentLv}";     // ì „íˆ¬ ë ˆë²¨                
+                additionCombat.text = $"{statLevel.combatList[currentLv].attack:F1}";        // ê³µê²©ë ¥ + ì¶”ê°€ ê³µê²©ë ¥ í¼ì„¼íŠ¸                
+                additionCombat_WeaponDurability.text = $"{statLevel.combatList[currentLv].durability:F1}";   // ë¬´ê¸° ë‚´êµ¬ë„ ê°ì†Œì¹˜ + ì¶”ê°€ ë¬´ê¸° ë‚´êµ¬ë„ ê°ì†Œì¹˜
                 break;
             case GrowStatType.Crafting:
-                craftingLevel.text = $"Lv. {currentLv}";     // Á¦ÀÛ ·¹º§
-                // ´ë¼º°ø È®·ü + Ãß°¡ ´ë¼º°ø È®·ü
-                additionCrafting.text = $"{statLevel.craftingList[currentLv] * 100:F0} %";
+                craftingLevel.text = $"Lv. {currentLv}";     // ì œì‘ ë ˆë²¨
+                // ëŒ€ì„±ê³µ í™•ë¥  + ì¶”ê°€ ëŒ€ì„±ê³µ í™•ë¥ 
+                additionCrafting.text = $"{statLevel.craftingList[currentLv]:F1}";
                 break;
             case GrowStatType.Fishing:
-                fishingLevel.text = "Lv. " + state.level.ToString();    // ³¬½Ã ·¹º§
-                // Àç·á Ãß°¡ È¹µæ È®·ü + Ãß°¡ È¹µæ È®·ü
-                additionFishing_AddIngredients.text = $"{statLevel.fishingList[currentLv].count * 100:F0} %";
-                // º¸¹°»óÀÚ È¹µæ È®·ü + Ãß°¡ È¹µæ È®·ü
-                additionFishing_TreasureChest.text = $"{statLevel.fishingList[currentLv].chest * 100:F0} %";                
+                fishingLevel.text = "Lv. " + state.level.ToString();    // ë‚šì‹œ ë ˆë²¨
+                // ì¬ë£Œ ì¶”ê°€ íšë“ í™•ë¥  + ì¶”ê°€ íšë“ í™•ë¥ 
+                additionFishing_AddIngredients.text = $"{statLevel.fishingList[currentLv].count:F1}";
+                // ë³´ë¬¼ìƒì íšë“ í™•ë¥  + ì¶”ê°€ íšë“ í™•ë¥ 
+                additionFishing_TreasureChest.text = $"{statLevel.fishingList[currentLv].chest:F1}";                
                 break;
 
         }
@@ -183,3 +183,5 @@ public class PlayerStatUI : MonoBehaviour
         UpdateBasicStatUI();
     }
 }
+
+

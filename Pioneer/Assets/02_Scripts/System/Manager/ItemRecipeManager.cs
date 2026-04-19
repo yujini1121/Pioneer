@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +11,8 @@ public class ItemRecipeManager : MonoBehaviour, IBegin
 
     public bool CanCraftInInventory(int id)
     {
-        SItemRecipeSO target = recipesSearch[id];
+        if (recipesSearch == null || !recipesSearch.TryGetValue(id, out SItemRecipeSO target))
+            return false;
 
         for (int index = 0; index < target.input.Length; ++index)
         {
@@ -43,7 +44,7 @@ public class ItemRecipeManager : MonoBehaviour, IBegin
 
     private void ValueAssign()
     {
-        //recipes = new List<SItemRecipe>(); // ÀÎ½ºÆåÅÍ Ã¢¿¡ ¼³Á¤ÇÑ °ªÀ» ¾ø¾Ö¹ö¸®°í ½ÍÀº °æ¿ì.
+        //recipes = new List<SItemRecipe>(); // ì¸ìŠ¤í™í„° ì°½ì— ì„¤ì •í•œ ê°’ì„ ì—†ì• ë²„ë¦¬ê³  ì‹¶ì€ ê²½ìš°.
         recipesSearch = new Dictionary<int, SItemRecipeSO>();
     }
 
@@ -70,3 +71,4 @@ public class ItemRecipeManager : MonoBehaviour, IBegin
         Add(hamburger);
     }
 }
+

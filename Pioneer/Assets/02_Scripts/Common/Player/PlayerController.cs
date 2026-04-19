@@ -1,20 +1,19 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// PlayerController: ÀÔ·Â¸¸ Ã³¸®ÇØ¼­ ´Ù¸¥ ½ºÅ©¸³Æ®¿¡ ¸í·É ³»¸®±â
-// TODO : ÄÚµå Á¤¸® ÇÊ¿ä ºÒ ÇÊ¿äÇÑ º¯¼ö ¹× ¸Ş¼­µå Á¦°Å
+// PlayerController: ì…ë ¥ë§Œ ì²˜ë¦¬í•´ì„œ ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ì— ëª…ë ¹ ë‚´ë¦¬ê¸°
+// TODO : ì½”ë“œ ì •ë¦¬ í•„ìš” ë¶ˆ í•„ìš”í•œ ë³€ìˆ˜ ë° ë©”ì„œë“œ ì œê±°
 public class PlayerController : MonoBehaviour
 {
     private PlayerCore playerCore;
     private PlayerFishing playerFishing;
     private GameManager gameManager;
 
-    // ÀÌµ¿ ¹æÇâ
     public Vector3 lastMoveDirection = Vector3.back;
 
-    [Header("³¬½Ã ¹Ù´Ù È®ÀÎ °ü·Ã ¼³Á¤")]
+    [Header("ë‚šì‹œ ë°”ë‹¤ í™•ì¸ ê´€ë ¨ ì„¤ì •")]
     public float rayOffset;
     public float ChargeTime;
     public bool isSeaInFront = false;
@@ -33,7 +32,7 @@ public class PlayerController : MonoBehaviour
     private float cancelDelayTimer;
     public static PlayerController instance;
 
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç")]
+    [Header("ì• ë‹ˆë©”ì´ì…˜")]
     public Animator animator;
     public AnimationSlot animSlots;
     private AnimatorOverrideController aoc;
@@ -46,7 +45,7 @@ public class PlayerController : MonoBehaviour
 
     public Transform mast;
 
-    [Header("µğ¹ö±×")]
+    [Header("ë””ë²„ê·¸")]
     public bool isDebugging;
 
     void Awake()
@@ -65,10 +64,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // ¹Ù´Ù Ã¼Å©
         isSeaInFront = CheckSea();
 
-        // ÀÌµ¿
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         moveInput = new Vector3(moveX, 0, moveY);
@@ -83,7 +80,6 @@ public class PlayerController : MonoBehaviour
         switch (playerCore.currentState)
         {
             case PlayerCore.PlayerState.Default:
-                // ÀÌµ¿, °ø°İ, ³¬½Ã ½ÃÀÛ
                 if (moveX == 0 && moveY == 0)
                 {
                     playerCore.Idle(lastMoveDirection);
@@ -96,12 +92,10 @@ public class PlayerController : MonoBehaviour
                 break;
 
             case PlayerCore.PlayerState.ChargingFishing:
-                // ³¬½Ã ½ÃÀÛ
                 HendleCharging();
                 break;
 
             case PlayerCore.PlayerState.ActionFishing:
-                // ³¬½Ã Á¾·á Á¶°Ç
                 HendleFishing();
                 break;
         }
@@ -112,7 +106,6 @@ public class PlayerController : MonoBehaviour
         animator.ResetTrigger("SetFishingHold");
         animator.SetTrigger(nextAnimTrigger);
 
-        // Å»Ãâ
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F12))
         {
@@ -130,20 +123,18 @@ public class PlayerController : MonoBehaviour
             lastMoveDirection = moveDirection;
         }
 
-        // °ø°İ
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 attackDirection = GetMouseWorldDirection();
 
-            if (attackDirection != Vector3.zero)
+            if (attackDirection != Vector3.zero && CanStartAttack(attackDirection))
             {
                 lastMoveDirection = attackDirection;
                 playerCore.PlayerAttack.PlayAttack(lastMoveDirection);
             }
         }
 
-        // ³¬½Ã ½ÃÀÛ Á¶°Ç È®ÀÎÇÏ°í ³¬½Ã »óÅÂ ÀüÈ¯?
-        if (isSeaInFront) // + ³·ÀÎÁö && gameManager.currentGameTime < dayDuration?
+        if (isSeaInFront)
         {
             fishingUI.gameObject.SetActive(true);
 
@@ -163,6 +154,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private bool CanStartAttack(Vector3 attackDirection)
+    {
+        if (playerCore == null || playerCore.PlayerAttack == null)
+            return false;
+
+        float range = playerCore.CalculatedHandAttack != null ? playerCore.CalculatedHandAttack.weaponRange : playerCore.attackRange;
+
+        SItemStack selected = InventoryManager.Instance != null ? InventoryManager.Instance.SelectedSlotInventory : null;
+        if (selected != null && selected.itemBaseType is SItemWeaponTypeSO weapon)
+        {
+            range = weapon.weaponRange;
+        }
+
+        return playerCore.PlayerAttack.HasEnemyInDirection(attackDirection, Mathf.Max(range, 0.5f));
+    }
+
     private void HendleCharging()
     {
         if (Input.GetKey(KeyCode.Q))
@@ -176,7 +183,7 @@ public class PlayerController : MonoBehaviour
 
                 isCharging = false;
 
-                playerFishing.StartFishingLoop(); // ³¬½Ã ½ÃÀÛ È®ÀÎ
+                playerFishing.StartFishingLoop();
 
                 cancelDelayTimer = fishingCancelDelay;
                 currentChargeTime = 0f;
@@ -222,14 +229,12 @@ public class PlayerController : MonoBehaviour
 
             if (currentChargeTime >= ChargeTime)
             {
-                Debug.Log("³¬½Ã Áß´Ü!");
+                Debug.Log("ë‚šì‹œ ì¤‘ë‹¨!");
                 playerFishing.StopFishingLoop();
                 playerCore.SetState(PlayerCore.PlayerState.Default);
                 currentChargeTime = 0f;
                 cencleChargeSlider.value = 0f;
                 fishingCencleUI.gameObject.SetActive(false);
-
-                //playerCore.Idle(lastMoveDirection);
             }
         }
 
@@ -277,9 +282,6 @@ public class PlayerController : MonoBehaviour
             return false;
     }
 
-    /// <summary>
-    /// ÇÇ°İ µîÀ¸·Î ³¬½Ã°¡ °­Á¦ Ãë¼ÒµÇ¾úÀ» ¶§ UI¿Í »óÅÂ¸¦ Á¤¸®ÇÏ´Â ÇÔ¼ö
-    /// </summary>
     public void CancelFishing()
     {
         isCharging = false;
