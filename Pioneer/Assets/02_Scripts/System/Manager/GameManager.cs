@@ -190,7 +190,7 @@ public class GameManager : MonoBehaviour, IBegin
             // 일반 모드일 때만 6일차 엔딩 발생
             if (!GameModeState.IsInfiniteMode && currentDay >= 6)
             {
-                TriggerGameOver();
+                TriggerGameClear();
                 return;
             }
         }
@@ -229,6 +229,16 @@ public class GameManager : MonoBehaviour, IBegin
 
     public void TriggerGameOver()
     {
+        TriggerGameResult(false);
+    }
+
+    public void TriggerGameClear()
+    {
+        TriggerGameResult(true);
+    }
+
+    private void TriggerGameResult(bool voyageSucceeded)
+    {
         Time.timeScale = 0f;
 
         if (ThisIsPlayer.Player != null)
@@ -245,7 +255,7 @@ public class GameManager : MonoBehaviour, IBegin
         HideAllUI();
 
         if (gameOverUI != null)
-            gameOverUI.ShowGameOverScreen(totalMarinerMembers, deadMarinerMembers);
+            gameOverUI.ShowGameOverScreen(totalMarinerMembers, deadMarinerMembers, voyageSucceeded);
     }
 
     void HideAllUI()

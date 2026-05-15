@@ -304,7 +304,7 @@ public class CreateObject : MonoBehaviour, IBegin
         }
     }
 
-    private void TryPlaceIfPermitted(Vector3 worldPos, Vector3 localPos)
+    private void TryPlaceIfPermitted(Vector3 worldPos, Vector3 localPos, bool isBlockedByUI)
     {
         if (!CheckNear(worldPos))
         {
@@ -313,23 +313,14 @@ public class CreateObject : MonoBehaviour, IBegin
         }
 
         SetPreviewColor(permitColor);
-        if (Input.GetMouseButtonDown(0))
+        if (!isBlockedByUI && Input.GetMouseButtonDown(0))
             MoveToCreate(worldPos, localPos);
     }
 
     private void CheckCreatable()
     {
-        #region UI 위 클릭이면 설치 프리뷰 갱신 중지
-        if (IsBlockedByUI())
-        {
-            SetPreviewVisible(false);
-            return;
-        }
-        else
-        {
-            SetPreviewVisible(true);
-        }
-        #endregion
+        bool isBlockedByUI = IsBlockedByUI();
+        SetPreviewVisible(true);
 
         if (!TryGetMouseGroundPoint(out var mouseWorldPos)) return;
 
@@ -340,7 +331,7 @@ public class CreateObject : MonoBehaviour, IBegin
         ApplyPreviewTransform(localPos);
 
         Vector3 worldPos = onHand.transform.position;
-        TryPlaceIfPermitted(worldPos, localPos);
+        TryPlaceIfPermitted(worldPos, localPos, isBlockedByUI);
     }
 
     private void HandleOrientationInput()
@@ -408,13 +399,20 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private bool IsBlockedByUI()
     {
-        if (EventSystem.current == null || uiRaycaster == null) return false;
+        if (EventSystem.current == null)
+            return false;
+
+        if (EventSystem.current.IsPointerOverGameObject())
+            return true;
+
+        if (uiRaycaster == null)
+            return false;
 
         var ped = new PointerEventData(EventSystem.current) { position = Input.mousePosition };
         var results = new List<RaycastResult>();
         uiRaycaster.Raycast(ped, results);
 
-        return false;
+        return results.Count > 0;
     }
 
     private IEnumerable<Vector3> EnumerateFootprintCellCenters(Vector3 pivotCenterWorld)

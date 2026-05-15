@@ -406,7 +406,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if (hotkeyInventoryNum > -1) SelectSlot(hotkeyInventoryNum);
 
         // 인벤토리 핫키 휠 스크롤
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        bool isBuilding = CreateObject.instance != null && CreateObject.instance.IsBuilding;
+        float scroll = isBuilding ? 0f : Input.GetAxis("Mouse ScrollWheel");
         if (scroll > 0f) // 위로
         {
             hotkeyInventoryNum = InventoryManager.Instance.selectedSlotIndex - 1;
