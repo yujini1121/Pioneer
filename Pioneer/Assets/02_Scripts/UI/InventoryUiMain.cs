@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -37,16 +38,16 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
     public void InventoryExpand(bool value)
     {
+#region
         foreach (GameObject i in inventorySlot)
         {
             CanvasGroup cg = i.GetComponent<CanvasGroup>();
-            cg.alpha = value ? 1f : 0f;
-            cg.blocksRaycasts = value;
-            cg.interactable = value;
+            if (cg == null)
+                cg = i.AddComponent<CanvasGroup>();
 
-
-            //i.SetActive(value);
+            UITweenHelper.FadeCanvasGroup(cg, value, 0.16f);
         }
+#endregion
     }
 
     public void HideWindow()
@@ -250,6 +251,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             AudioManager.instance.PlaySfx(AudioManager.SFX.SelectQuickSlot);
         mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
         IconRefresh();
+        if (mCurrentSelectedHotbarSlot != null)
+            mCurrentSelectedHotbarSlot.PlaySelectedFeedback();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
         if (CreateObject.instance != null)
@@ -461,16 +464,19 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             ItemSlotUI _forUi = slotGameObjects[index].GetComponent<ItemSlotUI>();
 
             _forUi.Show(InventoryManager.Instance.itemLists[index]);
+            _forUi.image.gameObject.transform.DOKill();
             _forUi.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
         }
         mouseUI.Show(InventoryManager.Instance.mouseInventory);
+        mouseUI.image.gameObject.transform.DOKill();
         mouseUI.image.gameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
 
         if (mCurrentSelectedHotbarSlot != null)
         {
-            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
+            mCurrentSelectedHotbarSlot.image.gameObject.transform.DOKill();
+            mCurrentSelectedHotbarSlot.image.gameObject.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
         }
 
         PlayerStatUI.Instance.UpdateBasicStatUI();

@@ -54,14 +54,12 @@ public class RepairUI : MonoBehaviour
         InGameUI.instance.OpenUI(new List<GameObject>() { }, InGameUI.ID_REPAIR_ITEM,
             () =>
             {
-                cg.alpha = 0f;
-                cg.interactable = false;
-                cg.blocksRaycasts = false;
+                UITweenHelper.FadeCanvasGroup(cg, false, 0.12f);
             }
             );
-        cg.alpha = 1f;
-        cg.interactable = true;
-        cg.blocksRaycasts = true;
+        UITweenHelper.FadeCanvasGroup(cg, true, 0.16f);
+        if (repairWindow != null)
+            UITweenHelper.PunchScale(repairWindow.transform, 0.06f, 0.16f);
 
         IconRefresh();
     }
@@ -111,7 +109,8 @@ public class RepairUI : MonoBehaviour
             c.g = 1f;
             c.b = 1f;
             itemSlotUIs[1].image.color = c;
-            itemSlotUIs[1].durability.text = $"{RepairSystem.instance.slot.itemLists[0].duability + 50}%";
+
+            itemSlotUIs[1].ShowDurabilityPreview(RepairSystem.instance.slot.itemLists[0].duability + 50);
         }
         else
         {

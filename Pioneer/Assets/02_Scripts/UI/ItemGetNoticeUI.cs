@@ -25,7 +25,14 @@ public class ItemGetNoticeUI : MonoBehaviour
         //if ()
 
 
+        if (uiList.Count >= objectPool.Length)
+        {
+            ItemGetNoticeSingleUI oldest = uiList[uiList.Count - 1];
+            RemoveUI(oldest.index, oldest);
+        }
+
         GameObject newUi = null;
+        int poolIndex = -1;
         for (int forIndex = 0; forIndex < objectPool.Length; forIndex++)
         {
             if (!isUsing[forIndex])
@@ -33,6 +40,7 @@ public class ItemGetNoticeUI : MonoBehaviour
                 isUsing[forIndex] = true;
                 objectPool[forIndex].SetActive(true);
                 newUi = objectPool[forIndex];
+                poolIndex = forIndex;
                 break;
             }
         }
@@ -43,6 +51,7 @@ public class ItemGetNoticeUI : MonoBehaviour
         Debug.Assert(newUi != null, "!! ItemGetNoticeUI: Object Pool is full!");
 
         ItemGetNoticeSingleUI newUiScript = newUi.GetComponent<ItemGetNoticeSingleUI>();
+        newUiScript.index = poolIndex;
         newUiScript.Show(item);
         newUiScript.Begin();
         uiList.Insert(0, newUiScript);
@@ -62,7 +71,7 @@ public class ItemGetNoticeUI : MonoBehaviour
                 RemoveUI(one.index, uiList[3]);
                 continue;
             }
-            objectPool[one.index].transform.localPosition += new Vector3(0, -72, 0);
+            one.MoveToLocalY(75 - (72 * uiListIndex));
             Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 중간 - {objectPool[one.index].transform.localPosition}");
         }
 

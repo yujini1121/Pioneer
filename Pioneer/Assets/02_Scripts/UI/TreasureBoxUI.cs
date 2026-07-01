@@ -24,8 +24,9 @@ public class TreasureBoxUI : MonoBehaviour
 
         SItemTypeSO itemType = ItemTypeManager.Instance.FindType(sItemStack);
 
-        TreasureWindow.SetActive(true);
+        UITweenHelper.PlayOpen(TreasureWindow);
         itemImage.sprite = itemType.image;
+        UITweenHelper.PunchScale(itemImage.transform, 0.12f, 0.18f);
 
         itemName.text = itemType.typeName;
         itemCount.text = $"x{sItemStack.amount}";
@@ -33,7 +34,7 @@ public class TreasureBoxUI : MonoBehaviour
 
     public void CloseWindow()
     {
-        TreasureWindow.SetActive(false);
+        UITweenHelper.PlayClose(TreasureWindow, () => TreasureWindow.SetActive(false));
     }
 
     public void PressAccept()

@@ -235,8 +235,6 @@ public class InGameUI : MonoBehaviour, IBegin
         {
             if (currentFabricationUi != null) CommonUI.instance.CloseTab(currentFabricationUi);
 
-            makeshiftCraftUI.SetActive(false);
-            gameObjectPlayerStatUiParent.SetActive(false);
             CloseUI(ID_MAKESHIFT);
             CloseUI(ID_CHAR_PANNEL);
 
@@ -295,7 +293,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
         foreach (GameObject g in uiGameobjects)
         {
-            g.SetActive(true);
+            UITweenHelper.PlayOpen(g);
         }
         InGameUiChunk one = new InGameUiChunk(uiGameobjects, true, closeAction);
         one.id = id;
@@ -307,8 +305,9 @@ public class InGameUI : MonoBehaviour, IBegin
         for (int index = 0; index < uiChunkStack.Count; ++index)
         {
             if (uiChunkStack[index].id != id) continue;
-            uiChunkStack[index].CloseAction();
+            CloseChunk(uiChunkStack[index]);
             uiChunkStack.RemoveAt(index);
+            break;
         }
     }
 
@@ -318,7 +317,51 @@ public class InGameUI : MonoBehaviour, IBegin
 
         if (uiChunkStack.Count <= 0) return;
 
-        uiChunkStack[uiChunkStack.Count - 1].CloseAction();
+        CloseChunk(uiChunkStack[uiChunkStack.Count - 1]);
         uiChunkStack.RemoveAt(uiChunkStack.Count - 1);
     }
+
+#region
+    private void CloseChunk(InGameUiChunk chunk)
+    {
+        if (chunk == null)
+            return;
+
+        if (chunk.UiGameobjects == null || chunk.UiGameobjects.Count == 0)
+        {
+            chunk.CloseAction();
+            return;
+        }
+
+        int remaining = 0;
+        foreach (GameObject uiObject in chunk.UiGameobjects)
+        {
+            if (uiObject != null && uiObject.activeInHierarchy)
+                remaining++;
+        }
+
+        if (remaining == 0)
+        {
+            chunk.CloseAction();
+            return;
+        }
+
+        bool isClosed = false;
+        foreach (GameObject uiObject in chunk.UiGameobjects)
+        {
+            if (uiObject == null || uiObject.activeInHierarchy == false)
+                continue;
+
+            UITweenHelper.PlayClose(uiObject, () =>
+            {
+                remaining--;
+                if (remaining > 0 || isClosed)
+                    return;
+
+                isClosed = true;
+                chunk.CloseAction();
+            });
+        }
+    }
+#endregion
 }

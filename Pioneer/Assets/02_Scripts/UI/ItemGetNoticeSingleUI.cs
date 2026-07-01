@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +12,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
     public TextMeshProUGUI text;
     public CanvasGroup canvasGroup;
     public int index;
+    private Sequence sequence;
 
     public void Show(SItemStack target)
     {
@@ -20,25 +22,33 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
 
     public void Begin()
     {
-        IEnumerator mCoroutine()
+#region
+        if (myCoroutine != null)
         {
-            for (float t = 0.0f; t < 0.2f; t += Time.deltaTime)
-            {
-                canvasGroup.alpha = Mathf.Lerp(0.0f, 1.0f, t / 0.2f);
-                yield return null;
-            }
-
-            canvasGroup.alpha = 1.0f;
-            yield return new WaitForSeconds(4.5f);
-
-            for (float t = 0.0f; t < 0.5f; t += Time.deltaTime)
-            {
-                canvasGroup.alpha = Mathf.Lerp(1.0f, 0.0f, t / 0.5f);
-                yield return null;
-            }
-            ItemGetNoticeUI.Instance.RemoveUI(index, this);
+            StopCoroutine(myCoroutine);
+            myCoroutine = null;
         }
-        myCoroutine = StartCoroutine(mCoroutine());
+
+        sequence?.Kill();
+        transform.DOKill();
+        canvasGroup.DOKill();
+
+        transform.localScale = Vector3.one;
+        canvasGroup.alpha = 0.0f;
+
+        sequence = DOTween.Sequence();
+        sequence.Join(canvasGroup.DOFade(1.0f, 0.18f).SetEase(Ease.OutCubic));
+        sequence.Join(transform.DOPunchScale(Vector3.one * 0.08f, 0.22f, 8, 0.7f));
+        sequence.AppendInterval(4.5f);
+        sequence.Append(canvasGroup.DOFade(0.0f, 0.35f).SetEase(Ease.InCubic));
+        sequence.OnComplete(() => ItemGetNoticeUI.Instance.RemoveUI(index, this));
+#endregion
+    }
+
+    public void MoveToLocalY(float targetY)
+    {
+        transform.DOKill();
+        transform.DOLocalMoveY(targetY, 0.18f).SetEase(Ease.OutCubic);
     }
 
 
@@ -48,6 +58,14 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
         {
             canvasGroup.alpha = 0.0f;
         }
+    }
+
+    private void OnDisable()
+    {
+        sequence?.Kill();
+        transform.DOKill();
+        if (canvasGroup != null)
+            canvasGroup.DOKill();
     }
 
     // Start is called before the first frame update

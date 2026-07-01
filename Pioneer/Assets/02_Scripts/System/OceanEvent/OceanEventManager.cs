@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
@@ -90,7 +91,7 @@ public class OceanEventManager : MonoBehaviour
         RemoveNormalFromRemainingEvents();
 
         Debug.Log($"[OceanEventManager][첫날 이벤트 : {currentEvent.EventName}]");
-        currentEventName.text = currentEvent.EventName;
+        SetCurrentEventName(currentEvent.EventName, false);
     }
 
     // 첫날에 해당 함수를 실행해선 안됩니다.
@@ -147,10 +148,34 @@ public class OceanEventManager : MonoBehaviour
         //                          windStunDuration);
         #endregion
         Debug.Log($"[OceanEventManager][오늘의 바다이벤트 : {currentEvent.EventName}]");
-        currentEventName.text = currentEvent.EventName;
+        SetCurrentEventName(currentEvent.EventName, true);
 
         currentEvent.EventRun();
     }
+
+#region
+    private void SetCurrentEventName(string eventName, bool animate)
+    {
+        if (currentEventName == null)
+            return;
+
+        currentEventName.DOKill();
+        currentEventName.transform.DOKill();
+        currentEventName.text = eventName;
+
+        if (!animate)
+        {
+            currentEventName.alpha = 1.0f;
+            currentEventName.transform.localScale = Vector3.one;
+            return;
+        }
+
+        currentEventName.alpha = 0.0f;
+        currentEventName.transform.localScale = Vector3.one * 0.9f;
+        currentEventName.DOFade(1.0f, 0.25f).SetEase(Ease.OutCubic);
+        currentEventName.transform.DOScale(Vector3.one, 0.25f).SetEase(Ease.OutBack);
+    }
+#endregion
     
     // 첫날 평범한 날 예외때문에 이렇게 만들었는데 분명 더 좋은 방법이 있을거 같음
     private void RemoveNormalFromRemainingEvents()
