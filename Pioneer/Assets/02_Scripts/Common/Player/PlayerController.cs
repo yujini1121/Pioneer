@@ -80,15 +80,19 @@ public class PlayerController : MonoBehaviour
         switch (playerCore.currentState)
         {
             case PlayerCore.PlayerState.Default:
-                if (moveX == 0 && moveY == 0)
+                if (!playerCore.IsRunningCoroutineItem)
                 {
-                    playerCore.Idle(lastMoveDirection);
+                    if (moveX == 0 && moveY == 0)
+                    {
+                        playerCore.Idle(lastMoveDirection);
+                    }
+                    else
+                    {
+                        nextAnimTrigger = "SetRun";
+                    }
+
+                    HendleDefault();
                 }
-                else
-                {
-                    nextAnimTrigger = "SetRun";
-                }
-                HendleDefault();
                 break;
 
             case PlayerCore.PlayerState.ChargingFishing:
@@ -100,11 +104,14 @@ public class PlayerController : MonoBehaviour
                 break;
         }
 
-        animator.ResetTrigger("SetIdle");
-        animator.ResetTrigger("SetRun");
-        animator.ResetTrigger("SetFishing");
-        animator.ResetTrigger("SetFishingHold");
-        animator.SetTrigger(nextAnimTrigger);
+        if (!playerCore.IsRunningCoroutineItem)
+        {
+            animator.ResetTrigger("SetIdle");
+            animator.ResetTrigger("SetRun");
+            animator.ResetTrigger("SetFishing");
+            animator.ResetTrigger("SetFishingHold");
+            animator.SetTrigger(nextAnimTrigger);
+        }
 
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F12))
@@ -130,7 +137,6 @@ public class PlayerController : MonoBehaviour
             if (attackDirection != Vector3.zero && CanStartAttack(attackDirection))
             {
                 lastMoveDirection = attackDirection;
-                playerCore.PlayerAttack.PlayAttack(lastMoveDirection);
             }
         }
 

@@ -5,6 +5,11 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class WeaponUseUtils
 {
+    private const float AttackWindupRatio = 0.18f;
+    private const float AttackActiveRatio = 0.2f;
+    private const float MinAttackWindupTime = 0.05f;
+    private const float MinAttackActiveTime = 0.05f;
+
     private static bool HasAttackTarget(CommonBase userGameObject, SItemWeaponTypeSO data, Vector3 dir)
     {
         if (userGameObject == null || data == null)
@@ -50,6 +55,9 @@ public class WeaponUseUtils
         Debug.Assert(data != null);
 
         float originalSpeed = PlayerCore.Instance.speed;
+        PlayerAttack playerAttack = PlayerCore.Instance.PlayerAttack;
+        if (playerAttack == null)
+            yield break;
 
         try
         {
@@ -86,16 +94,30 @@ public class WeaponUseUtils
                 Vector3 position = userGameObject.transform.position + dir * 0.5f;
                 position.y = PlayerCore.Instance.AttackHeight;
 
-                PlayerCore.Instance.PlayerAttack.transform.position = position;
-                PlayerCore.Instance.PlayerAttack.transform.rotation = Quaternion.LookRotation(dir);
-                PlayerCore.Instance.PlayerAttack.EnableAttackCollider();
-                PlayerCore.Instance.PlayerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
-                PlayerCore.Instance.PlayerAttack.SetAttackRange(data.weaponRange);
+                float totalAnimationTime = Mathf.Max(0.01f, data.weaponAnimation);
+                float windupTime = Mathf.Clamp(
+                    totalAnimationTime * AttackWindupRatio,
+                    Mathf.Min(MinAttackWindupTime, Mathf.Max(0f, totalAnimationTime - MinAttackActiveTime)),
+                    Mathf.Max(0f, totalAnimationTime - MinAttackActiveTime));
+                float activeBudget = Mathf.Max(0f, totalAnimationTime - windupTime);
+                float activeTime = Mathf.Min(Mathf.Max(totalAnimationTime * AttackActiveRatio, Mathf.Min(MinAttackActiveTime, activeBudget)), activeBudget);
+                float recoveryTime = Mathf.Max(0f, totalAnimationTime - windupTime - activeTime);
 
-                yield return new WaitForSeconds(data.weaponAnimation);
+                playerAttack.transform.position = position;
+                playerAttack.transform.rotation = Quaternion.LookRotation(dir);
+                playerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
+                playerAttack.SetAttackRange(data.weaponRange);
+                playerAttack.DisableAttackCollider();
+                playerAttack.PlayAttack(dir);
 
-                PlayerCore.Instance.PlayerAttack.DisableAttackCollider();
-                PlayerCore.Instance.PlayerAttack.SetAttackRange(0.1f);
+                yield return new WaitForSeconds(windupTime);
+
+                playerAttack.EnableAttackCollider();
+                yield return new WaitForSeconds(activeTime);
+
+                playerAttack.DisableAttackCollider();
+                playerAttack.SetAttackRange(0.1f);
+                yield return new WaitForSeconds(recoveryTime);
                 InventoryUiMain.instance.IconRefresh();
             }
 
@@ -103,6 +125,12 @@ public class WeaponUseUtils
         }
         finally
         {
+            if (playerAttack != null)
+            {
+                playerAttack.DisableAttackCollider();
+                playerAttack.SetAttackRange(0.1f);
+            }
+
             PlayerCore.Instance.speed = originalSpeed;
         }
 

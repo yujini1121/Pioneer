@@ -50,7 +50,6 @@ public class PlayerAttack : MonoBehaviour, IBegin
         target.TakeDamage(damage, gameObject);
         Debug.LogError($"damage : {damage}, this.gameObject : {gameObject}");
 
-        ChangeAnim(playerController.lastMoveDirection);
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.ApplyItemDuablilityUsed();
