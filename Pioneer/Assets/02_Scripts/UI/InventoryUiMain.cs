@@ -447,6 +447,10 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             default: break;
         }
 
+        if (info.categories == EDataType.WeaponItem)
+        {
+            categoriesName = $"{categoriesName} · {target.duability}%";
+        }
 
         // return $"{info.typeName}\n{categoriesName}\n{info.infomation}";
         return (info.typeName, categoriesName, info.infomation);
