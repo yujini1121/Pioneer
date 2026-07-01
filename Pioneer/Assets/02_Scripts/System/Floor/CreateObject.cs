@@ -77,6 +77,9 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float installTimeSec = 2f; // Installable SO에서 덮어쓸 수 있음
     [SerializeField] private Image ringBackground;
     [SerializeField] private Image ringFill;
+    [SerializeField] private float installProgressSideOffset = -0.85f;
+    [SerializeField] private float installProgressHeightOffset = 0f;
+    private RectTransform installProgressRect;
 
     [SerializeField] private const float defaultCellSize = 2f;
 
@@ -124,6 +127,7 @@ public class CreateObject : MonoBehaviour, IBegin
         mainCamera = Camera.main;
         playerTrans = transform;
         playerAgent = GetComponent<NavMeshAgent>();
+        installProgressRect = ringBackground != null ? ringBackground.rectTransform : null;
 
         // 생성 프리팹 딕셔너리 구성
         creationDict.Add(CreationType.Platform, creationList.platform);
@@ -204,6 +208,39 @@ public class CreateObject : MonoBehaviour, IBegin
         {
             CancelInstall();
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (ringBackground != null && ringBackground.gameObject.activeInHierarchy)
+        {
+            UpdateInstallProgressUiTransform();
+        }
+    }
+
+    private void UpdateInstallProgressUiTransform()
+    {
+        if (installProgressRect == null || playerTrans == null || mainCamera == null)
+            return;
+
+        Vector3 sideDir = mainCamera.transform.right;
+        sideDir.y = 0f;
+
+        if (sideDir.sqrMagnitude < 0.0001f)
+        {
+            sideDir = Vector3.right;
+        }
+        else
+        {
+            sideDir.Normalize();
+        }
+
+        installProgressRect.position =
+            playerTrans.position +
+            sideDir * installProgressSideOffset +
+            Vector3.up * installProgressHeightOffset;
+
+        installProgressRect.rotation = mainCamera.transform.rotation;
     }
 
     public void CreateObjectInit()
@@ -647,6 +684,7 @@ public class CreateObject : MonoBehaviour, IBegin
         if (ringFill != null)
         {
             ringFill.fillAmount = 0f;
+            UpdateInstallProgressUiTransform();
             ringBackground.gameObject.SetActive(true);
         }
 

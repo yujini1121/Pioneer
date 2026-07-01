@@ -224,11 +224,17 @@ public class InventoryManager : InventoryBase
     public void ApplyItemDuablilityUsed()
     {
         if (SelectedSlotInventory == null) return;
-        // data는 SItemWeaponType임
+
+        SItemWeaponTypeSO weapon = SelectedSlotInventory.itemBaseType as SItemWeaponTypeSO;
+        if (weapon == null) return;
+
         SelectedSlotInventory.duability = Mathf.Max(0, SelectedSlotInventory.duability -
-                    Mathf.Max(0, (SelectedSlotInventory.itemBaseType as SItemWeaponTypeSO).duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
+                    Mathf.Max(0, weapon.duabilityRedutionPerHit - PlayerCore.Instance.DuabilityReducePrevent));
         SafeClean();
-        InventoryUiMain.instance.IconRefresh();
+        if (InventoryUiMain.instance != null)
+        {
+            InventoryUiMain.instance.IconRefresh();
+        }
     }
 
 	protected override void SafeClean()
@@ -316,6 +322,8 @@ public class InventoryManager : InventoryBase
         //Add(new SItemStack(102, 80));
         //Add(new SItemStack(103, 80));
         Add(new SItemStack(20001, 1, 100));
+        Add(new SItemStack(20002, 1, 100));
+        Add(new SItemStack(20003, 1, 100));
         Add(new SItemStack(30001, 80));
         Add(new SItemStack(30002, 80));
         Add(new SItemStack(30003, 80));

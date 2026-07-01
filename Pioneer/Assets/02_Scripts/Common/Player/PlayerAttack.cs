@@ -51,8 +51,16 @@ public class PlayerAttack : MonoBehaviour, IBegin
         Debug.LogError($"damage : {damage}, this.gameObject : {gameObject}");
 
         ChangeAnim(playerController.lastMoveDirection);
-        InventoryManager.Instance.ApplyItemDuablilityUsed();
-        PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.ApplyItemDuablilityUsed();
+        }
+
+        if (PlayerStatsLevel.Instance != null)
+        {
+            PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
+        }
+
         Debug.Log("AddExp() 호출");
     }
 
@@ -151,9 +159,55 @@ public class PlayerAttack : MonoBehaviour, IBegin
     void ChangeAttackByIndex(int idx)
     {
         if (idx < 0) return;
-        var target = slots.attack[idx];
 
-        playerController.ChangeAnimationClip(slots.curAttackClip, target);
-        playerController.animator.Play("Attack");
+        AnimationClip baseClip;
+        string stateName;
+        List<AnimationClip> attackClips = GetAttackClips(out baseClip, out stateName);
+        if (attackClips == null || idx >= attackClips.Count || attackClips[idx] == null)
+        {
+            attackClips = slots.attack;
+            baseClip = slots.curAttackClip;
+            stateName = "Attack";
+        }
+
+        if (attackClips == null || idx >= attackClips.Count || attackClips[idx] == null)
+            return;
+
+        var target = attackClips[idx];
+
+        playerController.ChangeAnimationClip(baseClip, target);
+        playerController.animator.Play(stateName);
+    }
+
+    List<AnimationClip> GetAttackClips(out AnimationClip baseClip, out string stateName)
+    {
+        baseClip = slots.curAttackClip;
+        stateName = "Attack";
+
+        SItemStack selected = InventoryManager.Instance != null ? InventoryManager.Instance.SelectedSlotInventory : null;
+        SItemWeaponTypeSO weapon = selected != null ? selected.itemBaseType as SItemWeaponTypeSO : null;
+        if (weapon == null || selected.duability <= 0)
+            return slots.attack;
+
+        switch (weapon.id)
+        {
+            case 20001:
+                baseClip = slots.curWoodenSwordClip;
+                stateName = "WoodenSword";
+                return slots.woodenSword;
+
+            case 20002:
+                baseClip = slots.curIronSwrordClip;
+                stateName = "IronSword";
+                return slots.ironSword;
+
+            case 20003:
+                baseClip = slots.curConchSwordClip;
+                stateName = "ConchSword";
+                return slots.conchSword;
+
+            default:
+                return slots.attack;
+        }
     }
 }
