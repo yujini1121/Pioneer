@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a9b2d2d1d0b4c6fa4eb1a42f1015a01, type: 3}
+  m_Name: GameBalanceSettings
+  m_EditorClassIdentifier: 
+  dayDuration: 120
+  nightDuration: 60
+  enemySpawnTable:
+  - total: 3
+    minion: 3
+    crawler: 0
+    titan: 0
+  - total: 6
+    minion: 4
+    crawler: 2
+    titan: 0
+  - total: 10
+    minion: 5
+    crawler: 3
+    titan: 2
+  - total: 13
+    minion: 6
+    crawler: 4
+    titan: 3
+  - total: 17
+    minion: 8
+    crawler: 5
+    titan: 4
+  enemyScaleTable:
+  - attackPercent: 0
+    hpPercent: 0
+  - attackPercent: 0
+    hpPercent: 0
+  - attackPercent: 0
+    hpPercent: 0
+  - attackPercent: 20
+    hpPercent: 40
+  - attackPercent: 50
+    hpPercent: 60

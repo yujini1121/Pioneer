@@ -12,6 +12,7 @@ public class TitanAI : EnemyBase, IBegin
 
     private bool isAttack = false;
     private float attackTimer = 0f;
+    private const float AttackRecoveryDelay = 0.25f;
     private Vector3 previousPosition;
 
     private StunHandler stunHandler;
@@ -82,6 +83,7 @@ public class TitanAI : EnemyBase, IBegin
         if (CanAttack())
         {
             Attack();
+            return;
         }
         else if (CanMove())
         {
@@ -178,7 +180,7 @@ public class TitanAI : EnemyBase, IBegin
         while (animator != null && !animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
             yield return null;
 
-        const float dashStartNormalized = 0.15f;
+        const float dashStartNormalized = 0.18f;
         while (animator != null && animator.GetCurrentAnimatorStateInfo(0).normalizedTime < dashStartNormalized)
             yield return null;
 
@@ -214,6 +216,8 @@ public class TitanAI : EnemyBase, IBegin
                 }
             }
         }
+
+        yield return new WaitForSeconds(AttackRecoveryDelay);
 
         isAttack = false;
         previousPosition = transform.position;

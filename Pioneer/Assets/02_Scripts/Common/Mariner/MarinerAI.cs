@@ -37,7 +37,9 @@ public class MarinerAI : MarinerBase, IBegin
     public int marinerId;
 
     private float attackCooldown = 0f;
-    private float attackInterval = 0.5f;
+    private float attackInterval = 0.33f;
+    private const float AttackHitDelay = 0.09f;
+    private const float AttackRecoveryDelay = 0.41f;
 
     private bool isRegistered = false;
     private bool lastDaytimeState = false;
@@ -52,7 +54,7 @@ public class MarinerAI : MarinerBase, IBegin
         speed = 2f;
         attackDamage = 6;
         attackRange = 1.5f;
-        attackDelayTime = 1.5f;
+        attackDelayTime = AttackHitDelay;
 
         fov = GetComponent<FOVController>();
         initialRot = transform.rotation;
@@ -366,6 +368,8 @@ public class MarinerAI : MarinerBase, IBegin
 
             // 실제 타격
             PerformMarinerAttack();
+
+            yield return new WaitForSeconds(AttackRecoveryDelay);
             attackCooldown = attackInterval;
 
             // 타겟 상태 확인 후 분기

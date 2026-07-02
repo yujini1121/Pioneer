@@ -170,7 +170,10 @@ public class EnemyBase : CreatureBase, IBegin
 
         UpdateSpriteFacing(dir);
 
-        animator.Play("Attack");
+        animator.ResetTrigger("SetIdle");
+        animator.ResetTrigger("SetRun");
+        animator.ResetTrigger("SetAttack");
+        animator.Play("Attack", 0, 0f);
         nextAnimTrigger = "SetAttack";
     }
 
@@ -191,18 +194,13 @@ public class EnemyBase : CreatureBase, IBegin
         Transform visualRoot = animator.transform;
         if (visualRoot == null) return;
 
-    // PlayerController의 ChangeAnimationClip 흐름을 가져온 코드입니다. 추후 정리 필요.
+        if (!hasDefaultAnimatorScale)
         {
             defaultAnimatorScale = visualRoot.localScale;
             hasDefaultAnimatorScale = true;
         }
 
-        if (Mathf.Abs(dir.x) < 0.0001f)
-            return;
-
-        Vector3 scale = defaultAnimatorScale;
-        scale.x = Mathf.Abs(defaultAnimatorScale.x) * (dir.x > 0f ? -1f : 1f);
-        visualRoot.localScale = scale;
+        visualRoot.localScale = defaultAnimatorScale;
     }
 
     // PlayerController의 ChangeAnimationClip을 그대로 가져온 코드, 추후 정리 필요

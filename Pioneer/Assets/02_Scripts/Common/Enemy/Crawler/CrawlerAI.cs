@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -15,6 +16,8 @@ public class CrawlerAI : EnemyBase, IBegin
     private GameObject revengeTarget;
     private bool isAttack = false;
     private float attackTimer = 0f;
+    private const float AttackHitDelay = 0.1f;
+    private const float AttackRecoveryDelay = 0.45f;
 
     private StunHandler stunHandler;
     private float originalSpeed;
@@ -52,8 +55,11 @@ public class CrawlerAI : EnemyBase, IBegin
         if (attackTimer > 0f)
         {
             attackTimer -= dt;
-            ChangeIdleByIndex(lastMoveDirection);
-            ApplyAnimTrigger();
+            if (!isAttack)
+            {
+                ChangeIdleByIndex(lastMoveDirection);
+                ApplyAnimTrigger();
+            }
 
             // 쿨타임이 끝나면 다시 이동 허용
             if (attackTimer <= 0f && agent != null) agent.isStopped = false;
@@ -70,6 +76,7 @@ public class CrawlerAI : EnemyBase, IBegin
         if (CanAttack())
         {
             Attack();
+            return;
         }
         else if (CanMove())
         {
@@ -131,6 +138,11 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private void Attack()
     {
+        if (isAttack)
+            return;
+
+        isAttack = true;
+
         // 공격 시작 시 Run 쪽으로 섞여 들어가는 것을 방지
         if (agent != null)
         {
@@ -147,6 +159,13 @@ public class CrawlerAI : EnemyBase, IBegin
         }
 
         ChangeAttackByIndex(lastMoveDirection);
+        StartCoroutine(AttackSequence());
+        attackTimer = attackDelayTime;
+    }
+
+    private IEnumerator AttackSequence()
+    {
+        yield return new WaitForSeconds(AttackHitDelay);
 
         Collider[] hitColliders = DetectAttackRange();
 
@@ -164,13 +183,14 @@ public class CrawlerAI : EnemyBase, IBegin
                     SortCloseObj();
                     currentAttackTarget = fov.visibleTargets[closeTarget].gameObject;
                 }
-                return;
+                continue;
             }
 
             targetBase.TakeDamage(attackDamage, this.gameObject);
         }
 
-        attackTimer = attackDelayTime;
+        yield return new WaitForSeconds(AttackRecoveryDelay);
+        isAttack = false;
     }
 
     private void SortCloseObj()

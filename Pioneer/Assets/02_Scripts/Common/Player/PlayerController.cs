@@ -24,6 +24,9 @@ public class PlayerController : MonoBehaviour
     public Slider chargeSlider;
     public Slider cencleChargeSlider;
 
+    [Header("낚시 UI 효과")]
+    [SerializeField, Min(1f)] private float fishingChargeVisualPower = 1.3f;
+
     private LayerMask combinedMask;
     private float currentChargeTime;
     public bool isCharging;
@@ -150,7 +153,7 @@ public class PlayerController : MonoBehaviour
                 playerCore.SetState(PlayerCore.PlayerState.ChargingFishing);
                 isCharging = true;
                 currentChargeTime = 0f;
-                chargeSlider.value = 0f;
+                ResetFishingChargeSlider(chargeSlider);
             }
         }
         else
@@ -181,7 +184,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.Q))
         {
             currentChargeTime += Time.deltaTime;
-            chargeSlider.value = currentChargeTime / ChargeTime;
+            SetFishingChargeSliderValue(chargeSlider, currentChargeTime / ChargeTime);
 
             if (currentChargeTime >= ChargeTime)
             {
@@ -193,7 +196,7 @@ public class PlayerController : MonoBehaviour
 
                 cancelDelayTimer = fishingCancelDelay;
                 currentChargeTime = 0f;
-                chargeSlider.value = 0f;
+                ResetFishingChargeSlider(chargeSlider);
                 fishingUI.gameObject.SetActive(false);
                 fishingCencleUI.gameObject.SetActive(true);
                 playerCore.FishingHold(lastMoveDirection);
@@ -208,7 +211,7 @@ public class PlayerController : MonoBehaviour
         {
             isCharging = false;
             currentChargeTime = 0f;
-            chargeSlider.value = 0f;
+            ResetFishingChargeSlider(chargeSlider);
             playerCore.SetState(PlayerCore.PlayerState.Default);
         }
     }
@@ -224,14 +227,15 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             currentChargeTime = 0f;
-            chargeSlider.value = 0f;
+            ResetFishingChargeSlider(chargeSlider);
+            ResetFishingChargeSlider(cencleChargeSlider);
             chargeSlider.gameObject.SetActive(true);
         }
 
         if (Input.GetKey(KeyCode.Q))
         {
             currentChargeTime += Time.deltaTime;
-            cencleChargeSlider.value = currentChargeTime / ChargeTime;
+            SetFishingChargeSliderValue(cencleChargeSlider, currentChargeTime / ChargeTime);
 
             if (currentChargeTime >= ChargeTime)
             {
@@ -239,7 +243,7 @@ public class PlayerController : MonoBehaviour
                 playerFishing.StopFishingLoop();
                 playerCore.SetState(PlayerCore.PlayerState.Default);
                 currentChargeTime = 0f;
-                cencleChargeSlider.value = 0f;
+                ResetFishingChargeSlider(cencleChargeSlider);
                 fishingCencleUI.gameObject.SetActive(false);
             }
         }
@@ -247,8 +251,25 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Q))
         {
             currentChargeTime = 0f;
-            cencleChargeSlider.value = 0f;
+            ResetFishingChargeSlider(cencleChargeSlider);
         }
+    }
+
+    private void SetFishingChargeSliderValue(Slider slider, float rawProgress)
+    {
+        if (slider == null)
+            return;
+
+        float clampedProgress = Mathf.Clamp01(rawProgress);
+        slider.value = Mathf.Pow(clampedProgress, fishingChargeVisualPower);
+    }
+
+    private void ResetFishingChargeSlider(Slider slider)
+    {
+        if (slider == null)
+            return;
+
+        slider.value = 0f;
     }
 
     private Vector3 GetMouseWorldDirection()
@@ -295,10 +316,10 @@ public class PlayerController : MonoBehaviour
         playerFishing.StopFishingLoop();
 
         if (chargeSlider != null)
-            chargeSlider.value = 0f;
+            ResetFishingChargeSlider(chargeSlider);
 
         if (cencleChargeSlider != null)
-            cencleChargeSlider.value = 0f;
+            ResetFishingChargeSlider(cencleChargeSlider);
 
         if (fishingCencleUI != null)
             fishingCencleUI.gameObject.SetActive(false);

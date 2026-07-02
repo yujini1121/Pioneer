@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -20,7 +21,10 @@ public class MinionAI : EnemyBase, IBegin
     private GameObject revengeTarget;   // 나를 공격한 대상
     // 최종 목표 : currentAttackTarget
 
+    private bool isAttack = false;
     private float attackTimer = 0f;
+    private const float AttackHitDelay = 0.1f;
+    private const float AttackRecoveryDelay = 0.45f;
 
     private StunHandler stunHandler;
     private float originalSpeed;
@@ -66,8 +70,11 @@ public class MinionAI : EnemyBase, IBegin
         if (attackTimer > 0f)
         {
             attackTimer -= dt;
-            ChangeIdleByIndex(lastMoveDirection);
-            ApplyAnimTrigger();
+            if (!isAttack)
+            {
+                ChangeIdleByIndex(lastMoveDirection);
+                ApplyAnimTrigger();
+            }
 
             // 쿨타임이 끝나면 다시 이동 허용
             if (attackTimer <= 0f && agent != null) agent.isStopped = false;
@@ -90,6 +97,7 @@ public class MinionAI : EnemyBase, IBegin
         else if (CanAttack(isTargetInAttackRange))
         {
             Attack();
+            return;
         }
         else if (CanMove())
         {
@@ -209,6 +217,11 @@ public class MinionAI : EnemyBase, IBegin
     // =============================================================
     private void Attack()
     {
+        if (isAttack)
+            return;
+
+        isAttack = true;
+
         // 공격 시작 시 Run 애니메이션으로 섞여 들어가는 것을 방지
         if (agent != null)
         {
@@ -225,20 +238,34 @@ public class MinionAI : EnemyBase, IBegin
         }
 
         ChangeAttackByIndex(lastMoveDirection);
+        StartCoroutine(AttackSequence(currentAttackTarget));
+        attackTimer = attackDelayTime;
+    }
 
-        if (currentAttackTarget == null)
-            return;
+    private IEnumerator AttackSequence(GameObject targetToAttack)
+    {
+        yield return new WaitForSeconds(AttackHitDelay);
 
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Minion);
-
-        CommonBase targetBase = currentAttackTarget.GetComponent<CommonBase>();
-        if (targetBase != null && !targetBase.IsDead)
+        if (targetToAttack != null)
         {
-            targetBase.TakeDamage(attackDamage, this.gameObject);
+            Collider[] targetsInAttackRange = DetectAttackRange();
+            bool isTargetStillInRange = IsTargetInColliders(targetToAttack, targetsInAttackRange);
+
+            if (isTargetStillInRange)
+            {
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.AfterAttack_Minion);
+
+                CommonBase targetBase = targetToAttack.GetComponent<CommonBase>();
+                if (targetBase != null && !targetBase.IsDead)
+                {
+                    targetBase.TakeDamage(attackDamage, this.gameObject);
+                }
+            }
         }
 
-        attackTimer = attackDelayTime;
+        yield return new WaitForSeconds(AttackRecoveryDelay);
+        isAttack = false;
     }
 
     // =============================================================

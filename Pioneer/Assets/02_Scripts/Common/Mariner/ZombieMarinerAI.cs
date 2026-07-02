@@ -13,7 +13,9 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     // 공격 설정
     private float attackCooldown = 0f;
-    private float attackInterval = 0.5f;
+    private float attackInterval = 0.33f;
+    private const float AttackHitDelay = 0.09f;
+    private const float AttackRecoveryDelay = 0.41f;
 
     private StunHandler stunHandler;
 
@@ -49,7 +51,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         speed = 2f;
         attackDamage = 6;
         attackRange = 1.5f;
-        attackDelayTime = 1.5f;
+        attackDelayTime = AttackHitDelay;
 
         chaseRange = 3f; 
 
@@ -167,6 +169,8 @@ public class ZombieMarinerAI : MarinerBase, IBegin
         }
 
         PerformZombieAttack();
+
+        yield return new WaitForSeconds(AttackRecoveryDelay);
         attackCooldown = attackInterval;
 
         // 타겟 생존 여부 확인

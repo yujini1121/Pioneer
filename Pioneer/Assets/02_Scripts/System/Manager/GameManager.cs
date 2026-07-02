@@ -26,6 +26,10 @@ public class GameManager : MonoBehaviour, IBegin
 {
     public static GameManager Instance;
 
+    [Header("Balance Settings")]
+    [SerializeField] private GameBalanceSettings balanceSettings;
+    [SerializeField] private bool loadDefaultBalanceSettings = true;
+
     [Header("시간 설정")]
     public float currentGameTime = 0f;
 
@@ -115,7 +119,11 @@ public class GameManager : MonoBehaviour, IBegin
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        postProcessVolume.profile.TryGet(out colorAdjustments);
+        LoadDefaultBalanceSettingsIfNeeded();
+        ApplyBalanceSettings();
+
+        if (postProcessVolume != null && postProcessVolume.profile != null)
+            postProcessVolume.profile.TryGet(out colorAdjustments);
     }
 
     private void Start()
@@ -155,8 +163,11 @@ public class GameManager : MonoBehaviour, IBegin
         float t = Mathf.Clamp01(cycleTime / duration);
 
         // 컬러/노출 보정
-        colorAdjustments.colorFilter.value = grad.Evaluate(t);
-        colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
+        if (colorAdjustments != null)
+        {
+            colorAdjustments.colorFilter.value = grad.Evaluate(t);
+            colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
+        }
 
         // 아직 페이즈가 끝나지 않았으면 리턴
         if (cycleTime < duration) return;
@@ -493,6 +504,124 @@ public class GameManager : MonoBehaviour, IBegin
         Debug.Log($"자원 획득: {type}");
     }
     #endregion
+
+    public void SetBalanceSettings(GameBalanceSettings settings, bool applyNow = true)
+    {
+        balanceSettings = settings;
+
+        if (applyNow)
+            ApplyBalanceSettings();
+    }
+
+    [ContextMenu("Apply Balance Settings")]
+    public void ApplyBalanceSettings()
+    {
+        if (balanceSettings == null)
+            return;
+
+        dayDuration = Mathf.Max(0.01f, balanceSettings.dayDuration);
+        nightDuration = Mathf.Max(0.01f, balanceSettings.nightDuration);
+        oneDayDuration = dayDuration + nightDuration;
+
+        enemySpawnTable = ToGameManagerRows(balanceSettings.enemySpawnTable);
+        enemyScaleTable = ToGameManagerRows(balanceSettings.enemyScaleTable);
+    }
+
+    public void CopyCurrentBalanceTo(GameBalanceSettings settings)
+    {
+        if (settings == null)
+            return;
+
+        settings.dayDuration = dayDuration;
+        settings.nightDuration = nightDuration;
+        settings.enemySpawnTable = ToSettingsRows(enemySpawnTable);
+        settings.enemyScaleTable = ToSettingsRows(enemyScaleTable);
+        settings.NormalizeTotals();
+    }
+
+    private void LoadDefaultBalanceSettingsIfNeeded()
+    {
+        if (!loadDefaultBalanceSettings || balanceSettings != null)
+            return;
+
+        balanceSettings = Resources.Load<GameBalanceSettings>(GameBalanceSettings.DefaultResourceName);
+    }
+
+    private static DayEnemyRow[] ToGameManagerRows(GameBalanceSettings.EnemySpawnRow[] source)
+    {
+        if (source == null)
+            return null;
+
+        DayEnemyRow[] result = new DayEnemyRow[source.Length];
+        for (int i = 0; i < source.Length; i++)
+        {
+            result[i] = new DayEnemyRow
+            {
+                total = source[i].total,
+                minion = source[i].minion,
+                crawler = source[i].crawler,
+                titan = source[i].titan
+            };
+        }
+
+        return result;
+    }
+
+    private static EnemyScaleRow[] ToGameManagerRows(GameBalanceSettings.EnemyScaleRow[] source)
+    {
+        if (source == null)
+            return null;
+
+        EnemyScaleRow[] result = new EnemyScaleRow[source.Length];
+        for (int i = 0; i < source.Length; i++)
+        {
+            result[i] = new EnemyScaleRow
+            {
+                attackPercent = source[i].attackPercent,
+                hpPercent = source[i].hpPercent
+            };
+        }
+
+        return result;
+    }
+
+    private static GameBalanceSettings.EnemySpawnRow[] ToSettingsRows(DayEnemyRow[] source)
+    {
+        if (source == null)
+            return null;
+
+        GameBalanceSettings.EnemySpawnRow[] result = new GameBalanceSettings.EnemySpawnRow[source.Length];
+        for (int i = 0; i < source.Length; i++)
+        {
+            result[i] = new GameBalanceSettings.EnemySpawnRow
+            {
+                total = source[i].total,
+                minion = source[i].minion,
+                crawler = source[i].crawler,
+                titan = source[i].titan
+            };
+        }
+
+        return result;
+    }
+
+    private static GameBalanceSettings.EnemyScaleRow[] ToSettingsRows(EnemyScaleRow[] source)
+    {
+        if (source == null)
+            return null;
+
+        GameBalanceSettings.EnemyScaleRow[] result = new GameBalanceSettings.EnemyScaleRow[source.Length];
+        for (int i = 0; i < source.Length; i++)
+        {
+            result[i] = new GameBalanceSettings.EnemyScaleRow
+            {
+                attackPercent = source[i].attackPercent,
+                hpPercent = source[i].hpPercent
+            };
+        }
+
+        return result;
+    }
 
     private void EnsureSpawnRoot()
     {
