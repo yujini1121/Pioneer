@@ -11295,9 +11295,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  targetOffset: {x: 0, y: 1, z: 0}
-  radius: 0.09
-  edgeSoftness: 0.025
+  targetOffset: {x: 0, y: 0.15, z: 0}
+  radius: 0.18
+  edgeSoftness: 0.0082
   depthPadding: 0.5
 --- !u!1 &1904211460
 GameObject:
@@ -15302,6 +15302,13 @@ MonoBehaviour:
   fullnessBar: {fileID: 1859603818}
   mentalBar: {fileID: 96295163}
   guiltyBar: {fileID: 1833672143}
+  hpIcon: {fileID: 0}
+  fullnessIcon: {fileID: 0}
+  mentalIcon: {fileID: 0}
+  guiltyIcon: {fileID: 0}
+  deltaFeedbackHoldDuration: 0.8
+  barFollowDuration: 0.25
+  deltaFeedbackFadeDuration: 0.35
 --- !u!114 &998115671511118915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18503,6 +18510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameOverPanel: {fileID: 7657135796502995611}
   otherUIPanels: []
+  infiniteModeHintText: {fileID: 0}
   survivalTimeText: {fileID: 6548327613589993260}
   crewStatsText: {fileID: 1342168643976521745}
   continueButton: {fileID: 3545762352239407377}
@@ -24560,6 +24568,7 @@ MonoBehaviour:
   fishingCencleUI: {fileID: 1523561411}
   chargeSlider: {fileID: 414858961}
   cencleChargeSlider: {fileID: 583700802}
+  fishingChargeVisualPower: 1.3
   isCharging: 0
   fishingCancelDelay: 1
   animator: {fileID: 4775383469521072797}
@@ -26273,6 +26282,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82d1a3825d98a1c4fba8a96e95b92ee9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  balanceSettings: {fileID: 0}
+  loadDefaultBalanceSettings: 1
   currentGameTime: 0
   IsDaytime: 1
   currentDay: 1
@@ -33043,6 +33054,8 @@ MonoBehaviour:
   installTimeSec: 3
   ringBackground: {fileID: 1549456458}
   ringFill: {fileID: 1517500650}
+  installProgressSideOffset: -0.85
+  installProgressHeightOffset: 0
 --- !u!1001 &8526916259828762702
 PrefabInstance:
   m_ObjectHideFlags: 0
