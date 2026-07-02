@@ -31,13 +31,28 @@ public class TitleInfiniteModeUI : MonoBehaviour
     {
         GameModeState.StartNormalMode();
         Time.timeScale = 1f;
-        SceneManager.LoadScene(gameSceneName);
+        LoadGameScene();
     }
 
     public void StartInfiniteGame()
     {
         GameModeState.StartInfiniteMode();
         Time.timeScale = 1f;
+        LoadGameScene();
+    }
+
+    private void LoadGameScene()
+    {
+        if (SceneController.Instance != null)
+        {
+            string targetSceneName = string.IsNullOrEmpty(gameSceneName) || gameSceneName == "GameScene"
+                ? SceneController.Instance.sceneToLoad
+                : gameSceneName;
+
+            SceneController.Instance.LoadScene(targetSceneName);
+            return;
+        }
+
         SceneManager.LoadScene(gameSceneName);
     }
 }
