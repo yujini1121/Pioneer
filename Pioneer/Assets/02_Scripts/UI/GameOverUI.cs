@@ -118,6 +118,9 @@ public class GameOverUI : MonoBehaviour
     private void RestartGame()
     {
         Time.timeScale = 1f;
+        if (AudioManager.instance != null)
+            AudioManager.instance.RestoreRuntimeVolumes();
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
@@ -134,6 +137,9 @@ public class GameOverUI : MonoBehaviour
     public void GoToTitle()
     {
         Time.timeScale = 1f;
+        if (AudioManager.instance != null)
+            AudioManager.instance.RestoreRuntimeVolumes();
+
         SceneManager.LoadScene("Title");
     }
 }

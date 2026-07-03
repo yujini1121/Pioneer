@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour, IBegin
     private float oneDayDuration;
 
     private ColorAdjustments colorAdjustments;
+    private Vignette vignette;
+    private Coroutine gameResultPresentationCoroutine;
     private float cycleTime = 0f;
 
     [Header("스포너 지점")]
@@ -66,6 +68,14 @@ public class GameManager : MonoBehaviour, IBegin
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
     public bool IsGameResultActive { get; private set; }
+
+    [Header("Game Result Presentation")]
+    [SerializeField] private float gameOverPresentationDuration = 1.8f;
+    [SerializeField] private float gameOverAudioFadeDuration = 1.6f;
+    [SerializeField] private float gameOverCameraZoomDistance = 1.8f;
+    [SerializeField] private float gameOverCameraShakeAmount = 0.08f;
+    [SerializeField] private float gameOverVignetteIntensity = 0.55f;
+    [SerializeField] private float gameOverVignetteSmoothness = 0.6f;
 
     [Header("동적 스포너(EnemySpawnerFinder)")]
     [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector에서 할당
@@ -125,6 +135,9 @@ public class GameManager : MonoBehaviour, IBegin
 
         if (postProcessVolume != null && postProcessVolume.profile != null)
             postProcessVolume.profile.TryGet(out colorAdjustments);
+
+        if (postProcessVolume != null && postProcessVolume.profile != null)
+            postProcessVolume.profile.TryGet(out vignette);
     }
 
     private void Start()
@@ -268,22 +281,92 @@ public class GameManager : MonoBehaviour, IBegin
         }
 
         Time.timeScale = 0f;
-
-        if (ThisIsPlayer.Player != null)
-        {
-            Renderer playerRenderer = ThisIsPlayer.Player.GetComponent<Renderer>();
-            if (playerRenderer != null)
-            {
-                Color color = playerRenderer.material.color;
-                color.a = 0f;
-                playerRenderer.material.color = color;
-            }
-        }
-
         HideAllUI();
 
+        if (gameResultPresentationCoroutine != null)
+            StopCoroutine(gameResultPresentationCoroutine);
+
+        if (voyageSucceeded)
+        {
+            ShowGameResultScreen(voyageSucceeded);
+            return;
+        }
+
+        gameResultPresentationCoroutine = StartCoroutine(PlayGameOverPresentation(voyageSucceeded));
+    }
+
+    private IEnumerator PlayGameOverPresentation(bool voyageSucceeded)
+    {
+        if (AudioManager.instance != null)
+            AudioManager.instance.FadeOutForGameResult(gameOverAudioFadeDuration);
+
+        Camera cam = Camera.main;
+        Vector3 startCameraPosition = cam != null ? cam.transform.position : Vector3.zero;
+        Vector3 targetCameraPosition = startCameraPosition;
+
+        if (cam != null)
+            targetCameraPosition = startCameraPosition + cam.transform.forward * gameOverCameraZoomDistance;
+
+        float startVignetteIntensity = vignette != null ? vignette.intensity.value : 0f;
+        float startVignetteSmoothness = vignette != null ? vignette.smoothness.value : 0f;
+        bool hadVignette = vignette != null && vignette.active;
+
+        if (vignette != null)
+        {
+            vignette.active = true;
+            vignette.intensity.overrideState = true;
+            vignette.smoothness.overrideState = true;
+        }
+
+        float duration = Mathf.Max(0.01f, gameOverPresentationDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = SmoothStep01(t);
+
+            if (cam != null)
+            {
+                Vector2 shake = Random.insideUnitCircle * gameOverCameraShakeAmount * (1f - eased);
+                Vector3 shakeOffset = cam.transform.right * shake.x + cam.transform.up * shake.y;
+                cam.transform.position = Vector3.Lerp(startCameraPosition, targetCameraPosition, eased) + shakeOffset;
+            }
+
+            if (vignette != null)
+            {
+                vignette.intensity.value = Mathf.Lerp(startVignetteIntensity, gameOverVignetteIntensity, eased);
+                vignette.smoothness.value = Mathf.Lerp(startVignetteSmoothness, gameOverVignetteSmoothness, eased);
+            }
+
+            yield return null;
+        }
+
+        if (cam != null)
+            cam.transform.position = targetCameraPosition;
+
+        if (vignette != null)
+        {
+            vignette.intensity.value = gameOverVignetteIntensity;
+            vignette.smoothness.value = gameOverVignetteSmoothness;
+            vignette.active = hadVignette || gameOverVignetteIntensity > 0f;
+        }
+
+        ShowGameResultScreen(voyageSucceeded);
+        gameResultPresentationCoroutine = null;
+    }
+
+    private void ShowGameResultScreen(bool voyageSucceeded)
+    {
         if (gameOverUI != null)
             gameOverUI.ShowGameOverScreen(totalMarinerMembers, deadMarinerMembers, voyageSucceeded);
+    }
+
+    private static float SmoothStep01(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return t * t * (3f - 2f * t);
     }
 
     void HideAllUI()
@@ -339,6 +422,9 @@ public class GameManager : MonoBehaviour, IBegin
     {
         Time.timeScale = 1f;
         IsGameResultActive = false;
+
+        if (AudioManager.instance != null)
+            AudioManager.instance.RestoreRuntimeVolumes();
 
         if (PlayerController.instance != null)
             PlayerController.instance.UnlockFromGameResult();

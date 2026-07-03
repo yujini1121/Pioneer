@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -33,60 +34,60 @@ public class AudioManager : MonoBehaviour, IBegin
     /// <returns></returns>
     public enum SFX
     {
-        GameStartButton,
-        SamshSound,
-        GameOver,
-        Die,
-        Click,
-        AfterAttack_Minion,
-        AfterAttack_Titan,
-        AfterAttack_Crawler,
-        BeforeAttack_Minion,
-        BeforeAttack_Titan,
-        BeforeAttack_Crawler,
-        Hunger,
-        Sanity29Down,
-        LevelUp,
-        SelectQuickSlot,
-        RemoveItem,
-        ArrayItem,
-        EatingFood,
-        Drink,
-        UseComsumpitem,
-        BeforeFishing,
-        GetFishing,
-        OpenBox,
-        SuccessCrafting,
-        GreatSuccessCrafting,
-        InstallingObject,
-        InstallObject,
-        RotateInstallTypeObject,
-        DestroyedObject,
-        Hit_Object,hit,
-        BalistaAttack,
-        ActivatedSpiketrap,
-        BeforeAttack_BlackFog,
-        AfterAttack_BlackFog,
-        Scream2,
-        CantESCNoise,
-        LaughSaren,
-        Hurricane,
-        HeavyRain,
-        Thunder,
-        FortifyObject,
-        ItemGet,
-        ToNight,
-        MeetEnemy,
-        Punch1_Player,
-        Hit,
-        Take,
-        Hit2,
-        GreatSuccessCrafting2,
-        meetEnemy2,
-        Punch3_Player,
-        SuccessCrafting2,
-        To_night2,
-        grunt_effort_struggle_male_b_17
+        GameStartButton = 0,
+        SamshSound = 1,
+        GameOver = 2,
+        Die = 3,
+        Click = 4,
+        AfterAttack_Minion = 5,
+        AfterAttack_Titan = 6,
+        AfterAttack_Crawler = 7,
+        BeforeAttack_Minion = 8,
+        BeforeAttack_Titan = 9,
+        BeforeAttack_Crawler = 10,
+        Hunger = 11,
+        Sanity29Down = 12,
+        LevelUp = 13,
+        SelectQuickSlot = 14,
+        RemoveItem = 15,
+        ArrayItem = 16,
+        EatingFood = 17,
+        Drink = 18,
+        UseComsumpitem = 19,
+        BeforeFishing = 20,
+        GetFishing = 21,
+        OpenBox = 22,
+        SuccessCrafting = 23,
+        GreatSuccessCrafting = 24,
+        InstallingObject = 25,
+        InstallObject = 26,
+        RotateInstallTypeObject = 27,
+        DestroyedObject = 28,
+        Hit_Object = 29,
+        BalistaAttack = 30,
+        ActivatedSpiketrap = 31,
+        BeforeAttack_BlackFog = 32,
+        AfterAttack_BlackFog = 33,
+        Scream2 = 34,
+        CantESCNoise = 35,
+        LaughSaren = 36,
+        Hurricane = 37,
+        HeavyRain = 38,
+        Thunder = 39,
+        FortifyObject = 40,
+        ItemGet = 41,
+        ToNight = 42,
+        MeetEnemy = 43,
+        Punch1_Player = 44,
+        Hit = 45,
+        Take = 46,
+        Hit2 = 48,
+        GreatSuccessCrafting2 = 49,
+        meetEnemy2 = 50,
+        Punch3_Player = 51,
+        SuccessCrafting2 = 52,
+        To_night2 = 53,
+        grunt_effort_struggle_male_b_17 = 54
     }
 
     [Header("Vol UI")]
@@ -113,6 +114,10 @@ public class AudioManager : MonoBehaviour, IBegin
     private int sfxChannelIndex;
 
     private Dictionary<SFX, AudioClip> sfxDictionary;
+    private Coroutine gameResultFadeCoroutine;
+    private float runtimeBgmVolumeBeforeFade;
+    private float[] runtimeSfxVolumesBeforeFade;
+    private bool hasRuntimeVolumesBeforeFade;
 
     void Awake()
     {
@@ -227,6 +232,113 @@ public class AudioManager : MonoBehaviour, IBegin
     public void StopBgm()
     {
         bgmPlayer.Stop();
+    }
+
+    public void FadeOutForGameResult(float duration)
+    {
+        if (!hasRuntimeVolumesBeforeFade)
+        {
+            runtimeBgmVolumeBeforeFade = bgmPlayer != null ? bgmPlayer.volume : bgmVolume;
+            runtimeSfxVolumesBeforeFade = GetSfxVolumes();
+            hasRuntimeVolumesBeforeFade = true;
+        }
+
+        if (gameResultFadeCoroutine != null)
+            StopCoroutine(gameResultFadeCoroutine);
+
+        gameResultFadeCoroutine = StartCoroutine(FadeOutForGameResultCoroutine(Mathf.Max(0.01f, duration)));
+    }
+
+    public void RestoreRuntimeVolumes()
+    {
+        if (gameResultFadeCoroutine != null)
+        {
+            StopCoroutine(gameResultFadeCoroutine);
+            gameResultFadeCoroutine = null;
+        }
+
+        if (bgmPlayer != null)
+            bgmPlayer.volume = hasRuntimeVolumesBeforeFade ? runtimeBgmVolumeBeforeFade : bgmVolume;
+
+        if (sfxPlayers == null)
+        {
+            runtimeSfxVolumesBeforeFade = null;
+            hasRuntimeVolumesBeforeFade = false;
+            return;
+        }
+
+        for (int i = 0; i < sfxPlayers.Length; i++)
+        {
+            if (sfxPlayers[i] != null)
+            {
+                bool hasStoredVolume = hasRuntimeVolumesBeforeFade
+                    && runtimeSfxVolumesBeforeFade != null
+                    && i < runtimeSfxVolumesBeforeFade.Length;
+
+                sfxPlayers[i].volume = hasStoredVolume ? runtimeSfxVolumesBeforeFade[i] : sfxVolume;
+            }
+        }
+
+        runtimeSfxVolumesBeforeFade = null;
+        hasRuntimeVolumesBeforeFade = false;
+    }
+
+    private IEnumerator FadeOutForGameResultCoroutine(float duration)
+    {
+        float elapsed = 0f;
+        float startBgmVolume = bgmPlayer != null ? bgmPlayer.volume : 0f;
+        float[] startSfxVolumes = GetSfxVolumes();
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float volumeScale = 1f - SmoothStep01(t);
+
+            if (bgmPlayer != null)
+                bgmPlayer.volume = startBgmVolume * volumeScale;
+
+            ApplySfxVolumeScale(startSfxVolumes, volumeScale);
+
+            yield return null;
+        }
+
+        if (bgmPlayer != null)
+            bgmPlayer.volume = 0f;
+
+        ApplySfxVolumeScale(startSfxVolumes, 0f);
+        gameResultFadeCoroutine = null;
+    }
+
+    private float[] GetSfxVolumes()
+    {
+        if (sfxPlayers == null)
+            return new float[0];
+
+        float[] volumes = new float[sfxPlayers.Length];
+        for (int i = 0; i < sfxPlayers.Length; i++)
+            volumes[i] = sfxPlayers[i] != null ? sfxPlayers[i].volume : 0f;
+
+        return volumes;
+    }
+
+    private void ApplySfxVolumeScale(float[] startVolumes, float volumeScale)
+    {
+        if (sfxPlayers == null || startVolumes == null)
+            return;
+
+        int count = Mathf.Min(sfxPlayers.Length, startVolumes.Length);
+        for (int i = 0; i < count; i++)
+        {
+            if (sfxPlayers[i] != null)
+                sfxPlayers[i].volume = startVolumes[i] * volumeScale;
+        }
+    }
+
+    private static float SmoothStep01(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return t * t * (3f - 2f * t);
     }
 
     /// <summary>
