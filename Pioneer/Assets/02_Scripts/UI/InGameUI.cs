@@ -56,7 +56,7 @@ public class InGameUI : MonoBehaviour, IBegin
     float denyUiEndTime = 0.0f;
     float denyUiLifeTime = 2.0f;
     bool isCraftButtonExist = false;
-    bool isPannelExpand = true;
+    bool isPannelExpand = false;
     public bool IsPannelExpanded => isPannelExpand;
     bool isNearCraft = false;
 
@@ -68,7 +68,7 @@ public class InGameUI : MonoBehaviour, IBegin
 
     void Start()
     {
-        UseTab();
+        InitializeClosedPanelState();
     }
 
     void Update()
@@ -216,6 +216,33 @@ public class InGameUI : MonoBehaviour, IBegin
             g.SetActive(isPannelExpand);
         }
         InventoryUiMain.instance.InventoryExpand(isPannelExpand);
+    }
+
+    private void InitializeClosedPanelState()
+    {
+        isPannelExpand = false;
+        isNearCraft = false;
+        currentFabricationUi = makeshiftCraft != null ? makeshiftCraft.ui : null;
+
+        if (MakeshiftCraftUiMain.instance != null)
+            MakeshiftCraftUiMain.instance.isOpened = false;
+
+        ApplyPanelExpandState();
+
+        if (gameObjectPlayerStatUiParent != null)
+            gameObjectPlayerStatUiParent.SetActive(false);
+
+        if (makeshiftCraftUI != null)
+            makeshiftCraftUI.SetActive(false);
+
+        if (defaultCraftUI != null)
+            defaultCraftUI.SetActive(false);
+
+        if (mainCraft != null && mainCraft.ui != null)
+            mainCraft.ui.gameObject.SetActive(false);
+
+        if (makeshiftCraft != null && makeshiftCraft.ui != null)
+            makeshiftCraft.ui.gameObject.SetActive(false);
     }
 
     public void UseTab()

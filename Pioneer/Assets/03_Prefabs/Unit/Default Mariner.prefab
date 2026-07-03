@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 8963320510897873902}
   - component: {fileID: 2680221196759778759}
   - component: {fileID: 1699682457884838275}
+  - component: {fileID: -6943291221528661387}
   m_Layer: 11
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -159,7 +160,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1367171001, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
+  m_Sprite: {fileID: 580515869, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -303,7 +304,6 @@ GameObject:
   - component: {fileID: 1611188805888511943}
   - component: {fileID: -2158088053475900180}
   - component: {fileID: -5526518313908064534}
-  - component: {fileID: -6943291221528661387}
   - component: {fileID: -8069143574915022562}
   - component: {fileID: -129499574645891824}
   - component: {fileID: 3868669519861422790}
@@ -454,8 +454,8 @@ MonoBehaviour:
   hitFlashDurations: 0.2
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashEmission: 2
-  spriteRenderer: {fileID: 0}
-  fov: {fileID: 0}
+  spriteRenderer: {fileID: 2680221196759778759}
+  fov: {fileID: 5351841184761118691}
   speed: 0
   attackDamage: 0
   attackRange: 0
@@ -519,7 +519,7 @@ Animator:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5261718270079172171}
+  m_GameObject: {fileID: 3961168948238632565}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 296f2c6ef2012dd45ab03d81fe80807d, type: 2}
@@ -552,6 +552,14 @@ MonoBehaviour:
   damp: 0.08
   invertX: 0
   invertZ: 0
+  defaultIdleFront: {fileID: 580515869, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
+  defaultIdleBack: {fileID: 16665109, guid: 11a9baf6d3908634c871ad26ebe9c982, type: 3}
+  defaultIdleLeft: {fileID: -1389467579, guid: d43bec86c088f284288664a70cfbc5bf, type: 3}
+  defaultIdleRight: {fileID: 394434068, guid: 1156643c288f3d9449bbf59b03ebfa3e, type: 3}
+  zombieIdleFront: {fileID: -817789107, guid: ec07544d78d977a47abc72fdcffc51f5, type: 3}
+  zombieIdleBack: {fileID: -117647857, guid: 6b50f0820c534554fb004a3861328c09, type: 3}
+  zombieIdleLeft: {fileID: -638755602, guid: e27667cddeb67fd4fb44a5fa39c1f85d, type: 3}
+  zombieIdleRight: {fileID: 1174114668, guid: 9a7997817c386684b85c4061fc3ad329, type: 3}
 --- !u!114 &-129499574645891824
 MonoBehaviour:
   m_ObjectHideFlags: 0

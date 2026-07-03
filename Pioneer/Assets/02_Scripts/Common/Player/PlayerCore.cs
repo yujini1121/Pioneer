@@ -196,6 +196,7 @@ public class PlayerCore : CreatureBase, IBegin
         Instance = this;
         playerController = GetComponent<PlayerController>();
         playerRb = GetComponent<Rigidbody>();
+        IgnorePlatformCollisionSeams();
         creatureEffect = GetComponent<CreatureEffect>();
         SetSetAttribute();
 
@@ -207,6 +208,17 @@ public class PlayerCore : CreatureBase, IBegin
         animator = playerController.animator;
         playerRb = GetComponent<Rigidbody>();
 
+    }
+
+    private static void IgnorePlatformCollisionSeams()
+    {
+        int playerLayer = LayerMask.NameToLayer("Player");
+        int platformLayer = LayerMask.NameToLayer("Platform");
+        if (playerLayer < 0 || platformLayer < 0) return;
+
+        // Platform floor tiles use separate colliders; physical player/platform
+        // contacts can snag the capsule on tile seams while manual movement runs.
+        Physics.IgnoreLayerCollision(playerLayer, platformLayer, true);
     }
     
     new void Start()
@@ -220,14 +232,18 @@ public class PlayerCore : CreatureBase, IBegin
 
     void Update()
     {
-        if (stunHandler != null && stunHandler.IsStunned)
+        if (IsDead)
             return;
 
         if (hp <= 0)
         {
             IsDead = true;
             WhenDestroy();
+            return;
         }
+
+        if (stunHandler != null && stunHandler.IsStunned)
+            return;
 
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F12))
@@ -268,7 +284,7 @@ public class PlayerCore : CreatureBase, IBegin
         //maxHp = 100;
         maxHp = 100;
         hp = maxHp;                 // 체력
-        speed = 4.0f;               // 이동 속도
+        speed = 1.8f;               // 이동 속도
         defaultSpeed = speed;
         currentFullness = 80;              // 포만감 (시작 값 80)
         currentMental = maxMental;         // 정신력 (시작 값 100)
@@ -368,6 +384,13 @@ public class PlayerCore : CreatureBase, IBegin
 
         var v = moveInput.normalized * speed;
         playerRb.velocity = new Vector3(v.x, playerRb.velocity.y, v.z);
+    }
+
+    public void StopHorizontalMovement()
+    {
+        if (playerRb == null) return;
+
+        playerRb.velocity = new Vector3(0f, playerRb.velocity.y, 0f);
     }
 
     // =============================================================

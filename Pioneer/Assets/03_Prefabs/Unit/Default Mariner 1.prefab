@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1367171001, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
+  m_Sprite: {fileID: 580515869, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -140,6 +140,14 @@ MonoBehaviour:
   damp: 0.08
   invertX: 0
   invertZ: 0
+  defaultIdleFront: {fileID: 580515869, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
+  defaultIdleBack: {fileID: 16665109, guid: 11a9baf6d3908634c871ad26ebe9c982, type: 3}
+  defaultIdleLeft: {fileID: -1389467579, guid: d43bec86c088f284288664a70cfbc5bf, type: 3}
+  defaultIdleRight: {fileID: 394434068, guid: 1156643c288f3d9449bbf59b03ebfa3e, type: 3}
+  zombieIdleFront: {fileID: -817789107, guid: ec07544d78d977a47abc72fdcffc51f5, type: 3}
+  zombieIdleBack: {fileID: -117647857, guid: 6b50f0820c534554fb004a3861328c09, type: 3}
+  zombieIdleLeft: {fileID: -638755602, guid: e27667cddeb67fd4fb44a5fa39c1f85d, type: 3}
+  zombieIdleRight: {fileID: 1174114668, guid: 9a7997817c386684b85c4061fc3ad329, type: 3}
 --- !u!1 &3339714784095837873
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,8 +311,8 @@ MonoBehaviour:
   hitFlashDurations: 0.2
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashEmission: 2
-  spriteRenderer: {fileID: 0}
-  fov: {fileID: 0}
+  spriteRenderer: {fileID: 6931784451536395334}
+  fov: {fileID: 1067817375811682228}
   speed: 0
   attackDamage: 0
   attackRange: 0

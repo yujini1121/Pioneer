@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8480634719498701782}
   - component: {fileID: 7904728821678511056}
   - component: {fileID: 3432821965893446996}
+  - component: {fileID: 9123456789012345674}
   - component: {fileID: 2151693467487321608}
   - component: {fileID: 6619639927548977897}
   - component: {fileID: 4368125581735223614}
@@ -139,8 +140,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b206fcdc475c5d40a9d51ce88671b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   viewRadius: 10
   viewAngle: 360
   visibleTargets: []
@@ -165,8 +166,8 @@ MonoBehaviour:
   hitFlashDurations: 0.2
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashEmission: 2
-  spriteRenderer: {fileID: 0}
-  fov: {fileID: 0}
+  spriteRenderer: {fileID: 7979947009109882733}
+  fov: {fileID: 7904728821678511056}
   speed: 0
   attackDamage: 0
   attackRange: 0
@@ -177,8 +178,35 @@ MonoBehaviour:
   isRepairing: 0
   personalRayCount: 8
   personalMaxDistance: 50
-  animator: {fileID: 0}
+  animator: {fileID: 9123456789012345673}
   marinerId: 0
+--- !u!114 &9123456789012345674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038291238442652822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63ba27b1104a1df4598a980bb6db97aa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  agent: {fileID: 8480634719498701782}
+  animator: {fileID: 9123456789012345673}
+  sprite: {fileID: 7979947009109882733}
+  idleThreshold: 0.05
+  damp: 0.08
+  invertX: 0
+  invertZ: 0
+  defaultIdleFront: {fileID: 580515869, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
+  defaultIdleBack: {fileID: 16665109, guid: 11a9baf6d3908634c871ad26ebe9c982, type: 3}
+  defaultIdleLeft: {fileID: -1389467579, guid: d43bec86c088f284288664a70cfbc5bf, type: 3}
+  defaultIdleRight: {fileID: 394434068, guid: 1156643c288f3d9449bbf59b03ebfa3e, type: 3}
+  zombieIdleFront: {fileID: -817789107, guid: ec07544d78d977a47abc72fdcffc51f5, type: 3}
+  zombieIdleBack: {fileID: -117647857, guid: 6b50f0820c534554fb004a3861328c09, type: 3}
+  zombieIdleLeft: {fileID: -638755602, guid: e27667cddeb67fd4fb44a5fa39c1f85d, type: 3}
+  zombieIdleRight: {fileID: 1174114668, guid: 9a7997817c386684b85c4061fc3ad329, type: 3}
 --- !u!114 &2151693467487321608
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,6 +291,7 @@ GameObject:
   - component: {fileID: 1271429286540645363}
   - component: {fileID: 7979947009109882733}
   - component: {fileID: 3634729754170221969}
+  - component: {fileID: 9123456789012345673}
   m_Layer: 11
   m_Name: 2D Sprite
   m_TagString: Untagged
@@ -326,7 +355,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1367171001, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
+  m_Sprite: {fileID: 580515869, guid: 4b199675b6ff18d428bf91a9b4b6646d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -349,6 +378,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac343e6051d9ba43b5371ab263fc6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &9123456789012345673
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4688622703810975482}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 296f2c6ef2012dd45ab03d81fe80807d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage:
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8448013369567587075
 GameObject:
   m_ObjectHideFlags: 0

@@ -75,6 +75,8 @@ public class WeaponUseUtils
                 if (!HasAttackTarget(userGameObject, data, dir))
                     yield break;
 
+                PlayerCore.Instance.StopHorizontalMovement();
+
                 switch (data.id)
                 {
                     case 20001:

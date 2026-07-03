@@ -65,6 +65,7 @@ public class GameManager : MonoBehaviour, IBegin
     public int deadMarinerMembers = 0;
     public GameOverUI gameOverUI;
     public Canvas[] allUICanvas;
+    public bool IsGameResultActive { get; private set; }
 
     [Header("동적 스포너(EnemySpawnerFinder)")]
     [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector에서 할당
@@ -250,6 +251,22 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void TriggerGameResult(bool voyageSucceeded)
     {
+        if (IsGameResultActive)
+            return;
+
+        IsGameResultActive = true;
+
+        if (PlayerController.instance != null)
+            PlayerController.instance.LockForGameResult();
+
+        if (PlayerCore.Instance != null)
+        {
+            PlayerCore.Instance.StopHorizontalMovement();
+
+            if (!voyageSucceeded)
+                PlayerCore.Instance.SetState(PlayerCore.PlayerState.Dead);
+        }
+
         Time.timeScale = 0f;
 
         if (ThisIsPlayer.Player != null)
@@ -321,6 +338,13 @@ public class GameManager : MonoBehaviour, IBegin
     public void ResumeFromEndingToInfiniteMode()
     {
         Time.timeScale = 1f;
+        IsGameResultActive = false;
+
+        if (PlayerController.instance != null)
+            PlayerController.instance.UnlockFromGameResult();
+
+        if (PlayerCore.Instance != null)
+            PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
 
         // 플레이어 다시 보이게
         if (ThisIsPlayer.Player != null)

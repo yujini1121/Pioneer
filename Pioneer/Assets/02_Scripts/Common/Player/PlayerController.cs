@@ -30,6 +30,8 @@ public class PlayerController : MonoBehaviour
     private LayerMask combinedMask;
     private float currentChargeTime;
     public bool isCharging;
+    private bool gameResultLocked;
+    private float animatorSpeedBeforeGameResult = 1f;
 
     [SerializeField] private float fishingCancelDelay = 1.0f;
     private float cancelDelayTimer;
@@ -67,6 +69,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (gameResultLocked || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive))
+        {
+            LockForGameResult();
+            return;
+        }
+
         isSeaInFront = CheckSea();
 
         float moveX = Input.GetAxisRaw("Horizontal");
@@ -328,6 +336,63 @@ public class PlayerController : MonoBehaviour
         {
             fishingUI.gameObject.SetActive(true);
         }
+    }
+
+    public void LockForGameResult()
+    {
+        if (gameResultLocked)
+            return;
+
+        gameResultLocked = true;
+        animatorSpeedBeforeGameResult = animator != null ? animator.speed : 1f;
+
+        playerCore?.StopHorizontalMovement();
+        playerFishing?.StopFishingLoop();
+
+        isCharging = false;
+        currentChargeTime = 0f;
+        cancelDelayTimer = 0f;
+        moveInput = Vector3.zero;
+        moveDirection = Vector3.zero;
+
+        ResetFishingChargeSlider(chargeSlider);
+        ResetFishingChargeSlider(cencleChargeSlider);
+
+        if (fishingUI != null)
+            fishingUI.SetActive(false);
+
+        if (fishingCencleUI != null)
+            fishingCencleUI.SetActive(false);
+
+        if (animator != null)
+        {
+            ResetAnimationTriggers();
+            animator.speed = 0f;
+        }
+    }
+
+    public void UnlockFromGameResult()
+    {
+        if (!gameResultLocked)
+            return;
+
+        gameResultLocked = false;
+
+        if (animator != null)
+            animator.speed = animatorSpeedBeforeGameResult;
+
+        nextAnimTrigger = "SetIdle";
+    }
+
+    private void ResetAnimationTriggers()
+    {
+        if (animator == null)
+            return;
+
+        animator.ResetTrigger("SetIdle");
+        animator.ResetTrigger("SetRun");
+        animator.ResetTrigger("SetFishing");
+        animator.ResetTrigger("SetFishingHold");
     }
 
     public void ChangeAnimationClip(AnimationClip oldAnim, AnimationClip newAnim)

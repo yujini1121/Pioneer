@@ -60,11 +60,19 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     private void InitZombieVisuals()
     {
-        spriteTransform = transform.GetChild(0);
-        spriteRenderer = spriteTransform.GetComponent<SpriteRenderer>();
+        if (spriteTransform == null && transform.childCount > 0)
+            spriteTransform = transform.GetChild(0);
+
+        if (spriteRenderer == null && spriteTransform != null)
+            spriteRenderer = spriteTransform.GetComponent<SpriteRenderer>();
+
+        if (GetComponentInChildren<Animator>(true) != null)
+            return;
+
         GameManager gm = FindObjectOfType<GameManager>();
 
-        if (gm != null && gm.marinerSprites != null && gm.marinerSprites.Length > 1)
+        if (spriteTransform != null && spriteRenderer != null
+            && gm != null && gm.marinerSprites != null && gm.marinerSprites.Length > 1)
         {
             spriteTransform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
             spriteRenderer.sprite = gm.marinerSprites[1];
