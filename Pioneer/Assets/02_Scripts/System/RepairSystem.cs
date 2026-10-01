@@ -22,13 +22,13 @@ public class RepairSystem : MonoBehaviour
         }
         if (slot.itemLists[0].duability > 50)
         {
-            Debug.Log("수리가 필요하지 않습니다.");
+            UtilityFunctions.Log("수리가 필요하지 않습니다.");
             return;
         }
         //if (InventoryManager.Instance.Get(40007) < 1)
         if (remainRepairCount < 1)
         {
-            Debug.Log("수리 도구가 부족합니다.");
+            UtilityFunctions.Log("수리 도구가 부족합니다.");
             return;
         }
 
@@ -55,8 +55,5 @@ public class RepairSystem : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

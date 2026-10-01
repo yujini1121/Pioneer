@@ -69,7 +69,7 @@ public class CheckBottom : MonoBehaviour, IBegin
         isReturning = true;
         agent.isStopped = false;
         agent.SetDestination(shipPosition);
-        Debug.Log("배로 복귀 중...");
+        UtilityFunctions.Log("배로 복귀 중...");
     }
 
     void CheckArrivalAtShip()

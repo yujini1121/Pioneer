@@ -53,7 +53,7 @@ public class EnemyBase : CreatureBase, IBegin
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
 
-        if (animator == null || animator.runtimeAnimatorController == null)
+        if (animator == null || animator.runtimeAnimatorController == null || slots == null)
             return;
 
         if (aoc == null)
@@ -160,7 +160,7 @@ public class EnemyBase : CreatureBase, IBegin
     {
         int idx = PlayerCore.Get2DirIndex(dir);
         if (idx < 0) return;
-        if (slots == null || slots.attack == null || idx >= slots.attack.Count) return;
+        if (animator == null || slots == null || slots.attack == null || idx >= slots.attack.Count) return;
 
         if (idx != _curAttackIdx)
         {

@@ -13,6 +13,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
     public CanvasGroup canvasGroup;
     public int index;
     private Sequence sequence;
+    private Tween moveTween;
 
     public void Show(SItemStack target)
     {
@@ -22,6 +23,7 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
 
     public void Begin()
     {
+        if (canvasGroup == null) canvasGroup = UITweenHelper.EnsureCanvasGroup(gameObject);
 #region
         if (myCoroutine != null)
         {
@@ -36,19 +38,23 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
         transform.localScale = Vector3.one;
         canvasGroup.alpha = 0.0f;
 
-        sequence = DOTween.Sequence();
+        sequence = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDisable);
         sequence.Join(canvasGroup.DOFade(1.0f, 0.18f).SetEase(Ease.OutCubic));
         sequence.Join(transform.DOPunchScale(Vector3.one * 0.08f, 0.22f, 8, 0.7f));
         sequence.AppendInterval(4.5f);
         sequence.Append(canvasGroup.DOFade(0.0f, 0.35f).SetEase(Ease.InCubic));
-        sequence.OnComplete(() => ItemGetNoticeUI.Instance.RemoveUI(index, this));
+        sequence.OnComplete(() =>
+        {
+            if (ItemGetNoticeUI.Instance != null) ItemGetNoticeUI.Instance.RemoveUI(index, this);
+        });
 #endregion
     }
 
     public void MoveToLocalY(float targetY)
     {
-        transform.DOKill();
-        transform.DOLocalMoveY(targetY, 0.18f).SetEase(Ease.OutCubic);
+        moveTween?.Kill();
+        moveTween = transform.DOLocalMoveY(targetY, 0.18f).SetEase(Ease.OutCubic)
+            .SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDisable);
     }
 
 
@@ -69,16 +75,10 @@ public class ItemGetNoticeSingleUI : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 
 
 

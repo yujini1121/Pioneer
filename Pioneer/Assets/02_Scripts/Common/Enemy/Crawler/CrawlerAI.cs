@@ -46,6 +46,7 @@ public class CrawlerAI : EnemyBase, IBegin
 
     void Update()
     {
+        if (IsDead || Time.timeScale <= 0f || fov == null) return;
         if (stunHandler != null && stunHandler.IsStunned)
             return;
 
@@ -62,7 +63,7 @@ public class CrawlerAI : EnemyBase, IBegin
             }
 
             // 쿨타임이 끝나면 다시 이동 허용
-            if (attackTimer <= 0f && agent != null) agent.isStopped = false;
+            if (attackTimer <= 0f && agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.isStopped = false;
             return;
         }
 
@@ -91,7 +92,7 @@ public class CrawlerAI : EnemyBase, IBegin
         ApplyAnimTrigger();
 
         Debug.DrawRay(transform.position + Vector3.up * 0.2f, lastMoveDirection, Color.cyan);
-        Debug.Log($"lastMoveDirection={lastMoveDirection} 4Dir={PlayerCore.Get4DirIndex(lastMoveDirection)}");
+        UtilityFunctions.Log($"lastMoveDirection={lastMoveDirection} 4Dir={PlayerCore.Get4DirIndex(lastMoveDirection)}");
 
     }
 
@@ -109,7 +110,7 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private bool CanMove()
     {
-        return fov.visibleTargets.Any(target => detectMask == (detectMask | (1 << target.gameObject.layer)))
+        return fov.visibleTargets.Any(target => target != null && detectMask == (detectMask | (1 << target.gameObject.layer)))
                || currentAttackTarget != null;
     }
 
@@ -121,15 +122,18 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private void Move()
     {
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) return;
         if (fov.visibleTargets.Count > 0)
         {
             SortCloseObj();
-            currentAttackTarget = sortedTarget[closeTarget].gameObject;
+            currentAttackTarget = sortedTarget.Count > closeTarget ? sortedTarget[closeTarget].gameObject : null;
         }
 
         if (currentAttackTarget == null) return;
 
-        Vector3 destination = currentAttackTarget.GetComponent<Collider>().ClosestPoint(transform.position);
+        Collider targetCollider = currentAttackTarget.GetComponent<Collider>();
+        if (targetCollider == null) return;
+        Vector3 destination = targetCollider.ClosestPoint(transform.position);
         if (Vector3.Distance(agent.destination, destination) > 0.1f)
         {
             agent.SetDestination(destination);
@@ -144,7 +148,7 @@ public class CrawlerAI : EnemyBase, IBegin
         isAttack = true;
 
         // 공격 시작 시 Run 쪽으로 섞여 들어가는 것을 방지
-        if (agent != null)
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.ResetPath();
@@ -196,6 +200,7 @@ public class CrawlerAI : EnemyBase, IBegin
     private void SortCloseObj()
     {
         sortedTarget = fov.visibleTargets
+            .Where(target => target != null)
             .OrderBy(target => Vector3.Distance(transform.position, target.transform.position))
             .ToList();
     }

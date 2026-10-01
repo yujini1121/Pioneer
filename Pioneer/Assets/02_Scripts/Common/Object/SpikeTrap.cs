@@ -54,7 +54,7 @@ public class SpikeTrap : MonoBehaviour
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.ActivatedSpiketrap);
 
-            Debug.Log("따끔");
+            UtilityFunctions.Log("따끔");
             elapsed += 1f;
             yield return new WaitForSeconds(1f);
         }

@@ -13,6 +13,7 @@ public class StunHandler : MonoBehaviour
 
     public void ApplyStun(float duration)
     {
+        if (!isActiveAndEnabled) return;
         if (agent == null)
             agent = GetComponent<NavMeshAgent>();
 
@@ -26,7 +27,7 @@ public class StunHandler : MonoBehaviour
     {
         isStunned = true;
 
-        if (agent != null && agent.isOnNavMesh)
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             agent.ResetPath();
             agent.isStopped = true;
@@ -34,13 +35,25 @@ public class StunHandler : MonoBehaviour
 
         yield return new WaitForSeconds(duration);
 
-        isStunned = false;
-
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.isStopped = false;
-        }
-
         stunCoroutine = null;
+        ClearStun();
+    }
+
+    public void ClearStun()
+    {
+        bool wasStunned = isStunned;
+        if (stunCoroutine != null) StopCoroutine(stunCoroutine);
+        stunCoroutine = null;
+        isStunned = false;
+        if (!wasStunned) return;
+        WindAirborne airborne = GetComponent<WindAirborne>();
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh
+            && (airborne == null || !airborne.IsAirborne))
+            agent.isStopped = false;
+    }
+
+    private void OnDisable()
+    {
+        ClearStun();
     }
 }

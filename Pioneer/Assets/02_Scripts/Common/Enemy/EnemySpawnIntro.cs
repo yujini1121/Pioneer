@@ -81,7 +81,7 @@ public class EnemySpawnIntro : MonoBehaviour
         foreach (var c in toToggleColliders) if (c) c.enabled = false;
         foreach (var r in toToggleRenderers) if (r) r.enabled = false;
 
-        if (stopAgentDuringIntro && agent) agent.isStopped = true;
+        if (stopAgentDuringIntro && agent && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.isStopped = true;
 
         // 스프라이트 알파 0으로 시작
         SetAlpha(0f);
@@ -102,7 +102,7 @@ public class EnemySpawnIntro : MonoBehaviour
         foreach (var c in toToggleColliders) if (c) c.enabled = true;
         foreach (var b in toToggleBehaviours) if (b) b.enabled = true;
 
-        if (stopAgentDuringIntro && agent) agent.isStopped = false;
+        if (stopAgentDuringIntro && agent && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.isStopped = false;
     }
 
     void SetAlpha(float a)

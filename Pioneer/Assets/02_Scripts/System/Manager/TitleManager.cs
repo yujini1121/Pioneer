@@ -32,7 +32,7 @@ public class TitleManager : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.Log("Screen Controller Instance Error");
+            UtilityFunctions.Log("Screen Controller Instance Error");
         }
     }
 
@@ -62,14 +62,14 @@ public class TitleManager : MonoBehaviour
 
     public void StartGameActive()
     {
-        Debug.Log("일반 시작 버튼 누름");
+        UtilityFunctions.Log("일반 시작 버튼 누름");
         GameModeState.StartNormalMode();
         SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
     }
 
     public void StartInfiniteGame()
     {
-        Debug.Log("무한 모드 버튼 누름");
+        UtilityFunctions.Log("무한 모드 버튼 누름");
         GameModeState.StartInfiniteMode();
         SceneController.Instance.LoadScene(SceneController.Instance.sceneToLoad);
     }
@@ -84,7 +84,7 @@ public class TitleManager : MonoBehaviour
         GameModeState.ResetInfiniteModeUnlock();
         RefreshInfiniteModeButton();
 
-        Debug.Log("[TitleManager] F10 입력: 무한 모드 해금 상태를 초기화했습니다.");
+        UtilityFunctions.Log("[TitleManager] F10 입력: 무한 모드 해금 상태를 초기화했습니다.");
     }
 
     public void SetActiveTitleButton() => titleButton.SetActive(true);
@@ -94,7 +94,7 @@ public class TitleManager : MonoBehaviour
 
     public void QuitGame()
     {
-        Debug.Log("게임 종료 버튼 클릭!");
+        UtilityFunctions.Log("게임 종료 버튼 클릭!");
         // 유니티 에디터에서 테스트할 경우 (Play 모드 중지)
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

@@ -252,8 +252,8 @@ public class PlayerCore : CreatureBase, IBegin
         }
 #endif
 
-        UnityEngine.Debug.Assert(fov != null);
-        UnityEngine.Debug.Assert(enemyLayer != null);
+        UtilityFunctions.Assert(fov != null);
+        UtilityFunctions.Assert(enemyLayer != null);
 
 
         fov.DetectTargets(enemyLayer);
@@ -296,7 +296,7 @@ public class PlayerCore : CreatureBase, IBegin
     public void SetState(PlayerState state)
     {
         currentState = state;
-        UnityEngine.Debug.Log("Player State Changed to: " + state);
+        UtilityFunctions.Log("Player State Changed to: " + state);
     }
 
     public static int Get4DirIndex(in Vector3 v)
@@ -358,7 +358,7 @@ public class PlayerCore : CreatureBase, IBegin
         int idx = Get4DirIndex(moveInput);
         if (isDebugging)
         {
-            UnityEngine.Debug.Log($"Idle idx : {idx}");
+            UtilityFunctions.Log($"Idle idx : {idx}");
         }
 
         if (idx != _curRunIdx)
@@ -448,7 +448,8 @@ public class PlayerCore : CreatureBase, IBegin
 
     public bool BeginCoroutine(IEnumerator coroutine)
     {
-        if (isRunningCoroutineItem) return false;
+        if (coroutine == null || isRunningCoroutineItem || !isActiveAndEnabled || IsDead
+            || Time.timeScale <= 0f || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)) return false;
         StartCoroutine(CoroutineWraper(coroutine));
         return true;
     }
@@ -456,8 +457,8 @@ public class PlayerCore : CreatureBase, IBegin
     private IEnumerator CoroutineWraper(IEnumerator coroutine)
     {
         isRunningCoroutineItem = true;
-        yield return coroutine;
-        isRunningCoroutineItem = false;
+        try { yield return coroutine; }
+        finally { isRunningCoroutineItem = false; }
     }
 
     public override void TakeDamage(int damage, GameObject attacker)
@@ -477,7 +478,7 @@ public class PlayerCore : CreatureBase, IBegin
         }
 
 
-        if (attacker.CompareTag("Enemy"))
+        if (attacker != null && attacker.CompareTag("Enemy"))
             AttackedFromEnemy();
 
         if (currentState == PlayerState.ChargingFishing || currentState == PlayerState.ActionFishing)
@@ -489,7 +490,7 @@ public class PlayerCore : CreatureBase, IBegin
             {
                 playerController.CancelFishing();
             }
-            UnityEngine.Debug.Log("피격으로 인해 낚시가 취소되었습니다!");
+            UtilityFunctions.Log("피격으로 인해 낚시가 취소되었습니다!");
         }
 
         if(hp <= 0)
@@ -542,7 +543,7 @@ public class PlayerCore : CreatureBase, IBegin
             }
             if (isDebugging)
             {
-                UnityEngine.Debug.Log($"굶주림 수치 : {currentFullness}");
+                UtilityFunctions.Log($"굶주림 수치 : {currentFullness}");
             }
         }
     }
@@ -613,7 +614,7 @@ public class PlayerCore : CreatureBase, IBegin
     /// <returns></returns>
     private IEnumerator StarvingDamageCorountine()
     {
-        UnityEngine.Debug.Log("굶주림 상태 : 체력 감소 시작");
+        UtilityFunctions.Log("굶주림 상태 : 체력 감소 시작");
         for(int i = 0; i < fullnessStarvingMax; i++)
         {
             yield return new WaitForSeconds(1f);
@@ -685,7 +686,7 @@ public class PlayerCore : CreatureBase, IBegin
         if(currentMental <= 29 && !isPlaySFXMental)
         {
             isPlaySFXMental = true;
-            AudioManager.instance.PlaySfx(AudioManager.SFX.Sanity29Down);
+            if (AudioManager.instance != null) AudioManager.instance.PlaySfx(AudioManager.SFX.Sanity29Down);
         }
 
         if (currentMental >= 30 && isPlaySFXMental)
@@ -693,17 +694,17 @@ public class PlayerCore : CreatureBase, IBegin
             isPlaySFXMental = false;
         }
 
-        if (Time.time - lastEffectTime >= 10f) 
+        if (CreatureEffect.Instance != null && Time.time - lastEffectTime >= 10f)
         {
             //creatureEffect.Effects[2].Play();
             if (increase <= 0)
             {
-                var ps = CreatureEffect.Instance.Effects[5];
+                var ps = CreatureEffect.Instance.GetEffect(5);
                 CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
             }
             else if (increase > 0)
             {
-                var ps = CreatureEffect.Instance.Effects[4];
+                var ps = CreatureEffect.Instance.GetEffect(4);
                 CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
             }
 
@@ -740,7 +741,6 @@ public class PlayerCore : CreatureBase, IBegin
     {
         float reduce = currentMental * reduceMentalOnMarinerDie;
         UpdateMental(Mathf.RoundToInt(-reduce)); // 반올림하고 았는데 그냥 . 아래 수 버릴거면 수정 가능
-        GuiltySystem.instance.CrewDead();
     }
 
     /// <summary>

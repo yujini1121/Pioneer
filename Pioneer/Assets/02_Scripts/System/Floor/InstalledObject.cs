@@ -55,9 +55,9 @@ public class InstalledObject : MonoBehaviour
 
         if (CreatureEffect.Instance != null)
         {
-            ParticleSystem ps = CreatureEffect.Instance.Effects[0]; 
+            ParticleSystem ps = CreatureEffect.Instance.GetEffect(0);
             CreatureEffect.Instance.PlayEffect(ps, transform.position + new Vector3(0f,1f,0f));
-            Debug.Log("설치 이펙트 호출");
+            UtilityFunctions.Log("설치 이펙트 호출");
         }
 
         // 이동 상태는 반드시 해제
@@ -80,10 +80,10 @@ public class InstalledObject : MonoBehaviour
 
         if (CreatureEffect.Instance != null)
         {
-            var ps = CreatureEffect.Instance.Effects[1]; 
+            var ps = CreatureEffect.Instance.GetEffect(1);
             CreatureEffect.Instance.PlayEffect(ps, transform.position);
         }
-        InstalledObjectUI.Instance.RebuildStart();
+        if (InstalledObjectUI.Instance != null) InstalledObjectUI.Instance.RebuildStart();
         Destroy(gameObject);
     }
 
@@ -128,7 +128,8 @@ public class InstalledObject : MonoBehaviour
                 if (_rend && _rend.material)
                 {
                     _rend.material.color = _origColor;
-                    CreateObject.instance.navMeshSurface.BuildNavMesh();
+                    if (CreateObject.instance != null && CreateObject.instance.navMeshSurface != null)
+                        CreateObject.instance.navMeshSurface.BuildNavMesh();
                 }
                 _relocating = false;
             }

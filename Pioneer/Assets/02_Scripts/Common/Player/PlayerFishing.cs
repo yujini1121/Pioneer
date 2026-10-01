@@ -19,6 +19,12 @@ public class PlayerFishing : MonoBehaviour
     [Header("보물 아이템")]
     public SItemTypeSO treasureItem;
 
+    [Header("낚시 돌발 이벤트 설정")]
+    public FishingEventUI fishingEventUI;
+    [SerializeField] private float eventChance = 0.3f;
+    private int nonEventCount = 0;
+
+
     private Coroutine fishingLoopCoroutine;
 
     private int fishingExp = 5;
@@ -27,17 +33,20 @@ public class PlayerFishing : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        creatureEffect = PlayerCore.Instance.GetComponent<CreatureEffect>();
+        creatureEffect = GetComponent<CreatureEffect>();
     }
 
     // PlayerFishing.cs
     public void BeginFishing(Vector3 dir)
     {
+        if (PlayerCore.Instance == null) return;
         // 좌/우만 사용: x>=0 → 1(오른쪽), x<0 → 0(왼쪽). 정지면 마지막 값 유지되므로 1로 처리
         int idx = (Mathf.Abs(dir.x) < 1e-6f) ? 1 : (dir.x >= 0f ? 1 : 0);
 
         // 안전장치: 리스트가 2개 미만이면 0으로 강제
-        var slots = PlayerCore.Instance.GetComponent<PlayerController>().animSlots;
+        var controller = PlayerCore.Instance.GetComponent<PlayerController>();
+        if (controller == null || controller.animSlots == null) return;
+        var slots = controller.animSlots;
         int maxReady = (slots.fising != null) ? Mathf.Max(0, slots.fising.Count - 1) : 0;
         int maxHold = (slots.fisingHold != null) ? Mathf.Max(0, slots.fisingHold.Count - 1) : 0;
         idx = Mathf.Clamp(idx, 0, Mathf.Min(maxReady, maxHold));
@@ -52,7 +61,8 @@ public class PlayerFishing : MonoBehaviour
     // 현재 낚시 중인지 확인
     public void StartFishingLoop()
     {
-        if(fishingLoopCoroutine == null)
+        if(fishingLoopCoroutine == null && isActiveAndEnabled && PlayerCore.Instance != null
+            && !PlayerCore.Instance.IsDead)
         {
             // 낚시 중이 아니면 낚시 시작
             fishingLoopCoroutine = StartCoroutine(FishingLoop());
@@ -68,7 +78,9 @@ public class PlayerFishing : MonoBehaviour
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
         }
-        PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
+        if (fishingEventUI != null) fishingEventUI.CloseUI();
+        if (PlayerCore.Instance != null && !PlayerCore.Instance.IsDead)
+            PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
     }
 
     // 낚시로 아이템 추가하는 코드
@@ -80,90 +92,61 @@ public class PlayerFishing : MonoBehaviour
         while (true)
         {
             // 낚시 시작
-            Debug.Log("낚시 시작");
+            UtilityFunctions.Log("낚시 시작");
 
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[8];
-                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.75f, 0.3f));
+                ParticleSystem ps = CreatureEffect.Instance.GetEffect(8);
+                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0.3f));
             }
             yield return new WaitForSeconds(2f);
 
-            // 아이템 획득
-            SItemTypeSO caughtItem = GetItem();
-            if(caughtItem != null)
-            {                
-                SItemStack itemStack = new SItemStack(caughtItem.id, 1);
 
-                if(caughtItem == treasureItem)
+            /* 낚시 이벤트
+             * 아이템 획득 전 30% 확률로 발생하는 슬라이드 바 타이밍 맞추기 이벤트
+             * 4초마다 30% 확률로 이벤트 발생
+             * 이벤트 연속 발생 횟수가 5번 이상일 경우 다음 낚시 돌발 이벤트 반드시 발생
+             * 플레이어 머리 위에 낚시 이벤트 UI 발생
+             */
+
+            bool isSuccess = true;
+            bool eventResult = false;
+            if (fishingEventUI != null && (nonEventCount >= 5 || Random.value < eventChance))
+            {
+                // isSuccess = true;
+                UtilityFunctions.Log("<color=orange>돌발 이벤트 발생!</color>");
+                nonEventCount = 0;
+
+
+                yield return fishingEventUI.StartCoroutine(fishingEventUI.StartQTE(res => eventResult = res));
+
+                if(!eventResult)
                 {
-                    TreasureBoxManager.instance.GetBox();
-                    fishingExp = 4;
+                    UtilityFunctions.Log("낚시 돌발 이벤트에 실패했습니다.");
+                    // 낚시 이벤트 실패 사운드 재생
+                    PlayerController controller = GetComponent<PlayerController>();
+                    if (controller != null) controller.CancelFishing();
+                    else StopFishingLoop();
+                    yield break;
                 }
-                else
-                {
-                    fishingExp = 2;
-                    InventoryManager.Instance.Add(itemStack);
-                }
-
-                PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
-                Debug.Log($">> PlayerFishing.FishingLoop() 아이템 획득: 숫자 {caughtItem.id}, 이름 {caughtItem.typeName}, 경험치 +{fishingExp}");
-
-                (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
-
-                if(Random.Range(0f, 1f) < chances.extraItemChance)
-                {
-                    if (caughtItem == treasureItem)
-                    {
-                        TreasureBoxManager.instance.GetBox();
-                    }
-                    else
-                    {
-                        InventoryManager.Instance.Add(itemStack);
-                    }
-                    Debug.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
-                }
-
-                if(Random.Range(0f, 1f) < chances.treasureChestChance)
-                {
-                    if(treasureItem != null)
-                    {
-                        //SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
-                        //InventoryManager.Instance.Add(treasureItemStack);
-
-                        TreasureBoxManager.instance.GetBox();
-                        Debug.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
-                    }
-                }
-
-                // 바다이벤트 녹조로 얻는 추가 아이템 획득 
-                if(OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
-                {
-                    OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
-
-                    SItemTypeSO bonusItem = waterBloomEnvent.GetMoreItem();
-
-                    if(bonusItem != null)
-                    {
-                        SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
-                        InventoryManager.Instance.Add(waterBloombonusItemStack);
-                    }
-                }
-
-                //creatureEffect.Effects[3].Play();
             }
             else
             {
-                Debug.LogError("아이템 획득에 실패했습니다. 드랍 테이블을 확인해주세요.");
+                nonEventCount++;
+
+                UtilityFunctions.Log($"돌발 이벤트 미발생 (누적: {nonEventCount})");
             }
 
-            Debug.Log("낚시 끝");
+            GetItemProcess(isSuccess && eventResult);
+
+            UtilityFunctions.Log("낚시 끝");
         }
     }
 
     private SItemTypeSO GetItem()
     {
-        Debug.Log("아이템 얻기 시작");
+        if (dropItemTable == null || dropItemTable.Count == 0) return null;
+        UtilityFunctions.Log("아이템 얻기 시작");
         float totalProbability = 0f;
         // 1. 전체 가중치 합 계산
         for (int i = 0; i < dropItemTable.Count; i++)
@@ -189,5 +172,87 @@ public class PlayerFishing : MonoBehaviour
         }
         
         return dropItemTable[dropItemTable.Count - 1].itemData;
+    }
+
+    private void GetItemProcess(bool isDoubleBonus)
+    {
+        SItemTypeSO caughtItem = GetItem();
+        if (caughtItem == null) return;
+
+        int count = isDoubleBonus ? 2 : 1;
+        SItemStack itemStack = new SItemStack(caughtItem.id, count);
+
+        if (caughtItem != null)
+        {
+            if (caughtItem == treasureItem)
+            {
+                // TreasureBoxManager.instance.GetBox();
+                for (int i = 0; i < count; i++) TreasureBoxManager.instance.GetBox();
+                fishingExp = 4;
+            }
+            else
+            {
+                InventoryManager.Instance.Add(itemStack);
+                fishingExp = 2;
+            }
+
+            if (PlayerStatsLevel.Instance == null) return;
+            PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
+            if (isDoubleBonus) return;
+            UtilityFunctions.Log($">> PlayerFishing.FishingLoop() 아이템 획득: 숫자 {caughtItem.id}, 이름 {caughtItem.typeName}, 경험치 +{fishingExp}");
+
+            (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
+
+            if (Random.Range(0f, 1f) < chances.extraItemChance)
+            {
+                if (caughtItem == treasureItem)
+                {
+                    TreasureBoxManager.instance.GetBox();
+                }
+                else
+                {
+                    InventoryManager.Instance.Add(itemStack);
+                }
+                UtilityFunctions.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
+            }
+
+            if (Random.Range(0f, 1f) < chances.treasureChestChance)
+            {
+                if (treasureItem != null)
+                {
+                    //SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
+                    //InventoryManager.Instance.Add(treasureItemStack);
+
+                    TreasureBoxManager.instance.GetBox();
+                    UtilityFunctions.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
+                }
+            }
+
+            // 바디이벤트 녹조로 얻는 추가 아이템 획득
+            if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
+            {
+                OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
+
+                SItemTypeSO bonusItem = waterBloomEnvent.GetMoreItem();
+
+                if (bonusItem != null)
+                {
+                    SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
+                    InventoryManager.Instance.Add(waterBloombonusItemStack);
+                }
+            }
+
+            //creatureEffect.Effects[3].Play();
+        }
+    }
+
+    private void OnDisable()
+    {
+        StopFishingLoop();
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this) instance = null;
     }
 }

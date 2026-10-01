@@ -21,11 +21,11 @@ public class Option : MonoBehaviour, IBegin
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
+            return;
         }
     }
     void Start()
@@ -44,7 +44,7 @@ public class Option : MonoBehaviour, IBegin
         }
         else
         {
-            UnityEngine.Debug.Log("Screen Controller Instance Error");
+            UtilityFunctions.Log("Screen Controller Instance Error");
         }
 
         Time.timeScale = 1f;
@@ -72,13 +72,16 @@ public class Option : MonoBehaviour, IBegin
 
     public void SetActivateEscUI()
     {
+        if (escUI == null || InGameUI.instance == null
+            || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)) return;
         InGameUI.instance.OpenUI(
             new List<GameObject>() { escUI },
             InGameUI.ID_ESC_OPTION,
             () =>
             {
                 escUI.SetActive(false);
-                Time.timeScale = 1f;
+                if (GameManager.Instance == null || !GameManager.Instance.IsGameResultActive)
+                    Time.timeScale = 1f;
             });
 
 
@@ -87,13 +90,13 @@ public class Option : MonoBehaviour, IBegin
     }
     public void SetDeactivateEscUI()
     {
-        InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION);
+        if (InGameUI.instance != null) InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION);
     }
 
 
     public void SetActivateHelpUI()
     {
-        if (helpUI == null) return;
+        if (helpUI == null || InGameUI.instance == null) return;
         if (InGameUI.instance.IsOpened(InGameUI.ID_ESC_OPTION_HELP)) return;
 
         helpUI.SetActive(true);
@@ -106,9 +109,13 @@ public class Option : MonoBehaviour, IBegin
                 helpUI.SetActive(false);
             });
     }
-    public void SetDeactivateHelpUI() => InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION_HELP);
+    public void SetDeactivateHelpUI()
+    {
+        if (InGameUI.instance != null) InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION_HELP);
+    }
     public void SetActivateOptionUI()
     {
+        if (optionUI == null || InGameUI.instance == null) return;
         optionUI.SetActive(true);
         InGameUI.instance.OpenUI(
             new List<GameObject>() { optionUI },
@@ -119,11 +126,19 @@ public class Option : MonoBehaviour, IBegin
             });
 
     }
-    public void SetDeactivateOptionUI() => InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION_SETTINGS);
+    public void SetDeactivateOptionUI()
+    {
+        if (InGameUI.instance != null) InGameUI.instance.CloseUI(InGameUI.ID_ESC_OPTION_SETTINGS);
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this) instance = null;
+    }
 
     public void QuitGame()
     {
-        Debug.Log("게임 종료 버튼 클릭!");
+        UtilityFunctions.Log("게임 종료 버튼 클릭!");
 
         // 유니티 에디터에서는 테스트를 위해 Play 모드를 종료
 #if UNITY_EDITOR

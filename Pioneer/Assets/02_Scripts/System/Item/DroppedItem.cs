@@ -17,7 +17,7 @@ public class DroppedItem : MonoBehaviour
 
     public void SetItem(SItemStack item, float pickUpTime)
     {
-        Debug.Log($">> DroppedItem.SetItem(SItemStack item) : 호출됨 / isItemNull : {item == null}");
+        UtilityFunctions.Log($">> DroppedItem.SetItem(SItemStack item) : 호출됨 / isItemNull : {item == null}");
 
         itemValue = item;
         slotUI.Show(item);

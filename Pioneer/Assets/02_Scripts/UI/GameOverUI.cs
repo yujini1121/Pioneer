@@ -19,10 +19,11 @@ public class GameOverUI : MonoBehaviour
     public Button titleButton;
 
     private bool voyageSucceeded;
+    private bool hasShownResult;
 
     private void Start()
     {
-        if (gameOverPanel != null)
+        if (gameOverPanel != null && !hasShownResult)
             gameOverPanel.SetActive(false);
 
         if (titleButton != null)
@@ -39,8 +40,9 @@ public class GameOverUI : MonoBehaviour
 
     public void ShowGameOverScreen(int totalCrewMembers, int deadCrewMembers, bool voyageSucceeded)
     {
+        hasShownResult = true;
         if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
+            UITweenHelper.PlayOpen(gameOverPanel);
 
         this.voyageSucceeded = voyageSucceeded;
         UpdateGameOverTexts(totalCrewMembers, deadCrewMembers, voyageSucceeded);
@@ -59,8 +61,8 @@ public class GameOverUI : MonoBehaviour
 
     private void UpdateGameOverTexts(int totalCrewMembers, int deadCrewMembers, bool voyageSucceeded)
     {
-        int days, hours;
-        GameManager.Instance.GetGameTimeInfo(out days, out hours);
+        int days = 0, hours = 0;
+        if (GameManager.Instance != null) GameManager.Instance.GetGameTimeInfo(out days, out hours);
         string resultText = voyageSucceeded ? "항해에 성공했습니다." : "항해에 실패했습니다.";
 
         if (survivalTimeText != null)

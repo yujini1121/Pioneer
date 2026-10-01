@@ -69,7 +69,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
             case >= 3: level = 1; break;
             default: level = 0; break;
         }
-        Debug.Log($">> GuiltySystem.ChangeWeight({value}) / level = {level}");
+        UtilityFunctions.Log($">> GuiltySystem.ChangeWeight({value}) / level = {level}");
 
 
         
@@ -155,7 +155,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
     private void Awake()
     {
-        Debug.Assert(player != null);
+        UtilityFunctions.Assert(player != null);
 
         instance = this;
 
@@ -196,6 +196,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
     // Update is called once per frame
     void Update()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.K))
         {
             CrewDead();
@@ -208,6 +209,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
         {
             Drink();
         }
+#endif
     }
 
     private void SpawnDarkObject()
@@ -231,7 +233,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
     
     private void SpawnDarkFog()
     {
-        Debug.Log($">> GuiltySystem.SpawnDarkFog()");
+        UtilityFunctions.Log($">> GuiltySystem.SpawnDarkFog()");
 
         
         

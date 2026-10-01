@@ -41,7 +41,7 @@ public class CommonUI : MonoBehaviour, IBegin
         {
             if (isDebugging)
             {
-                Debug.Log($">> CommonUI.IsCurrentCrafting.set : m_sCurrentCrafting : {m_sCurrentCrafting} -> {value}");
+                UtilityFunctions.Log($">> CommonUI.IsCurrentCrafting.set : m_sCurrentCrafting : {m_sCurrentCrafting} -> {value}");
             }
             m_sCurrentCrafting = value;
         }
@@ -60,7 +60,7 @@ public class CommonUI : MonoBehaviour, IBegin
     {
         if (IsDebuggingCraft)
         {
-            Debug.Log($">> CommonUI.UpdateCraftWindowUi(...) -> 함수 호출");
+            UtilityFunctions.Log($">> CommonUI.UpdateCraftWindowUi(...) -> 함수 호출");
         }
 
         currentRecipe = recipe;
@@ -110,12 +110,6 @@ public class CommonUI : MonoBehaviour, IBegin
         ui.craftButton.onClick.RemoveAllListeners();
         ui.craftButton.onClick.AddListener(() =>
         {
-            if (ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id) == false) return;
-            if (currentCraftCoroutine != null)
-            {
-                StopCoroutine(currentCraftCoroutine);
-            }
-
             // 제작 시간 타이머를 시작하고 제작 완료 후 버튼 상태를 갱신
             // 다른 제작 코루틴이 돌고 있으면 먼저 중지
             if (IsCurrentCrafting)
@@ -125,6 +119,7 @@ public class CommonUI : MonoBehaviour, IBegin
             }
             else
             {
+                if (ItemRecipeManager.Instance == null || !ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id)) return;
                 currentCraftCoroutine = StartCoroutine(CraftCoroutine(recipe, outsideGameObjectCraftButtonsWithImage, ui));
             }
         });
@@ -147,7 +142,7 @@ public class CommonUI : MonoBehaviour, IBegin
     {
         if (IsDebuggingCraft)
         {
-            Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 함수 호출");
+            UtilityFunctions.Log($">> CommonUI.ShowCategoryButton(...) -> 함수 호출");
         }
 
         // 1. 카테고리 아이콘 버튼
@@ -189,7 +184,7 @@ public class CommonUI : MonoBehaviour, IBegin
             craftSelectCategory.SetActive(true);
             craftSelectCategory.transform.SetAsLastSibling();
             prevCraftSelectButton.Add(craftSelectCategory);
-            Debug.Log($">> CommonUI.ShowCategoryButton(...) / created top ui / active={craftSelectCategory.activeSelf} / localPos={craftSelectCategoryRect.localPosition}");
+            UtilityFunctions.Log($">> CommonUI.ShowCategoryButton(...) / created top ui / active={craftSelectCategory.activeSelf} / localPos={craftSelectCategoryRect.localPosition}");
             CraftItemSelectTop craftSelectCategoryUi = craftSelectCategory.GetComponent<CraftItemSelectTop>();
             craftSelectCategoryUi.categoryImage.sprite = category.categorySprite;
             craftSelectCategoryUi.categoryName.text = category.categoryName;
@@ -217,7 +212,7 @@ public class CommonUI : MonoBehaviour, IBegin
                     geometryCraftSelectButton.start2D);
                 m_one.SetActive(true);
                 m_one.transform.SetAsLastSibling();
-                Debug.Log($">> CommonUI.ShowCategoryButton(...) / created single ui / index={visibleIndex} / active={m_one.activeSelf} / localPos={m_one.GetComponent<RectTransform>().localPosition}");
+                UtilityFunctions.Log($">> CommonUI.ShowCategoryButton(...) / created single ui / index={visibleIndex} / active={m_one.activeSelf} / localPos={m_one.GetComponent<RectTransform>().localPosition}");
                 CraftItemSelectSingle m_oneUi = m_one.GetComponent<CraftItemSelectSingle>();
 
                 m_oneUi.image.sprite = recipeResultType.image;
@@ -226,7 +221,7 @@ public class CommonUI : MonoBehaviour, IBegin
                 // 버튼 클릭 이벤트
                 m_oneUi.button.onClick.AddListener(() =>
                 {
-                    Debug.Log($">> CommonUI.ShowCategoryButton(...) -> 버튼 클릭!");
+                    UtilityFunctions.Log($">> CommonUI.ShowCategoryButton(...) -> 버튼 클릭!");
 
                     ui.gameObject.SetActive(true);
                     UpdateCraftWindowUi(ui, recipe, InventoryManager.Instance, new GameObject[] { m_one });
@@ -257,8 +252,8 @@ public class CommonUI : MonoBehaviour, IBegin
         itemButtonGameObject.GetComponent<UnityEngine.UI.Image>().sprite = recipeResultType.image;
 
         // 버튼 클릭 이벤트
-        Debug.Assert(itemButtonGameObject != null);
-        Debug.Assert(itemButtonGameObject.GetComponent<Button>() != null);
+        UtilityFunctions.Assert(itemButtonGameObject != null);
+        UtilityFunctions.Assert(itemButtonGameObject.GetComponent<Button>() != null);
         Button itemButton = itemButtonGameObject.GetComponent<Button>();
 
         itemButton.onClick.AddListener(() =>
@@ -323,19 +318,16 @@ public class CommonUI : MonoBehaviour, IBegin
         instance = this;
     }
 
-    void Start()
-    {
-    }
 
-    void Update()
-    {
-    }
+
+
 
     private IEnumerator CraftCoroutine(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)
     {
+        if (recipe == null || ui == null) yield break;
         if (isDebugging_CraftCoroutine)
         {
-            Debug.Log($">> CommonUI.CraftCoroutine(...) -> 함수 호출");
+            UtilityFunctions.Log($">> CommonUI.CraftCoroutine(...) -> 함수 호출");
         }
 
         // 입력된 시간만큼 대기
@@ -346,23 +338,37 @@ public class CommonUI : MonoBehaviour, IBegin
 
         while (leftTime > 0.0f)
         {
+            if (ui == null || !ui.gameObject.activeInHierarchy)
+            {
+                IsCurrentCrafting = false;
+                currentCraftCoroutine = null;
+                yield break;
+            }
             ui.timeLeft.text = $"{leftTime:0.0}s";
             leftTime -= Time.deltaTime;
             yield return null;
+        }
+        if (ItemRecipeManager.Instance == null || !ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id))
+        {
+            StopCraft(ui);
+            yield break;
         }
         Craft(recipe, itemButtonGameObject, ui);
 
         ui.timeLeft.text = $"제작 완료";
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
-        InventoryUiMain.instance.IconRefresh();
+        if (InventoryUiMain.instance != null) InventoryUiMain.instance.IconRefresh();
         IsCurrentCrafting = false;
+        currentCraftCoroutine = null;
 
         // 여기에 경험치 추가 처리
-        PlayerStatsLevel.Instance.AddExp(GrowStatType.Crafting, currentRecipe.exp);
+        if (PlayerStatsLevel.Instance != null) PlayerStatsLevel.Instance.AddExp(GrowStatType.Crafting, recipe.exp);
     }
 
     public void Craft(SItemRecipeSO recipe, GameObject[] itemButtonGameObject, DefaultFabrication ui)
     {
+        if (recipe == null || ui == null || InventoryManager.Instance == null
+            || ItemRecipeManager.Instance == null || !ItemRecipeManager.Instance.CanCraftInInventory(recipe.result.id)) return;
         InventoryManager.Instance.Add(recipe.result);
         InventoryManager.Instance.Remove(recipe.input);
 
@@ -375,12 +381,12 @@ public class CommonUI : MonoBehaviour, IBegin
 
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[2];
+                ParticleSystem ps = CreatureEffect.Instance.GetEffect(2);
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
             }
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[6]; // 추가 효과
+                ParticleSystem ps = CreatureEffect.Instance.GetEffect(6); // 추가 효과
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, 1f, 0f));
             }
         }
@@ -391,7 +397,7 @@ public class CommonUI : MonoBehaviour, IBegin
 
             if (CreatureEffect.Instance != null)
             {
-                ParticleSystem ps = CreatureEffect.Instance.Effects[2];
+                ParticleSystem ps = CreatureEffect.Instance.GetEffect(2);
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position);
             }
         }
@@ -400,7 +406,7 @@ public class CommonUI : MonoBehaviour, IBegin
         {
             if (IsDebuggingCraftCoroutine)
             {
-                Debug.Log($">> CommonUI.Craft(...) : 대성공 발생");
+                UtilityFunctions.Log($">> CommonUI.Craft(...) : 대성공 발생");
             }
 
             // 대성공 발생
@@ -437,19 +443,23 @@ public class CommonUI : MonoBehaviour, IBegin
 
     public void StopCraft(DefaultFabrication ui)
     {
-        if (currentCraftCoroutine == null) return;
-
-        StopCoroutine(currentCraftCoroutine);
+        if (currentCraftCoroutine != null) StopCoroutine(currentCraftCoroutine);
         currentCraftCoroutine = null;
         IsCurrentCrafting = false;
+        if (ui == null) return;
         ui.craftButtonWord.text = DefaultFabrication.CraftStart;
-        ui.timeLeft.text = $"{currentRecipe.time:0.0}s";
+        ui.timeLeft.text = $"{(currentRecipe != null ? currentRecipe.time : 0f):0.0}s";
     }
 
     public void CloseTab(DefaultFabrication ui)
     {
         if (IsCurrentCrafting) StopCraft(ui);
-        ui.gameObject.SetActive(false);
+        if (ui != null) ui.gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        StopCraft(null);
     }
 }
 

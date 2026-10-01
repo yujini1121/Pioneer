@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour, IBegin
 {
@@ -118,6 +119,11 @@ public class AudioManager : MonoBehaviour, IBegin
     private float runtimeBgmVolumeBeforeFade;
     private float[] runtimeSfxVolumesBeforeFade;
     private bool hasRuntimeVolumesBeforeFade;
+    private readonly Dictionary<SFX, float> lastSfxTimes = new Dictionary<SFX, float>();
+    private SFX[] channelSfx;
+    private int[] channelPriorities;
+    private float[] channelStartTimes;
+    private float sfxFadeScale = 1f;
 
     void Awake()
     {
@@ -129,14 +135,57 @@ public class AudioManager : MonoBehaviour, IBegin
         else
         {
             Destroy(gameObject);
+            return;
         }
 
         Init();
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     void Start()
     {
-        PlayBgm(BGM.MainTitle);
+        LoadVolumes();
+        if (SceneManager.GetActiveScene().name == "Title")
+            PlayBgm(BGM.MainTitle);
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (instance == this) instance = null;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (mode != LoadSceneMode.Single) return;
+        foreach (AudioSource source in sfxPlayers)
+            if (source != null) source.Stop();
+        lastSfxTimes.Clear();
+        RestoreRuntimeVolumes();
+        if (scene.name == "Title") PlayBgm(BGM.MainTitle);
+    }
+
+    private void LateUpdate()
+    {
+        UpdateSfxMix();
+    }
+
+    private void UpdateSfxMix()
+    {
+        if (sfxPlayers == null) return;
+        int playing = 0;
+        foreach (AudioSource source in sfxPlayers)
+            if (source != null && source.isPlaying) playing++;
+
+        // Keep a little headroom when a crowd attacks, without changing the mixer preference.
+        float gain = 1f / Mathf.Sqrt(Mathf.Max(1f, playing / 4f));
+        for (int i = 0; i < sfxPlayers.Length; i++)
+        {
+            if (sfxPlayers[i] == null) continue;
+            float volume = hasRuntimeVolumesBeforeFade && runtimeSfxVolumesBeforeFade != null
+                ? runtimeSfxVolumesBeforeFade[i] : sfxVolume;
+            sfxPlayers[i].volume = volume * sfxFadeScale * gain;
+        }
     }
 
     /// <summary>
@@ -157,7 +206,11 @@ public class AudioManager : MonoBehaviour, IBegin
         // SFX Player 초기화
         GameObject sfxObject = new GameObject("SfxPlayer");
         sfxObject.transform.parent = transform;
+        sfxChannels = Mathf.Clamp(sfxChannels, 1, 64);
         sfxPlayers = new AudioSource[sfxChannels];
+        channelSfx = new SFX[sfxChannels];
+        channelPriorities = new int[sfxChannels];
+        channelStartTimes = new float[sfxChannels];
         for (int index = 0; index < sfxPlayers.Length; index++)
         {
             sfxPlayers[index] = sfxObject.AddComponent<AudioSource>();
@@ -167,8 +220,10 @@ public class AudioManager : MonoBehaviour, IBegin
         }
 
         sfxDictionary = new Dictionary<SFX, AudioClip>();
+        if (sfxSoundList == null) return;
         foreach (SoundSFX pair in sfxSoundList)
         {
+            if (pair == null) continue;
             if (!sfxDictionary.ContainsKey(pair.sfx))
             {
                 sfxDictionary.Add(pair.sfx, pair.sfxClips);
@@ -186,39 +241,49 @@ public class AudioManager : MonoBehaviour, IBegin
     /// <returns></returns>
     public void InitSliders()
     {
+        if (audioMixer == null) return;
         float volume;
 
-        if (audioMixer.GetFloat("BGMVol", out volume))
+        if (bgmVolSlider != null && audioMixer.GetFloat("BGMVol", out volume))
         {
-            bgmVolSlider.value = Mathf.Pow(10, volume / 20);
+            bgmVolSlider.SetValueWithoutNotify(Mathf.Pow(10, volume / 20));
         }
 
-        if (audioMixer.GetFloat("SFXVol", out volume))
+        if (sfxVolSlider != null && audioMixer.GetFloat("SFXVol", out volume))
         {
-            sfxVolSlider.value = Mathf.Pow(10, volume / 20);
+            sfxVolSlider.SetValueWithoutNotify(Mathf.Pow(10, volume / 20));
         }
     }
 
     public void InitListenerVolSliders()
     {
         // masterVolSlider.onValueChanged.AddListener(SetMasterVolume);
-        bgmVolSlider.onValueChanged.AddListener(SetBgmVolume);
-        sfxVolSlider.onValueChanged.AddListener(SetSfxVolume);
+        if (bgmVolSlider != null)
+        {
+            bgmVolSlider.onValueChanged.RemoveListener(SetBgmVolume);
+            bgmVolSlider.onValueChanged.AddListener(SetBgmVolume);
+        }
+        if (sfxVolSlider != null)
+        {
+            sfxVolSlider.onValueChanged.RemoveListener(SetSfxVolume);
+            sfxVolSlider.onValueChanged.AddListener(SetSfxVolume);
+        }
     }
 
     public void PlayBgm(BGM bgm)
     {
         int bgmIndex = (int)bgm;
 
-        if (bgmIndex < 0 || bgmIndex >= bgmClips.Length)
+        if (bgmPlayer == null || bgmClips == null || bgmIndex < 0 || bgmIndex >= bgmClips.Length)
         {
             Debug.LogWarning($"PlayBgm: {bgm.ToString()}에 해당하는 bgmClip이 없습니다.");
             return;
         }
 
         AudioClip newClip = bgmClips[bgmIndex];
+        if (newClip == null) return;
 
-        if (bgmPlayer.clip != newClip)
+        if (bgmPlayer.clip != newClip || !bgmPlayer.isPlaying)
         {
             bgmPlayer.Stop();
             bgmPlayer.clip = newClip;
@@ -231,7 +296,7 @@ public class AudioManager : MonoBehaviour, IBegin
     /// </summary>
     public void StopBgm()
     {
-        bgmPlayer.Stop();
+        if (bgmPlayer != null) bgmPlayer.Stop();
     }
 
     public void FadeOutForGameResult(float duration)
@@ -251,6 +316,7 @@ public class AudioManager : MonoBehaviour, IBegin
 
     public void RestoreRuntimeVolumes()
     {
+        sfxFadeScale = 1f;
         if (gameResultFadeCoroutine != null)
         {
             StopCoroutine(gameResultFadeCoroutine);
@@ -281,13 +347,14 @@ public class AudioManager : MonoBehaviour, IBegin
 
         runtimeSfxVolumesBeforeFade = null;
         hasRuntimeVolumesBeforeFade = false;
+        UpdateSfxMix();
     }
 
     private IEnumerator FadeOutForGameResultCoroutine(float duration)
     {
         float elapsed = 0f;
         float startBgmVolume = bgmPlayer != null ? bgmPlayer.volume : 0f;
-        float[] startSfxVolumes = GetSfxVolumes();
+        float startSfxScale = sfxFadeScale;
 
         while (elapsed < duration)
         {
@@ -298,7 +365,8 @@ public class AudioManager : MonoBehaviour, IBegin
             if (bgmPlayer != null)
                 bgmPlayer.volume = startBgmVolume * volumeScale;
 
-            ApplySfxVolumeScale(startSfxVolumes, volumeScale);
+            sfxFadeScale = startSfxScale * volumeScale;
+            UpdateSfxMix();
 
             yield return null;
         }
@@ -306,7 +374,8 @@ public class AudioManager : MonoBehaviour, IBegin
         if (bgmPlayer != null)
             bgmPlayer.volume = 0f;
 
-        ApplySfxVolumeScale(startSfxVolumes, 0f);
+        sfxFadeScale = 0f;
+        UpdateSfxMix();
         gameResultFadeCoroutine = null;
     }
 
@@ -317,7 +386,7 @@ public class AudioManager : MonoBehaviour, IBegin
 
         float[] volumes = new float[sfxPlayers.Length];
         for (int i = 0; i < sfxPlayers.Length; i++)
-            volumes[i] = sfxPlayers[i] != null ? sfxPlayers[i].volume : 0f;
+            volumes[i] = sfxVolume;
 
         return volumes;
     }
@@ -347,24 +416,88 @@ public class AudioManager : MonoBehaviour, IBegin
     /// <returns></returns>
     public void PlaySfx(SFX sfx)
     {
-        if (!sfxDictionary.ContainsKey(sfx) || sfxDictionary[sfx] == null)
+        if (sfxDictionary == null || sfxPlayers == null || sfxPlayers.Length == 0
+            || !sfxDictionary.TryGetValue(sfx, out AudioClip clipToPlay) || clipToPlay == null)
             return;
 
-        AudioClip clipToPlay = sfxDictionary[sfx];
+        GetSfxLimits(sfx, out float cooldown, out int maxConcurrent, out int priority);
+        float now = Time.unscaledTime;
+        if (lastSfxTimes.TryGetValue(sfx, out float lastTime) && now - lastTime < cooldown)
+            return;
 
-        for(int index = 0; index <sfxPlayers.Length; index++)
+        int concurrent = 0;
+        int free = -1;
+        int replace = -1;
+        for (int index = 0; index < sfxPlayers.Length; index++)
         {
             int loopIndex = (index + sfxChannelIndex) % sfxPlayers.Length;
-
-            if(!sfxPlayers[loopIndex].isPlaying)
+            AudioSource source = sfxPlayers[loopIndex];
+            if (source == null) continue;
+            if (!source.isPlaying)
             {
-                sfxChannelIndex = loopIndex;
-
-                sfxPlayers[loopIndex].clip = clipToPlay;
-                sfxPlayers[loopIndex].Play();
-
-                break;
+                if (free < 0) free = loopIndex;
+                continue;
             }
+            if (channelSfx[loopIndex] == sfx) concurrent++;
+            if (channelPriorities[loopIndex] < priority && (replace < 0
+                || channelPriorities[loopIndex] < channelPriorities[replace]
+                || (channelPriorities[loopIndex] == channelPriorities[replace]
+                    && channelStartTimes[loopIndex] < channelStartTimes[replace])))
+                replace = loopIndex;
+        }
+        if (concurrent >= maxConcurrent) return;
+        int selected = free >= 0 ? free : replace;
+        if (selected < 0) return;
+
+        sfxPlayers[selected].Stop();
+        channelSfx[selected] = sfx;
+        channelPriorities[selected] = priority;
+        channelStartTimes[selected] = now;
+        lastSfxTimes[sfx] = now;
+        sfxChannelIndex = (selected + 1) % sfxPlayers.Length;
+        sfxPlayers[selected].clip = clipToPlay;
+        sfxPlayers[selected].Play();
+        UpdateSfxMix();
+    }
+
+    private static void GetSfxLimits(SFX sfx, out float cooldown, out int maxConcurrent, out int priority)
+    {
+        cooldown = 0.05f;
+        maxConcurrent = 2;
+        priority = 1;
+        switch (sfx)
+        {
+            case SFX.Click:
+            case SFX.SelectQuickSlot:
+            case SFX.RotateInstallTypeObject:
+                cooldown = 0.06f; maxConcurrent = 1; priority = 2; break;
+            case SFX.SamshSound:
+            case SFX.Punch1_Player:
+            case SFX.Punch3_Player:
+            case SFX.Hit:
+            case SFX.Hit2:
+                cooldown = 0.025f; maxConcurrent = 3; priority = 2; break;
+            case SFX.BeforeAttack_Minion:
+            case SFX.BeforeAttack_Crawler:
+            case SFX.BeforeAttack_Titan:
+            case SFX.AfterAttack_Minion:
+            case SFX.AfterAttack_Crawler:
+            case SFX.AfterAttack_Titan:
+            case SFX.BalistaAttack:
+            case SFX.ActivatedSpiketrap:
+                cooldown = 0.035f; maxConcurrent = 3; break;
+            case SFX.GameOver:
+            case SFX.GameStartButton:
+            case SFX.LevelUp:
+            case SFX.ToNight:
+            case SFX.To_night2:
+            case SFX.MeetEnemy:
+            case SFX.meetEnemy2:
+            case SFX.Sanity29Down:
+                cooldown = 0.12f; maxConcurrent = 1; priority = 3; break;
+            case SFX.Hurricane:
+            case SFX.HeavyRain:
+                cooldown = 0.25f; maxConcurrent = 1; priority = 0; break;
         }
     }
 
@@ -375,7 +508,7 @@ public class AudioManager : MonoBehaviour, IBegin
     public void SetVolume(string volumeName, float volume)
     {
         volume = Mathf.Clamp(volume, 0.001f, 1f);
-        audioMixer.SetFloat(volumeName, Mathf.Log10(volume) * 20);
+        if (audioMixer != null) audioMixer.SetFloat(volumeName, Mathf.Log10(volume) * 20);
         PlayerPrefs.SetFloat(volumeName, volume);
         PlayerPrefs.Save();
     }
@@ -390,8 +523,8 @@ public class AudioManager : MonoBehaviour, IBegin
         float sfxVol = PlayerPrefs.GetFloat("SFXVol", 1f);
 
         // if (masterVolSlider != null) masterVolSlider.value = masterVol;
-        if (bgmVolSlider != null) bgmVolSlider.value = bgmVol;
-        if (sfxVolSlider != null) sfxVolSlider.value = sfxVol;
+        if (bgmVolSlider != null) bgmVolSlider.SetValueWithoutNotify(bgmVol);
+        if (sfxVolSlider != null) sfxVolSlider.SetValueWithoutNotify(sfxVol);
 
         // SetMasterVolume(masterVol);
         SetBgmVolume(bgmVol);

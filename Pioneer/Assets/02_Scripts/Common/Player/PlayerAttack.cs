@@ -19,7 +19,8 @@ public class PlayerAttack : MonoBehaviour, IBegin
             attackCollider.enabled = false;
         }
 
-        slots = PlayerCore.Instance.slots;
+        if (playerController == null) playerController = GetComponentInParent<PlayerController>();
+        slots = playerController != null ? playerController.animSlots : null;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -34,6 +35,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
 
     private void TryDealDamage(Collider other)
     {
+        if (attackCollider == null || !attackCollider.enabled) return;
         if (!IsEnemyTarget(other))
             return;
 
@@ -43,12 +45,12 @@ public class PlayerAttack : MonoBehaviour, IBegin
             target = other.GetComponent<CreatureBase>();
         }
 
-        if (target == null || hitTargets.Contains(target))
+        if (target == null || target.IsDead || hitTargets.Contains(target))
             return;
 
         hitTargets.Add(target);
         target.TakeDamage(damage, gameObject);
-        Debug.LogError($"damage : {damage}, this.gameObject : {gameObject}");
+        UtilityFunctions.Log($"damage : {damage}, this.gameObject : {gameObject}");
 
         if (InventoryManager.Instance != null)
         {
@@ -60,7 +62,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
             PlayerStatsLevel.Instance.AddExp(GrowStatType.Combat, damage);
         }
 
-        Debug.Log("AddExp() 호출");
+        UtilityFunctions.Log("AddExp() 호출");
     }
 
     private bool IsEnemyTarget(Collider other)
@@ -125,7 +127,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
     {
         if (attackCollider != null)
         {
-            Debug.Log(">> PlayerAttack.EnableAttackCollider() 호출");
+            UtilityFunctions.Log(">> PlayerAttack.EnableAttackCollider() 호출");
             hitTargets.Clear();
             attackCollider.enabled = true;
         }
@@ -157,7 +159,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
 
     void ChangeAttackByIndex(int idx)
     {
-        if (idx < 0) return;
+        if (idx < 0 || slots == null || playerController == null || playerController.animator == null) return;
 
         AnimationClip baseClip;
         string stateName;

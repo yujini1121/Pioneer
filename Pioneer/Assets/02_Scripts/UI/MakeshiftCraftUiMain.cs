@@ -83,10 +83,7 @@ public class MakeshiftCraftUiMain : MonoBehaviour, IBegin
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 
     public void OnBegin()
     {

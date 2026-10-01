@@ -50,9 +50,12 @@ public class WeaponUseUtils
 
     public static IEnumerator AttackCoroutine(CommonBase userGameObject, SItemStack itemWithState, SItemWeaponTypeSO data)
     {
-        Debug.Log($">> WeaponUseUtils.AttackCoroutine : 함수 호출됨 내구도 닳기 : {data.duabilityRedutionPerHit}");
-        Debug.Assert(itemWithState != null);
-        Debug.Assert(data != null);
+        PlayerCore player = PlayerCore.Instance;
+        if (player == null || userGameObject == null || itemWithState == null || data == null || Camera.main == null)
+            yield break;
+        UtilityFunctions.Log($">> WeaponUseUtils.AttackCoroutine : 함수 호출됨 내구도 닳기 : {data.duabilityRedutionPerHit}");
+        UtilityFunctions.Assert(itemWithState != null);
+        UtilityFunctions.Assert(data != null);
 
         float originalSpeed = PlayerCore.Instance.speed;
         PlayerAttack playerAttack = PlayerCore.Instance.PlayerAttack;
@@ -62,7 +65,7 @@ public class WeaponUseUtils
         try
         {
             PlayerCore.Instance.speed = 0f;
-            Debug.Log($"플레이어 이동 멈춤 : {PlayerCore.Instance.speed}");
+            UtilityFunctions.Log($"플레이어 이동 멈춤 : {PlayerCore.Instance.speed}");
 
             Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit m_hitOnMap;
@@ -120,10 +123,10 @@ public class WeaponUseUtils
                 playerAttack.DisableAttackCollider();
                 playerAttack.SetAttackRange(0.1f);
                 yield return new WaitForSeconds(recoveryTime);
-                InventoryUiMain.instance.IconRefresh();
+                if (InventoryUiMain.instance != null) InventoryUiMain.instance.IconRefresh();
             }
 
-            InventoryUiMain.instance.IconRefresh();
+            if (InventoryUiMain.instance != null) InventoryUiMain.instance.IconRefresh();
         }
         finally
         {
@@ -133,7 +136,7 @@ public class WeaponUseUtils
                 playerAttack.SetAttackRange(0.1f);
             }
 
-            PlayerCore.Instance.speed = originalSpeed;
+            if (player != null) player.speed = originalSpeed;
         }
 
         yield return new WaitForSeconds(data.weaponDelay);

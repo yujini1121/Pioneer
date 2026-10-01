@@ -65,7 +65,7 @@ public class StructureBase : CommonBase
     public virtual void Interactive() { }
     public virtual void Use()
     {
-        Debug.Log(">> StructureBase.Use()");
+        UtilityFunctions.Log(">> StructureBase.Use()");
         isUsing = true;
     }
     public virtual void UnUse() { isUsing = false; }
@@ -81,7 +81,7 @@ public class StructureBase : CommonBase
     #endregion
     public override void WhenDestroy()
     {
-        Debug.LogError("\uC798 \uD30C\uAD34\uB410\uC5B4\uC6A9");
+        UtilityFunctions.Log("\uC798 \uD30C\uAD34\uB410\uC5B4\uC6A9");
         DisableDestroyTargets();
         if (GameManager.Instance != null)
             GameManager.Instance.NotifyPlatformLayoutChanged();

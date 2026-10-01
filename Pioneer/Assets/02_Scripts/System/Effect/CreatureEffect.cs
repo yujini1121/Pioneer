@@ -26,6 +26,16 @@ public class CreatureEffect : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    public ParticleSystem GetEffect(int index)
+    {
+        return Effects != null && index >= 0 && index < Effects.Length ? Effects[index] : null;
+    }
+
     public void PlayEffect(ParticleSystem pooled, Vector3 pos)
     {
         if (!pooled) return;
@@ -117,8 +127,8 @@ public class CreatureEffect : MonoBehaviour
         }
 
         // 풀링된 개체 재사용
-        pooled.transform.SetParent(target);
-        pooled.transform.localPosition = localOffset;
+        // Keep the pooled object under the persistent manager when its target's scene unloads.
+        pooled.transform.position = target.TransformPoint(localOffset);
         var main = pooled.main;
         main.loop = false;
         main.simulationSpace = ParticleSystemSimulationSpace.Local;
@@ -128,14 +138,20 @@ public class CreatureEffect : MonoBehaviour
         pooled.Play(true);
 
         float t = GetTotalDuration(pooled.gameObject) + 0.05f;
-        StartCoroutine(DisableAfterAndUnparent(pooled.gameObject, t));
+        StartCoroutine(DisableAfterAndUnparent(pooled.gameObject, t, target, localOffset));
     }
 
-    private IEnumerator DisableAfterAndUnparent(GameObject go, float t)
+    private IEnumerator DisableAfterAndUnparent(GameObject go, float t, Transform target, Vector3 localOffset)
     {
-        yield return new WaitForSeconds(t);
+        float elapsed = 0f;
+        while (go != null && target != null && elapsed < t)
+        {
+            go.transform.position = target.TransformPoint(localOffset);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
         if (!go) yield break;
-        go.transform.SetParent(Instance.transform, worldPositionStays: true); // 풀로 되돌림(원하면 전용 부모 사용)
+        go.transform.SetParent(transform, worldPositionStays: true); // 풀로 되돌림(원하면 전용 부모 사용)
         go.SetActive(false);
     }
     /*public void PlayEffect(GameObject effectPrefab, Vector3 position)

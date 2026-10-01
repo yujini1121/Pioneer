@@ -52,6 +52,7 @@ public class InstalledObjectUI : MonoBehaviour
     private NavMeshSurface nav;
     bool selectedThisFrame;
     MeshRenderer outlinedRenderer;
+    private Coroutine rebuildCoroutine;
 
     void Awake()
     {
@@ -140,7 +141,7 @@ public class InstalledObjectUI : MonoBehaviour
                 break;
 
             case Mode.Move:
-                Debug.Log("설치물 이동 모드 진행 중");
+                UtilityFunctions.Log("설치물 이동 모드 진행 중");
                 current.TickRelocate(cam);
                 if (!current.IsRelocating)          // 이동 종료 시 Idle 복귀
                 {
@@ -254,14 +255,20 @@ public class InstalledObjectUI : MonoBehaviour
 
     public void RebuildStart()
     {
-        StartCoroutine(Rebuild());
+        if (!isActiveAndEnabled) return;
+        if (rebuildCoroutine != null) StopCoroutine(rebuildCoroutine);
+        rebuildCoroutine = StartCoroutine(Rebuild());
     }
 
     public IEnumerator Rebuild()
     {
         yield return new WaitForSeconds(0.2f);
 
-        nav.BuildNavMesh();
+        if (nav == null) nav = FindObjectOfType<NavMeshSurface>();
+        if (nav != null) nav.BuildNavMesh();
+        if (GameManager.Instance != null) GameManager.Instance.NotifyPlatformLayoutChanged();
+        if (MastManager.Instance != null) MastManager.Instance.UpdateCurrentDeckCount();
+        rebuildCoroutine = null;
         yield return null;
     }
     public void Hide()
@@ -296,7 +303,7 @@ public class InstalledObjectUI : MonoBehaviour
         if (RepairSystem.instance == null || structure == null) return;
         if (RepairSystem.instance.remainRepairCount <= 0) return;
 
-        Debug.Log("수리 버튼 클릭");
+        UtilityFunctions.Log("수리 버튼 클릭");
 
         if (structure.ObjectData != null && structure.ObjectData.id == 50005)
         {

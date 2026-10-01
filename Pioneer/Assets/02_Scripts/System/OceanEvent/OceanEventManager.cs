@@ -14,6 +14,7 @@ public class OceanEventManager : MonoBehaviour
     public TextMeshProUGUI currentEventName;
 
     private readonly List<Coroutine> runningCoroutines = new List<Coroutine>();
+    private bool enteredNight;
 
     [Header("뇌우")]
     [SerializeField] private GameObject thunderEffect;
@@ -90,7 +91,7 @@ public class OceanEventManager : MonoBehaviour
 
         RemoveNormalFromRemainingEvents();
 
-        Debug.Log($"[OceanEventManager][첫날 이벤트 : {currentEvent.EventName}]");
+        UtilityFunctions.Log($"[OceanEventManager][첫날 이벤트 : {currentEvent.EventName}]");
         SetCurrentEventName(currentEvent.EventName, false);
     }
 
@@ -98,11 +99,12 @@ public class OceanEventManager : MonoBehaviour
     public void EnterDay()
     {
         EndCurrentEvent();
+        enteredNight = false;
 
         if (remainingEvents.Count == 0)
         {
             ResetRemainingEvents();
-            Debug.Log("[OceanEventManager][이벤트 목록 초기화]");
+            UtilityFunctions.Log("[OceanEventManager][이벤트 목록 초기화]");
         }
 
         // 전체 선택
@@ -147,7 +149,7 @@ public class OceanEventManager : MonoBehaviour
         //                          windAirborneDuration,
         //                          windStunDuration);
         #endregion
-        Debug.Log($"[OceanEventManager][오늘의 바다이벤트 : {currentEvent.EventName}]");
+        UtilityFunctions.Log($"[OceanEventManager][오늘의 바다이벤트 : {currentEvent.EventName}]");
         SetCurrentEventName(currentEvent.EventName, true);
 
         currentEvent.EventRun();
@@ -192,9 +194,10 @@ public class OceanEventManager : MonoBehaviour
 
     public void EnterNight()
     {
-        if (currentEvent == null) return;
+        if (currentEvent == null || !currentEvent.IsRunning || enteredNight) return;
+        enteredNight = true;
 
-        Debug.Log($"[OceanEventManager][밤 진입 : {currentEvent.EventName}]");
+        UtilityFunctions.Log($"[OceanEventManager][밤 진입 : {currentEvent.EventName}]");
         currentEvent.EnterNight();
     }
 
@@ -209,13 +212,14 @@ public class OceanEventManager : MonoBehaviour
 
         if (currentEvent == null) return;
 
-        Debug.Log($"[OceanEventManager][이벤트 종료 : {currentEvent.EventName}]");
+        UtilityFunctions.Log($"[OceanEventManager][이벤트 종료 : {currentEvent.EventName}]");
         currentEvent.EventEnd();
+        currentEvent = null;
     }
 
     public Coroutine BeginCoroutine(IEnumerator coroutine)
     {
-        if (coroutine == null) return null;
+        if (coroutine == null || !isActiveAndEnabled) return null;
 
         Coroutine routine = StartCoroutine(coroutine);
         runningCoroutines.Add(routine);
@@ -231,5 +235,20 @@ public class OceanEventManager : MonoBehaviour
         }
 
         runningCoroutines.Clear();
+    }
+
+    private void OnDisable()
+    {
+        EndCurrentEvent();
+        if (currentEventName != null)
+        {
+            currentEventName.DOKill();
+            currentEventName.transform.DOKill();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this) instance = null;
     }
 }

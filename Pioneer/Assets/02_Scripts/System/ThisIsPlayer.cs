@@ -9,7 +9,7 @@ public class ThisIsPlayer : MonoBehaviour
     static public bool IsThisPlayer(GameObject sus) => Player == sus;
     static public bool IsThisPlayer(Collider sus) => Player == sus.gameObject;
     static public bool IsThisPlayer(Collision sus) => Player == sus.collider.gameObject;
-    static public bool IsThisPlayer(string sus) => Player.name == sus;
+    static public bool IsThisPlayer(string sus) => Player != null && Player.name == sus;
 
     private void Awake()
     {
@@ -22,6 +22,7 @@ public class ThisIsPlayer : MonoBehaviour
 
     private void OnDestroy()
     {
-        Debug.LogError("!!!>>플레이어 파괴!");
+        if (Player == gameObject) Player = null;
+        UtilityFunctions.Log("!!!>>플레이어 파괴!");
     }
 }

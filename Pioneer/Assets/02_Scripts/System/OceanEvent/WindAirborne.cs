@@ -12,6 +12,9 @@ public class WindAirborne : MonoBehaviour
     private Rigidbody rb;
 
     private bool cachedAgentUpdatePosition;
+    private bool cachedAgentStopped;
+    private bool hasAgentState;
+    private Vector3 landingPosition;
 
     public bool IsAirborne => isAirborne;
 
@@ -23,8 +26,8 @@ public class WindAirborne : MonoBehaviour
 
     public void ApplyAirborne(float height, float duration, Vector3 windDirection, float horizontalDistance = 2f)
     {
-        if (airborneCoroutine != null)
-            StopCoroutine(airborneCoroutine);
+        if (!isActiveAndEnabled) return;
+        CancelAirborne();
 
         airborneCoroutine = StartCoroutine(AirborneRoutine(height, duration, windDirection, horizontalDistance));
     }
@@ -44,6 +47,7 @@ public class WindAirborne : MonoBehaviour
         flatDirection.Normalize();
 
         Vector3 endPosition = startPosition + flatDirection * horizontalDistance;
+        landingPosition = endPosition;
 
         // 포물선처럼 보이도록 중간 제어점을 사용
         Vector3 middlePosition = (startPosition + endPosition) * 0.5f + Vector3.up * height;
@@ -54,9 +58,13 @@ public class WindAirborne : MonoBehaviour
         if (rb == null)
             rb = GetComponent<Rigidbody>();
 
-        if (agent != null && agent.isOnNavMesh)
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             cachedAgentUpdatePosition = agent.updatePosition;
+            cachedAgentStopped = agent.isStopped;
+            StunHandler currentStun = GetComponent<StunHandler>();
+            if (currentStun != null && currentStun.IsStunned) cachedAgentStopped = false;
+            hasAgentState = true;
             agent.ResetPath();
             agent.isStopped = true;
             agent.updatePosition = false;
@@ -78,14 +86,40 @@ public class WindAirborne : MonoBehaviour
 
         ApplyPosition(endPosition);
 
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.updatePosition = cachedAgentUpdatePosition;
-            agent.Warp(endPosition);
-        }
+        RestoreAgent();
 
         isAirborne = false;
         airborneCoroutine = null;
+    }
+
+    public void CancelAirborne()
+    {
+        if (airborneCoroutine != null) StopCoroutine(airborneCoroutine);
+        airborneCoroutine = null;
+        if (isAirborne) ApplyPosition(landingPosition);
+        RestoreAgent();
+        isAirborne = false;
+    }
+
+    private void RestoreAgent()
+    {
+        if (!hasAgentState) return;
+        hasAgentState = false;
+        if (agent == null) return;
+        agent.updatePosition = cachedAgentUpdatePosition;
+        if (!agent.isActiveAndEnabled) return;
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, agent.areaMask))
+            agent.Warp(hit.position);
+        if (agent.isOnNavMesh)
+        {
+            StunHandler stun = GetComponent<StunHandler>();
+            agent.isStopped = cachedAgentStopped || (stun != null && stun.IsStunned);
+        }
+    }
+
+    private void OnDisable()
+    {
+        CancelAirborne();
     }
 
     private Vector3 GetQuadraticBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2)

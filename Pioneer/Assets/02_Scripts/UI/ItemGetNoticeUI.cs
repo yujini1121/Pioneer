@@ -19,7 +19,9 @@ public class ItemGetNoticeUI : MonoBehaviour
 
     public void Add(SItemStack item)
     {
-        Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 시작 {item.id}");
+        if (SItemStack.IsEmpty(item) || item.itemBaseType == null
+            || objectPool == null || objectPool.Length == 0) return;
+        UtilityFunctions.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 시작 {item.id}");
 
 
         //if ()
@@ -35,7 +37,8 @@ public class ItemGetNoticeUI : MonoBehaviour
         int poolIndex = -1;
         for (int forIndex = 0; forIndex < objectPool.Length; forIndex++)
         {
-            if (!isUsing[forIndex])
+            if (!isUsing[forIndex] && objectPool[forIndex] != null
+                && objectPool[forIndex].GetComponent<ItemGetNoticeSingleUI>() != null)
             {
                 isUsing[forIndex] = true;
                 objectPool[forIndex].SetActive(true);
@@ -44,11 +47,12 @@ public class ItemGetNoticeUI : MonoBehaviour
                 break;
             }
         }
-        Debug.Assert(newUi != null);
+        UtilityFunctions.Assert(newUi != null);
+        if (newUi == null) return;
         newUi.transform.localPosition = new Vector3(0, 75, 0);
         
 
-        Debug.Assert(newUi != null, "!! ItemGetNoticeUI: Object Pool is full!");
+        UtilityFunctions.Assert(newUi != null, "!! ItemGetNoticeUI: Object Pool is full!");
 
         ItemGetNoticeSingleUI newUiScript = newUi.GetComponent<ItemGetNoticeSingleUI>();
         newUiScript.index = poolIndex;
@@ -72,37 +76,34 @@ public class ItemGetNoticeUI : MonoBehaviour
                 continue;
             }
             one.MoveToLocalY(75 - (72 * uiListIndex));
-            Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 중간 - {objectPool[one.index].transform.localPosition}");
+            UtilityFunctions.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 중간 - {objectPool[one.index].transform.localPosition}");
         }
 
-        Debug.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 종료 {item.id}");
+        UtilityFunctions.Log($">> ItemGetNoticeUI.Add(SItemStack item) : 종료 {item.id}");
 
     }
 
     public void RemoveUI(int index, ItemGetNoticeSingleUI script)
     {
+        if (objectPool == null || index < 0 || index >= objectPool.Length) return;
         isUsing[index] = false;
-        objectPool[index].SetActive(false);
+        if (objectPool[index] != null) objectPool[index].SetActive(false);
         uiList.Remove(script);
     }
 
     private void Awake()
     {
         Instance = this;
+        if (uiList == null) uiList = new List<ItemGetNoticeSingleUI>();
+        isUsing = new bool[objectPool != null ? objectPool.Length : 0];
     }
 
 
     // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 
     GameObject GetUiObjectIndex()
     {

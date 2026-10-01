@@ -63,7 +63,7 @@ public class ItemDeckDisconnect : MonoBehaviour
         var root = WorldToCoord(mast.position);
         if (!decks.ContainsKey(root))
         {
-            Debug.Log($"[ItemDeckDisconnect] 루트 좌표 {root}를 찾지 못했습니다. gridSize 또는 마스트 위치를 확인하세요.");
+            UtilityFunctions.Log($"[ItemDeckDisconnect] 루트 좌표 {root}를 찾지 못했습니다. gridSize 또는 마스트 위치를 확인하세요.");
             RefreshDebugView();
             return;
         }

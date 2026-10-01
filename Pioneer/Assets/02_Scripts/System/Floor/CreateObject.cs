@@ -121,7 +121,7 @@ public class CreateObject : MonoBehaviour, IBegin
     }
     private void Awake()
     {
-        Debug.Log($">> CreateObject : {gameObject.name}");
+        UtilityFunctions.Log($">> CreateObject : {gameObject.name}");
         instance = this;
 
         mainCamera = Camera.main;
@@ -145,6 +145,8 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void Start()
     {
+        // Scene NavMeshSurface registers its data in OnEnable, before this Start.
+        if (playerAgent != null && !playerAgent.enabled) playerAgent.enabled = true;
         ExitInstallMode(); // 시작 시 설치 모드 비활성화
 
         if (uiOutside == null)
@@ -531,7 +533,7 @@ public class CreateObject : MonoBehaviour, IBegin
                     // 최대 개수 초과 시 설치 불가
                     if (currentDeckCount >= maxDeckCount)
                     {
-                        Debug.Log($"갑판 설치 불가: {currentDeckCount}/{maxDeckCount}개 (최대치)");
+                        UtilityFunctions.Log($"갑판 설치 불가: {currentDeckCount}/{maxDeckCount}개 (최대치)");
                         return false;
                     }
                 }
@@ -676,7 +678,7 @@ public class CreateObject : MonoBehaviour, IBegin
     // 설치 모드 진입
     private IEnumerator InstallCountdownRoutine()
     {
-        Debug.Assert(cost != null);
+        UtilityFunctions.Assert(cost != null);
 
         isCountingDown = true;
         arrivedTimer = 0f;
@@ -710,24 +712,29 @@ public class CreateObject : MonoBehaviour, IBegin
             yield return null;
         }
 
+        if (tempObj == null)
+        {
+            CancelInstallCountdown();
+            yield break;
+        }
         var col = tempObj.GetComponent<Collider>();
         if (col != null) col.isTrigger = false;
 
         var rend = tempObj.GetComponent<Renderer>();
         if (rend != null && rend.material != null) rend.material.color = Color.white;
 
-        navMeshSurface.BuildNavMesh();
+        if (navMeshSurface != null) navMeshSurface.BuildNavMesh();
         GameManager.Instance?.NotifyPlatformLayoutChanged();
 
         // 플랫폼 설치 수 갱신
         if (creationType == CreationType.Platform && MastManager.Instance != null)
         {
             MastManager.Instance.UpdateCurrentDeckCount();
-            Debug.Log($"현재 갑판 수 갱신: {MastManager.Instance.currentDeckCount}");
+            UtilityFunctions.Log($"현재 갑판 수 갱신: {MastManager.Instance.currentDeckCount}");
         }
 
         tempObj.GetComponent<InstalledObject>()?.OnPlaced();
-        Debug.Log("[설치 완료]");
+        UtilityFunctions.Log("[설치 완료]");
 
         // 여기서 재료 차감
         InventoryManager.Instance.Remove(cost);
@@ -786,7 +793,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         cost = mCost;
 
-        Debug.Assert(cost.Length > 0);
+        UtilityFunctions.Assert(cost.Length > 0);
 
         // 진행 중인 카운트다운 취소
         if (installRoutine != null) CancelInstallCountdown();
@@ -823,7 +830,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         CreateObjectInit();
 
-        Debug.Log($"[설치 모드 시작] {creationType}, 시간 {installTimeSec:F2}s");
+        UtilityFunctions.Log($"[설치 모드 시작] {creationType}, 시간 {installTimeSec:F2}s");
     }
 
     public void ExitInstallMode()
@@ -850,7 +857,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         _activeInstallableSO = null;
 
-        Debug.Log("[설치 모드 종료]");
+        UtilityFunctions.Log("[설치 모드 종료]");
     }
 
     private void LockPlayerMovement()

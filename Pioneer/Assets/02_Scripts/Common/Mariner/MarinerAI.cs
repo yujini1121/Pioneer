@@ -76,6 +76,7 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
+        if (IsDead || isCharmed) return;
         if (stunHandler != null && stunHandler.IsStunned)
             return;
 
@@ -641,11 +642,28 @@ public class MarinerAI : MarinerBase, IBegin
 
     public void RestartNormalAI()
     {
-        if (!IsDead)
+        if (!IsDead && isActiveAndEnabled)
         {
             isCharmed = false;
             StopAllCoroutines();
-            StartCoroutine(StartSecondPriorityAction());
+            attackRoutine = null;
+            secondPriorityRoutine = null;
+            nightRoamRoutine = null;
+            isNightRoaming = false;
+            isSecondPriorityStarted = false;
+            isShowingAttackBox = false;
+            isRepairing = false;
+            isChasing = false;
+            target = null;
+            if (targetRepairObject != null && MarinerManager.Instance != null)
+                MarinerManager.Instance.ReleaseRepairObject(targetRepairObject);
+            targetRepairObject = null;
+            var anim = GetComponentInChildren<MarinerAnimControll>(true);
+            if (anim != null) { anim.EndAttack(); anim.StopFishing(); anim.ClearAim(); }
+            if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+                agent.isStopped = false;
+            EnterWanderingState();
+            hasInitializedDaytimeState = false;
         }
     }
 

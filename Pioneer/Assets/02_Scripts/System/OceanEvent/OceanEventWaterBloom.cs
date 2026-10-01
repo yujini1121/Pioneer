@@ -24,26 +24,29 @@ public class OceanEventWaterBloom : OceanEventBase
     public override void EventRun()
     {
         base.EventRun();
-        Debug.Log("[OceanEventWaterBloom][녹조 이벤트 시작]");
+        UtilityFunctions.Log("[OceanEventWaterBloom][녹조 이벤트 시작]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
-        Debug.Log("[OceanEventWaterBloom][녹조 이벤트 종료]");
+        UtilityFunctions.Log("[OceanEventWaterBloom][녹조 이벤트 종료]");
     }
 
     public SItemTypeSO GetMoreItem()
     {
+        if (!IsRunning || PlayerFishing.instance == null) return null;
         getMoreDropItems = PlayerFishing.instance.dropItemTable;
+        if (getMoreDropItems == null || getMoreDropItems.Count == 0) return null;
 
         if (Random.Range(0, 100) < getMoreProbability)
         {
             int randomIndex = Random.Range(0, getMoreDropItems.Count);
 
             PlayerFishing.FishingDropItem bonusItem = getMoreDropItems[randomIndex];
+            if (bonusItem.itemData == null) return null;
 
-            Debug.Log($"[OceanEventWaterBloom][녹조 추가 아이템 획득 : {bonusItem.itemData.name}]");
+            UtilityFunctions.Log($"[OceanEventWaterBloom][녹조 추가 아이템 획득 : {bonusItem.itemData.name}]");
             return bonusItem.itemData;
         }
 

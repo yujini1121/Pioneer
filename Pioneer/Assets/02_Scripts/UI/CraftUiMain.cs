@@ -64,10 +64,7 @@ public class CraftUiMain : MonoBehaviour, IBegin
     }
 
     // Update is called once per frame
-    void Update()
-    {
 
-    }
 
     //void ShowButton()
     //{

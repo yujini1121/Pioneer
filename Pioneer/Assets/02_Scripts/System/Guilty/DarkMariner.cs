@@ -22,11 +22,11 @@ public class DarkMariner : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) : 호출됨, 충돌체 {collision.collider.name}");
+        UtilityFunctions.Log($">> DarkMariner.OnCollisionEnter(Collision collision) : 호출됨, 충돌체 {collision.collider.name}");
 
         if (ThisIsPlayer.IsThisPlayer(collision) || collision.collider.GetComponent<PlayerAttack>() != null)
         {
-            Debug.Log($">> DarkMariner.OnCollisionEnter(Collision collision) => Player");
+            UtilityFunctions.Log($">> DarkMariner.OnCollisionEnter(Collision collision) => Player");
             PlayerCore.Instance.TakeDamage(1, null);
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.CantESCNoise);

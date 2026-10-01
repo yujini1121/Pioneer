@@ -37,10 +37,7 @@ public class ItemRecipeManager : MonoBehaviour, IBegin
         InspectorRegister();
     }
 
-    private void Start()
-    {
-        
-    }
+
 
     private void ValueAssign()
     {

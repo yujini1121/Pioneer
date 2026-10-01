@@ -45,7 +45,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             if (cg == null)
                 cg = i.AddComponent<CanvasGroup>();
 
-            UITweenHelper.FadeCanvasGroup(cg, value, 0.16f);
+            UITweenHelper.FadeCanvasGroup(cg, value, 0.16f, true);
         }
 #endregion
     }
@@ -171,7 +171,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if(PlayerCore.Instance.currentState != PlayerCore.PlayerState.ActionFishing)
         {
             // 플레이어 아이템 핸들
-            Debug.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
+            UtilityFunctions.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
             if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory) ||
                 InventoryManager.Instance.SelectedSlotInventory.itemBaseType.categories == EDataType.NormalItem)
             {
@@ -217,7 +217,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         if (Input.GetMouseButtonDown(1))
         {
-            Debug.Log("우클 감지");
+            UtilityFunctions.Log("우클 감지");
         }
 
     }
@@ -241,9 +241,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     }
     public void SelectSlot(int index)
     {
-        Debug.Assert(index >= 0);
-        Debug.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
-        Debug.Assert(InventoryManager.Instance != null);
+        UtilityFunctions.Assert(index >= 0);
+        UtilityFunctions.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
+        UtilityFunctions.Assert(InventoryManager.Instance != null);
 
         InventoryManager.Instance.SelectSlot(index);
 
@@ -283,16 +283,16 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             switch (InventoryManager.Instance.SelectedSlotInventory.id)
             {
                 case 20001:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : 나무검");
+                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : 나무검");
                     break;
                 case 20002:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : 철 검");
+                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : 철 검");
                     break;
                 case 20003:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
+                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
                     break;
                 default:
-                    Debug.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
+                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
                     break;
             }
         }

@@ -43,23 +43,23 @@ public class ItemSlotUI : MonoBehaviour,
         [CallerLineNumber] int line = 0,
         [CallerMemberName] string member = "")
     {
-        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 호출됨");
+        if (IS_DEBUG_LOG) UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 호출됨");
 
         if (item == null || item.id == 0)
         {
             Clear();
             return;
         }
-        if (IS_DEBUG_LOG) Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 내구도 = {item.duability}");
+        if (IS_DEBUG_LOG) UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 내구도 = {item.duability}");
 
 
-        Debug.Assert(item != null);
-        Debug.Assert(item.id != 0);
-        Debug.Assert(ItemTypeManager.Instance != null);
-        Debug.Assert(ItemTypeManager.Instance.itemTypeSearch != null);
-        Debug.Assert(ItemTypeManager.Instance.itemTypeSearch[item.id] != null);
+        UtilityFunctions.Assert(item != null);
+        UtilityFunctions.Assert(item.id != 0);
+        UtilityFunctions.Assert(ItemTypeManager.Instance != null);
+        UtilityFunctions.Assert(ItemTypeManager.Instance.itemTypeSearch != null);
+        UtilityFunctions.Assert(ItemTypeManager.Instance.itemTypeSearch[item.id] != null);
         if (IS_DEBUG_LOG) 
-            Debug.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : {item.id} / {item.amount}");
+            UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : {item.id} / {item.amount}");
 
         SItemTypeSO itemType = ItemTypeManager.Instance.itemTypeSearch[item.id];
         bool isNeedShowDuability = itemType.categories == EDataType.WeaponItem;

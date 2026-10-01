@@ -30,14 +30,18 @@ public static class UITweenHelper
         DOTween.Kill(target);
         canvasGroup.DOKill();
         targetTransform.DOKill();
+        Vector3 baseScale = targetTransform.localScale;
 
         canvasGroup.alpha = 0f;
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        targetTransform.localScale = Vector3.one * 0.96f;
+        targetTransform.localScale = baseScale * 0.96f;
 
-        canvasGroup.DOFade(1f, duration).SetEase(Ease.OutCubic).SetUpdate(true);
-        targetTransform.DOScale(Vector3.one, duration).SetEase(Ease.OutBack).SetUpdate(true);
+        Sequence sequence = DOTween.Sequence().SetTarget(target).SetUpdate(true)
+            .SetLink(target, LinkBehaviour.KillOnDisable);
+        sequence.Join(canvasGroup.DOFade(1f, duration).SetEase(Ease.OutCubic));
+        sequence.Join(targetTransform.DOScale(baseScale, duration).SetEase(Ease.OutCubic));
+        sequence.OnKill(() => { if (targetTransform != null) targetTransform.localScale = baseScale; });
     }
 
     public static void PlayClose(GameObject target, Action onComplete, float duration = 0.12f)
@@ -54,15 +58,18 @@ public static class UITweenHelper
         DOTween.Kill(target);
         canvasGroup.DOKill();
         targetTransform.DOKill();
+        Vector3 baseScale = targetTransform.localScale;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
 
-        Sequence sequence = DOTween.Sequence().SetTarget(target).SetUpdate(true);
+        Sequence sequence = DOTween.Sequence().SetTarget(target).SetUpdate(true)
+            .SetLink(target, LinkBehaviour.KillOnDisable);
         sequence.Join(canvasGroup.DOFade(0f, duration).SetEase(Ease.InCubic));
-        sequence.Join(targetTransform.DOScale(Vector3.one * 0.98f, duration).SetEase(Ease.InCubic));
+        sequence.Join(targetTransform.DOScale(baseScale * 0.98f, duration).SetEase(Ease.InCubic));
+        sequence.OnKill(() => { if (targetTransform != null) targetTransform.localScale = baseScale; });
         sequence.OnComplete(() =>
         {
-            targetTransform.localScale = Vector3.one;
+            if (targetTransform != null) targetTransform.localScale = baseScale;
             onComplete?.Invoke();
         });
     }
@@ -76,6 +83,7 @@ public static class UITweenHelper
         canvasGroup.blocksRaycasts = visible;
         canvasGroup.DOFade(visible ? 1f : 0f, duration)
             .SetEase(visible ? Ease.OutCubic : Ease.InCubic)
+            .SetLink(canvasGroup.gameObject, LinkBehaviour.KillOnDisable)
             .SetUpdate(ignoreTimeScale);
     }
 
@@ -83,11 +91,12 @@ public static class UITweenHelper
     {
         if (target == null) return;
 
-        Vector3 baseScale = target.localScale;
         target.DOKill();
+        Vector3 baseScale = target.localScale;
         target.localScale = baseScale;
         target.DOPunchScale(Vector3.one * strength, duration, 8, 0.7f)
             .SetUpdate(ignoreTimeScale)
+            .SetLink(target.gameObject, LinkBehaviour.KillOnDisable)
             .OnKill(() =>
             {
                 if (target != null)

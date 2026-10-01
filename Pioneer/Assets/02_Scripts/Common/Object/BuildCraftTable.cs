@@ -22,15 +22,15 @@ public class BuildCraftTable : StructureBase
 
 	public override void Use()
 	{
-		Debug.Log($">> BuildCraftTable.Use() / name={name} / activeSelf={gameObject.activeSelf}");
+		UtilityFunctions.Log($">> BuildCraftTable.Use() / name={name} / activeSelf={gameObject.activeSelf}");
 		base.Use();
-		Debug.Log(">> BuildCraftTable.Use() / calling ShowDefaultCraftUI");
+		UtilityFunctions.Log(">> BuildCraftTable.Use() / calling ShowDefaultCraftUI");
 		InGameUI.instance.ShowDefaultCraftUI();
 	}
 
 	public override void UnUse()
 	{
-		Debug.Log($">> BuildCraftTable.UnUse() / name={name}");
+		UtilityFunctions.Log($">> BuildCraftTable.UnUse() / name={name}");
 		base.UnUse();
 		InGameUI.instance.CloseDefaultCraftUI();
 	}

@@ -675,7 +675,7 @@ public class MarinerBase : CreatureBase
     protected virtual float GetRepairSuccessRate() => 1.0f;
     protected virtual int GetMarinerId() => 0;
     protected virtual string GetCrewTypeName() => "승무원";
-    protected virtual void OnNightApproaching() { Debug.Log($"{GetCrewTypeName()} 기본 밤 처리"); }
+    protected virtual void OnNightApproaching() { UtilityFunctions.Log($"{GetCrewTypeName()} 기본 밤 처리"); }
 
     protected virtual void OnDrawGizmos()
     {

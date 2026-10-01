@@ -80,7 +80,7 @@ public class InventoryManager : InventoryBase
 
     public void MouseDrop()
     {
-        Debug.Log($">> InventoryManager.MouseDrop() : 호출됨");
+        UtilityFunctions.Log($">> InventoryManager.MouseDrop() : 호출됨");
 
         // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
         ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
@@ -134,7 +134,7 @@ public class InventoryManager : InventoryBase
     {
         if (IsDebuggingAdd)
         {
-            Debug.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
+            UtilityFunctions.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
         isThisFrameReloadCraft = true;
 
@@ -144,7 +144,7 @@ public class InventoryManager : InventoryBase
             return;
         }
 
-        Debug.Assert(InventoryUiMain.instance != null);
+        UtilityFunctions.Assert(InventoryUiMain.instance != null);
         SItemStack remain;// = null;
         if (TryAdd(item, out remain) == false)
         {
@@ -291,12 +291,12 @@ public class InventoryManager : InventoryBase
     {
         if (isThisFrameReloadCraft)
         {
-            Debug.Log("아이템 획득 업데이트");
+            UtilityFunctions.Log("아이템 획득 업데이트");
 
             isThisFrameReloadCraft = false;
             if (MakeshiftCraftUiMain.instance.isOpened)
             {
-                Debug.Log("아이템 획득 업데이트 완료");
+                UtilityFunctions.Log("아이템 획득 업데이트 완료");
 
                 MakeshiftCraftUiMain.instance.UpdateRecipe();
             }

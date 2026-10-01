@@ -146,7 +146,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
     {
         if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused)
         {
-            Debug.Log($"감염승무원 {marinerId}: 파밍 시작 거부 (프리-나이트/야간 상태)");
+            UtilityFunctions.Log($"감염승무원 {marinerId}: 파밍 시작 거부 (프리-나이트/야간 상태)");
             yield break;
         }
 

@@ -58,6 +58,7 @@ public class MinionAI : EnemyBase, IBegin
 
     void Update()
     {
+        if (IsDead || Time.timeScale <= 0f || fov == null) return;
         if (stunHandler != null && stunHandler.IsStunned)
             return;
 
@@ -77,7 +78,7 @@ public class MinionAI : EnemyBase, IBegin
             }
 
             // 쿨타임이 끝나면 다시 이동 허용
-            if (attackTimer <= 0f && agent != null) agent.isStopped = false;
+            if (attackTimer <= 0f && agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.isStopped = false;
             return;
         }
 
@@ -223,7 +224,7 @@ public class MinionAI : EnemyBase, IBegin
         isAttack = true;
 
         // 공격 시작 시 Run 애니메이션으로 섞여 들어가는 것을 방지
-        if (agent != null)
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.ResetPath();
@@ -273,12 +274,14 @@ public class MinionAI : EnemyBase, IBegin
     // =============================================================
     void Move()
     {
-        if (currentAttackTarget == null)
+        if (currentAttackTarget == null || agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
             return;
 
         agent.isStopped = false;
 
-        Vector3 destination = currentAttackTarget.GetComponent<Collider>().ClosestPoint(transform.position);
+        Collider targetCollider = currentAttackTarget.GetComponent<Collider>();
+        if (targetCollider == null) return;
+        Vector3 destination = targetCollider.ClosestPoint(transform.position);
 
         if (Vector3.Distance(agent.destination, destination) > 0.5f)
         {
@@ -301,6 +304,7 @@ public class MinionAI : EnemyBase, IBegin
 
         foreach (var t in targets)
         {
+            if (t == null) continue;
             float dist = Vector3.Distance(transform.position, t.position);
             if (dist < closestDistance)
             {

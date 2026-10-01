@@ -20,7 +20,7 @@ public class TreasureBoxUI : MonoBehaviour
 
     public void ShowItem(SItemStack sItemStack)
     {
-        Debug.Log(">> TreasureBoxUI.ShowItem : 보상 받음");
+        UtilityFunctions.Log(">> TreasureBoxUI.ShowItem : 보상 받음");
 
         SItemTypeSO itemType = ItemTypeManager.Instance.FindType(sItemStack);
 

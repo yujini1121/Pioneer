@@ -13,7 +13,7 @@ public class TreasureBoxManager : MonoBehaviour
 
     public void GetBox()
     {
-        Debug.Log(">> TreasureBoxManager : 보상 받음");
+        UtilityFunctions.Log(">> TreasureBoxManager : 보상 받음");
 
         SItemStack r = GetReward();
         rewardStack.Add(r);
@@ -50,7 +50,7 @@ public class TreasureBoxManager : MonoBehaviour
 
         if (CreatureEffect.Instance != null)
         {
-            ParticleSystem ps = CreatureEffect.Instance.Effects[9]; 
+            ParticleSystem ps = CreatureEffect.Instance.GetEffect(9);
             CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, 1.5f, 0f));
         }
 
@@ -87,16 +87,10 @@ public class TreasureBoxManager : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }
 
 [System.Serializable]

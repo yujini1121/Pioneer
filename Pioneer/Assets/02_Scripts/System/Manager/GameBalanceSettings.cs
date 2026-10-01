@@ -22,8 +22,8 @@ public class GameBalanceSettings : ScriptableObject
     }
 
     [Header("Day / Night")]
-    [Min(0.01f)] public float dayDuration = 120f;
-    [Min(0.01f)] public float nightDuration = 60f;
+    [Min(0.01f)] public float dayDuration = 270f;
+    [Min(0.01f)] public float nightDuration = 90f;
 
     [Header("Enemy Spawn Table")]
     public EnemySpawnRow[] enemySpawnTable =

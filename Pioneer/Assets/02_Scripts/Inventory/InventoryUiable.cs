@@ -61,7 +61,7 @@ public class InventoryUiable : InventoryBase
 
     public void MouseDrop()
     {
-        Debug.Log($">> MouseDrop() : 호출됨");
+        UtilityFunctions.Log($">> MouseDrop() : 호출됨");
 
         // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
         ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
@@ -112,10 +112,10 @@ public class InventoryUiable : InventoryBase
     {
         if (IsDebuggingAdd)
         {
-            Debug.Log($">> Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
+            UtilityFunctions.Log($">> Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
 
-        Debug.Assert(InventoryUiMain.instance != null);
+        UtilityFunctions.Assert(InventoryUiMain.instance != null);
         SItemStack remain;// = null;
         if (TryAdd(item, out remain) == false)
         {

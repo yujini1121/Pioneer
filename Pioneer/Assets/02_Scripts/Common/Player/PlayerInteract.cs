@@ -39,7 +39,7 @@ public class PlayerInteract : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.E) && PlayerCore.Instance.currentState == PlayerCore.PlayerState.Default)
 			{
-				Debug.Log("PlayerInteract");
+				UtilityFunctions.Log("PlayerInteract");
 
 				// 가장 가까운 애 선택
 

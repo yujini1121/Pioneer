@@ -10,6 +10,8 @@ public class OceanEventThunder : OceanEventBase
     private float warningDuration;
     private float thunderRadius;
     private float stunDuration;
+    private readonly List<GameObject> strikeEffects = new List<GameObject>();
+    private readonly HashSet<StunHandler> stunnedTargets = new HashSet<StunHandler>();
 
 
     // 2번 선택되는 것 방지용
@@ -79,12 +81,17 @@ public class OceanEventThunder : OceanEventBase
 
         OceanEventManager.instance.BeginCoroutine(ThunderLoop());
 
-        rainEffect.SetActive(true);
     }   
 
     public override void EventEnd()
     {
         base.EventEnd();
+        foreach (GameObject effect in strikeEffects)
+            if (effect != null) GameObject.Destroy(effect);
+        strikeEffects.Clear();
+        foreach (StunHandler stun in stunnedTargets)
+            if (stun != null) stun.ClearStun();
+        stunnedTargets.Clear();
 
         if (PlayerCore.Instance != null)
             PlayerCore.Instance.ResetThunderSpeedModifier();
@@ -129,7 +136,6 @@ public class OceanEventThunder : OceanEventBase
             decks[i].EndThunderWarning();
         }
 
-        rainEffect.SetActive(false);
     }
 
     private IEnumerator ThunderLoop()
@@ -156,12 +162,16 @@ public class OceanEventThunder : OceanEventBase
                 yield break;
             }
 
+            if (targetDeck == null || targetDeck.IsDead)
+                continue;
+
             Vector3 strikePosition = targetDeck.transform.position;
 
             // 바다이벤트 : 실제 뇌우 이펙트 생성
             if (thunderEffectPrefab != null)
             {
-                GameObject.Instantiate(thunderEffectPrefab, strikePosition, Quaternion.identity);
+                strikeEffects.RemoveAll(effect => effect == null);
+                strikeEffects.Add(GameObject.Instantiate(thunderEffectPrefab, strikePosition, Quaternion.identity));
             }
 
             ApplyThunderDamage(strikePosition, targetDeck);
@@ -237,6 +247,7 @@ public class OceanEventThunder : OceanEventBase
                 if (stunHandler != null)
                 {
                     stunHandler.ApplyStun(stunDuration);
+                    stunnedTargets.Add(stunHandler);
                 }
             }
         }

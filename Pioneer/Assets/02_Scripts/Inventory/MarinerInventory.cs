@@ -93,7 +93,7 @@ public class MarinerInventory : InventoryBase
     /// </summary>
     private void TransferAllItemsToPlayer()
     {
-        Debug.Log("플레이어에게 아이템 전달 함수 호출");
+        UtilityFunctions.Log("플레이어에게 아이템 전달 함수 호출");
         if (InventoryManager.Instance == null) return;
 
         List<SItemStack> itemsToTransfer = new List<SItemStack>();
@@ -136,8 +136,8 @@ public class MarinerInventory : InventoryBase
     /// </summary>
     public void TransferAllItemsToStorage(InventoryBase storageInventory)
     {
-        Debug.Log("모든 아이템 보관함에 저장 함수 호출");
-        if (storageInventory == null) ; // 오류 검증을 위한 return 제거
+        UtilityFunctions.Log("모든 아이템 보관함에 저장 함수 호출");
+        if (storageInventory == null) return; // 오류 검증을 위한 return 제거
 
         for (int i = 0; i < itemLists.Count; i++)
         {
@@ -146,17 +146,18 @@ public class MarinerInventory : InventoryBase
                 SItemStack remain;
                 if (storageInventory.TryAdd(itemLists[i], out remain))
                 {
-                    Debug.Log($"보관함에 저장: {itemLists[i].id} x {itemLists[i].amount}");
+                    UtilityFunctions.Log($"보관함에 저장: {itemLists[i].id} x {itemLists[i].amount}");
                     itemLists[i] = null;
                 }
                 else
                 {
+                    itemLists[i] = remain;
                     Debug.LogWarning("보관함이 가득참");
                     break;
                 }
             }
         }
         SafeClean();
-        Debug.Log("모든 아이템을 보관함에 저장 완료");
+        UtilityFunctions.Log("모든 아이템을 보관함에 저장 완료");
     }
 }

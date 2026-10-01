@@ -12,6 +12,7 @@ public class FogFade : MonoBehaviour
     [SerializeField] private float fadeOutDuration = 1.5f;
 
     private Coroutine fadeCoroutine;
+    private float emissionMultiplier;
 
     private readonly List<float> baseEmissionRates = new List<float>();
 
@@ -48,18 +49,19 @@ public class FogFade : MonoBehaviour
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
 
-        fadeCoroutine = StartCoroutine(FadeRoutine(0f, 1f, fadeInDuration, false));
+        if (isActiveAndEnabled)
+            fadeCoroutine = StartCoroutine(FadeRoutine(emissionMultiplier, 1f, fadeInDuration, false));
     }
 
     public void HideFog()
     {
-        if (!gameObject.activeSelf)
+        if (!isActiveAndEnabled)
             return;
 
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
 
-        fadeCoroutine = StartCoroutine(FadeRoutine(1f, 0f, fadeOutDuration, true));
+        fadeCoroutine = StartCoroutine(FadeRoutine(emissionMultiplier, 0f, fadeOutDuration, true));
     }
 
     private IEnumerator FadeRoutine(float start, float end, float duration, bool disableAfterFade)
@@ -70,7 +72,7 @@ public class FogFade : MonoBehaviour
 
         while (timer < duration)
         {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
             float t = duration <= 0f ? 1f : Mathf.Clamp01(timer / duration);
             float value = Mathf.Lerp(start, end, t);
 
@@ -91,6 +93,7 @@ public class FogFade : MonoBehaviour
 
     private void SetEmissionMultiplier(float multiplier)
     {
+        emissionMultiplier = multiplier;
         for (int i = 0; i < fogParticles.Length; i++)
         {
             if (fogParticles[i] == null) continue;

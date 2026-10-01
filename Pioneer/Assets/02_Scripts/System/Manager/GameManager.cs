@@ -4,6 +4,7 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using Cinemachine;
 
 #region 임시 Stats
 public class EnemyStats : MonoBehaviour
@@ -49,6 +50,11 @@ public class GameManager : MonoBehaviour, IBegin
     private ColorAdjustments colorAdjustments;
     private Vignette vignette;
     private Coroutine gameResultPresentationCoroutine;
+    private readonly Dictionary<Canvas, bool> canvasStatesBeforeResult = new Dictionary<Canvas, bool>();
+    private CinemachineBrain resultCameraBrain;
+    private Camera resultCamera;
+    private Vector3 resultCameraStartPosition;
+    private bool restoreCameraBrain;
     private float cycleTime = 0f;
 
     [Header("스포너 지점")]
@@ -128,7 +134,7 @@ public class GameManager : MonoBehaviour, IBegin
     private void Awake()
     {
         if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        else { Destroy(gameObject); return; }
 
         LoadDefaultBalanceSettingsIfNeeded();
         ApplyBalanceSettings();
@@ -144,19 +150,21 @@ public class GameManager : MonoBehaviour, IBegin
     {
         oneDayDuration = dayDuration + nightDuration;
 
-        Debug.Log($">> GameManager.Start()");
-        Debug.Log($"[GameMode] Infinite Mode: {GameModeState.IsInfiniteMode}");
+        UtilityFunctions.Log($">> GameManager.Start()");
+        UtilityFunctions.Log($"[GameMode] Infinite Mode: {GameModeState.IsInfiniteMode}");
 
-        AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
         if (InventoryUiMain.instance != null)
             InventoryUiMain.instance.Start();
         else
-            Debug.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
+            UtilityFunctions.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
     }
 
     private void Update()
     {
+        if (IsGameResultActive) return;
         if (Time.timeScale > 0)
         {
             currentGameTime += Time.deltaTime;
@@ -195,9 +203,10 @@ public class GameManager : MonoBehaviour, IBegin
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.To_night2);
 
-            AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
 
-            Debug.Log($"밤이 되었습니다. (Day {currentDay})");
+            UtilityFunctions.Log($"밤이 되었습니다. (Day {currentDay})");
             IsDaytime = false;
             OnNightStart();
         }
@@ -207,10 +216,11 @@ public class GameManager : MonoBehaviour, IBegin
             IsDaytime = true;
             currentDay++;
 
-            AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
             OnNightEnd();
-            Debug.Log($"아침이 되었습니다. (Day {currentDay})");
+            UtilityFunctions.Log($"아침이 되었습니다. (Day {currentDay})");
 
             // 일반 모드일 때만 6일차 엔딩 발생
             if (!GameModeState.IsInfiniteMode && currentDay >= 6)
@@ -229,7 +239,7 @@ public class GameManager : MonoBehaviour, IBegin
         RefreshSpawnPointsFromFinder();
 
         var s = GetScaleRowForDay(currentDay);
-        Debug.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
+        UtilityFunctions.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
         SpawnEnemiesForCurrentDay();
     }
 
@@ -301,7 +311,13 @@ public class GameManager : MonoBehaviour, IBegin
             AudioManager.instance.FadeOutForGameResult(gameOverAudioFadeDuration);
 
         Camera cam = Camera.main;
+        resultCamera = cam;
+        resultCameraBrain = cam != null ? cam.GetComponent<CinemachineBrain>() : null;
+        restoreCameraBrain = resultCameraBrain != null && resultCameraBrain.enabled;
+        // The active Brain writes the camera transform in LateUpdate even at timeScale zero.
+        if (restoreCameraBrain) resultCameraBrain.enabled = false;
         Vector3 startCameraPosition = cam != null ? cam.transform.position : Vector3.zero;
+        resultCameraStartPosition = startCameraPosition;
         Vector3 targetCameraPosition = startCameraPosition;
 
         if (cam != null)
@@ -371,25 +387,30 @@ public class GameManager : MonoBehaviour, IBegin
 
     void HideAllUI()
     {
+        canvasStatesBeforeResult.Clear();
+        if (allUICanvas == null) return;
         foreach (Canvas canvas in allUICanvas)
         {
-            if (canvas != null && canvas != gameOverUI.GetComponent<Canvas>())
-                canvas.gameObject.SetActive(false);
+            if (canvas == null || (gameOverUI != null && gameOverUI.transform.IsChildOf(canvas.transform)))
+                continue;
+            canvasStatesBeforeResult[canvas] = canvas.gameObject.activeSelf;
+            canvas.gameObject.SetActive(false);
         }
     }
 
     void ShowAllUI()
     {
-        foreach (Canvas canvas in allUICanvas)
+        foreach (var entry in canvasStatesBeforeResult)
         {
-            if (canvas != null)
-                canvas.gameObject.SetActive(true);
+            if (entry.Key != null)
+                entry.Key.gameObject.SetActive(entry.Value);
         }
+        canvasStatesBeforeResult.Clear();
     }
 
     private void SpawnEnemiesForCurrentDay()
     {
-        Debug.Log("Spawn Enemies");
+        UtilityFunctions.Log("Spawn Enemies");
 
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
@@ -404,7 +425,7 @@ public class GameManager : MonoBehaviour, IBegin
         SpawnOf(titan, row.titan, scale);       // 타이탄
 
         int spawnedCount = row.minion + row.crawler + row.titan;
-        Debug.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
+        UtilityFunctions.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
     }
 
     // 바다이벤트 : 안개 낮 효과 -> 미니언 추가 스폰
@@ -420,6 +441,12 @@ public class GameManager : MonoBehaviour, IBegin
 
     public void ResumeFromEndingToInfiniteMode()
     {
+        if (gameResultPresentationCoroutine != null)
+        {
+            StopCoroutine(gameResultPresentationCoroutine);
+            gameResultPresentationCoroutine = null;
+        }
+        RestoreResultCamera();
         Time.timeScale = 1f;
         IsGameResultActive = false;
 
@@ -451,14 +478,14 @@ public class GameManager : MonoBehaviour, IBegin
         if (gameOverUI != null)
             gameOverUI.HideGameOverScreen();
 
-        Debug.Log("[GameMode] 무한 모드로 전환되어 게임을 이어서 진행합니다.");
+        UtilityFunctions.Log("[GameMode] 무한 모드로 전환되어 게임을 이어서 진행합니다.");
     }
 
     // 일차별 공격력 적용된 에너미 생성
     private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
     {
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
-        Debug.Log($"[Table] Day{currentDay} -> M:{row.minion}, C:{row.crawler}, T:{row.titan}");
+        UtilityFunctions.Log($"[Table] Day{currentDay} -> M:{row.minion}, C:{row.crawler}, T:{row.titan}");
 
         if (prefab == null || count <= 0) return;
 
@@ -501,20 +528,20 @@ public class GameManager : MonoBehaviour, IBegin
                 float hpMul = 1f + (scale.hpPercent * 0.01f);
                 stats.ApplyScaling(atkMul, hpMul);
 
-                Debug.Log($"[Scale] Day {currentDay} {e.name} ATK {stats.baseATK}→{stats.atk} (x{atkMul:0.00}), HP {stats.baseHP}→{stats.hp} (x{hpMul:0.00})");
+                UtilityFunctions.Log($"[Scale] Day {currentDay} {e.name} ATK {stats.baseATK}→{stats.atk} (x{atkMul:0.00}), HP {stats.baseHP}→{stats.hp} (x{hpMul:0.00})");
             }
         }
     }
 
     private void DespawnAllEnemies()
     {
-        Debug.Log($"DespawnAllEnemies 들어옴 / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
+        UtilityFunctions.Log($"DespawnAllEnemies 들어옴 / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
 
         foreach (GameObject one in GameObject.FindGameObjectsWithTag("Enemy"))
         {
             if (one == null) continue;
 
-            Debug.Log($"DespawnAllEnemies : {one.name}");
+            UtilityFunctions.Log($"DespawnAllEnemies : {one.name}");
 
             UnitFadeController fade = EnsureUnitFadeController(one);
             if (fade != null)
@@ -525,7 +552,7 @@ public class GameManager : MonoBehaviour, IBegin
 
         spawnedEnemies.Clear();
 
-        Debug.Log("[Despawn] 밤 종료로 모든 에너미 제거");
+        UtilityFunctions.Log("[Despawn] 밤 종료로 모든 에너미 제거");
     }
 
     private DayEnemyRow GetSpawnRowForDay(int day)
@@ -578,12 +605,12 @@ public class GameManager : MonoBehaviour, IBegin
         int add = CalcMarinerEmbarkCount(currentDay, totalMarinerMembers);
         if (add <= 0)
         {
-            Debug.Log($"[Mariner] Day {currentDay} 아침: 승선 0명 → 총 {totalMarinerMembers}명");
+            UtilityFunctions.Log($"[Mariner] Day {currentDay} 아침: 승선 0명 → 총 {totalMarinerMembers}명");
             return;
         }
 
         SpawnMariner(add);
-        Debug.Log($"[Mariner] Day {currentDay} 아침: 승선 {add}명 → 총 {totalMarinerMembers}명");
+        UtilityFunctions.Log($"[Mariner] Day {currentDay} 아침: 승선 {add}명 → 총 {totalMarinerMembers}명");
     }
 
     // 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
@@ -611,7 +638,7 @@ public class GameManager : MonoBehaviour, IBegin
 
     public void CollectResource(string type)
     {
-        Debug.Log($"자원 획득: {type}");
+        UtilityFunctions.Log($"자원 획득: {type}");
     }
     #endregion
 
@@ -900,5 +927,20 @@ public class GameManager : MonoBehaviour, IBegin
             fade = target.AddComponent<UnitFadeController>();
 
         return fade;
+    }
+
+    private void RestoreResultCamera()
+    {
+        if (resultCamera != null) resultCamera.transform.position = resultCameraStartPosition;
+        if (resultCameraBrain != null && restoreCameraBrain) resultCameraBrain.enabled = true;
+        resultCamera = null;
+        resultCameraBrain = null;
+        restoreCameraBrain = false;
+    }
+
+    private void OnDestroy()
+    {
+        RestoreResultCamera();
+        if (Instance == this) Instance = null;
     }
 }

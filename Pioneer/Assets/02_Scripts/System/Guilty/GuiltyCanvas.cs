@@ -17,8 +17,8 @@ public class GuiltyCanvas : MonoBehaviour
 
     public void CurseView(string word)
     {
-        Debug.Log($">> GuiltyCanvas.CurseView(string word) : 호출됨");
-        Debug.Log($">> GuiltyCanvas.CurseView(string word) : 널값인가 ? {coroutineCarkMarinerCurseText == null}");
+        UtilityFunctions.Log($">> GuiltyCanvas.CurseView(string word) : 호출됨");
+        UtilityFunctions.Log($">> GuiltyCanvas.CurseView(string word) : 널값인가 ? {coroutineCarkMarinerCurseText == null}");
 
         if (darkMarinerCurseText.gameObject.activeSelf == false)
         {
@@ -40,17 +40,14 @@ public class GuiltyCanvas : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 
     IEnumerator CoroutineCarkMarinerCurse()
     {
         float mTime = 0.0f;
         while (mTime < curseTime)
         {
-            Debug.Log($">> GuiltyCanvas.CoroutineCarkMarinerCurse() : 시작 -> {mTime}, {curseTime}");
+            UtilityFunctions.Log($">> GuiltyCanvas.CoroutineCarkMarinerCurse() : 시작 -> {mTime}, {curseTime}");
 
             mTime += Time.deltaTime;
             yield return null;

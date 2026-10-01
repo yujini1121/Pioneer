@@ -35,8 +35,11 @@ public class TitanAI : EnemyBase, IBegin
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         agent = GetComponent<NavMeshAgent>();
-        agent.updatePosition = false;
-        agent.updateRotation = false;
+        if (agent != null)
+        {
+            agent.updatePosition = false;
+            agent.updateRotation = false;
+        }
 
         SetAttribute();
         if (agent != null) agent.speed = speed;
@@ -53,6 +56,7 @@ public class TitanAI : EnemyBase, IBegin
 
     void Update()
     {
+        if (IsDead || Time.timeScale <= 0f || fov == null) return;
         if (stunHandler != null && stunHandler.IsStunned)
             return;
 
@@ -68,7 +72,7 @@ public class TitanAI : EnemyBase, IBegin
                 ApplyAnimTrigger();
             }
 
-            if (attackTimer <= 0f && agent != null) agent.isStopped = false;
+            if (attackTimer <= 0f && agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.isStopped = false;
             return;
         }
 
@@ -125,7 +129,7 @@ public class TitanAI : EnemyBase, IBegin
 
     private void Move()
     {
-        if (currentAttackTarget == null || agent == null) return;
+        if (currentAttackTarget == null || agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) return;
 
         Vector3 targetPosition = new Vector3(
             currentAttackTarget.transform.position.x,
@@ -146,9 +150,10 @@ public class TitanAI : EnemyBase, IBegin
 
     private void Attack()
     {
+        if (isAttack || fov.visibleTargets.Count == 0 || fov.visibleTargets[0] == null) return;
         isAttack = true;
 
-        if (agent != null)
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.ResetPath();
@@ -177,11 +182,20 @@ public class TitanAI : EnemyBase, IBegin
         directionToTarget.y = 0f;
         transform.rotation = Quaternion.LookRotation(directionToTarget);
 
-        while (animator != null && !animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        float animationDeadline = Time.time + Mathf.Max(0.5f, attackDelayTime);
+        while (animator != null && !animator.GetCurrentAnimatorStateInfo(0).IsName("Attack")
+            && Time.time < animationDeadline)
             yield return null;
 
+        if (animator == null || !animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        {
+            isAttack = false;
+            yield break;
+        }
+
         const float dashStartNormalized = 0.18f;
-        while (animator != null && animator.GetCurrentAnimatorStateInfo(0).normalizedTime < dashStartNormalized)
+        while (animator != null && animator.GetCurrentAnimatorStateInfo(0).normalizedTime < dashStartNormalized
+            && Time.time < animationDeadline)
             yield return null;
 
         float dashDuration = 0.2f;

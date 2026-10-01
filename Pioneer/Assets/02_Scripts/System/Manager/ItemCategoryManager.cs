@@ -31,15 +31,10 @@ public class ItemCategoryManager : MonoBehaviour, IBegin
     }
 
     // Start is called before the first frame update
-    private void Start()
-    {
-    }
+
 
     // Update is called once per frame
-    void Update()
-    {
 
-    }
 
     private void InspectorRegister()
     {

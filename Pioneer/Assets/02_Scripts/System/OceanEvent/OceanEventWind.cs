@@ -13,6 +13,7 @@ public class OceanEventWind : OceanEventBase
     private readonly float windAirborneHeight;
     private readonly float windAirborneDuration;
     private readonly float windStunDuration;
+    private readonly List<GameObject> activeWinds = new List<GameObject>();
 
     public OceanEventWind(GameObject windEffectPrefab,
                           float windInterval,
@@ -37,18 +38,28 @@ public class OceanEventWind : OceanEventBase
 
     public override void EventRun()
     {
+        if (IsRunning || OceanEventManager.instance == null) return;
         base.EventRun();
 
         OceanEventManager.instance.BeginCoroutine(WindLoop());
 
-        Debug.Log("[OceanEventWind][돌풍 이벤트 시작]");
+        UtilityFunctions.Log("[OceanEventWind][돌풍 이벤트 시작]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
+        foreach (GameObject wind in activeWinds)
+            if (wind != null) GameObject.Destroy(wind);
+        activeWinds.Clear();
+        foreach (WindAirborne airborne in GameObject.FindObjectsOfType<WindAirborne>())
+        {
+            airborne.CancelAirborne();
+            StunHandler stun = airborne.GetComponent<StunHandler>();
+            if (stun != null) stun.ClearStun();
+        }
 
-        Debug.Log("[OceanEventWind][돌풍 이벤트 종료]");
+        UtilityFunctions.Log("[OceanEventWind][돌풍 이벤트 종료]");
     }
 
     private IEnumerator WindLoop()
@@ -111,6 +122,9 @@ public class OceanEventWind : OceanEventBase
 
         Quaternion rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
         GameObject windObject = GameObject.Instantiate(windEffectPrefab, spawnPosition, rotation);
+        activeWinds.RemoveAll(wind => wind == null);
+        activeWinds.Add(windObject);
+        GameObject.Destroy(windObject, Mathf.Max(0.1f, windLifetime));
 
         WindHit windHit = windObject.GetComponent<WindHit>();
         if (windHit != null)

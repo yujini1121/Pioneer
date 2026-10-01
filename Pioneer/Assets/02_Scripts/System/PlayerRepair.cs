@@ -31,23 +31,20 @@ public class PlayerRepair : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 
     public void Repair(StructureBase target)
     {
         if (isAction) return;
 
-        Debug.Log($"수리 버튼 눌림");
+        UtilityFunctions.Log($"수리 버튼 눌림");
 
         StartCoroutine(RepairCoroutine(target));
     }
 
     IEnumerator RepairCoroutine(StructureBase target)
     {
-        Debug.Log($"수리 버튼 눌림");
+        UtilityFunctions.Log($"수리 버튼 눌림");
 
         isAction = true;
 

@@ -16,6 +16,7 @@ public class OceanEventSiren : OceanEventBase
     private readonly float procChance;
 
     private readonly Dictionary<MarinerAI, GameObject> debuffEffects = new Dictionary<MarinerAI, GameObject>();
+    private readonly List<GameObject> appearEffects = new List<GameObject>();
 
     public OceanEventSiren(GameObject sirenDebuffEffectPrefab,
                            GameObject sirenAppearLeftEffectPrefab,
@@ -39,6 +40,7 @@ public class OceanEventSiren : OceanEventBase
 
     public override void EventRun()
     {
+        if (IsRunning || OceanEventManager.instance == null) return;
         base.EventRun();
         OceanEventManager.instance.BeginCoroutine(CharmLoop());
     }
@@ -50,7 +52,6 @@ public class OceanEventSiren : OceanEventBase
         for (int i = 0; i < charmedMariners.Count; i++)
         {
             if (charmedMariners[i] == null) continue;
-            if (charmedMariners[i].IsDead) continue;
 
             RemoveDebuffEffect(charmedMariners[i]);
             charmedMariners[i].isCharmed = false;
@@ -65,17 +66,21 @@ public class OceanEventSiren : OceanEventBase
                 GameObject.Destroy(pair.Value);
         }
         debuffEffects.Clear();
+        foreach (GameObject effect in appearEffects)
+            if (effect != null) GameObject.Destroy(effect);
+        appearEffects.Clear();
     }
 
     private IEnumerator CharmLoop()
     {
+        if (GameManager.Instance == null) yield break;
         float totalDuration = GameManager.Instance.dayDuration + GameManager.Instance.nightDuration;
         float elapsed = 0f; // 하루 전체 체크용
 
         while (elapsed < totalDuration && IsRunning)
         {
-            yield return new WaitForSeconds(checkInterval);
-            elapsed += checkInterval;
+            yield return new WaitForSeconds(Mathf.Max(0.1f, checkInterval));
+            elapsed += Mathf.Max(0.1f, checkInterval);
 
             if (!IsRunning) yield break;
 
@@ -85,7 +90,7 @@ public class OceanEventSiren : OceanEventBase
                 if (mariners.Length == 0) continue;
 
                 MarinerAI target = mariners[Random.Range(0, mariners.Length)];
-                if (target == null || target.isCharmed || target.IsDead) continue;
+                if (target == null || !target.isActiveAndEnabled || target.isCharmed || target.IsDead) continue;
 
                 OceanEventManager.instance.BeginCoroutine(CharmRoutine(target));
             }
@@ -94,6 +99,7 @@ public class OceanEventSiren : OceanEventBase
 
     private IEnumerator CharmRoutine(MarinerAI target)
     {
+        if (target == null || !target.isActiveAndEnabled || target.IsDead || target.isCharmed) yield break;
         target.isCharmed = true;
 
         CreateDebuffEffect(target);
@@ -103,16 +109,19 @@ public class OceanEventSiren : OceanEventBase
             charmedMariners.Add(target);
 
         target.StopAllCoroutines();
-        target.Agent.isStopped = false;
+        if (target.Agent != null && target.Agent.isActiveAndEnabled && target.Agent.isOnNavMesh)
+            target.Agent.isStopped = false;
 
         float attackInterval = 1f;
         int clickCount = 0;
         float timer = 0f;
+        float nextAttackTime = attackInterval;
 
         while (timer < charmDuration && IsRunning)
         {
-            yield return new WaitForSeconds(attackInterval);
-            timer += attackInterval;
+            yield return null;
+            if (Time.timeScale <= 0f) continue;
+            timer += Time.deltaTime;
 
             if (!IsRunning)
             {
@@ -126,7 +135,13 @@ public class OceanEventSiren : OceanEventBase
                 yield break;
             }
 
-            if (target == null || target.IsDead) yield break;
+            if (target == null || !target.isActiveAndEnabled || target.IsDead)
+            {
+                RemoveDebuffEffect(target);
+                if (target != null) target.isCharmed = false;
+                charmedMariners.Remove(target);
+                yield break;
+            }
 
             //플레이어 근처 클릭 3회 -> 해제
             Collider[] cols = Physics.OverlapBox(target.transform.position, new Vector3(4f, 1f, 4f));
@@ -143,18 +158,23 @@ public class OceanEventSiren : OceanEventBase
                         charmedMariners.Remove(target);
                         yield break;
                     }
+                    break; // Multiple player colliders still represent one click.
                 }
             }
 
+            if (timer < nextAttackTime) continue;
+            nextAttackTime += attackInterval;
+
             //주변 피해 (Player, Mariner)
             Collider[] hits = Physics.OverlapBox(target.transform.position, new Vector3(4f, 1f, 4f));
+            HashSet<CommonBase> damagedTargets = new HashSet<CommonBase>();
             foreach (var hit in hits)
             {
                 int layer = hit.gameObject.layer;
                 if (layer == LayerMask.NameToLayer("Player") || layer == LayerMask.NameToLayer("Mariner"))
                 {
-                    CommonBase cb = hit.GetComponent<CommonBase>();
-                    if (cb != null && !cb.IsDead)
+                    CommonBase cb = hit.GetComponentInParent<CommonBase>();
+                    if (cb != null && !cb.IsDead && damagedTargets.Add(cb))
                     {
                         int dmg = Mathf.Max(1, Mathf.RoundToInt(cb.maxHp * 0.01f));
                         cb.TakeDamage(dmg, target.gameObject);
@@ -164,7 +184,7 @@ public class OceanEventSiren : OceanEventBase
 
             //랜덤 이동 승무원 베이스 코드 가져옴
             NavMeshAgent agent = target.Agent;
-            if (agent != null && agent.isOnNavMesh)
+            if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
             {
                 Vector3 randomDirection = Random.insideUnitSphere * 5f + target.transform.position;
                 randomDirection.y = target.transform.position.y;
@@ -222,6 +242,7 @@ public class OceanEventSiren : OceanEventBase
         spawnPos += mainCamera.transform.up * 1.5f;
         spawnPos += mainCamera.transform.forward * 8f;
 
-        GameObject.Instantiate(prefab, spawnPos, Quaternion.identity);
+        appearEffects.RemoveAll(effect => effect == null);
+        appearEffects.Add(GameObject.Instantiate(prefab, spawnPos, Quaternion.identity));
     }
 }

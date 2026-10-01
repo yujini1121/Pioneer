@@ -6,6 +6,6 @@ public class Hello : MonoBehaviour
 {
     public void Say()
     {
-        Debug.Log($">> Hello.Say()");
+        UtilityFunctions.Log($">> Hello.Say()");
     }
 }

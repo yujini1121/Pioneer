@@ -35,15 +35,15 @@ public class MastManager : MonoBehaviour
         Collider[] platformColliders = Physics.OverlapSphere(Vector3.zero, 1000f, platformLayerMask);
         currentDeckCount = platformColliders.Length;
 
-        Debug.Log($"=== 갑판 카운트 디버그 ===");
-        Debug.Log($"레이어마스크 값: {platformLayerMask.value}");
-        Debug.Log($"검색된 콜라이더 수: {platformColliders.Length}");
-        Debug.Log($"현재 갑판 개수: {currentDeckCount}");
+        UtilityFunctions.Log($"=== 갑판 카운트 디버그 ===");
+        UtilityFunctions.Log($"레이어마스크 값: {platformLayerMask.value}");
+        UtilityFunctions.Log($"검색된 콜라이더 수: {platformColliders.Length}");
+        UtilityFunctions.Log($"현재 갑판 개수: {currentDeckCount}");
 
         // 각 갑판 정보 출력
         for (int i = 0; i < platformColliders.Length; i++)
         {
-            Debug.Log($"갑판 {i}: {platformColliders[i].name} at {platformColliders[i].transform.position}");
+            UtilityFunctions.Log($"갑판 {i}: {platformColliders[i].name} at {platformColliders[i].transform.position}");
         }
     }
 
@@ -60,7 +60,7 @@ public class MastManager : MonoBehaviour
     // 게임오버 처리
     public void GameOver()
     {
-        Debug.Log("게임오버! 돛대가 파괴되었습니다.");
+        UtilityFunctions.Log("게임오버! 돛대가 파괴되었습니다.");
         Time.timeScale = 0f;
     }
 }

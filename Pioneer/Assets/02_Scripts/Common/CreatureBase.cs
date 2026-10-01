@@ -13,7 +13,7 @@ public class CreatureBase : CommonBase
 
     public void Start()
     {
-        Debug.Log($">> 게임오브젝트 {gameObject.name}의 CreatureBase.Start 호출됨");
+        UtilityFunctions.Log($">> 게임오브젝트 {gameObject.name}의 CreatureBase.Start 호출됨");
 
         fov = GetComponent<FOVController>();
     }

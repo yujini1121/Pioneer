@@ -102,7 +102,7 @@ public class InventoryBase : MonoBehaviour
         remainOrNull = itemStack.Copy();
         remainOrNull.amount = amount;
 
-        Debug.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count} / adding : {itemStack.id} + {itemStack.amount}");
+        UtilityFunctions.Log($">> InventoryBase.TryAdd : itemLists.Count = {itemLists.Count} / adding : {itemStack.id} + {itemStack.amount}");
         return false;
     }
 

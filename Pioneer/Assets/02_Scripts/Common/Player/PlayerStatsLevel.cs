@@ -171,7 +171,7 @@ public class PlayerStatsLevel : MonoBehaviour
     /// <param name="amount">경험치 값</param>
     public void AddExp(GrowStatType type, int amount)
     {
-        UnityEngine.Debug.Log($"AddExp() 시작");
+        UtilityFunctions.Log($"AddExp() 시작");
         GrowState growState = growStates[type];
 
         if (growState.level >= growState.maxExp.Length)
@@ -183,7 +183,7 @@ public class PlayerStatsLevel : MonoBehaviour
         {
             growState.currentExp -= growState.maxExp[growState.level];
             growState.level++;
-            UnityEngine.Debug.Log($"{type} 레벨업 -> {growState.level}");
+            UtilityFunctions.Log($"{type} 레벨업 -> {growState.level}");
 
             if (AudioManager.instance != null)
                 AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);
@@ -196,7 +196,7 @@ public class PlayerStatsLevel : MonoBehaviour
             // ===========================================
             StatLevelUp?.Invoke(type); // ui 업데이트 이벤튼
         }
-        UnityEngine.Debug.Log($"{type} 스탯 경험치 {amount} 획득");
+        UtilityFunctions.Log($"{type} 스탯 경험치 {amount} 획득");
     }
 
     /// <summary>

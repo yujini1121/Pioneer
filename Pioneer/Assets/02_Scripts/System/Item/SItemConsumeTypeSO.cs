@@ -15,7 +15,7 @@ public class SItemConsumeTypeSO : SItemTypeSO
 
     public override IEnumerator Use(CommonBase userGameObject, SItemStack itemWithState)
     {
-        Debug.Log(">> 아이템_소모 : 사용됨");
+        UtilityFunctions.Log(">> 아이템_소모 : 사용됨");
 
         itemWithState.isUseCoroutineEnd = false;
 
@@ -55,19 +55,19 @@ public class SItemConsumeTypeSO : SItemTypeSO
             case 801: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 15);
-                var ps = CreatureEffect.Instance.Effects[3]; // Heal 이펙트
+                var ps = CreatureEffect.Instance.GetEffect(3); // Heal 이펙트
                 CreatureEffect.Instance.PlayEffectFollow(ps, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break; 
             case 802: //
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 40);
-                var ps1 = CreatureEffect.Instance.Effects[3]; // Heal 이펙트
+                var ps1 = CreatureEffect.Instance.GetEffect(3); // Heal 이펙트
                 CreatureEffect.Instance.PlayEffectFollow(ps1, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             case 803:
                 PlayerCore.Instance.hp = Mathf.Min
                     (PlayerCore.Instance.maxHp, PlayerCore.Instance.hp + 70);
-                var ps2 = CreatureEffect.Instance.Effects[3]; // Heal 이펙트
+                var ps2 = CreatureEffect.Instance.GetEffect(3); // Heal 이펙트
                 CreatureEffect.Instance.PlayEffectFollow(ps2, PlayerCore.Instance.transform, new Vector3(0f, 0f, 0f));
                 break;
             //배고픔 해소

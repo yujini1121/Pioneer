@@ -84,8 +84,8 @@ public class PlayerController : MonoBehaviour
 
         if (isDebugging)
         {
-            Debug.Log($"moveX : {moveX}, moveY: {moveY}");
-            Debug.Log($"moveInput : {moveInput}");
+            UtilityFunctions.Log($"moveX : {moveX}, moveY: {moveY}");
+            UtilityFunctions.Log($"moveInput : {moveInput}");
         }
 
         switch (playerCore.currentState)
@@ -247,7 +247,7 @@ public class PlayerController : MonoBehaviour
 
             if (currentChargeTime >= ChargeTime)
             {
-                Debug.Log("낚시 중단!");
+                UtilityFunctions.Log("낚시 중단!");
                 playerFishing.StopFishingLoop();
                 playerCore.SetState(PlayerCore.PlayerState.Default);
                 currentChargeTime = 0f;

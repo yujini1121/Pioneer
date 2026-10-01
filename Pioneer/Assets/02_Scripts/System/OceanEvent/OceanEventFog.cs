@@ -17,9 +17,10 @@ public class OceanEventFog : OceanEventBase
 
     public override void EventRun()
     {
+        if (IsRunning) return;
         base.EventRun();
 
-        Debug.Log("[OceanEventFog][이벤트 시작]");
+        UtilityFunctions.Log("[OceanEventFog][이벤트 시작]");
 
         if (fogFade != null)
             fogFade.ShowFog();
@@ -31,7 +32,8 @@ public class OceanEventFog : OceanEventBase
 
     public override void EnterNight()
     {
-        Debug.Log("[OceanEventFog][밤 효과 적용]");
+        if (!IsRunning || isNightFogApplied) return;
+        UtilityFunctions.Log("[OceanEventFog][밤 효과 적용]");
 
         RemoveDayFogVision();
         ApplyNightFogVision();
@@ -49,12 +51,12 @@ public class OceanEventFog : OceanEventBase
         RemoveNightFogVision();
         StopDayEffects();
 
-        Debug.Log("[OceanEventFog][이벤트 종료]");
+        UtilityFunctions.Log("[OceanEventFog][이벤트 종료]");
     }
 
     private void ApplyMentalPenalty()
     {
-        Debug.Log("[OceanEventFog][정신력 감소량 10% 추가 적용]");
+        UtilityFunctions.Log("[OceanEventFog][정신력 감소량 10% 추가 적용]");
         if (PlayerCore.Instance != null)
         {
             PlayerCore.Instance.ReduceMentalByFog();
@@ -67,7 +69,7 @@ public class OceanEventFog : OceanEventBase
         if (isDayFogApplied) return;
         isDayFogApplied = true;
 
-        Debug.Log("[OceanEventFog][낮 시야에 밤 시야 효과 적용]");
+        UtilityFunctions.Log("[OceanEventFog][낮 시야에 밤 시야 효과 적용]");
         // TODO : 시야 시스템 연결
     }
 
@@ -76,7 +78,7 @@ public class OceanEventFog : OceanEventBase
         if (!isDayFogApplied) return;
         isDayFogApplied = false;
 
-        Debug.Log("[OceanEventFog][낮 시야 효과 해제]");
+        UtilityFunctions.Log("[OceanEventFog][낮 시야 효과 해제]");
         // TODO : 시야 시스템 원복
     }
 
@@ -85,7 +87,7 @@ public class OceanEventFog : OceanEventBase
         if (isNightFogApplied) return;
         isNightFogApplied = true;
 
-        Debug.Log("[OceanEventFog][밤 시야 범위 20% 감소]");
+        UtilityFunctions.Log("[OceanEventFog][밤 시야 범위 20% 감소]");
         // TODO : 밤 시야 20% 감소 적용
     }
 
@@ -94,14 +96,14 @@ public class OceanEventFog : OceanEventBase
         if (!isNightFogApplied) return;
         isNightFogApplied = false;
 
-        Debug.Log("[OceanEventFog][밤 시야 효과 해제]");
+        UtilityFunctions.Log("[OceanEventFog][밤 시야 효과 해제]");
         // TODO : 밤 시야 원복
     }
     #endregion  
 
     private void ApplyNightGuiltBonus()
     {
-        Debug.Log("[OceanEventFog][현재 죄책감 가중치의 20% 추가 증가]");
+        UtilityFunctions.Log("[OceanEventFog][현재 죄책감 가중치의 20% 추가 증가]");
         if (GuiltySystem.instance != null)
         {
             GuiltySystem.instance.AddFogNightWeight();
@@ -121,11 +123,11 @@ public class OceanEventFog : OceanEventBase
 
     private IEnumerator DayMinionSpawnLoop()
     {
-        while (IsRunning)
+        while (IsRunning && GameManager.Instance != null && GameManager.Instance.IsDaytime)
         {
             yield return new WaitForSeconds(3f);
 
-            if (!IsRunning) yield break;
+            if (!IsRunning || GameManager.Instance == null || !GameManager.Instance.IsDaytime) yield break;
 
             if (Random.value <= 0.5f)
             {
@@ -142,13 +144,13 @@ public class OceanEventFog : OceanEventBase
 
     private IEnumerator DayGuiltIncreaseLoop()
     {
-        while (IsRunning)
+        while (IsRunning && GameManager.Instance != null && GameManager.Instance.IsDaytime)
         {
             yield return new WaitForSeconds(3f);
 
-            if (!IsRunning) yield break;
+            if (!IsRunning || GameManager.Instance == null || !GameManager.Instance.IsDaytime) yield break;
 
-            Debug.Log("[OceanEventFog][죄책감 가중치 1 증가]");
+            UtilityFunctions.Log("[OceanEventFog][죄책감 가중치 1 증가]");
             if (GuiltySystem.instance != null)
             {
                 GuiltySystem.instance.AddFogDayWeight();

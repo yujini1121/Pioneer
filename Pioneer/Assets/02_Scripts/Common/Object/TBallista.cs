@@ -4,7 +4,7 @@ using UnityEngine.Pool;
 
 public class TBallista : StructureBase
 {
-    [SerializeField] private LayerMask enemyLayer;
+    // enemyLayer uses the inherited serialized field from StructureBase.
     [SerializeField] private Collider[] enemyColliders;
     [SerializeField] private Transform closestTarget;
     [SerializeField] private float turnSpeed;

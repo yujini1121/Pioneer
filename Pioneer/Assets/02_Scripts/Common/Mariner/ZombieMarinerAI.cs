@@ -8,7 +8,7 @@ public class ZombieMarinerAI : MarinerBase, IBegin
 
     // 좀비 시각적 요소
     public UnityEngine.Transform spriteTransform;
-    public SpriteRenderer spriteRenderer;
+    // spriteRenderer uses the inherited serialized field from CommonBase.
     public GameObject attackRangeObject;
 
     // 공격 설정

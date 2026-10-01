@@ -12,12 +12,12 @@ public class OceanEventNormal : OceanEventBase
     public override void EventRun()
     {
         base.EventRun();
-        Debug.Log("[OceanEventNormal][평범 이벤트 시작]");
+        UtilityFunctions.Log("[OceanEventNormal][평범 이벤트 시작]");
     }
 
     public override void EventEnd()
     {
         base.EventEnd();
-        Debug.Log("[OceanEventNormal][평범 이벤트 종료]");
+        UtilityFunctions.Log("[OceanEventNormal][평범 이벤트 종료]");
     }
 }

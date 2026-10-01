@@ -21,6 +21,7 @@ public class CommonBase : MonoBehaviour, IBegin
     // public으로 변경해서 외부에서 설정 가능하게
     [HideInInspector] public SpriteRenderer spriteRenderer;
     private Material material;
+    private Material originalMaterial;
     private Coroutine hitFlashCoroutine;
 
     private static readonly int FlashColorID = Shader.PropertyToID("_FlashColor");
@@ -50,14 +51,16 @@ public class CommonBase : MonoBehaviour, IBegin
 
         if (spriteRenderer != null)
         {
-            Debug.Log($"[{gameObject.name}] SpriteRenderer 찾음! 오브젝트: {spriteRenderer.gameObject.name}");
+            UtilityFunctions.Log($"[{gameObject.name}] SpriteRenderer 찾음! 오브젝트: {spriteRenderer.gameObject.name}");
 
             // Material을 인스턴스화
             if (material == null)
             {
-                material = new Material(spriteRenderer.material);
+                if (spriteRenderer.sharedMaterial == null) return;
+                originalMaterial = spriteRenderer.sharedMaterial;
+                material = new Material(spriteRenderer.sharedMaterial);
                 spriteRenderer.material = material;
-                Debug.Log($"[{gameObject.name}] Material 생성 완료!");
+                UtilityFunctions.Log($"[{gameObject.name}] Material 생성 완료!");
             }
 
             // 셰이더 프로퍼티 기본값 초기화
@@ -77,10 +80,7 @@ public class CommonBase : MonoBehaviour, IBegin
         }
     }
 
-    void Update()
-    {
 
-    }
 
     // 데미지 받는 함수
     public virtual void TakeDamage(int damage, GameObject attacker)
@@ -88,7 +88,7 @@ public class CommonBase : MonoBehaviour, IBegin
         if (IsDead) return;
 
         hp -= damage;
-        Debug.Log(gameObject.name + "가 " + damage + "의 데미지를 입었습니다! 현재 체력: " + hp);
+        UtilityFunctions.Log(gameObject.name + "가 " + damage + "의 데미지를 입었습니다! 현재 체력: " + hp);
         this.attacker = attacker;
 
         // Material이 null이면 다시 초기화 시도
@@ -98,7 +98,7 @@ public class CommonBase : MonoBehaviour, IBegin
         }
 
         // 피격 효과 실행
-        if (material != null && spriteRenderer != null)
+        if (material != null && spriteRenderer != null && isActiveAndEnabled)
         {
             if (hitFlashCoroutine != null)
             {
@@ -145,12 +145,19 @@ public class CommonBase : MonoBehaviour, IBegin
     // 사라졌을때 호출하는 변수 (생명체인 경우 사망했을 때)
     public virtual void WhenDestroy()
     {
-        Debug.Log($"{gameObject.name} 오브젝트 파괴");
+        UtilityFunctions.Log($"{gameObject.name} 오브젝트 파괴");
         ItemDropper dropper = GetComponent<ItemDropper>();
-        if (dropper != null)
+        if (dropper != null && ItemDropManager.instance != null)
         {
             ItemDropManager.instance.Drop(dropper.GetDroppedItems(), transform.position + dropOffset);
         }
         Destroy(gameObject);
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (spriteRenderer != null && spriteRenderer.sharedMaterial == material)
+            spriteRenderer.sharedMaterial = originalMaterial;
+        if (material != null) Destroy(material);
     }
 }
