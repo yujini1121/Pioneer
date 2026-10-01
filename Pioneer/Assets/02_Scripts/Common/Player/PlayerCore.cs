@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
@@ -373,7 +373,7 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     public void Move(Vector3 moveInput)
     {
-        if (currentState != PlayerState.Default) return;
+        if (currentState != PlayerState.Default || IsKnockbackActive) return;
 
         int idx = Get4DirIndex(moveInput);
         if (idx != _curRunIdx)
@@ -463,6 +463,7 @@ public class PlayerCore : CreatureBase, IBegin
 
     public override void TakeDamage(int damage, GameObject attacker)
     {
+        if (IsDead) return;
         base.TakeDamage(damage, attacker);
         PlayerHpChanged?.Invoke(hp);
 

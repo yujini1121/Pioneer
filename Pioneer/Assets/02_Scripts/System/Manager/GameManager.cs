@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
@@ -208,6 +208,7 @@ public class GameManager : MonoBehaviour, IBegin
 
             UtilityFunctions.Log($"밤이 되었습니다. (Day {currentDay})");
             IsDaytime = false;
+            InGameUI.instance?.ShowActionFeedback("밤이 찾아왔습니다. 배를 지키세요.", 1);
             OnNightStart();
         }
         else

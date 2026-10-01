@@ -26,8 +26,9 @@ public class MinionNest : EnemyBase
         StartCoroutine(SpawnMinionRoutine());
     }
 
-    void OnDisable()
+    protected override void OnDisable()
     {
+        base.OnDisable();
         StopAllCoroutines();
     }
 

@@ -122,9 +122,6 @@ public class MinionAI : EnemyBase, IBegin
 
         if (attacker != null && !IsDead)
         {
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
-
             revengeTarget = attacker;
         }
     }

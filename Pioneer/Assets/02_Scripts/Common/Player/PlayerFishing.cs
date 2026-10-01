@@ -124,6 +124,8 @@ public class PlayerFishing : MonoBehaviour
                 {
                     UtilityFunctions.Log("낚시 돌발 이벤트에 실패했습니다.");
                     // 낚시 이벤트 실패 사운드 재생
+                    AudioManager.instance?.PlaySfx(AudioManager.SFX.RemoveItem);
+                    InGameUI.instance?.ShowActionFeedback("놓쳤습니다. Q를 길게 눌러 다시 낚시하세요.");
                     PlayerController controller = GetComponent<PlayerController>();
                     if (controller != null) controller.CancelFishing();
                     else StopFishingLoop();
@@ -179,6 +181,9 @@ public class PlayerFishing : MonoBehaviour
         SItemTypeSO caughtItem = GetItem();
         if (caughtItem == null) return;
 
+        AudioManager.instance?.PlaySfx(caughtItem == treasureItem ? AudioManager.SFX.OpenBox : AudioManager.SFX.GetFishing);
+        if (caughtItem == treasureItem) InGameUI.instance?.ShowActionFeedback("보물상자를 낚았습니다!");
+        else if (isDoubleBonus) InGameUI.instance?.ShowActionFeedback("타이밍 성공! 두 배로 획득했습니다.");
         int count = isDoubleBonus ? 2 : 1;
         SItemStack itemStack = new SItemStack(caughtItem.id, count);
 
@@ -239,6 +244,7 @@ public class PlayerFishing : MonoBehaviour
                 {
                     SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
                     InventoryManager.Instance.Add(waterBloombonusItemStack);
+                    InGameUI.instance?.ShowActionFeedback("녹조 보너스! 추가 자원을 획득했습니다.");
                 }
             }
 

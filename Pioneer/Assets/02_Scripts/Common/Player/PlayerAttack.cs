@@ -49,7 +49,8 @@ public class PlayerAttack : MonoBehaviour, IBegin
             return;
 
         hitTargets.Add(target);
-        target.TakeDamage(damage, gameObject);
+        target.TakeDamage(damage, playerController != null ? playerController.gameObject : gameObject);
+        if (damage > 0) AudioManager.instance?.PlaySfx(AudioManager.SFX.Hit);
         UtilityFunctions.Log($"damage : {damage}, this.gameObject : {gameObject}");
 
         if (InventoryManager.Instance != null)

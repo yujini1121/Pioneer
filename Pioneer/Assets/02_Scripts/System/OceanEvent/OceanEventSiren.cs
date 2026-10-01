@@ -101,6 +101,7 @@ public class OceanEventSiren : OceanEventBase
     {
         if (target == null || !target.isActiveAndEnabled || target.IsDead || target.isCharmed) yield break;
         target.isCharmed = true;
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.LaughSaren);
 
         CreateDebuffEffect(target);
         CreateAppearEffect(target);

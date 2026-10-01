@@ -448,6 +448,9 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         if (zombieAI == null)
             zombieAI = gameObject.AddComponent<ZombieMarinerAI>();
 
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.Scream2);
+        InGameUI.instance?.ShowActionFeedback("승무원이 좀비로 변했습니다!", 2);
+
         zombieAI.marinerId = marinerId;
         zombieAI.targetLayer = LayerMask.GetMask("Mariner", "Player");
         gameObject.layer = LayerMask.NameToLayer("Enemy");

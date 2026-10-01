@@ -29,6 +29,9 @@ public static class ReleaseValidation
     private static AudioClip probeClip;
     private static MarinerAI probeMariner;
     private static Vector3 cameraBeforeResult;
+    private static Vector3 playerBeforeResult;
+    private static UnityEngine.AI.NavMeshAgent navigationProbe;
+    private static Vector3 navigationProbeStart;
 
     [Serializable] private class Report
     {
@@ -170,7 +173,8 @@ public static class ReleaseValidation
                     Require(CreatureEffect.Instance != null, "Effect pool survives Title to Main");
                     var playerAgent = PlayerCore.Instance.GetComponent<UnityEngine.AI.NavMeshAgent>();
                     Require(playerAgent != null && playerAgent.isOnNavMesh, "Player agent binds after the scene NavMesh is ready");
-                    Require(GameManager.Instance.dayDuration == 270 && GameManager.Instance.nightDuration == 90, "Resource balance applies 270 / 90 seconds");
+                    var balance = Resources.Load<GameBalanceSettings>("GameBalanceSettings");
+                    Require(balance != null && GameManager.Instance.dayDuration == balance.dayDuration && GameManager.Instance.nightDuration == balance.nightDuration, "Current RC resource balance applies to the day / night cycle");
                     Require(!GameModeState.IsInfiniteMode && GameManager.Instance.currentDay == 1, "Normal Mode starts on day one");
                     int hp = PlayerCore.Instance.hp;
                     PlayerCore.Instance.TakeDamage(1, null);
@@ -184,15 +188,28 @@ public static class ReleaseValidation
                     Require(InGameUI.instance.uiChunkStack.Select(c => c.id).Distinct().Count() == InGameUI.instance.uiChunkStack.Count, "UI stack has no duplicate IDs");
                     InGameUI.instance.UseTab();
                     Option.instance.SetActivateEscUI();
+                    CheckEscMenuLayout();
                     Option.instance.SetActivateOptionUI();
+                    var helpButton = Object.FindObjectsOfType<UnityEngine.UI.Button>(true).First(b => b.name == "Help");
+                    helpButton.onClick.Invoke();
                     break;
                 case 4:
                     Require(Time.timeScale == 0, "ESC menu pauses gameplay");
+                    var helpPanel = Get<GameObject>(Option.instance, "helpUI");
+                    Require(helpPanel != null && helpPanel.activeInHierarchy && InGameUI.instance.IsOpened(InGameUI.ID_ESC_OPTION_HELP),
+                        "ESC Help button opens the connected help panel");
+                    Require(helpPanel.GetComponentsInChildren<TMPro.TextMeshProUGUI>().Any(t => t.text.Contains("Space")), "Help includes the actual fishing controls");
+                    helpPanel.GetComponentsInChildren<UnityEngine.UI.Button>().First(b => b.name == "CloseButton").onClick.Invoke();
+                    InGameUI.instance.ShowActionFeedback("Important probe", 2);
+                    InGameUI.instance.ShowActionFeedback("Ordinary probe", 0);
+                    Require(Get<TMPro.TextMeshProUGUI>(InGameUI.instance, "actionFeedback").text == "Important probe", "Ordinary outcome cannot overwrite an important event notice");
                     Option.instance.SetDeactivateOptionUI();
                     Option.instance.SetDeactivateEscUI();
                     break;
                 case 5:
                     Require(Time.timeScale == 1, "Unscaled menu close resumes gameplay");
+                    Require(!Get<GameObject>(Option.instance, "helpUI").activeSelf, "Help close completes while paused");
+                    Require(!Get<TMPro.TextMeshProUGUI>(InGameUI.instance, "actionFeedback").raycastTarget, "Outcome feedback never intercepts gameplay input");
                     CheckAudioAdmission();
                     AudioManager.instance.FadeOutForGameResult(0.1f);
                     Time.timeScale = 0;
@@ -215,11 +232,17 @@ public static class ReleaseValidation
                 case 8:
                     if (!Object.FindObjectsOfType<MinionAI>().Any(m => m.isActiveAndEnabled && !m.IsDead)) return;
                     CheckCombat();
+                    CheckKnockback();
+                    CheckCombat();
                     Call(GameManager.Instance, "SpawnMariner", 1);
                     break;
                 case 9:
                     probeMariner = Object.FindObjectOfType<MarinerAI>();
                     if (probeMariner != null && !probeMariner.isActiveAndEnabled) return;
+                    Require(navigationProbe != null && navigationProbe.isOnNavMesh
+                        && Vector3.Distance(navigationProbeStart, navigationProbe.nextPosition) > 0.03f,
+                        "Agent follows its path again across frames after knockback");
+                    Object.Destroy(navigationProbe.gameObject);
                     Require(probeMariner != null, "Mariner spawns and initializes");
                     TestOceanStart<OceanEventSiren>();
                     var siren = (OceanEventSiren)OceanEventManager.instance.currentEvent;
@@ -278,11 +301,18 @@ public static class ReleaseValidation
                     Require(!GameManager.Instance.IsGameResultActive && Time.timeScale == 1 && GameModeState.IsInfiniteMode, "Clear continues into Infinite Mode");
                     Require(!GameManager.Instance.gameOverUI.gameOverPanel.activeSelf, "Result panel hides on continue");
                     cameraBeforeResult = Camera.main.transform.position;
+                    var hitSource = new GameObject("Knockback result probe");
+                    hitSource.transform.position = PlayerCore.Instance.transform.position - Vector3.right;
+                    PlayerCore.Instance.TakeDamage(1, hitSource);
+                    Object.Destroy(hitSource);
+                    playerBeforeResult = PlayerCore.Instance.transform.position;
                     GameManager.Instance.TriggerGameOver();
                     break;
                 case 17:
                     if (!GameManager.Instance.gameOverUI.gameOverPanel.activeInHierarchy) return;
                     Require(Time.timeScale == 0, "Game Over presentation finishes while paused");
+                    Require(!PlayerCore.Instance.IsKnockbackActive && Vector3.Distance(playerBeforeResult, PlayerCore.Instance.transform.position) < 0.02f,
+                        "Game Over cancels knockback without moving the player");
                     Require(Vector3.Distance(cameraBeforeResult, Camera.main.transform.position) > 0.5f, "Result camera zoom survives Cinemachine LateUpdate");
                     Call(GameManager.Instance.gameOverUI, "RestartGame");
                     break;
@@ -311,6 +341,27 @@ public static class ReleaseValidation
         }
     }
 
+    private static void CheckEscMenuLayout()
+    {
+        Canvas.ForceUpdateCanvases();
+        var menu = Get<GameObject>(Option.instance, "escUI");
+        var buttons = menu.GetComponentsInChildren<UnityEngine.UI.Button>();
+        string[] names = { "Continue", "Option", "Help", "Exit" };
+        Require(buttons.Length == 4 && names.All(name => buttons.Count(b => b.name == name) == 1),
+            "ESC menu contains Continue, Settings, Help and Exit as four separate buttons");
+        var corners = new Vector3[4];
+        float previousBottom = float.PositiveInfinity;
+        for (int i = 0; i < names.Length; i++)
+        {
+            var button = buttons.First(b => b.name == names[i]);
+            ((RectTransform)button.transform).GetWorldCorners(corners);
+            float top = corners.Max(c => c.y);
+            float bottom = corners.Min(c => c.y);
+            Require(top > bottom && top < previousBottom, "ESC button has its own vertical row: " + names[i]);
+            previousBottom = bottom;
+        }
+    }
+
     private static void CheckAudioAdmission()
     {
         AudioManager audio = AudioManager.instance;
@@ -329,7 +380,34 @@ public static class ReleaseValidation
         }
         audio.PlaySfx(AudioManager.SFX.GameOver);
         Require(Get<AudioManager.SFX[]>(audio, "channelSfx").Contains(AudioManager.SFX.GameOver), "Important SFX can replace ambient channel under saturation");
-        Require(sources.All(s => s.volume <= audio.sfxVolume * 0.5f), "Crowded SFX mix has headroom");
+        int[] priorities = Get<int[]>(audio, "channelPriorities");
+        Require(sources.Where((s, i) => priorities[i] <= 1).All(s => s.volume <= audio.sfxVolume * 0.5f), "Crowded ordinary SFX mix has headroom");
+        foreach (AudioSource source in sources) source.Stop();
+        var times = Get<Dictionary<AudioManager.SFX, float>>(audio, "lastSfxTimes");
+        times.Clear();
+        var probeSounds = new[] { AudioManager.SFX.BeforeAttack_Minion, AudioManager.SFX.AfterAttack_Minion,
+            AudioManager.SFX.BeforeAttack_Crawler, AudioManager.SFX.AfterAttack_Crawler,
+            AudioManager.SFX.BalistaAttack, AudioManager.SFX.ActivatedSpiketrap,
+            AudioManager.SFX.HeavyRain, AudioManager.SFX.Hurricane, AudioManager.SFX.Die, AudioManager.SFX.Hit_Object };
+        foreach (var sound in probeSounds) clips[sound] = probeClip;
+        for (int repeat = 0; repeat < 30; repeat++)
+            foreach (var sound in probeSounds) { times.Clear(); audio.PlaySfx(sound); }
+        Require(sources.Count(s => s.isPlaying) <= 8, "Mixed crowd / trap / environment requests respect the global budget");
+        var channelIds = Get<AudioManager.SFX[]>(audio, "channelSfx");
+        Require(sources.Where((s, i) => s.isPlaying && probeSounds.Take(4).Contains(channelIds[i])).Count() <= 3,
+            "Different ordinary enemy attacks share a concurrency limit");
+        clips[AudioManager.SFX.Sanity29Down] = probeClip;
+        times.Clear();
+        audio.PlaySfx(AudioManager.SFX.Sanity29Down);
+        audio.PlaySfx(AudioManager.SFX.Thunder);
+        audio.PlaySfx(AudioManager.SFX.Hit);
+        audio.PlaySfx(AudioManager.SFX.Click);
+        Require(sources.Where((s, i) => s.isPlaying && channelIds[i] == AudioManager.SFX.Sanity29Down).Any(),
+            "Player danger warning survives mixed SFX saturation");
+        Require(sources.Where((s, i) => s.isPlaying && channelIds[i] == AudioManager.SFX.Thunder).Any(), "Event warning survives mixed SFX saturation");
+        Require(sources.Where((s, i) => s.isPlaying && channelIds[i] == AudioManager.SFX.Hit).Any(), "Attack contact survives mixed SFX saturation");
+        Require(sources.Where((s, i) => s.isPlaying && channelIds[i] == AudioManager.SFX.Click).Any(), "UI confirmation survives mixed SFX saturation");
+        Require(sources.Count(s => s.isPlaying) <= 8, "Priority replacement does not grow the global budget");
     }
 
     private static void CheckInventoryAndCraft()
@@ -405,6 +483,130 @@ public static class ReleaseValidation
         Require(target.hp == before - 1, "Disabled attack window cannot deal damage");
     }
 
+    private static void StepKnockback(CreatureBase creature, float dt)
+    {
+        typeof(CreatureBase).GetMethod("TickHitKnockback", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(creature, new object[] { dt });
+    }
+
+    private static void CheckKnockback()
+    {
+        var player = PlayerCore.Instance;
+        var playerAgent = player.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        var target = Object.FindObjectsOfType<MinionAI>().First(m => m.isActiveAndEnabled && !m.IsDead);
+        var agent = target.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        var source = new GameObject("Knockback direction probe");
+        Vector3 oldPlayerPosition = player.transform.position;
+        Vector3 oldTargetPosition = target.transform.position;
+        int oldPlayerHp = player.hp;
+        int oldTargetHp = target.hp;
+        bool oldStopped = agent.isStopped;
+        bool oldPlayerStopped = playerAgent.isStopped;
+        try
+        {
+            Require(UnityEngine.AI.NavMesh.SamplePosition(oldPlayerPosition - Vector3.up * playerAgent.baseOffset, out var center, 0.5f, playerAgent.areaMask), "Knockback test has a navigable deck");
+            var body = player.GetComponent<Rigidbody>();
+            source.transform.position = body.position - Vector3.right;
+            Vector3 before = body.position;
+            player.TakeDamage(1, source);
+            Require(player.IsKnockbackActive, "Player damage starts a short knockback");
+            StepKnockback(player, 0f);
+            Require(Vector3.Distance(before, body.position) < 0.001f, "Paused knockback does not move");
+            StepKnockback(player, 0.12f);
+            Require(!player.IsKnockbackActive && Vector3.Distance(before, body.position) > 0.02f
+                && Vector3.Distance(before, body.position) <= 0.19f, "Player knockback is short and finishes: from=" + before + " to=" + player.transform.position + " body=" + player.GetComponent<Rigidbody>().position + " agent=" + playerAgent.nextPosition + " baseOffset=" + playerAgent.baseOffset + " active=" + player.IsKnockbackActive);
+            player.Move(Vector3.right);
+            Require(player.GetComponent<Rigidbody>().velocity.x > 0 && playerAgent.isStopped == oldPlayerStopped,
+                "Player movement resumes and agent stop ownership is preserved");
+            player.StopHorizontalMovement();
+            player.TakeDamage(1, null);
+            Require(!player.IsKnockbackActive, "Environmental damage has no invented knockback direction");
+
+            agent.isStopped = true;
+            source.transform.position = target.transform.position - Vector3.right;
+            target.hp = 100;
+            before = target.transform.position;
+            for (int i = 0; i < 20; i++) target.TakeDamage(1, source);
+            StepKnockback(target, 0.12f);
+            Require(target.hp == 80 && !target.IsKnockbackActive && Vector3.Distance(before, target.transform.position) > 0.02f && Vector3.Distance(before, target.transform.position) <= 0.29f,
+                "Repeated hits replace one knockback and preserve every damage application: hp=" + target.hp + " from=" + before + " to=" + target.transform.position + " active=" + target.IsKnockbackActive);
+            Require(agent.isOnNavMesh && agent.isStopped && agent.updatePosition, "Enemy knockback preserves the agent and attack stop state");
+            var stun = target.GetComponent<StunHandler>() ?? target.gameObject.AddComponent<StunHandler>();
+            stun.ApplyStun(2f);
+            target.TakeDamage(1, source);
+            StepKnockback(target, 0.12f);
+            Require(stun.IsStunned && agent.isStopped, "Knockback does not clear an existing stun");
+            stun.ClearStun();
+            Require(!agent.isStopped, "Stun still releases movement after knockback");
+            agent.SetDestination(center.position);
+            Require(agent.isOnNavMesh && agent.enabled && agent.updatePosition, "Enemy can navigate again after knockback");
+
+            agent.Warp(center.position + Vector3.up * agent.baseOffset);
+            if (agent.Raycast(center.position + Vector3.right * 100f, out var edge))
+            {
+                agent.Warp(edge.position - Vector3.right * 0.03f + Vector3.up * agent.baseOffset);
+                // Let the agent settle onto its surface after the test-only warp.
+                agent.Move(Vector3.zero);
+                before = agent.nextPosition;
+                source.transform.position = before - Vector3.right;
+                target.TakeDamage(1, source);
+                StepKnockback(target, 0.12f);
+                Require(agent.isOnNavMesh && !UnityEngine.AI.NavMesh.Raycast(before, agent.nextPosition, out _, agent.areaMask)
+                    && Vector3.Distance(before, agent.nextPosition) <= 0.29f, "Deck boundary blocks knockback without crossing water");
+            }
+            else throw new Exception("Could not find deck boundary for knockback check");
+            target.TakeDamage(1, source);
+            target.IsDead = true;
+            before = target.transform.position;
+            StepKnockback(target, 0.12f);
+            Require(!target.IsKnockbackActive && Vector3.Distance(before, target.transform.position) < 0.001f,
+                "Death cancels an in-flight knockback");
+            target.IsDead = false;
+            agent.Warp(center.position + Vector3.up * agent.baseOffset);
+            var airborne = target.GetComponent<WindAirborne>() ?? target.gameObject.AddComponent<WindAirborne>();
+            airborne.ApplyAirborne(0.1f, 0.1f, Vector3.right, 0f);
+            target.TakeDamage(1, source);
+            Require(!target.IsKnockbackActive, "Wind airborne movement owns position during a hit");
+            airborne.CancelAirborne();
+            var deathProbe = new GameObject("Lethal knockback probe");
+            deathProbe.transform.position = center.position;
+            deathProbe.AddComponent<UnityEngine.AI.NavMeshAgent>();
+            var creature = deathProbe.AddComponent<CreatureBase>();
+            creature.hp = 2;
+            creature.TakeDamage(1, source);
+            creature.TakeDamage(1, source);
+            before = creature.transform.position;
+            StepKnockback(creature, 0.12f);
+            Require(creature.IsDead && !creature.IsKnockbackActive && creature.transform.position == before,
+                "Lethal damage ends knockback before deferred destruction");
+            target.TakeDamage(1, source);
+            target.enabled = false;
+            Require(!target.IsKnockbackActive, "Disabling an enemy clears knockback state");
+            target.enabled = true;
+            var walker = new GameObject("Post-knockback navigation probe");
+            walker.transform.position = center.position;
+            navigationProbe = walker.AddComponent<UnityEngine.AI.NavMeshAgent>();
+            navigationProbe.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.NoObstacleAvoidance;
+            navigationProbe.speed = 1f;
+            var walkerCreature = walker.AddComponent<CreatureBase>();
+            walkerCreature.hp = 10;
+            walkerCreature.TakeDamage(1, source);
+            StepKnockback(walkerCreature, 0.12f);
+            navigationProbeStart = navigationProbe.nextPosition;
+            navigationProbe.SetDestination(center.position + Vector3.forward * 0.5f);
+        }
+        finally
+        {
+            Object.Destroy(source);
+            player.hp = oldPlayerHp;
+            playerAgent.Warp(oldPlayerPosition);
+            player.StopHorizontalMovement();
+            target.hp = oldTargetHp;
+            target.IsDead = false;
+            agent.Warp(oldTargetPosition);
+            agent.isStopped = oldStopped;
+        }
+    }
+
     private static void TestOceanStart<T>() where T : OceanEventBase
     {
         var manager = OceanEventManager.instance;
@@ -468,14 +670,19 @@ public static class ReleaseValidation
     }
 
     [MenuItem("Tools/Pioneer/Release validation/Build Windows candidate")]
-    public static void BuildWindows()
+    public static void BuildWindows() => BuildWindowsAt("Builds/ReleaseCandidate");
+
+    [MenuItem("Tools/Pioneer/Release validation/Build Final Polish")]
+    public static void BuildFinalPolish() => BuildWindowsAt("Builds/FinalPolish");
+
+    private static void BuildWindowsAt(string outputDirectory)
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
-        Directory.CreateDirectory("Builds/ReleaseCandidate");
+        Directory.CreateDirectory(outputDirectory);
         BuildReport build = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {
             scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
-            locationPathName = "Builds/ReleaseCandidate/Pioneer.exe",
+            locationPathName = outputDirectory + "/Pioneer.exe",
             target = BuildTarget.StandaloneWindows64,
             options = BuildOptions.None
         });

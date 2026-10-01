@@ -1,4 +1,6 @@
 ﻿using System;
+using DG.Tweening;
+using TMPro;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -53,6 +55,50 @@ public class InGameUI : MonoBehaviour, IBegin
     public List<InGameUiChunk> uiChunkStack = new List<InGameUiChunk>();
     private List<GameObject> mainCraftSelectUi;
     private readonly Dictionary<int, InGameUiChunk> closingChunks = new Dictionary<int, InGameUiChunk>();
+
+    private TextMeshProUGUI actionFeedback;
+    private Sequence actionFeedbackTween;
+    private int actionFeedbackPriority;
+    private float actionFeedbackUntil;
+
+    // Brief outcomes use the existing HUD font and never capture gameplay input.
+    public void ShowActionFeedback(string message, int priority = 0)
+    {
+        if (!isActiveAndEnabled || string.IsNullOrEmpty(message)
+            || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)) return;
+        if (Time.unscaledTime < actionFeedbackUntil && priority < actionFeedbackPriority) return;
+        if (actionFeedback == null)
+        {
+            var template = OceanEventManager.instance != null ? OceanEventManager.instance.currentEventName : null;
+            if (template == null || template.canvas == null) return;
+            var notice = new GameObject("ActionFeedback", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            notice.transform.SetParent(template.canvas.rootCanvas.transform, false);
+            actionFeedback = notice.GetComponent<TextMeshProUGUI>();
+            actionFeedback.font = template.font;
+            actionFeedback.fontSharedMaterial = template.fontSharedMaterial;
+            actionFeedback.fontSize = 28f;
+            actionFeedback.enableAutoSizing = true;
+            actionFeedback.fontSizeMin = 22f;
+            actionFeedback.fontSizeMax = 28f;
+            actionFeedback.alignment = TextAlignmentOptions.Center;
+            actionFeedback.color = new Color(1f, 0.94f, 0.8f);
+            actionFeedback.raycastTarget = false;
+            var rect = actionFeedback.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -125f);
+            rect.sizeDelta = new Vector2(760f, 72f);
+        }
+        actionFeedbackTween?.Kill();
+        actionFeedback.text = message;
+        actionFeedback.alpha = 0f;
+        actionFeedbackPriority = priority;
+        actionFeedbackUntil = Time.unscaledTime + 2.8f;
+        actionFeedbackTween = DOTween.Sequence().SetUpdate(true).SetLink(actionFeedback.gameObject, LinkBehaviour.KillOnDisable)
+            .Append(actionFeedback.DOFade(1f, 0.15f))
+            .AppendInterval(2.2f)
+            .Append(actionFeedback.DOFade(0f, 0.45f));
+    }
 
     float denyUiEndTime = 0.0f;
     float denyUiLifeTime = 2.0f;

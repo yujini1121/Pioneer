@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -124,6 +124,40 @@ public class AudioManager : MonoBehaviour, IBegin
     private int[] channelPriorities;
     private float[] channelStartTimes;
     private float sfxFadeScale = 1f;
+    private const int GlobalSfxBudget = 8;
+    // Runtime categories only; serialized SFX enum values are unchanged.
+    private enum SfxGroup { General, PlayerAlert, PlayerAttack, EnemyAttack, Trap, UI, Environment, Event, Interaction }
+
+    private static SfxGroup GetSfxGroup(SFX sfx)
+    {
+        switch (sfx)
+        {
+            case SFX.Sanity29Down: return SfxGroup.PlayerAlert;
+            case SFX.SamshSound: case SFX.Punch1_Player: case SFX.Punch3_Player:
+            case SFX.Hit: case SFX.Hit2: return SfxGroup.PlayerAttack;
+            case SFX.BeforeAttack_Minion: case SFX.AfterAttack_Minion:
+            case SFX.BeforeAttack_Crawler: case SFX.AfterAttack_Crawler:
+            case SFX.BeforeAttack_Titan: case SFX.AfterAttack_Titan:
+            case SFX.BeforeAttack_BlackFog: case SFX.AfterAttack_BlackFog: return SfxGroup.EnemyAttack;
+            case SFX.BalistaAttack: case SFX.ActivatedSpiketrap: return SfxGroup.Trap;
+            case SFX.Click: case SFX.SelectQuickSlot: case SFX.RotateInstallTypeObject:
+            case SFX.RemoveItem: case SFX.ArrayItem: return SfxGroup.UI;
+            case SFX.Hurricane: case SFX.HeavyRain: return SfxGroup.Environment;
+            case SFX.GameOver: case SFX.GameStartButton: case SFX.ToNight: case SFX.To_night2:
+            case SFX.Hunger: case SFX.MeetEnemy: case SFX.meetEnemy2:
+            case SFX.Scream2: case SFX.LaughSaren: case SFX.Thunder: return SfxGroup.Event;
+            case SFX.SuccessCrafting: case SFX.SuccessCrafting2: case SFX.GreatSuccessCrafting:
+            case SFX.GreatSuccessCrafting2: case SFX.InstallObject: case SFX.FortifyObject:
+            case SFX.GetFishing: case SFX.OpenBox: case SFX.LevelUp: return SfxGroup.Interaction;
+            default: return SfxGroup.General;
+        }
+    }
+
+    private static int GetGroupLimit(SfxGroup group)
+    {
+        if (group == SfxGroup.PlayerAlert) return 1;
+        return group == SfxGroup.PlayerAttack || group == SfxGroup.EnemyAttack ? 3 : 2;
+    }
 
     void Awake()
     {
@@ -174,8 +208,13 @@ public class AudioManager : MonoBehaviour, IBegin
     {
         if (sfxPlayers == null) return;
         int playing = 0;
-        foreach (AudioSource source in sfxPlayers)
-            if (source != null && source.isPlaying) playing++;
+        bool important = false;
+        for (int i = 0; i < sfxPlayers.Length; i++)
+            if (sfxPlayers[i] != null && sfxPlayers[i].isPlaying)
+            {
+                playing++;
+                important |= channelPriorities[i] >= 3;
+            }
 
         // Keep a little headroom when a crowd attacks, without changing the mixer preference.
         float gain = 1f / Mathf.Sqrt(Mathf.Max(1f, playing / 4f));
@@ -184,7 +223,9 @@ public class AudioManager : MonoBehaviour, IBegin
             if (sfxPlayers[i] == null) continue;
             float volume = hasRuntimeVolumesBeforeFade && runtimeSfxVolumesBeforeFade != null
                 ? runtimeSfxVolumesBeforeFade[i] : sfxVolume;
-            sfxPlayers[i].volume = volume * sfxFadeScale * gain;
+            float channelGain = channelPriorities[i] >= 3 ? 1f : gain;
+            if (important && channelPriorities[i] <= 1) channelGain *= 0.65f;
+            sfxPlayers[i].volume = volume * sfxFadeScale * channelGain;
         }
     }
 
@@ -425,6 +466,11 @@ public class AudioManager : MonoBehaviour, IBegin
         if (lastSfxTimes.TryGetValue(sfx, out float lastTime) && now - lastTime < cooldown)
             return;
 
+        SfxGroup group = GetSfxGroup(sfx);
+        int playing = 0;
+        int groupCount = 0;
+        int groupReplace = -1;
+        int sameReplace = -1;
         int concurrent = 0;
         int free = -1;
         int replace = -1;
@@ -438,15 +484,34 @@ public class AudioManager : MonoBehaviour, IBegin
                 if (free < 0) free = loopIndex;
                 continue;
             }
-            if (channelSfx[loopIndex] == sfx) concurrent++;
+            playing++;
+            if (channelSfx[loopIndex] == sfx)
+            {
+                concurrent++;
+                if (sameReplace < 0 || channelStartTimes[loopIndex] < channelStartTimes[sameReplace]) sameReplace = loopIndex;
+            }
+            if (GetSfxGroup(channelSfx[loopIndex]) == group)
+            {
+                groupCount++;
+                if (channelPriorities[loopIndex] <= priority && (groupReplace < 0
+                    || channelPriorities[loopIndex] < channelPriorities[groupReplace]
+                    || (channelPriorities[loopIndex] == channelPriorities[groupReplace]
+                        && channelStartTimes[loopIndex] < channelStartTimes[groupReplace]))) groupReplace = loopIndex;
+            }
             if (channelPriorities[loopIndex] < priority && (replace < 0
                 || channelPriorities[loopIndex] < channelPriorities[replace]
                 || (channelPriorities[loopIndex] == channelPriorities[replace]
                     && channelStartTimes[loopIndex] < channelStartTimes[replace])))
                 replace = loopIndex;
         }
-        if (concurrent >= maxConcurrent) return;
-        int selected = free >= 0 ? free : replace;
+        int selected;
+        if (concurrent >= maxConcurrent)
+        {
+            if (priority < 3) return;
+            selected = sameReplace;
+        }
+        else if (groupCount >= GetGroupLimit(group)) selected = groupReplace;
+        else selected = playing < GlobalSfxBudget && free >= 0 ? free : replace;
         if (selected < 0) return;
 
         sfxPlayers[selected].Stop();
@@ -479,22 +544,38 @@ public class AudioManager : MonoBehaviour, IBegin
                 cooldown = 0.025f; maxConcurrent = 3; priority = 2; break;
             case SFX.BeforeAttack_Minion:
             case SFX.BeforeAttack_Crawler:
-            case SFX.BeforeAttack_Titan:
             case SFX.AfterAttack_Minion:
             case SFX.AfterAttack_Crawler:
-            case SFX.AfterAttack_Titan:
-            case SFX.BalistaAttack:
             case SFX.ActivatedSpiketrap:
                 cooldown = 0.035f; maxConcurrent = 3; break;
-            case SFX.GameOver:
+            case SFX.BeforeAttack_Titan:
+            case SFX.AfterAttack_Titan:
+            case SFX.BalistaAttack:
+                cooldown = 0.06f; maxConcurrent = 2; priority = 2; break;
             case SFX.GameStartButton:
             case SFX.LevelUp:
             case SFX.ToNight:
             case SFX.To_night2:
             case SFX.MeetEnemy:
             case SFX.meetEnemy2:
-            case SFX.Sanity29Down:
                 cooldown = 0.12f; maxConcurrent = 1; priority = 3; break;
+            case SFX.GameOver:
+            case SFX.Sanity29Down:
+                cooldown = 0.08f; maxConcurrent = 1; priority = 4; break;
+            case SFX.Scream2:
+            case SFX.LaughSaren:
+            case SFX.Thunder:
+            case SFX.Hunger:
+                cooldown = 0.15f; maxConcurrent = 1; priority = 3; break;
+            case SFX.SuccessCrafting:
+            case SFX.SuccessCrafting2:
+            case SFX.GreatSuccessCrafting:
+            case SFX.GreatSuccessCrafting2:
+            case SFX.InstallObject:
+            case SFX.FortifyObject:
+            case SFX.GetFishing:
+            case SFX.OpenBox:
+                cooldown = 0.06f; maxConcurrent = 1; priority = 2; break;
             case SFX.Hurricane:
             case SFX.HeavyRain:
                 cooldown = 0.25f; maxConcurrent = 1; priority = 0; break;

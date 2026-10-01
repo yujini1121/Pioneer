@@ -40,6 +40,13 @@ public class EnemyBase : CreatureBase, IBegin
     protected int _curRunIdx = -1;
     protected int _curAttackIdx = -1;
 
+    public override void WhenDestroy()
+    {
+        if (CreatureEffect.Instance != null)
+            CreatureEffect.Instance.PlayEffect(CreatureEffect.Instance.GetEffect(7), transform.position);
+        base.WhenDestroy();
+    }
+
     /// <summary>
     /// 기본 속성 값을 설정합니다.
     /// </summary>

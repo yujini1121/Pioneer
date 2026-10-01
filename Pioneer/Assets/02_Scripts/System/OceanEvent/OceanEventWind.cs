@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -121,6 +121,7 @@ public class OceanEventWind : OceanEventBase
         moveDirection.Normalize();
 
         Quaternion rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.Hurricane);
         GameObject windObject = GameObject.Instantiate(windEffectPrefab, spawnPosition, rotation);
         activeWinds.RemoveAll(wind => wind == null);
         activeWinds.Add(windObject);

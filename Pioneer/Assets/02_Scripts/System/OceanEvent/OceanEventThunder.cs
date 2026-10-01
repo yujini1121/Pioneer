@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -174,6 +174,7 @@ public class OceanEventThunder : OceanEventBase
                 strikeEffects.Add(GameObject.Instantiate(thunderEffectPrefab, strikePosition, Quaternion.identity));
             }
 
+            AudioManager.instance?.PlaySfx(AudioManager.SFX.Thunder);
             ApplyThunderDamage(strikePosition, targetDeck);
 
             if (targetDeck != null)

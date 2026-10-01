@@ -153,6 +153,12 @@ public class OceanEventManager : MonoBehaviour
         SetCurrentEventName(currentEvent.EventName, true);
 
         currentEvent.EventRun();
+        string hint = currentEvent is OceanEventSiren ? "세이렌 — 매혹된 승무원을 세 번 클릭해 깨우세요."
+            : currentEvent is OceanEventThunder ? "뇌우 — 경고가 표시된 갑판에서 벗어나세요."
+            : currentEvent is OceanEventWind ? "돌풍 — 다가오는 바람을 피하세요."
+            : currentEvent is OceanEventWaterBloom ? "녹조 — 낚시에서 추가 자원을 얻을 수 있습니다."
+            : currentEvent is OceanEventFog ? "안개 — 주변의 위협을 살피세요." : null;
+        if (hint != null) InGameUI.instance?.ShowActionFeedback(hint, 1);
     }
 
 #region
