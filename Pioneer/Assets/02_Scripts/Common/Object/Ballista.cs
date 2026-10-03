@@ -16,7 +16,7 @@ public class Ballista : StructureBase, IBegin
     [SerializeField] private float attackRange = 8f;
     [SerializeField] private float attackCooldown = 2f;
     [SerializeField] private float attackSpeed = 4f;
-    [SerializeField] private Vector3 boltHalfSize = new Vector3(0.25f, 0.25f, 0.5f);
+    [SerializeField] private Vector3 boltHalfSize = new Vector3(0.01791416f, 0.01791417f, 0.5611568f);
     [SerializeField] private Transform gunnerPos;
     [SerializeField] private Transform boltPool;
 
@@ -30,7 +30,7 @@ public class Ballista : StructureBase, IBegin
     private GameObject gunner;
     private PlayerController gunnerController;
     private Rigidbody gunnerRb;
-    private float centerVecY;
+    private Collider bodyCollider;
     private int poolIndex = 0;
     private float curCooldown = 0f;
     private bool isDestroyed = false;
@@ -46,8 +46,7 @@ public class Ballista : StructureBase, IBegin
 
     private void Start()
     {
-        var sc = GetComponent<SphereCollider>();
-        centerVecY = sc ? transform.TransformPoint(sc.center).y : transform.position.y;
+        bodyCollider = GetComponent<Collider>();
 
         bolts.Clear();
         if (boltPool != null)
@@ -68,8 +67,7 @@ public class Ballista : StructureBase, IBegin
             return;
         }
 
-        Vector3 center = transform.position;
-        center.y = centerVecY;
+        Vector3 center = bodyCollider ? bodyCollider.bounds.center : transform.position;
 
         colliders = Physics.OverlapSphere(center, attackRange, enemyLayer, QueryTriggerInteraction.Ignore);
         enemyDetect = colliders != null && colliders.Length > 0;
