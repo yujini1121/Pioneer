@@ -16,7 +16,7 @@ public class Ballista : StructureBase, IBegin
     [SerializeField] private float attackRange = 8f;
     [SerializeField] private float attackCooldown = 2f;
     [SerializeField] private float attackSpeed = 4f;
-    [SerializeField] private Vector3 boltHalfSize = new Vector3(0.5f, 0.5f, 1f);
+    [SerializeField] private Vector3 boltHalfSize = new Vector3(0.25f, 0.25f, 0.5f);
     [SerializeField] private Transform gunnerPos;
     [SerializeField] private Transform boltPool;
 
@@ -47,7 +47,7 @@ public class Ballista : StructureBase, IBegin
     private void Start()
     {
         var sc = GetComponent<SphereCollider>();
-        centerVecY = sc ? sc.center.y : transform.position.y;
+        centerVecY = sc ? transform.TransformPoint(sc.center).y : transform.position.y;
 
         bolts.Clear();
         if (boltPool != null)

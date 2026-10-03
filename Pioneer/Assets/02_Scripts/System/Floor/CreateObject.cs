@@ -90,6 +90,8 @@ public class CreateObject : MonoBehaviour, IBegin
     private GameObject _evalDummy;
 
     private SItemStack[] cost;
+    private readonly Dictionary<int, int> requiredPlacementCost = new Dictionary<int, int>();
+    private MastSystem mastSystem;
     private int installSelectionIndex = -1;
     private bool deckSelectionConsumed;
 
@@ -126,25 +128,39 @@ public class CreateObject : MonoBehaviour, IBegin
             && (_activeInstallableSO == null || selected.id == _activeInstallableSO.id);
     }
 
-    private bool HasPlacementCost()
+    private bool CachePlacementCost()
     {
-        if (InventoryManager.Instance == null || cost == null || cost.Length == 0) return false;
-        Dictionary<int, int> required = new Dictionary<int, int>();
+        requiredPlacementCost.Clear();
+        if (cost == null || cost.Length == 0) return false;
         foreach (SItemStack item in cost)
         {
             if (SItemStack.IsEmpty(item) || item.amount <= 0) return false;
-            required.TryGetValue(item.id, out int amount);
-            required[item.id] = amount + item.amount;
+            requiredPlacementCost.TryGetValue(item.id, out int amount);
+            requiredPlacementCost[item.id] = amount + item.amount;
         }
-        foreach (var item in required)
+        return true;
+    }
+
+    private bool HasPlacementCost()
+    {
+        if (InventoryManager.Instance == null || cost == null || cost.Length == 0
+            || requiredPlacementCost.Count == 0) return false;
+        foreach (var item in requiredPlacementCost)
             if (InventoryManager.Instance.Get(item.Key) < item.Value) return false;
         return true;
+    }
+
+    private MastSystem GetMastSystem()
+    {
+        if (mastSystem == null)
+            mastSystem = FindObjectOfType<MastSystem>();
+        return mastSystem;
     }
 
     private bool HasDeckCapacity()
     {
         if (creationType != CreationType.Platform || MastManager.Instance == null) return true;
-        MastSystem mast = FindObjectOfType<MastSystem>();
+        MastSystem mast = GetMastSystem();
         int maximum = mast != null ? mast.GetMaxDeckCount() : 30;
         return MastManager.Instance.currentDeckCount < maximum;
     }
@@ -566,10 +582,10 @@ public class CreateObject : MonoBehaviour, IBegin
                     int maxDeckCount = 30; // 기본 최대 개수
 
                     // 마스트가 있으면 실제 최대치 사용
-                    MastSystem[] masts = FindObjectsOfType<MastSystem>();
-                    if (masts.Length > 0)
+                    MastSystem mast = GetMastSystem();
+                    if (mast != null)
                     {
-                        maxDeckCount = masts[0].GetMaxDeckCount();
+                        maxDeckCount = mast.GetMaxDeckCount();
                     }
 
                     // 최대 개수 초과 시 설치 불가
@@ -865,7 +881,7 @@ public class CreateObject : MonoBehaviour, IBegin
         cost = new SItemStack[mCost.Length];
         for (int i = 0; i < mCost.Length; i++)
             cost[i] = mCost[i] != null ? new SItemStack(mCost[i]) : null;
-        if (!HasPlacementCost())
+        if (!CachePlacementCost() || !HasPlacementCost())
         {
             ExitInstallMode();
             return;
@@ -937,6 +953,7 @@ public class CreateObject : MonoBehaviour, IBegin
         UnlockPlayerMovement();
 
         _activeInstallableSO = null;
+        requiredPlacementCost.Clear();
         installSelectionIndex = -1;
         deckSelectionConsumed = false;
 

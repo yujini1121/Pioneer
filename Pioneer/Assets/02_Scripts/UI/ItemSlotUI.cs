@@ -13,6 +13,7 @@ public class ItemSlotUI : MonoBehaviour,
 
     const float DURABILITY_FILL_SCALE = 0.9f;
     static Sprite durabilityFillSprite;
+    static Sprite itemTypeBorderSprite;
 
 
     public int index;
@@ -26,6 +27,11 @@ public class ItemSlotUI : MonoBehaviour,
     [SerializeField] private Color durabilityMidColor = new Color(1f, 0.72f, 0.24f, 0.42f);
     [SerializeField] private Color durabilityLowColor = new Color(1f, 0.22f, 0.18f, 0.48f);
     [SerializeField] private float durabilityFillInset = 3f;
+
+    [Header("Item type border")]
+    [SerializeField, Range(0f, 1f)] private float itemTypeBorderOpacity = 0.9f;
+    [SerializeField, Min(0.1f)] private float itemTypeBorderWidth = 4f;
+    private UnityEngine.UI.Image itemTypeBorder;
 
     public bool isSlot;
     public bool isRepairSlot;
@@ -62,6 +68,7 @@ public class ItemSlotUI : MonoBehaviour,
             UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : {item.id} / {item.amount}");
 
         SItemTypeSO itemType = ItemTypeManager.Instance.itemTypeSearch[item.id];
+        SetItemTypeBorder(itemType.categories);
         bool isNeedShowDuability = itemType.categories == EDataType.WeaponItem;
 
         if (ItemTypeManager.Instance.itemTypeSearch[item.id].image != null)
@@ -94,9 +101,88 @@ public class ItemSlotUI : MonoBehaviour,
         count.text = "";
         durability.text = "";
         HideDurabilityFill();
+        HideItemTypeBorder();
     }
 
     #region
+    private void SetItemTypeBorder(EDataType category)
+    {
+        // Only inventory/hotbar slots get a border; the dragged icon and previews do not.
+        Color borderColor = GetItemTypeBorderColor(category);
+        if (!isSlot || borderColor.a == 0f)
+        {
+            HideItemTypeBorder();
+            return;
+        }
+
+        if (itemTypeBorder == null)
+        {
+            GameObject borderObject = new GameObject("ItemTypeBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(UnityEngine.UI.Image));
+            borderObject.layer = gameObject.layer;
+            borderObject.transform.SetParent(transform, false);
+            borderObject.transform.SetAsFirstSibling();
+
+            RectTransform borderRect = borderObject.GetComponent<RectTransform>();
+            borderRect.anchorMin = Vector2.zero;
+            borderRect.anchorMax = Vector2.one;
+            borderRect.offsetMin = Vector2.zero;
+            borderRect.offsetMax = Vector2.zero;
+
+            itemTypeBorder = borderObject.GetComponent<UnityEngine.UI.Image>();
+            itemTypeBorder.raycastTarget = false;
+            itemTypeBorder.sprite = GetItemTypeBorderSprite();
+            itemTypeBorder.type = UnityEngine.UI.Image.Type.Sliced;
+            itemTypeBorder.fillCenter = false;
+        }
+
+        itemTypeBorder.pixelsPerUnitMultiplier = 1f / Mathf.Max(0.1f, itemTypeBorderWidth);
+        borderColor.a *= itemTypeBorderOpacity;
+        itemTypeBorder.color = borderColor;
+        itemTypeBorder.enabled = true;
+    }
+
+    private void HideItemTypeBorder()
+    {
+        if (itemTypeBorder != null)
+            itemTypeBorder.enabled = false;
+    }
+
+    private static Color GetItemTypeBorderColor(EDataType category)
+    {
+        switch (category)
+        {
+            case EDataType.CommonResource: return new Color(1f, 0.76f, 0.36f);
+            case EDataType.WeaponItem: return new Color(1f, 0.38f, 0.34f);
+            case EDataType.NormalItem: return new Color(0.78f, 0.85f, 0.96f);
+            case EDataType.ConsumeItem: return new Color(0.36f, 0.94f, 0.48f);
+            case EDataType.BuildObject: return new Color(0.32f, 0.68f, 1f);
+            case EDataType.Recipe: return new Color(0.80f, 0.43f, 1f);
+            case EDataType.Unit: return new Color(0.27f, 0.94f, 0.86f);
+            default: return Color.clear;
+        }
+    }
+
+    private static Sprite GetItemTypeBorderSprite()
+    {
+        if (itemTypeBorderSprite != null)
+            return itemTypeBorderSprite;
+
+        Texture2D texture = new Texture2D(3, 3, TextureFormat.RGBA32, false);
+        texture.hideFlags = HideFlags.HideAndDontSave;
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        Color[] pixels = new Color[9];
+        for (int i = 0; i < pixels.Length; ++i)
+            pixels[i] = Color.white;
+        texture.SetPixels(pixels);
+        texture.Apply();
+
+        itemTypeBorderSprite = Sprite.Create(texture, new Rect(0, 0, 3, 3), new Vector2(0.5f, 0.5f),
+            100f, 0, SpriteMeshType.FullRect, Vector4.one);
+        itemTypeBorderSprite.hideFlags = HideFlags.HideAndDontSave;
+        return itemTypeBorderSprite;
+    }
+
     public void ShowDurabilityPreview(int durabilityValue)
     {
         if (durability != null)

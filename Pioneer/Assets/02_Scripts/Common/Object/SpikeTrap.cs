@@ -25,7 +25,18 @@ public class SpikeTrap : MonoBehaviour
 
     private bool spikesRaised;
     private float nextScan;
+    private Collider floor;
     private readonly Dictionary<CommonBase, float> nextHit = new Dictionary<CommonBase, float>();
+
+    private void Awake()
+    {
+        floor = GetComponent<Collider>();
+    }
+
+    private void OnEnable()
+    {
+        if (niddles != null) niddles.transform.localPosition = hidePos;
+    }
 
     private void Update()
     {
@@ -33,8 +44,7 @@ public class SpikeTrap : MonoBehaviour
             || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)) return;
         nextScan = Time.time + 0.1f;
         // The installed trap has a solid floor collider, so trigger callbacks alone never fire.
-        Collider floor = GetComponent<Collider>();
-        if (floor == null) return;
+        if (floor == null || floor.isTrigger) return;
         Bounds bounds = floor.bounds;
         Vector3 center = new Vector3(bounds.center.x, bounds.max.y + 1f, bounds.center.z);
         foreach (Collider hit in Physics.OverlapBox(center,
@@ -44,7 +54,8 @@ public class SpikeTrap : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other == null || ((1 << other.gameObject.layer) & enemyLayer) == 0
+        if (floor == null || floor.isTrigger
+            || other == null || ((1 << other.gameObject.layer) & enemyLayer) == 0
             || Time.timeScale <= 0f || niddles == null) return;
         CommonBase target = other.GetComponentInParent<CommonBase>();
         if (target == null || target.IsDead) return;

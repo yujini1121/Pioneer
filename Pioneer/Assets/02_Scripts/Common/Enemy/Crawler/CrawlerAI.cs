@@ -91,10 +91,6 @@ public class CrawlerAI : EnemyBase, IBegin
         }
 
         ApplyAnimTrigger();
-
-        Debug.DrawRay(transform.position + Vector3.up * 0.2f, lastMoveDirection, Color.cyan);
-        UtilityFunctions.Log($"lastMoveDirection={lastMoveDirection} 4Dir={PlayerCore.Get4DirIndex(lastMoveDirection)}");
-
     }
 
     // 기본 세팅
