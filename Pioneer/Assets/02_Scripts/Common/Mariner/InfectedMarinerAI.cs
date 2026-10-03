@@ -103,6 +103,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
+        if (Time.timeScale <= 0f || (GetComponent<WindAirborne>()?.IsAirborne ?? false)) return;
         if (stunHandler != null && stunHandler.IsStunned)
             return;
 
@@ -150,9 +151,10 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             yield break;
         }
 
-        secondPriorityRoutine = StartCoroutine(SecondPriorityBody());
-        yield return secondPriorityRoutine;
-        secondPriorityRoutine = null;
+        if (isSecondPriorityStarted) yield break;
+        isSecondPriorityStarted = true;
+        try { yield return SecondPriorityBody(); }
+        finally { isSecondPriorityStarted = false; }
     }
 
     /// <summary>
@@ -224,7 +226,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         {
             //Debug.Log($"감염된 승무원 {marinerId}: 개인 경계에서 가짜 파밍");
 
-            yield return StartCoroutine(MoveToMyEdgeAndFarm());
+            yield return MoveToMyEdgeAndFarm();
 
             if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused)
                 yield break;
@@ -237,8 +239,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             }
             else // 재시작 가드
             {
-                if (!(IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused))
-                    StartCoroutine(StartSecondPriorityAction());
+                // Update starts the next action after this routine finishes.
+                yield break;
             }
         }
     }
@@ -520,12 +522,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
             agent.velocity = Vector3.zero;
         }
 
-        Vector3 dir = agent != null && agent.desiredVelocity.sqrMagnitude > 0.1f
-            ? agent.desiredVelocity
-            : transform.forward;
-        dir.y = 0f;
-
-        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
+        Vector3 sideDir = personalSeaDirection;
         if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
 
         float endTime = Time.time + 10f;
@@ -533,7 +530,7 @@ public class InfectedMarinerAI : MarinerBase, IBegin
         {
             while (Time.time < endTime)
             {
-                if (!isSecondPriorityStarted) yield break;
+                if (!isSecondPriorityStarted || !HasSeaAtFishingPoint()) yield break;
                 if (IsPreNightActive || IsNightPhaseActive || isNightRoaming || isNightBehaviorStarted || isConfused) yield break;
                 yield return null;
             }

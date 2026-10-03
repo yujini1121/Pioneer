@@ -171,21 +171,28 @@ public class CrawlerAI : EnemyBase, IBegin
     {
         yield return new WaitForSeconds(AttackHitDelay);
 
+        if (IsDead || (stunHandler != null && stunHandler.IsStunned)
+            || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive))
+        {
+            isAttack = false;
+            yield break;
+        }
         Collider[] hitColliders = DetectAttackRange();
+        var damaged = new HashSet<CommonBase>();
 
         for (int i = 0; i < hitColliders.Length; i++)
         {
             GameObject currentObject = hitColliders[i].gameObject;
-            CommonBase targetBase = currentObject.GetComponent<CommonBase>();
+            CommonBase targetBase = currentObject.GetComponentInParent<CommonBase>();
 
-            if (targetBase == null) continue;
+            if (targetBase == null || !damaged.Add(targetBase)) continue;
 
             if (targetBase.IsDead)
             {
                 if (fov.visibleTargets.Count > 0)
                 {
                     SortCloseObj();
-                    currentAttackTarget = fov.visibleTargets[closeTarget].gameObject;
+                    currentAttackTarget = sortedTarget.Count > 0 ? sortedTarget[0].gameObject : null;
                 }
                 continue;
             }

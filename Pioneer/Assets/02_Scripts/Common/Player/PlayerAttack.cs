@@ -87,20 +87,20 @@ public class PlayerAttack : MonoBehaviour, IBegin
             return false;
 
         Vector3 origin = playerController.transform.position;
-        Collider[] hits = Physics.OverlapSphere(origin, Mathf.Max(range, 0.5f), enemyLayer, QueryTriggerInteraction.Ignore);
+        
+        if (!(attackCollider is BoxCollider box)) return false;
+        range = Mathf.Max(range, 0.5f);
+        Vector3 scale = transform.lossyScale;
+        Vector3 halfExtents = new Vector3(Mathf.Abs(box.size.x * scale.x),
+            Mathf.Abs(box.size.y * scale.y), range) * 0.5f;
+        Vector3 center = origin + dir.normalized * (range * 0.5f);
+        center.y = PlayerCore.Instance != null ? PlayerCore.Instance.AttackHeight : origin.y;
+        Collider[] hits = Physics.OverlapBox(center, halfExtents,
+            Quaternion.LookRotation(dir), enemyLayer, QueryTriggerInteraction.Ignore);
 
         foreach (Collider hit in hits)
         {
             if (hit == null)
-                continue;
-
-            Vector3 toTarget = hit.bounds.center - origin;
-            toTarget.y = 0f;
-
-            if (toTarget.sqrMagnitude > range * range)
-                continue;
-
-            if (Vector3.Dot(dir.normalized, toTarget.normalized) < 0.2f)
                 continue;
 
             CreatureBase target = hit.GetComponentInParent<CreatureBase>();
@@ -146,7 +146,7 @@ public class PlayerAttack : MonoBehaviour, IBegin
     public void SetAttackRange(float range)
     {
         Vector3 v = transform.localScale;
-        v.z = range;
+        v.z = range / Mathf.Max(0.001f, transform.parent != null ? Mathf.Abs(transform.parent.lossyScale.z) : 1f);
         transform.localScale = v;
     }
 

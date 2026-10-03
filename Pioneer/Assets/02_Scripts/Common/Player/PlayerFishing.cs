@@ -89,7 +89,7 @@ public class PlayerFishing : MonoBehaviour
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
 
-        while (true)
+        // One cast now resolves exactly one attempt.
         {
             // 낚시 시작
             UtilityFunctions.Log("낚시 시작");
@@ -99,7 +99,7 @@ public class PlayerFishing : MonoBehaviour
                 ParticleSystem ps = CreatureEffect.Instance.GetEffect(8);
                 CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0.3f));
             }
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(Random.Range(3f, 5f));
 
 
             /* 낚시 이벤트
@@ -118,14 +118,18 @@ public class PlayerFishing : MonoBehaviour
                 nonEventCount = 0;
 
 
-                yield return fishingEventUI.StartCoroutine(fishingEventUI.StartQTE(res => eventResult = res));
+                InGameUI.instance?.ShowActionFeedback("강한 입질! 잠시 후 표시 구간에 맞춰 Space!", 1);
+                AudioManager.instance?.PlaySfx(AudioManager.SFX.BeforeFishing);
+                yield return new WaitForSeconds(0.8f);
+                yield return fishingEventUI.StartQTE(res => eventResult = res);
 
                 if(!eventResult)
                 {
                     UtilityFunctions.Log("낚시 돌발 이벤트에 실패했습니다.");
                     // 낚시 이벤트 실패 사운드 재생
                     AudioManager.instance?.PlaySfx(AudioManager.SFX.RemoveItem);
-                    InGameUI.instance?.ShowActionFeedback("놓쳤습니다. Q를 길게 눌러 다시 낚시하세요.");
+                    InGameUI.instance?.ShowActionFeedback("놓쳤습니다. Q를 길게 눌러 다시 낚시하세요.", 1);
+                    fishingLoopCoroutine = null;
                     PlayerController controller = GetComponent<PlayerController>();
                     if (controller != null) controller.CancelFishing();
                     else StopFishingLoop();
@@ -142,6 +146,10 @@ public class PlayerFishing : MonoBehaviour
             GetItemProcess(isSuccess && eventResult);
 
             UtilityFunctions.Log("낚시 끝");
+            fishingLoopCoroutine = null;
+            PlayerController completedController = GetComponent<PlayerController>();
+            if (completedController != null) completedController.CancelFishing();
+            else StopFishingLoop();
         }
     }
 
@@ -153,18 +161,19 @@ public class PlayerFishing : MonoBehaviour
         // 1. 전체 가중치 합 계산
         for (int i = 0; i < dropItemTable.Count; i++)
         {
-            totalProbability += dropItemTable[i].dropProbability;
+            if (dropItemTable[i].itemData != null) totalProbability += Mathf.Max(0f, dropItemTable[i].dropProbability);
         }
 
         if (totalProbability <= 0)
         {
-            return dropItemTable[0].itemData;
+            return null;
         }
         // 2. 0 ~ 전체 가중치사이 랜덤 숫자 뽑기
         float randomNum = Random.Range(0f, totalProbability);
         // 3. 랜덤 숫자가 현재 아이템의 가중치 보다 작으면 당첨
         foreach (var item in dropItemTable)
         {
+            if (item.itemData == null || item.dropProbability <= 0f) continue;
             if(randomNum <= item.dropProbability)
             {
                 return item.itemData;
@@ -183,8 +192,12 @@ public class PlayerFishing : MonoBehaviour
 
         AudioManager.instance?.PlaySfx(caughtItem == treasureItem ? AudioManager.SFX.OpenBox : AudioManager.SFX.GetFishing);
         if (caughtItem == treasureItem) InGameUI.instance?.ShowActionFeedback("보물상자를 낚았습니다!");
-        else if (isDoubleBonus) InGameUI.instance?.ShowActionFeedback("타이밍 성공! 두 배로 획득했습니다.");
-        int count = isDoubleBonus ? 2 : 1;
+        else InGameUI.instance?.ShowActionFeedback(isDoubleBonus
+            ? "인양 성공! 자원과 특별 보상을 획득했습니다."
+            : "인양 완료! Q를 길게 눌러 다시 던지세요.", 1);
+        // Longer, manual casts return a small bundle; the normal material pool stays intact.
+        int count = caughtItem == treasureItem ? 1 : 2;
+        if (isDoubleBonus) TreasureBoxManager.instance?.GetSpecialBox();
         SItemStack itemStack = new SItemStack(caughtItem.id, count);
 
         if (caughtItem != null)
@@ -193,17 +206,16 @@ public class PlayerFishing : MonoBehaviour
             {
                 // TreasureBoxManager.instance.GetBox();
                 for (int i = 0; i < count; i++) TreasureBoxManager.instance.GetBox();
-                fishingExp = 4;
+                fishingExp = 10;
             }
             else
             {
                 InventoryManager.Instance.Add(itemStack);
-                fishingExp = 2;
+                fishingExp = isDoubleBonus ? 10 : 5;
             }
 
             if (PlayerStatsLevel.Instance == null) return;
             PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
-            if (isDoubleBonus) return;
             UtilityFunctions.Log($">> PlayerFishing.FishingLoop() 아이템 획득: 숫자 {caughtItem.id}, 이름 {caughtItem.typeName}, 경험치 +{fishingExp}");
 
             (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
@@ -216,7 +228,7 @@ public class PlayerFishing : MonoBehaviour
                 }
                 else
                 {
-                    InventoryManager.Instance.Add(itemStack);
+                    InventoryManager.Instance.Add(new SItemStack(caughtItem.id, 1));
                 }
                 UtilityFunctions.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
             }
@@ -243,7 +255,8 @@ public class PlayerFishing : MonoBehaviour
                 if (bonusItem != null)
                 {
                     SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
-                    InventoryManager.Instance.Add(waterBloombonusItemStack);
+                    if (bonusItem == treasureItem) TreasureBoxManager.instance?.GetBox();
+                    else InventoryManager.Instance.Add(waterBloombonusItemStack);
                     InGameUI.instance?.ShowActionFeedback("녹조 보너스! 추가 자원을 획득했습니다.");
                 }
             }

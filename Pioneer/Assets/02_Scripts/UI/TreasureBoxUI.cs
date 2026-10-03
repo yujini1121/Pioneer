@@ -13,6 +13,8 @@ public class TreasureBoxUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] TextMeshProUGUI itemCount;
 
+    private Coroutine revealRoutine;
+
     private void Awake()
     {
         instance = this;
@@ -29,11 +31,35 @@ public class TreasureBoxUI : MonoBehaviour
         UITweenHelper.PunchScale(itemImage.transform, 0.12f, 0.18f);
 
         itemName.text = itemType.typeName;
-        itemCount.text = $"x{sItemStack.amount}";
+        itemCount.text = $"x{sItemStack.amount} 획득";
+        foreach (Button button in TreasureWindow.GetComponentsInChildren<Button>(true))
+        {
+            for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+            {
+                string method = button.onClick.GetPersistentMethodName(i);
+                if (method == nameof(PressDeny)) button.gameObject.SetActive(false);
+                if (method == nameof(PressAccept))
+                {
+                    var label = button.GetComponentInChildren<TMP_Text>();
+                    if (label != null) label.text = "확인";
+                }
+            }
+        }
+        if (revealRoutine != null) StopCoroutine(revealRoutine);
+        revealRoutine = StartCoroutine(AutoDismiss());
+    }
+
+    private IEnumerator AutoDismiss()
+    {
+        yield return new WaitForSeconds(2f);
+        revealRoutine = null;
+        TreasureBoxManager.instance?.Accept();
     }
 
     public void CloseWindow()
     {
+        if (revealRoutine != null) StopCoroutine(revealRoutine);
+        revealRoutine = null;
         UITweenHelper.PlayClose(TreasureWindow, () => TreasureWindow.SetActive(false));
     }
 

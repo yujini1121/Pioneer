@@ -110,10 +110,13 @@ public class PlayerStatsLevel : MonoBehaviour
     public PlayerCore player;
 
     public List<(float attack, float durability)> combatList 
-        = new List<(float attack, float durability)> { (0f, 0f), (0.3f, 0.3f), (0.15f, -0.3f), (0.20f, -0.5f), (0.25f, -0.8f), (0.30f, -1) };
-    public List<float> craftingList = new List<float> { 0f, 0.3f, 0.10f, 0.15f, 0.20f, 0.30f };
+        = new List<(float attack, float durability)> { (0f, 0f), (0.10f, 0.1f), (0.15f, 0.3f), (0.20f, 0.5f), (0.25f, 0.8f), (0.30f, 1f) };
+    public List<float> craftingList = new List<float> { 0f, 0.05f, 0.10f, 0.15f, 0.20f, 0.30f };
     public List<(float count, float chest)> fishingList 
-        = new List<(float count, float chest)> { (0.0f, 0f), (0.3f, 0.3f), (0.1f, 0.3f), (0.12f, 0.4f), (0.15f, 0.5f) };
+        = new List<(float count, float chest)> { (0f, 0f), (0.05f, 0f), (0.07f, 0f), (0.10f, 0.30f), (0.12f, 0.40f), (0.15f, 0.50f) };
+
+    public float CombatDamageMultiplier => 1f + combatList[Mathf.Clamp(
+        growStates[GrowStatType.Combat].level, 0, combatList.Count - 1)].attack;
 
     public static event Action<GrowStatType> StatLevelUp;
      
@@ -135,6 +138,7 @@ public class PlayerStatsLevel : MonoBehaviour
         player = GetComponent<PlayerCore>();
 
         InitGrowState();
+        CombatLevelUp(GrowStatType.Combat);
     }
 
     // =============== 디버깅용 인스펙터창에서 레벨과 경험치들 보이도록 ==================
@@ -179,9 +183,9 @@ public class PlayerStatsLevel : MonoBehaviour
 
         growState.currentExp += amount;
 
-        while (growState.level < growState.maxExp.Length && growState.currentExp >= growState.maxExp[growState.level])
+        while (growState.level < growState.maxExp.Length && growState.currentExp >= growState.maxExp[Mathf.Max(0, growState.level - 1)])
         {
-            growState.currentExp -= growState.maxExp[growState.level];
+            growState.currentExp -= growState.maxExp[Mathf.Max(0, growState.level - 1)];
             growState.level++;
             UtilityFunctions.Log($"{type} 레벨업 -> {growState.level}");
 
@@ -195,6 +199,10 @@ public class PlayerStatsLevel : MonoBehaviour
             }
             // ===========================================
             StatLevelUp?.Invoke(type); // ui 업데이트 이벤튼
+            string label = type == GrowStatType.Combat ? "전투" : type == GrowStatType.Crafting ? "제작" : "낚시";
+            string benefit = type == GrowStatType.Combat ? "공격력 · 내구도 효율 증가"
+                : type == GrowStatType.Crafting ? "대성공 확률 증가" : "추가 보상 확률 증가";
+            InGameUI.instance?.ShowActionFeedback($"{label} Lv. {growState.level} — {benefit}", 2);
         }
         UtilityFunctions.Log($"{type} 스탯 경험치 {amount} 획득");
     }
@@ -207,22 +215,18 @@ public class PlayerStatsLevel : MonoBehaviour
     private void CombatLevelUp(GrowStatType type)
     {
         int combatLevel = growStates[GrowStatType.Combat].level;
-        float increaseAttackDamage = 0f;
 
         /*if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.LevelUp);*/
 
         if (combatLevel >= 0 && combatLevel < combatList.Count)
         {
-            increaseAttackDamage = combatList[combatLevel].attack;
+            player.duabilityReducePrevent = combatList[combatLevel].durability;
         }
 
-        player.duabilityReducePrevent += combatList[combatLevel].durability;
-
-        int prevDamage = (int)player.handAttackCurrentValueRaw.weaponDamage;
-
-        player.handAttackCurrentValueRaw.weaponDamage =
-            Mathf.RoundToInt(prevDamage * (1 + increaseAttackDamage)); // 레벨 업에 따른 원본 변경
+        // 레벨 업에 따른 원본 변경
+        // Damage is calculated once from the base weapon + hand damage at attack time.
+        // Repeatedly rounding the 2-point hand stat used to erase every level-up bonus.
 
 		//player.attackDamage = Mathf.RoundToInt(player.attackDamage * (1 + increaseAttackDamage));
 	}

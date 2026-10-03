@@ -45,7 +45,7 @@ public class MinionAI : EnemyBase, IBegin
         if (agent != null)
         {
             agent.speed = speed;
-            agent.stoppingDistance = 0.8f;
+            agent.stoppingDistance = 0.35f;
         }
 
         originalSpeed = speed;
@@ -131,7 +131,7 @@ public class MinionAI : EnemyBase, IBegin
         hp = 20;
         maxHp = hp;
         attackDamage = 5;
-        attackRange = 2f;
+        attackRange = 1f;
         speed = 2f;
         detectionRange = 5f;
         attackDelayTime = 2f;
@@ -188,7 +188,8 @@ public class MinionAI : EnemyBase, IBegin
 
         Vector3 direction = (currentAttackTarget.transform.position - transform.position).normalized;
         direction.y = 0;
-        transform.rotation = Quaternion.LookRotation(direction);
+        if (direction.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(direction);
 
         return currentAttackTarget != null
             && isTargetInAttackRange
@@ -244,7 +245,9 @@ public class MinionAI : EnemyBase, IBegin
     {
         yield return new WaitForSeconds(AttackHitDelay);
 
-        if (targetToAttack != null)
+        if (targetToAttack != null && !IsDead
+            && (stunHandler == null || !stunHandler.IsStunned)
+            && (GameManager.Instance == null || !GameManager.Instance.IsGameResultActive))
         {
             Collider[] targetsInAttackRange = DetectAttackRange();
             bool isTargetStillInRange = IsTargetInColliders(targetToAttack, targetsInAttackRange);

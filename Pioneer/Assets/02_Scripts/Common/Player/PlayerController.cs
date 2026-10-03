@@ -75,6 +75,14 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (Time.timeScale <= 0f) return;
+        StunHandler stun = GetComponent<StunHandler>();
+        WindAirborne wind = GetComponent<WindAirborne>();
+        if ((stun != null && stun.IsStunned) || (wind != null && wind.IsAirborne))
+        {
+            playerCore.StopHorizontalMovement();
+            return;
+        }
         isSeaInFront = CheckSea();
 
         float moveX = Input.GetAxisRaw("Horizontal");

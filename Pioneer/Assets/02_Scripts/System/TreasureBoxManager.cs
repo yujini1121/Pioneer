@@ -11,74 +11,62 @@ public class TreasureBoxManager : MonoBehaviour
     [SerializeField] RandomBox[] reward;
     List<SItemStack> rewardStack;
 
-    public void GetBox()
+    public void GetBox() => GrantReward(false);
+
+    public void GetSpecialBox() => GrantReward(true);
+
+    private void GrantReward(bool special)
     {
         UtilityFunctions.Log(">> TreasureBoxManager : 보상 받음");
-
-        SItemStack r = GetReward();
-        rewardStack.Add(r);
-
-        if (rewardStack.Count == 1)
+        SItemStack item = GetReward(special);
+        if (item == null || InventoryManager.Instance == null) return;
+        // Overflow follows the existing inventory rule: drop nearby, never discard the reward.
+        InventoryManager.Instance.Add(item.Copy());
+        if (TreasureBoxUI.instance != null)
         {
-            TreasureBoxUI.instance.ShowItem(r);
+            rewardStack.Add(item.Copy());
+            if (rewardStack.Count == 1) TreasureBoxUI.instance.ShowItem(rewardStack[0]);
         }
-
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.OpenBox);
+        if (CreatureEffect.Instance != null && PlayerCore.Instance != null)
+            CreatureEffect.Instance.PlayEffect(CreatureEffect.Instance.GetEffect(9),
+                PlayerCore.Instance.transform.position + Vector3.up * 1.5f);
     }
 
-    public SItemStack GetReward()
+    public SItemStack GetReward() => GetReward(false);
+
+    private SItemStack GetReward(bool special)
     {
-        float max = 0.0f;
-        foreach (RandomBox one in reward) max += one.weight;
-        float value = Random.Range(0, max);
-
-        for (int index = 0; index < reward.Length - 1; ++index)
+        if (reward == null || reward.Length == 0) return null;
+        float total = 0f;
+        foreach (RandomBox entry in reward)
+            if (entry != null && entry.reward != null && entry.weight > 0f
+                && (!special || entry.reward.id != 30001)) total += entry.weight;
+        if (total <= 0f) return special ? GetReward(false) : null;
+        float roll = Random.Range(0f, total);
+        SItemStack fallback = null;
+        foreach (RandomBox entry in reward)
         {
-            if (value <= reward[index].weight)
-            {
-                return reward[index].reward;
-            }
-            value -= reward[index].weight;
+            if (entry == null || entry.reward == null || entry.weight <= 0f
+                || (special && entry.reward.id == 30001)) continue;
+            fallback = entry.reward;
+            roll -= entry.weight;
+            if (roll <= 0f) return entry.reward.Copy();
         }
-        return reward[reward.Length - 1].reward;
+        return fallback?.Copy();
     }
 
+    // Both existing serialized buttons now only dismiss an already granted reward.
     public void Accept()
     {
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.OpenBox);
-
-
-        if (CreatureEffect.Instance != null)
-        {
-            ParticleSystem ps = CreatureEffect.Instance.GetEffect(9);
-            CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, 1.5f, 0f));
-        }
-
-        InventoryManager.Instance.Add(rewardStack[0]);
-
+        if (rewardStack.Count == 0) return;
         rewardStack.RemoveAt(0);
-        if (rewardStack.Count > 0)
-        {
-            TreasureBoxUI.instance.ShowItem(rewardStack[0]);
-        }
-        else
-        {
-            TreasureBoxUI.instance.CloseWindow();
-        }
+        if (TreasureBoxUI.instance == null) return;
+        if (rewardStack.Count > 0) TreasureBoxUI.instance.ShowItem(rewardStack[0]);
+        else TreasureBoxUI.instance.CloseWindow();
     }
 
-    public void Deny()
-    {
-        rewardStack.RemoveAt(0);
-        if (rewardStack.Count > 0)
-        {
-            TreasureBoxUI.instance.ShowItem(rewardStack[0]);
-        }
-        else
-        {
-            TreasureBoxUI.instance.CloseWindow();
-        }
-    }
+    public void Deny() => Accept();
 
     private void Awake()
     {

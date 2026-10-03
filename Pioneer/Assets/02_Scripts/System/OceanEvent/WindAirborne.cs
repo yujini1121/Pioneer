@@ -15,19 +15,25 @@ public class WindAirborne : MonoBehaviour
     private bool cachedAgentStopped;
     private bool hasAgentState;
     private Vector3 landingPosition;
+    private float nextAirborneTime;
+    private CreatureBase creature;
+    public bool CanBeLifted => isActiveAndEnabled && !isAirborne && Time.time >= nextAirborneTime
+        && (creature == null || !creature.IsDead)
+        && (GameManager.Instance == null || !GameManager.Instance.IsGameResultActive);
 
     public bool IsAirborne => isAirborne;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        creature = GetComponent<CreatureBase>();
         rb = GetComponent<Rigidbody>();
     }
 
     public void ApplyAirborne(float height, float duration, Vector3 windDirection, float horizontalDistance = 2f)
     {
-        if (!isActiveAndEnabled) return;
-        CancelAirborne();
+        if (!CanBeLifted || agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) return;
+        nextAirborneTime = Time.time + Mathf.Max(0.1f, duration) + 3f;
 
         airborneCoroutine = StartCoroutine(AirborneRoutine(height, duration, windDirection, horizontalDistance));
     }
@@ -46,7 +52,16 @@ public class WindAirborne : MonoBehaviour
 
         flatDirection.Normalize();
 
-        Vector3 endPosition = startPosition + flatDirection * horizontalDistance;
+        var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
+        if (!NavMesh.SamplePosition(startPosition, out NavMeshHit start, Mathf.Abs(agent.baseOffset) + 0.5f, filter))
+        {
+            isAirborne = false;
+            yield break;
+        }
+        Vector3 destination = start.position + flatDirection * Mathf.Clamp(horizontalDistance, 0f, 0.75f);
+        if (NavMesh.Raycast(start.position, destination, out NavMeshHit edge, filter))
+            destination = start.position + flatDirection * Mathf.Max(0f, Vector3.Distance(start.position, edge.position) - 0.05f);
+        Vector3 endPosition = new Vector3(destination.x, startPosition.y, destination.z);
         landingPosition = endPosition;
 
         // 포물선처럼 보이도록 중간 제어점을 사용
@@ -70,11 +85,17 @@ public class WindAirborne : MonoBehaviour
             agent.updatePosition = false;
         }
 
-        float totalDuration = Mathf.Max(0.01f, duration + 0.35f);
+        float totalDuration = Mathf.Max(0.01f, duration);
         float timer = 0f;
 
         while (timer < totalDuration)
         {
+            if ((creature != null && creature.IsDead)
+                || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive))
+            {
+                landingPosition = new Vector3(transform.position.x, startPosition.y, transform.position.z);
+                break;
+            }
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / totalDuration);
 
@@ -84,7 +105,7 @@ public class WindAirborne : MonoBehaviour
             yield return null;
         }
 
-        ApplyPosition(endPosition);
+        ApplyPosition(landingPosition);
 
         RestoreAgent();
 
@@ -108,8 +129,14 @@ public class WindAirborne : MonoBehaviour
         if (agent == null) return;
         agent.updatePosition = cachedAgentUpdatePosition;
         if (!agent.isActiveAndEnabled) return;
-        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 2f, agent.areaMask))
+        Vector3 restoredPosition = transform.position;
+        var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
+        if (NavMesh.SamplePosition(restoredPosition, out NavMeshHit hit, Mathf.Abs(agent.baseOffset) + 0.5f, filter))
+        {
             agent.Warp(hit.position);
+            // Warp uses the surface height; keep the character's original visual/body height.
+            transform.position = new Vector3(hit.position.x, restoredPosition.y, hit.position.z);
+        }
         if (agent.isOnNavMesh)
         {
             StunHandler stun = GetComponent<StunHandler>();

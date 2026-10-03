@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class FishingEventUI : MonoBehaviour
 {
@@ -49,6 +50,15 @@ public class FishingEventUI : MonoBehaviour
         UpdateUIPosition();
 
         fishingEvent_UI.SetActive(true);
+        foreach (TMP_Text label in fishingEvent_UI.GetComponentsInChildren<TMP_Text>(true))
+        {
+            label.text = "표시 구간에 맞춰 Space!";
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 16f;
+            label.fontSizeMax = 24f;
+            label.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 340f);
+        }
+        slider.value = 0f;
         isSuccess = false;
 
         float startVal = UnityEngine.Random.Range(0.5f, 0.9f);
@@ -60,6 +70,8 @@ public class FishingEventUI : MonoBehaviour
 
         float timer = 0;
         bool forward = true;
+        float elapsed = 0f;
+        bool pressed = false;
 
         while (isRunning)
         {
@@ -68,7 +80,9 @@ public class FishingEventUI : MonoBehaviour
                 yield return null;
                 continue;
             }
-            if (Input.GetKeyDown(KeyCode.Space)) break;
+            elapsed += Time.deltaTime;
+            if (Input.GetKeyDown(KeyCode.Space)) { pressed = true; break; }
+            if (elapsed >= 6f) break;
             if(forward)
             {
                 timer += Time.deltaTime / Mathf.Max(0.01f, moveDuration);
@@ -91,14 +105,14 @@ public class FishingEventUI : MonoBehaviour
         }
 
         if (!isRunning) yield break;
-        if(slider.value >= startVal && slider.value <= startVal + 0.1f)
+        if(pressed && slider.value >= startVal && slider.value <= startVal + 0.1f)
         {
             isSuccess = true;
         }
 
         isRunning = false;
-        eventResult?.Invoke(isSuccess);
         fishingEvent_UI.SetActive(false);
+        eventResult?.Invoke(isSuccess);
     }
 
     public void CloseUI()

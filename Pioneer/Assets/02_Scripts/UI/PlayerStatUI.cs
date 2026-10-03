@@ -516,9 +516,10 @@ public class PlayerStatUI : MonoBehaviour
 		}
 
 
+        float growth = PlayerStatsLevel.Instance != null ? PlayerStatsLevel.Instance.CombatDamageMultiplier : 1f;
         if (weaponOrNull != null)
         {
-			playerAttackDamage.text = $"{PlayerCore.Instance.CalculatedHandAttack.weaponDamage + weaponOrNull.weaponDamage}";
+			playerAttackDamage.text = $"{Mathf.RoundToInt((PlayerCore.Instance.CalculatedHandAttack.weaponDamage + weaponOrNull.weaponDamage) * growth)}";
 			playerAttackSpeed.text = $"{weaponOrNull.weaponDelay / 1f}";
 			playerAttackRange.text = $"{weaponOrNull.weaponRange}";
 		}
@@ -526,7 +527,7 @@ public class PlayerStatUI : MonoBehaviour
         {
             // 무기가 아니기에 맨손 기준 적용
 
-			playerAttackDamage.text = $"{PlayerCore.Instance.CalculatedHandAttack.weaponDamage}";
+			playerAttackDamage.text = $"{Mathf.RoundToInt(PlayerCore.Instance.CalculatedHandAttack.weaponDamage * 2f * growth)}";
 			playerAttackSpeed.text = $"{PlayerCore.Instance.attackDelayTime}";
 			playerAttackRange.text = $"{PlayerCore.Instance.attackRange}";
 		}
@@ -543,20 +544,20 @@ public class PlayerStatUI : MonoBehaviour
         {
             case GrowStatType.Combat:
                 combatLevel.text = $"Lv. {currentLv}";     // 전투 레벨                
-                additionCombat.text = $"{statLevel.combatList[currentLv].attack:F1}";        // 공격력 + 추가 공격력 퍼센트                
+                additionCombat.text = $"{statLevel.combatList[currentLv].attack * 100f:F0}";        // 공격력 + 추가 공격력 퍼센트
                 additionCombat_WeaponDurability.text = $"{statLevel.combatList[currentLv].durability:F1}";   // 무기 내구도 감소치 + 추가 무기 내구도 감소치
                 break;
             case GrowStatType.Crafting:
                 craftingLevel.text = $"Lv. {currentLv}";     // 제작 레벨
                 // 대성공 확률 + 추가 대성공 확률
-                additionCrafting.text = $"{statLevel.craftingList[currentLv]:F1}";
+                additionCrafting.text = $"{statLevel.craftingList[currentLv] * 100f:F0}";
                 break;
             case GrowStatType.Fishing:
                 fishingLevel.text = "Lv. " + state.level.ToString();    // 낚시 레벨
                 // 재료 추가 획득 확률 + 추가 획득 확률
-                additionFishing_AddIngredients.text = $"{statLevel.fishingList[currentLv].count:F1}";
+                additionFishing_AddIngredients.text = $"{statLevel.fishingList[currentLv].count * 100f:F0}";
                 // 보물상자 획득 확률 + 추가 획득 확률
-                additionFishing_TreasureChest.text = $"{statLevel.fishingList[currentLv].chest:F1}";                
+                additionFishing_TreasureChest.text = $"{statLevel.fishingList[currentLv].chest * 100f:F0}";
                 break;
 
         }

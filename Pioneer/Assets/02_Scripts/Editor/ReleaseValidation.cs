@@ -220,6 +220,7 @@ public static class ReleaseValidation
                     Require(Get<AudioSource>(AudioManager.instance, "bgmPlayer").volume > 0, "Audio volume restores");
                     foreach (AudioSource source in Get<AudioSource[]>(AudioManager.instance, "sfxPlayers")) source.Stop();
                     Time.timeScale = 1;
+                    CheckGameplayEconomy();
                     CheckInventoryAndCraft();
                     CheckFishingCancellation();
                     Set(GameManager.Instance, "cycleTime", GameManager.Instance.dayDuration);
@@ -231,6 +232,7 @@ public static class ReleaseValidation
                     break;
                 case 8:
                     if (!Object.FindObjectsOfType<MinionAI>().Any(m => m.isActiveAndEnabled && !m.IsDead)) return;
+                    CheckGameplayHitGeometry();
                     CheckCombat();
                     CheckKnockback();
                     CheckCombat();
@@ -244,6 +246,7 @@ public static class ReleaseValidation
                         "Agent follows its path again across frames after knockback");
                     Object.Destroy(navigationProbe.gameObject);
                     Require(probeMariner != null, "Mariner spawns and initializes");
+                    CheckCrewFishingEdge();
                     TestOceanStart<OceanEventSiren>();
                     var siren = (OceanEventSiren)OceanEventManager.instance.currentEvent;
                     OceanEventManager.instance.BeginCoroutine((System.Collections.IEnumerator)Call(siren, "CharmRoutine", probeMariner));
@@ -264,15 +267,28 @@ public static class ReleaseValidation
                     TestOceanStart<OceanEventWind>();
                     var airborne = probeMariner.GetComponent<WindAirborne>() ?? probeMariner.gameObject.AddComponent<WindAirborne>();
                     airborne.ApplyAirborne(1, 0.1f, Vector3.right, 0);
+                    Coroutine gust = Get<Coroutine>(airborne, "airborneCoroutine");
                     airborne.ApplyAirborne(1, 0.1f, Vector3.right, 0);
+                    Require(gust != null && gust == Get<Coroutine>(airborne, "airborneCoroutine") && !airborne.CanBeLifted,
+                        "Repeated gusts cannot restart airborne movement or chain crowd control");
                     OceanEventManager.instance.EndCurrentEvent();
                     Require(!airborne.IsAirborne, "Wind end cancels repeated airborne state");
+                    Set(airborne, "nextAirborneTime", 0f);
+                    var windAgent = probeMariner.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                    windAgent.isStopped = false;
+                    airborne.ApplyAirborne(0.8f, 0.45f, Vector3.right, 0.65f);
+                    probeMariner.GetComponent<StunHandler>()?.ApplyStun(0.45f);
                     TestOceanStart<OceanEventWaterBloom>();
                     OceanEventManager.instance.EndCurrentEvent();
                     TestOceanStart<OceanEventNormal>();
                     OceanEventManager.instance.EndCurrentEvent();
                     break;
                 case 12:
+                    var landed = probeMariner.GetComponent<WindAirborne>();
+                    var landedAgent = probeMariner.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                    if (landed.IsAirborne || (probeMariner.GetComponent<StunHandler>()?.IsStunned ?? false)) return;
+                    Require(landedAgent.isOnNavMesh && landedAgent.updatePosition,
+                        "Wind landing completes across frames and restores the NavMesh agent");
                     Call(MarinerManager.Instance, "InfectMariner", probeMariner);
                     break;
                 case 13:
@@ -443,6 +459,117 @@ public static class ReleaseValidation
         Object.Destroy(sourceObject); Object.Destroy(storageObject);
     }
 
+    private static void CheckGameplayEconomy()
+    {
+        var obtainable = new HashSet<int>(PlayerFishing.instance.dropItemTable
+            .Where(d => d.itemData != null && d.dropProbability > 0f).Select(d => d.itemData.id));
+        foreach (RandomBox box in Get<RandomBox[]>(TreasureBoxManager.instance, "reward"))
+            if (box.weight > 0f) obtainable.Add(box.reward.id);
+        foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/03_Prefabs/Unit" }))
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
+            foreach (ItemDropper dropper in prefab.GetComponentsInChildren<ItemDropper>(true))
+                foreach (var drop in dropper.dropElements)
+                    if (drop.weight > 0f) obtainable.Add(drop.item.id);
+        }
+        var recipes = ItemRecipeManager.Instance.recipes;
+        for (int pass = 0; pass < recipes.Count; pass++)
+            foreach (var recipe in recipes)
+                if (recipe.input.All(i => obtainable.Contains(i.id))) obtainable.Add(recipe.result.id);
+        Require(recipes.All(r => r.input.All(i => obtainable.Contains(i.id))),
+            "Every active recipe has reachable ingredients through fishing, treasure, enemy drops or crafting");
+        var stats = PlayerStatsLevel.Instance;
+        Require(stats.fishingList.Count > 5 && stats.fishingList[5].count > 0f
+            && Enumerable.Range(1, 5).All(i => stats.fishingList[i].count >= stats.fishingList[i - 1].count
+                && stats.fishingList[i].chest >= stats.fishingList[i - 1].chest
+                && stats.craftingList[i] >= stats.craftingList[i - 1]
+                && stats.combatList[i].attack >= stats.combatList[i - 1].attack),
+            "All growth rewards are nondecreasing and Fishing Lv.5 keeps its bonuses");
+        int oldLevel = stats.growStates[GrowStatType.Combat].level;
+        float first = stats.CombatDamageMultiplier;
+        stats.growStates[GrowStatType.Combat].level = 5;
+        Require(Mathf.RoundToInt(15f * stats.CombatDamageMultiplier) > Mathf.RoundToInt(15f * first),
+            "Combat growth raises actual equipped weapon damage");
+        stats.growStates[GrowStatType.Combat].level = oldLevel;
+        Require((int)Call(GameManager.Instance, "CalcMarinerEmbarkCount", 99, 5) == 0
+            && (int)Call(GameManager.Instance, "CalcMarinerEmbarkCount", 99, 4) == 1,
+            "Infinite Mode crew replenishes below, but never above, five members");
+    }
+
+    private static void CheckGameplayHitGeometry()
+    {
+        var player = PlayerCore.Instance;
+        var attack = player.PlayerAttack;
+        Vector3 oldPosition = attack.transform.position;
+        Quaternion oldRotation = attack.transform.rotation;
+        Vector3 oldScale = attack.transform.localScale;
+        int oldDamage = attack.damage;
+        GameObject crawler = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/03_Prefabs/Unit/Crawler.prefab"));
+        try
+        {
+            crawler.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;
+            var ai = crawler.GetComponent<CrawlerAI>();
+            ai.enabled = false; ai.hp = ai.maxHp = 50;
+            // Preserve authored crawler scale, capsule and visual height; never enlarge its hitbox.
+            crawler.transform.position = player.transform.position + Vector3.right * 1.4f + Vector3.up * 1.15f;
+            Physics.SyncTransforms();
+            Require(attack.HasEnemyInDirection(Vector3.right, 1.5f), "Crawler at weapon reach can start an attack despite its height");
+            attack.transform.position = new Vector3(player.transform.position.x + 0.75f, player.AttackHeight, player.transform.position.z);
+            attack.transform.rotation = Quaternion.LookRotation(Vector3.right);
+            attack.SetAttackRange(1.5f);
+            var box = (BoxCollider)attack.attackCollider;
+            var hits = Physics.OverlapBox(box.transform.TransformPoint(box.center),
+                Vector3.Scale(box.size, box.transform.lossyScale) * 0.5f, box.transform.rotation,
+                player.EnemyLayer, QueryTriggerInteraction.Ignore);
+            Require(hits.Any(h => h.GetComponentInParent<CrawlerAI>() == ai),
+                "Actual weapon box reaches the same crawler accepted by the input check");
+            attack.damage = 1; attack.EnableAttackCollider();
+            foreach (var hit in hits) Call(attack, "TryDealDamage", hit);
+            Require(ai.hp == 49, "Crawler receives one damage application with its original collider");
+            attack.DisableAttackCollider();
+            crawler.transform.position = player.transform.position + Vector3.right * 3f;
+            Physics.SyncTransforms();
+            Require(!attack.HasEnemyInDirection(Vector3.right, 1.5f), "Out-of-reach crawler does not pass the attack check");
+            var trapObject = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/06_Modelings/50007 - SpikeTrap/PF_SpikeTrap.prefab"));
+            try
+            {
+                var trap = trapObject.GetComponent<SpikeTrap>();
+                Set(trap, "isTriggerd", true); Set(trap, "spikesRaised", true);
+                int hp = ai.hp;
+                Call(trap, "OnTriggerStay", crawler.GetComponent<Collider>());
+                Call(trap, "OnTriggerStay", crawler.GetComponent<Collider>());
+                Require(ai.hp == hp - 10, "Raised trap deals damage once per enemy per interval");
+            }
+            finally { Object.Destroy(trapObject); }
+        }
+        finally
+        {
+            Object.Destroy(crawler);
+            attack.DisableAttackCollider(); attack.damage = oldDamage;
+            attack.transform.SetPositionAndRotation(oldPosition, oldRotation);
+            attack.transform.localScale = oldScale;
+        }
+    }
+
+    private static void CheckCrewFishingEdge()
+    {
+        var agent = probeMariner.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        var playerAgent = PlayerCore.Instance.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        Require(UnityEngine.AI.NavMesh.SamplePosition(playerAgent.nextPosition, out var center, 3f, agent.areaMask),
+            "Crew edge test has a navigable deck");
+        Vector3 oldPosition = probeMariner.transform.position;
+        agent.Warp(center.position + Vector3.up * (agent.baseOffset * Mathf.Abs(agent.transform.lossyScale.y)));
+        Vector3 edge = (Vector3)Call(probeMariner, "FindMyOwnEdgePoint");
+        Require(edge != Vector3.zero, "Crew finds a reachable exterior platform edge");
+        Vector3 sea = Get<Vector3>(probeMariner, "personalSeaDirection");
+        Require(!Physics.Raycast(edge + sea * 1.2f + Vector3.up * 3f, Vector3.down, 6f, LayerMask.GetMask("Platform")),
+            "Crew casts toward open sea rather than through a platform");
+        agent.Warp(edge + Vector3.up * (agent.baseOffset * Mathf.Abs(agent.transform.lossyScale.y)));
+        Require((bool)Call(probeMariner, "HasSeaAtFishingPoint"), "Crew validates its fishing direction after arriving");
+        agent.Warp(oldPosition);
+    }
+
     private static void CheckFishingCancellation()
     {
         var fishing = PlayerFishing.instance;
@@ -453,6 +580,39 @@ public static class ReleaseValidation
         Require(first != null && first == Get<Coroutine>(fishing, "fishingLoopCoroutine"), "Repeated fishing start keeps one coroutine");
         fishing.StopFishingLoop();
         var ui = fishing.fishingEventUI;
+        float chance = Get<float>(fishing, "eventChance");
+        Set(fishing, "eventChance", 0f); Set(fishing, "nonEventCount", 0);
+        int beforeItems = InventoryManager.Instance.GetAllItem();
+        var attempt = (System.Collections.IEnumerator)Call(fishing, "FishingLoop");
+        Require(attempt.MoveNext() && attempt.Current is WaitForSeconds, "A cast waits before resolving");
+        Require(!attempt.MoveNext() && PlayerCore.Instance.currentState == PlayerCore.PlayerState.Default
+            && Get<Coroutine>(fishing, "fishingLoopCoroutine") == null && InventoryManager.Instance.GetAllItem() > beforeItems,
+            "Normal cast awards its catch and ends without automatic recasting");
+        Set(fishing, "eventChance", 1f);
+        attempt = (System.Collections.IEnumerator)Call(fishing, "FishingLoop");
+        attempt.MoveNext();
+        Require(attempt.MoveNext() && attempt.Current is WaitForSeconds && !ui.fishingEvent_UI.activeSelf,
+            "Special bite has a separate warning wait before the QTE appears");
+        // Resolving an unsuccessful special bite must end this cast with no reward.
+        int beforeFailure = InventoryManager.Instance.GetAllItem();
+        Require(attempt.MoveNext() && attempt.Current is System.Collections.IEnumerator,
+            "Special bite starts the QTE only after the warning");
+        Require(!attempt.MoveNext() && InventoryManager.Instance.GetAllItem() == beforeFailure
+            && PlayerCore.Instance.currentState == PlayerCore.PlayerState.Default,
+            "Failed special bite gives no reward and returns to normal controls");
+        fishing.StopFishingLoop();
+        Set(fishing, "eventChance", chance);
+        var treasure = TreasureBoxManager.instance;
+        var rewards = Get<List<SItemStack>>(treasure, "rewardStack");
+        while (rewards.Count > 0) treasure.Accept();
+        var beforeReward = ItemTypeManager.Instance.itemTypeSearch.Keys.ToDictionary(id => id, id => InventoryManager.Instance.Get(id));
+        treasure.GetSpecialBox();
+        var granted = rewards[0].Copy();
+        Require(granted.id != 30001 && InventoryManager.Instance.Get(granted.id) == beforeReward[granted.id] + granted.amount,
+            "Special salvage grants a non-wood treasure reward immediately");
+        treasure.Accept();
+        Require(InventoryManager.Instance.Get(granted.id) == beforeReward[granted.id] + granted.amount,
+            "Dismissing the treasure reveal cannot grant the reward twice");
         bool called = false;
         var qte = ui.StartQTE(success => called = true);
         Require(qte.MoveNext(), "Fishing QTE starts");
@@ -521,6 +681,8 @@ public static class ReleaseValidation
             player.TakeDamage(1, null);
             Require(!player.IsKnockbackActive, "Environmental damage has no invented knockback direction");
 
+            // Isolate ordinary movement from random shoreline spawn positions.
+            agent.Warp(center.position + Vector3.up * (agent.baseOffset * Mathf.Abs(agent.transform.lossyScale.y)));
             agent.isStopped = true;
             source.transform.position = target.transform.position - Vector3.right;
             target.hp = 100;
@@ -540,7 +702,7 @@ public static class ReleaseValidation
             agent.SetDestination(center.position);
             Require(agent.isOnNavMesh && agent.enabled && agent.updatePosition, "Enemy can navigate again after knockback");
 
-            agent.Warp(center.position + Vector3.up * agent.baseOffset);
+            agent.Warp(center.position + Vector3.up * (agent.baseOffset * Mathf.Abs(agent.transform.lossyScale.y)));
             if (agent.Raycast(center.position + Vector3.right * 100f, out var edge))
             {
                 agent.Warp(edge.position - Vector3.right * 0.03f + Vector3.up * agent.baseOffset);
@@ -561,7 +723,7 @@ public static class ReleaseValidation
             Require(!target.IsKnockbackActive && Vector3.Distance(before, target.transform.position) < 0.001f,
                 "Death cancels an in-flight knockback");
             target.IsDead = false;
-            agent.Warp(center.position + Vector3.up * agent.baseOffset);
+            agent.Warp(center.position + Vector3.up * (agent.baseOffset * Mathf.Abs(agent.transform.lossyScale.y)));
             var airborne = target.GetComponent<WindAirborne>() ?? target.gameObject.AddComponent<WindAirborne>();
             airborne.ApplyAirborne(0.1f, 0.1f, Vector3.right, 0f);
             target.TakeDamage(1, source);

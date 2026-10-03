@@ -38,13 +38,13 @@ public class OceanEventManager : MonoBehaviour
 
     [Header("돌풍")]
     [SerializeField] private GameObject windEffect;
-    [SerializeField] private float windInterval = 10f;
+    [SerializeField] private float windInterval = 7f;
     [SerializeField] private float windMoveSpeed = 16f;
     [SerializeField] private float windLifetime = 5f;
     [SerializeField] private float windSpawnDistance = 10f;
-    [SerializeField] private float windAirborneHeight = 4f;
-    [SerializeField] private float windAirborneDuration = 1f;
-    [SerializeField] private float windStunDuration = 2f;
+    [SerializeField] private float windAirborneHeight = 0.8f;
+    [SerializeField] private float windAirborneDuration = 0.45f;
+    [SerializeField] private float windStunDuration = 0.45f;
 
     private void Awake()
     {

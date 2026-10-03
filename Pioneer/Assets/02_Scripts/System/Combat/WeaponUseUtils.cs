@@ -19,33 +19,8 @@ public class WeaponUseUtils
         if (dir.sqrMagnitude < 0.0001f)
             return false;
 
-        LayerMask enemyMask = PlayerCore.Instance != null ? PlayerCore.Instance.EnemyLayer : 0;
-        Vector3 origin = userGameObject.transform.position;
-        float range = Mathf.Max(data.weaponRange, 0.5f);
-        Collider[] hits = Physics.OverlapSphere(origin, range, enemyMask, QueryTriggerInteraction.Ignore);
-
-        foreach (Collider hit in hits)
-        {
-            if (hit == null)
-                continue;
-
-            Vector3 toTarget = hit.bounds.center - origin;
-            toTarget.y = 0f;
-            if (toTarget.sqrMagnitude > range * range)
-                continue;
-
-            if (Vector3.Dot(dir.normalized, toTarget.normalized) < 0.2f)
-                continue;
-
-            CommonBase target = hit.GetComponentInParent<CommonBase>();
-            if (target == null)
-                target = hit.GetComponent<CommonBase>();
-
-            if (target != null && !target.IsDead)
-                return true;
-        }
-
-        return false;
+        return PlayerCore.Instance != null && PlayerCore.Instance.PlayerAttack != null
+            && PlayerCore.Instance.PlayerAttack.HasEnemyInDirection(dir, data.weaponRange);
     }
 
     public static IEnumerator AttackCoroutine(CommonBase userGameObject, SItemStack itemWithState, SItemWeaponTypeSO data)
@@ -68,12 +43,13 @@ public class WeaponUseUtils
             UtilityFunctions.Log($"플레이어 이동 멈춤 : {PlayerCore.Instance.speed}");
 
             Ray m_rayFromMouse = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit m_hitOnMap;
+            Plane attackPlane = new Plane(Vector3.up, userGameObject.transform.position);
 
-            if (Physics.Raycast(m_rayFromMouse, out m_hitOnMap, Mathf.Infinity))
+            if (attackPlane.Raycast(m_rayFromMouse, out float distance))
             {
-                Vector3 dir = (m_hitOnMap.point - userGameObject.transform.position).normalized;
+                Vector3 dir = m_rayFromMouse.GetPoint(distance) - userGameObject.transform.position;
                 dir.y = 0f;
+                dir.Normalize();
 
                 if (!HasAttackTarget(userGameObject, data, dir))
                     yield break;
@@ -96,7 +72,7 @@ public class WeaponUseUtils
 
                 userGameObject.transform.rotation = Quaternion.LookRotation(dir);
 
-                Vector3 position = userGameObject.transform.position + dir * 0.5f;
+                Vector3 position = userGameObject.transform.position + dir * (data.weaponRange * 0.5f);
                 position.y = PlayerCore.Instance.AttackHeight;
 
                 float totalAnimationTime = Mathf.Max(0.01f, data.weaponAnimation);
@@ -110,7 +86,8 @@ public class WeaponUseUtils
 
                 playerAttack.transform.position = position;
                 playerAttack.transform.rotation = Quaternion.LookRotation(dir);
-                playerAttack.damage = (int)(data.weaponDamage + PlayerCore.Instance.CalculatedHandAttack.weaponDamage);
+                float growth = PlayerStatsLevel.Instance != null ? PlayerStatsLevel.Instance.CombatDamageMultiplier : 1f;
+                playerAttack.damage = Mathf.RoundToInt((data.weaponDamage + player.CalculatedHandAttack.weaponDamage) * growth);
                 playerAttack.SetAttackRange(data.weaponRange);
                 playerAttack.DisableAttackCollider();
                 playerAttack.PlayAttack(dir);

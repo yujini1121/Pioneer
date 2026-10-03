@@ -23,17 +23,50 @@ public class SpikeTrap : MonoBehaviour
     [SerializeField] private int numberOfUses = 0;
     [SerializeField] private bool isTriggerd;
 
+    private bool spikesRaised;
+    private float nextScan;
+    private readonly Dictionary<CommonBase, float> nextHit = new Dictionary<CommonBase, float>();
+
+    private void Update()
+    {
+        if (Time.timeScale <= 0f || Time.time < nextScan
+            || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)) return;
+        nextScan = Time.time + 0.1f;
+        // The installed trap has a solid floor collider, so trigger callbacks alone never fire.
+        Collider floor = GetComponent<Collider>();
+        if (floor == null) return;
+        Bounds bounds = floor.bounds;
+        Vector3 center = new Vector3(bounds.center.x, bounds.max.y + 1f, bounds.center.z);
+        foreach (Collider hit in Physics.OverlapBox(center,
+            new Vector3(bounds.extents.x, 1f, bounds.extents.z), Quaternion.identity, enemyLayer, QueryTriggerInteraction.Ignore))
+            OnTriggerStay(hit);
+    }
+
     private void OnTriggerStay(Collider other)
     {
-        if (((1 << other.gameObject.layer) &enemyLayer) != 0 && isTriggerd == false)
-        {
-            StartCoroutine(Trigger());
-        }
+        if (other == null || ((1 << other.gameObject.layer) & enemyLayer) == 0
+            || Time.timeScale <= 0f || niddles == null) return;
+        CommonBase target = other.GetComponentInParent<CommonBase>();
+        if (target == null || target.IsDead) return;
+        if (!isTriggerd) StartCoroutine(Trigger());
+        if (!spikesRaised || (nextHit.TryGetValue(target, out float next) && Time.time < next)) return;
+        nextHit[target] = Time.time + Mathf.Max(0.1f, attackInterval);
+        target.TakeDamage(Mathf.Max(1, Mathf.RoundToInt(attackPower)), gameObject);
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        isTriggerd = false;
+        spikesRaised = false;
+        nextHit.Clear();
+        if (niddles != null) niddles.transform.localPosition = hidePos;
     }
 
     private IEnumerator Trigger()
     {
         isTriggerd = true;
+        nextHit.Clear();
 
         //발동
         float elapsed = 0f;
@@ -47,6 +80,8 @@ public class SpikeTrap : MonoBehaviour
         }
         niddles.transform.localPosition = triggeredPos;
 
+        spikesRaised = true;
+
         //유지
         elapsed = 0f;
         while (elapsed < duration)
@@ -58,6 +93,8 @@ public class SpikeTrap : MonoBehaviour
             elapsed += 1f;
             yield return new WaitForSeconds(1f);
         }
+
+        spikesRaised = false;
 
         //종료
         elapsed = 0f;
@@ -76,7 +113,9 @@ public class SpikeTrap : MonoBehaviour
 
         if (numberOfUses >= howManyTime)
         {
-            Destroy(gameObject);
+            StructureBase structure = GetComponent<StructureBase>();
+            if (structure != null) structure.WhenDestroy();
+            else Destroy(gameObject);
         }
     }
 }

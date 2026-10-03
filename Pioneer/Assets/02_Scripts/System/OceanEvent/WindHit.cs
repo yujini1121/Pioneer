@@ -73,12 +73,16 @@ public class WindHit : MonoBehaviour
             if (windAirborne == null)
                 windAirborne = creature.gameObject.AddComponent<WindAirborne>();
 
-            windAirborne.ApplyAirborne(airborneHeight, airborneDuration, moveDirection, 2f);
+            if (!windAirborne.CanBeLifted) return;
+            if (creature is PlayerCore && PlayerController.instance != null)
+                PlayerController.instance.CancelFishing();
+            windAirborne.ApplyAirborne(airborneHeight, airborneDuration, moveDirection, 0.65f);
+            if (!windAirborne.IsAirborne) return;
 
             StunHandler stunHandler = creature.GetComponent<StunHandler>();
             if (stunHandler != null)
             {
-                stunHandler.ApplyStun(stunDuration);
+                stunHandler.ApplyStun(Mathf.Min(stunDuration, airborneDuration));
             }
         }
     }

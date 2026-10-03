@@ -603,7 +603,7 @@ public class GameManager : MonoBehaviour, IBegin
     // ==========================
     private void ApplyMarinerEmbarkRule()
     {
-        int add = CalcMarinerEmbarkCount(currentDay, totalMarinerMembers);
+        int add = CalcMarinerEmbarkCount(currentDay, Mathf.Max(0, totalMarinerMembers - deadMarinerMembers));
         if (add <= 0)
         {
             UtilityFunctions.Log($"[Mariner] Day {currentDay} 아침: 승선 0명 → 총 {totalMarinerMembers}명");
@@ -618,6 +618,8 @@ public class GameManager : MonoBehaviour, IBegin
     // 5일차: 현재 승무원 수 ≤3 → 4명, 현재 승무원 수 ≥4 → 5명
     private int CalcMarinerEmbarkCount(int day, int marinerNow)
     {
+        // Keep the small deck readable, including during Infinite Mode.
+        if (marinerNow >= 5) return 0;
         switch (Mathf.Clamp(day, 1, 5))
         {
             case 1: return 0;

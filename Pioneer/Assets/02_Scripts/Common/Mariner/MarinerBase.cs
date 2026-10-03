@@ -43,6 +43,7 @@ public class MarinerBase : CreatureBase
     public float personalMaxDistance = 50f;
 
     protected Vector3 personalEdgePoint;
+    protected Vector3 personalSeaDirection;
     protected bool hasFoundPersonalEdge = false;
 
     // NavMeshAgent 공통
@@ -287,48 +288,45 @@ public class MarinerBase : CreatureBase
     // 경계 탐색 & 파밍 
     protected Vector3 FindMyOwnEdgePoint()
     {
-        List<Vector3> candidatePoints = new List<Vector3>();
-        Vector3 myPosition = transform.position;
-
-        float angleStep = 360f / personalRayCount;
-
-        for (int i = 0; i < personalRayCount; i++)
+        // Use the real platform tile bounds; a NavMesh hole around a building is not sea.
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) return Vector3.zero;
+        int deckMask = LayerMask.GetMask("Platform");
+        Vector3[] directions = { Vector3.right, Vector3.left, Vector3.forward, Vector3.back };
+        float bestScore = float.MaxValue;
+        Vector3 bestPoint = Vector3.zero;
+        var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
+        var path = new NavMeshPath();
+        MarinerBase[] crew = FindObjectsOfType<MarinerBase>();
+        foreach (ItemDeck deck in FindObjectsOfType<ItemDeck>())
         {
-            float angle = i * angleStep + Random.Range(-10f, 10f);
-            Vector3 direction = new Vector3(
-                Mathf.Cos(angle * Mathf.Deg2Rad),
-                0f,
-                Mathf.Sin(angle * Mathf.Deg2Rad)
-            );
-
-            Vector3 edgePoint = FindEdgeInDirection(myPosition, direction);
-            if (edgePoint != Vector3.zero && Vector3.Distance(myPosition, edgePoint) > 5f)
+            if (deck.IsDead || !deck.TryGetComponent(out Collider floor)) continue;
+            Bounds bounds = floor.bounds;
+            foreach (Vector3 direction in directions)
             {
-                candidatePoints.Add(edgePoint);
+                float extent = Mathf.Abs(direction.x) * bounds.extents.x + Mathf.Abs(direction.z) * bounds.extents.z;
+                Vector3 edge = bounds.center + direction * extent;
+                Vector3 sea = edge + direction * 0.3f;
+                if (Physics.Raycast(sea + Vector3.up * 3f, Vector3.down, 6f, deckMask, QueryTriggerInteraction.Ignore)) continue;
+                Vector3 candidate = edge - direction * 0.45f;
+                candidate.y = bounds.max.y;
+                if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, 0.8f, filter)) continue;
+                Vector3 edgeDelta = hit.position - edge; edgeDelta.y = 0f;
+                if (edgeDelta.magnitude > 0.85f) continue;
+                if (!agent.CalculatePath(hit.position, path) || path.status != NavMeshPathStatus.PathComplete) continue;
+                Vector3 delta = hit.position - transform.position; delta.y = 0f;
+                float score = delta.sqrMagnitude;
+                foreach (MarinerBase other in crew)
+                    if (other != this && !other.IsDead
+                        && (other.transform.position - hit.position).sqrMagnitude < 2f) score += 16f;
+                if (score >= bestScore) continue;
+                bestScore = score;
+                bestPoint = hit.position;
+                personalSeaDirection = direction;
             }
         }
-
-        if (candidatePoints.Count > 0)
-        {
-            Vector3 bestPoint = candidatePoints[0];
-            float maxDistance = Vector3.Distance(myPosition, bestPoint);
-
-            foreach (var point in candidatePoints)
-            {
-                float distance = Vector3.Distance(myPosition, point);
-                if (distance > maxDistance)
-                {
-                    maxDistance = distance;
-                    bestPoint = point;
-                }
-            }
-
-            //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점 발견 - {bestPoint}");
-            return bestPoint;
-        }
-
+        //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점 발견 - {bestPoint}");
         //Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾지 못함");
-        return Vector3.zero;
+        return bestPoint;
     }
 
     private Vector3 FindEdgeInDirection(Vector3 startPoint, Vector3 direction)
@@ -362,30 +360,57 @@ public class MarinerBase : CreatureBase
             if (personalEdgePoint == Vector3.zero)
             {
                 //Debug.LogWarning($"{GetCrewTypeName()} {GetMarinerId()}: 경계 지점을 찾을 수 없어 현재 위치에서 파밍");
-                personalEdgePoint = transform.position;
+                yield return new WaitForSeconds(2f);
+                yield break;
             }
             hasFoundPersonalEdge = true;
         }
 
         //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 개인 경계 지점으로 이동 - {personalEdgePoint}");
 
-        MoveTo(personalEdgePoint);
-
-        while (!IsArrived())
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) yield break;
+        float oldStoppingDistance = agent.stoppingDistance;
+        try
         {
-            if (!isSecondPriorityStarted)
+            agent.stoppingDistance = 0.1f;
+            agent.isStopped = false;
+            MoveTo(personalEdgePoint);
+            float deadline = Time.time + 15f;
+            while (true)
             {
-                yield break;
+                if (!isSecondPriorityStarted || IsDead || Time.time > deadline
+                    || !agent.isActiveAndEnabled || !agent.isOnNavMesh) yield break;
+                if (!agent.pathPending)
+                {
+                    if (agent.pathStatus != NavMeshPathStatus.PathComplete) yield break;
+                    Vector3 delta = transform.position - personalEdgePoint; delta.y = 0f;
+                    if (delta.sqrMagnitude <= 0.25f * 0.25f) break;
+                }
+                yield return null;
             }
-            yield return null;
-        }
-
-        if (agent != null && agent.isOnNavMesh)
-        {
+            if (!HasSeaAtFishingPoint()) yield break;
             agent.ResetPath();
+            yield return PerformPersonalEdgeFarming();
         }
+        finally
+        {
+            hasFoundPersonalEdge = false;
+            if (agent != null) agent.stoppingDistance = oldStoppingDistance;
+            GetComponentInChildren<MarinerAnimControll>(true)?.StopFishing();
+        }
+    }
 
-        yield return StartCoroutine(PerformPersonalEdgeFarming());
+    protected bool HasSeaAtFishingPoint()
+    {
+        StunHandler stun = GetComponent<StunHandler>();
+        if (IsDead || (stun != null && stun.IsStunned) || personalSeaDirection.sqrMagnitude < 0.5f) return false;
+        WindAirborne wind = GetComponent<WindAirborne>();
+        if (wind != null && wind.IsAirborne) return false;
+        if (!Physics.Raycast(transform.position + Vector3.up * 2f, Vector3.down, 6f,
+            LayerMask.GetMask("Platform"), QueryTriggerInteraction.Ignore)) return false;
+        Vector3 probe = transform.position + personalSeaDirection * 1.2f;
+        return !Physics.Raycast(probe + Vector3.up * 2f, Vector3.down, 6f,
+            LayerMask.GetMask("Platform"), QueryTriggerInteraction.Ignore);
     }
 
     protected virtual IEnumerator PerformPersonalEdgeFarming()
@@ -404,7 +429,7 @@ public class MarinerBase : CreatureBase
             agent.velocity = Vector3.zero;
         }
 
-        if (anim != null) anim.StartFishing(transform.position + transform.right, transform);
+        if (anim != null) anim.StartFishing(transform.position + personalSeaDirection, transform);
 
         float endTime = Time.time + 10f;
 
@@ -412,7 +437,7 @@ public class MarinerBase : CreatureBase
         {
             while (Time.time < endTime)
             {
-                if (!isSecondPriorityStarted) yield break;
+                if (!isSecondPriorityStarted || !HasSeaAtFishingPoint()) yield break;
 
                 if (GameManager.Instance.TimeUntilNight() <= 30f)
                 {
@@ -571,14 +596,17 @@ public class MarinerBase : CreatureBase
     public virtual IEnumerator StartSecondPriorityAction()
     {
         //Debug.Log($"{GetCrewTypeName()} 2순위 행동 - 기본 구현");
-        yield return StartCoroutine(MoveToMyEdgeAndFarm());
+        yield return MoveToMyEdgeAndFarm();
     }
 
     // ===== NavMeshAgent 공통 =====
     public void MoveTo(Vector3 destination)
     {
-        if (agent != null && agent.isOnNavMesh)
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
             agent.SetDestination(destination);
+        }
     }
 
     public bool IsArrived()

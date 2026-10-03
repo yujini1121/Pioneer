@@ -37,7 +37,7 @@ public class MarinerAI : MarinerBase, IBegin
     public int marinerId;
 
     private float attackCooldown = 0f;
-    private float attackInterval = 0.33f;
+    private float attackInterval = 0.7f;
     private const float AttackHitDelay = 0.09f;
     private const float AttackRecoveryDelay = 0.41f;
 
@@ -76,9 +76,10 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void Update()
     {
-        if (IsDead || isCharmed) return;
+        if (IsDead || isCharmed || Time.timeScale <= 0f) return;
         if (stunHandler != null && stunHandler.IsStunned)
             return;
+        if (GetComponent<WindAirborne>()?.IsAirborne ?? false) return;
 
         //if (Input.GetKeyDown(KeyCode.L))
         //{
@@ -269,7 +270,7 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void CancelCurrentRepair()
     {
-        isSecondPriorityStarted = false;
+        CancelSecondPriorityAction();
         if (isRepairing)
         {
             isRepairing = false;
@@ -289,8 +290,9 @@ public class MarinerAI : MarinerBase, IBegin
 
     protected void CancelSecondPriorityAction()
     {
-        if (!isSecondPriorityStarted) return;
         isSecondPriorityStarted = false;
+        hasFoundPersonalEdge = false;
+        GetComponentInChildren<MarinerAnimControll>(true)?.StopFishing();
         if (secondPriorityRoutine != null)
         {
             StopCoroutine(secondPriorityRoutine);
@@ -413,6 +415,8 @@ public class MarinerAI : MarinerBase, IBegin
 
     private void PerformMarinerAttack()
     {
+        if (IsDead || isCharmed || (stunHandler != null && stunHandler.IsStunned)
+            || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)) return;
         // 전방 박스 중심과 반경(반쪽 크기) 계산
         float half = Mathf.Max(0.5f, attackRange * 0.5f);
         Vector3 boxCenter = transform.position + transform.forward * half;
@@ -432,10 +436,11 @@ public class MarinerAI : MarinerBase, IBegin
             AudioManager.instance.PlaySfx(AudioManager.SFX.Hit);
         }*/
 
+        var damaged = new HashSet<CommonBase>();
         foreach (var hit in hits)
         {
-            CommonBase targetBase = hit.GetComponent<CommonBase>();
-            if (targetBase != null)
+            CommonBase targetBase = hit.GetComponentInParent<CommonBase>();
+            if (targetBase != null && !targetBase.IsDead && damaged.Add(targetBase))
             {
                 targetBase.TakeDamage(attackDamage, this.gameObject);
                 //Debug.Log($"승무원이 {hit.name}에게 {attackDamage} 데미지");
@@ -538,7 +543,7 @@ public class MarinerAI : MarinerBase, IBegin
         {
             //Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
             isSecondPriorityStarted = true;
-            yield return StartCoroutine(MoveToMyEdgeAndFarm());
+            yield return MoveToMyEdgeAndFarm();
 
             var needRepairList = MarinerManager.Instance.GetNeedsRepair();
             isSecondPriorityStarted = false;
@@ -772,14 +777,9 @@ public class MarinerAI : MarinerBase, IBegin
             agent.velocity = Vector3.zero;
         }
 
-        Vector3 dir = Vector3.zero;
-        if (agent != null)
-            dir = agent.desiredVelocity.sqrMagnitude > 0.0001f ? agent.desiredVelocity : agent.velocity;
-
-        if (dir.sqrMagnitude < 0.0001f) dir = transform.forward; // 거의 정지면 바라보는 방향 사용
-        dir.y = 0f;
-
-        Vector3 sideDir = (dir.x >= 0f) ? transform.right : -transform.right;
+        // 거의 정지면 바라보는 방향 사용
+        // 낚시는 실제 외곽에서 확인한 바다 방향을 사용한다.
+        Vector3 sideDir = personalSeaDirection;
         if (anim != null) anim.StartFishing(transform.position + sideDir, transform);
 
         float endTime = Time.time + 10f;
@@ -788,7 +788,7 @@ public class MarinerAI : MarinerBase, IBegin
         {
             while (Time.time < endTime)
             {
-                if (!isSecondPriorityStarted) yield break;
+                if (!isSecondPriorityStarted || !HasSeaAtFishingPoint()) yield break;
 
                 if (GameManager.Instance.TimeUntilNight() <= 30f)
                 {
