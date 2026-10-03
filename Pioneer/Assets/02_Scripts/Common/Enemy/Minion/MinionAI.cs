@@ -41,6 +41,7 @@ public class MinionAI : EnemyBase, IBegin
         stunHandler = GetComponent<StunHandler>();
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
+        ApplySpawnScaling();
 
         if (agent != null)
         {

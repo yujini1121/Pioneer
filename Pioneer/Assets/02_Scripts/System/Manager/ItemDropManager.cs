@@ -9,6 +9,66 @@ public class ItemDropManager : MonoBehaviour
 
     [SerializeField] GameObject prefabDroppedItemDefault;
     [SerializeField] float pickUpTime = 2f;
+    [SerializeField] private FishingPickupSettings fishingPickup = FishingPickupSettings.Default;
+    private float fishingItemInterval = 0.08f;
+
+    [System.Serializable]
+    public struct FishingPickupSettings
+    {
+        [Min(0f)] public float spawnDistance;
+        public float spawnSideOffset;
+        public float waterHeightOffset;
+        public float fallbackHeightOffset;
+        [Min(0f)] public float spawnSpread;
+        public Vector3 pickupOffset;
+        [Min(0f)] public float startDelay;
+        [Min(0f)] public float itemInterval;
+        [Min(0.01f)] public float popDuration;
+        [Min(0f)] public float popHeight;
+        [Min(0f)] public float popForwardDistance;
+        [Min(0f)] public float magnetDelay;
+        [Min(0.01f)] public float magnetDuration;
+        public float curveHeight;
+        public float curveSideOffset;
+
+        public static FishingPickupSettings Default => new FishingPickupSettings
+        {
+            spawnDistance = 1.5f,
+            waterHeightOffset = 0.05f,
+            fallbackHeightOffset = -0.35f,
+            spawnSpread = 0.25f,
+            pickupOffset = new Vector3(0f, 0.85f, 0f),
+            itemInterval = 0.08f,
+            popDuration = 0.22f,
+            popHeight = 0.65f,
+            popForwardDistance = 0.15f,
+            magnetDuration = 0.25f,
+            curveHeight = 0.45f,
+            curveSideOffset = 0.3f
+        };
+
+        public FishingPickupSettings Validated()
+        {
+            FishingPickupSettings value = this;
+            value.spawnDistance = Mathf.Max(0f, value.spawnDistance);
+            value.spawnSpread = Mathf.Max(0f, value.spawnSpread);
+            value.startDelay = Mathf.Max(0f, value.startDelay);
+            value.itemInterval = Mathf.Max(0f, value.itemInterval);
+            value.popDuration = Mathf.Max(0.01f, value.popDuration);
+            value.popHeight = Mathf.Max(0f, value.popHeight);
+            value.popForwardDistance = Mathf.Max(0f, value.popForwardDistance);
+            value.magnetDelay = Mathf.Max(0f, value.magnetDelay);
+            value.magnetDuration = Mathf.Max(0.01f, value.magnetDuration);
+            return value;
+        }
+    }
+
+    public FishingPickupSettings FishingPickup => fishingPickup.Validated();
+
+    private void OnValidate()
+    {
+        fishingPickup = fishingPickup.Validated();
+    }
 
     public void Drop(SItemStack target, Vector3 worldPosition)
     {
@@ -28,6 +88,42 @@ public class ItemDropManager : MonoBehaviour
         }
         item.SetItem(target, delay);
         return item;
+    }
+
+    public int CatchFishing(SItemStack target, Transform player, Vector3 seaDirection, int firstIndex = 0)
+    {
+        if (player == null || SItemStack.IsEmpty(target) || target.amount <= 0) return 0;
+        seaDirection.y = 0f;
+        if (seaDirection.sqrMagnitude < 0.001f) return 0;
+        seaDirection.Normalize();
+        FishingPickupSettings settings = FishingPickup;
+        if (firstIndex <= 0) fishingItemInterval = UnityEngine.Random.Range(0.08f, 0.25f);
+        Vector3 sideways = Vector3.Cross(Vector3.up, seaDirection);
+        Vector3 seaPosition = player.position + seaDirection * settings.spawnDistance
+            + sideways * settings.spawnSideOffset;
+        int mask = LayerMask.GetMask("Platform");
+        for (int step = 0; step < 12; step++)
+        {
+            if (!Physics.Raycast(seaPosition + Vector3.up * 3f, Vector3.down, 8f,
+                mask, QueryTriggerInteraction.Ignore)) break;
+            seaPosition += seaDirection * 0.25f;
+        }
+        seaPosition.y = player.position.y + settings.fallbackHeightOffset;
+        if (Physics.Raycast(seaPosition + Vector3.up * 3f, Vector3.down, out RaycastHit water,
+            8f, LayerMask.GetMask("Water"), QueryTriggerInteraction.Collide))
+            seaPosition.y = water.point.y + settings.waterHeightOffset;
+
+        int visualCount = Mathf.Min(target.amount, Mathf.Max(1, 8 - firstIndex));
+        for (int i = 0; i < visualCount; i++)
+        {
+            int index = firstIndex + i;
+            float scatter = ((index % 3) - 1) * settings.spawnSpread;
+            int amount = i == visualCount - 1 ? target.amount - i : 1;
+            DroppedItem item = CreateDrop(new SItemStack(target.id, amount, target.duability),
+                seaPosition + sideways * scatter, -1f);
+            if (item != null) item.FlyToPlayer(player, sideways * ((index % 2) == 0 ? 1f : -1f), settings.startDelay + index * fishingItemInterval);
+        }
+        return visualCount;
     }
 
     public int DropFishing(SItemStack target, Vector3 playerPosition, Vector3 seaDirection, int firstIndex = 0)

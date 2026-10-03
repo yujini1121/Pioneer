@@ -34,6 +34,7 @@ public class CrawlerAI : EnemyBase, IBegin
         InitializeAnimationSystem();
         agent = GetComponent<NavMeshAgent>();
         SetAttribute();
+        ApplySpawnScaling();
         if (agent != null) agent.speed = speed;
 
         originalSpeed = speed;

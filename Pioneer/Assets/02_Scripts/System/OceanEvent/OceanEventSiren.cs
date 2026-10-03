@@ -202,9 +202,8 @@ public class OceanEventSiren : OceanEventBase
         if (target != null && !target.IsDead)
         {
             RemoveDebuffEffect(target);
-            target.IsDead = true;
-            target.WhenDestroy();
             target.isCharmed = false;
+            target.RestartNormalAI();
             charmedMariners.Remove(target);
         }
     }

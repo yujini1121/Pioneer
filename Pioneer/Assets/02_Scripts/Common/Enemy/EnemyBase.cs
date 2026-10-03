@@ -40,6 +40,33 @@ public class EnemyBase : CreatureBase, IBegin
     protected int _curRunIdx = -1;
     protected int _curAttackIdx = -1;
 
+    private bool spawnScalingApplied;
+    private bool spawnScalingConfigured;
+    private float spawnAttackPercent;
+    private float spawnHpPercent;
+
+    public void SetSpawnScaling(float attackPercent, float hpPercent)
+    {
+        if (spawnScalingApplied) return;
+        spawnScalingConfigured = true;
+        spawnAttackPercent = attackPercent;
+        spawnHpPercent = hpPercent;
+    }
+
+    protected void ApplySpawnScaling()
+    {
+        if (spawnScalingApplied) return;
+        if (!spawnScalingConfigured && GameManager.Instance != null)
+        {
+            var scale = GameManager.Instance.GetScaleRowForDay(GameManager.Instance.currentDay);
+            SetSpawnScaling(scale.attackPercent, scale.hpPercent);
+        }
+        maxHp = Mathf.Max(1, Mathf.RoundToInt(maxHp * (1f + spawnHpPercent * 0.01f)));
+        hp = maxHp;
+        attackDamage = Mathf.Max(1, Mathf.RoundToInt(attackDamage * (1f + spawnAttackPercent * 0.01f)));
+        spawnScalingApplied = true;
+    }
+
     public override void WhenDestroy()
     {
         if (CreatureEffect.Instance != null)

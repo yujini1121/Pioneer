@@ -43,8 +43,8 @@ public class GameManager : MonoBehaviour, IBegin
     public Gradient dayToNightGradient;
     public Gradient nightToDayGradient;
     public AnimationCurve exposureCurve;
-    public float dayDuration = 270f;
-    public float nightDuration = 90f;
+    public float dayDuration = 150f;
+    public float nightDuration = 50f;
     private float oneDayDuration;
 
     private ColorAdjustments colorAdjustments;
@@ -117,10 +117,24 @@ public class GameManager : MonoBehaviour, IBegin
     }
 
     [Header("일차별 에너미 출현 표 (1~5일차)")]
-    public DayEnemyRow[] enemySpawnTable = new DayEnemyRow[5];
+    public DayEnemyRow[] enemySpawnTable =
+    {
+        new DayEnemyRow { total = 3, minion = 3, crawler = 0, titan = 0 },
+        new DayEnemyRow { total = 5, minion = 4, crawler = 1, titan = 0 },
+        new DayEnemyRow { total = 8, minion = 5, crawler = 2, titan = 1 },
+        new DayEnemyRow { total = 9, minion = 6, crawler = 2, titan = 1 },
+        new DayEnemyRow { total = 12, minion = 7, crawler = 3, titan = 2 },
+    };
 
     [Header("일차별 능력치 강화 표 (1~5일차)")]
-    public EnemyScaleRow[] enemyScaleTable = new EnemyScaleRow[5];
+    public EnemyScaleRow[] enemyScaleTable =
+    {
+        new EnemyScaleRow { attackPercent = 0f, hpPercent = 0f },
+        new EnemyScaleRow { attackPercent = 0f, hpPercent = 0f },
+        new EnemyScaleRow { attackPercent = 0f, hpPercent = 10f },
+        new EnemyScaleRow { attackPercent = 10f, hpPercent = 15f },
+        new EnemyScaleRow { attackPercent = 20f, hpPercent = 25f },
+    };
 
     [Header("승무원 스폰")]
     [SerializeField] private GameObject marinerPrefab;   
@@ -146,9 +160,22 @@ public class GameManager : MonoBehaviour, IBegin
             postProcessVolume.profile.TryGet(out vignette);
     }
 
+    private DayUI dayUI;
+    public bool HasMorningBriefingUI => dayUI != null && dayUI.isActiveAndEnabled && dayUI.HasMorningBriefing;
+
+    private void PresentMorning()
+    {
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.MorningBell);
+        if (dayUI != null && oceanEventManager != null)
+            dayUI.ShowMorningBriefing(currentDay, oceanEventManager.currentEvent);
+    }
+
     private void Start()
     {
         oneDayDuration = dayDuration + nightDuration;
+        dayUI = FindObjectOfType<DayUI>(true);
+        if (oceanEventManager == null) oceanEventManager = OceanEventManager.instance;
+        PresentMorning();
 
         UtilityFunctions.Log($">> GameManager.Start()");
         UtilityFunctions.Log($"[GameMode] Infinite Mode: {GameModeState.IsInfiniteMode}");
@@ -201,7 +228,7 @@ public class GameManager : MonoBehaviour, IBegin
         {
             // 낮 -> 밤 전환
             if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.To_night2);
+                AudioManager.instance.PlaySfx(AudioManager.SFX.NightBell);
 
             if (AudioManager.instance != null)
                 AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
@@ -249,6 +276,7 @@ public class GameManager : MonoBehaviour, IBegin
         if (oceanEventManager != null)
             oceanEventManager.EnterDay();
 
+        if (GameModeState.IsInfiniteMode || currentDay < 6) PresentMorning();
         DespawnAllEnemies();
         ApplyMarinerEmbarkRule();
     }
@@ -523,14 +551,8 @@ public class GameManager : MonoBehaviour, IBegin
 
             spawnedEnemies.Add(e);
 
-            if (e.TryGetComponent(out EnemyStats stats))
-            {
-                float atkMul = 1f + (scale.attackPercent * 0.01f);
-                float hpMul = 1f + (scale.hpPercent * 0.01f);
-                stats.ApplyScaling(atkMul, hpMul);
-
-                UtilityFunctions.Log($"[Scale] Day {currentDay} {e.name} ATK {stats.baseATK}→{stats.atk} (x{atkMul:0.00}), HP {stats.baseHP}→{stats.hp} (x{hpMul:0.00})");
-            }
+            if (e.TryGetComponent(out EnemyBase enemy))
+                enemy.SetSpawnScaling(scale.attackPercent, scale.hpPercent);
         }
     }
 
@@ -588,7 +610,7 @@ public class GameManager : MonoBehaviour, IBegin
         return result;
     }
 
-    private EnemyScaleRow GetScaleRowForDay(int day)
+    public EnemyScaleRow GetScaleRowForDay(int day)
     {
         if (enemyScaleTable != null && enemyScaleTable.Length > 0)
         {

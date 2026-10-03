@@ -12,37 +12,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a9b2d2d1d0b4c6fa4eb1a42f1015a01, type: 3}
   m_Name: GameBalanceSettings
   m_EditorClassIdentifier: 
-  dayDuration: 60
-  nightDuration: 30
+  dayDuration: 2500
+  nightDuration: 50
   enemySpawnTable:
   - total: 3
     minion: 3
     crawler: 0
     titan: 0
-  - total: 6
+  - total: 5
     minion: 4
-    crawler: 2
+    crawler: 1
     titan: 0
-  - total: 10
+  - total: 8
     minion: 5
+    crawler: 2
+    titan: 1
+  - total: 9
+    minion: 6
+    crawler: 2
+    titan: 1
+  - total: 12
+    minion: 7
     crawler: 3
     titan: 2
-  - total: 13
-    minion: 6
-    crawler: 4
-    titan: 3
-  - total: 17
-    minion: 8
-    crawler: 5
-    titan: 4
   enemyScaleTable:
   - attackPercent: 0
     hpPercent: 0
   - attackPercent: 0
     hpPercent: 0
   - attackPercent: 0
-    hpPercent: 0
+    hpPercent: 10
+  - attackPercent: 10
+    hpPercent: 15
   - attackPercent: 20
-    hpPercent: 40
-  - attackPercent: 50
-    hpPercent: 60
+    hpPercent: 25

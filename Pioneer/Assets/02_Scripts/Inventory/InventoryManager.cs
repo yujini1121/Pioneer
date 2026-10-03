@@ -73,7 +73,7 @@ public class InventoryManager : InventoryBase
         int mMouseNum = itemLists[index].amount - mSlotNum;
 
         itemLists[index].amount = mSlotNum;
-        mouseInventory = new SItemStack(itemLists[index].id, mMouseNum);
+        mouseInventory = new SItemStack(itemLists[index].id, mMouseNum, itemLists[index].duability);
 
         SafeClean();
     }

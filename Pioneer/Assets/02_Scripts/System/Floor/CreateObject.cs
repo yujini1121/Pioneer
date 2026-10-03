@@ -90,6 +90,8 @@ public class CreateObject : MonoBehaviour, IBegin
     private GameObject _evalDummy;
 
     private SItemStack[] cost;
+    private int installSelectionIndex = -1;
+    private bool deckSelectionConsumed;
 
     // 현재 설치형 오브젝트의 Footprint / Anchor 계산 기준
     private SInstallableObjectDataSO _activeInstallableSO;
@@ -109,16 +111,44 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private bool HasValidInstallableSelection()
     {
-        if (InventoryManager.Instance == null)
-            return false;
+        InventoryManager inventory = InventoryManager.Instance;
+        if (inventory == null || inventory.selectedSlotIndex < 0
+            || inventory.selectedSlotIndex >= inventory.itemLists.Count) return false;
+        if (_activeInstallableSO != null && inventory.selectedSlotIndex != installSelectionIndex) return false;
 
-        SItemStack selected = InventoryManager.Instance.SelectedSlotInventory;
-        if (selected == null || selected.itemBaseType == null)
-            return false;
+        SItemStack selected = inventory.itemLists[inventory.selectedSlotIndex];
+        if (selected == null)
+            return deckSelectionConsumed && _activeInstallableSO != null
+                && _activeInstallableSO.id == 50001 && creationType == CreationType.Platform;
 
-        return selected.itemBaseType.categories == EDataType.BuildObject
-            && selected.itemBaseType is SInstallableObjectDataSO;
+        return selected.amount > 0 && selected.itemBaseType is SInstallableObjectDataSO
+            && selected.itemBaseType.categories == EDataType.BuildObject
+            && (_activeInstallableSO == null || selected.id == _activeInstallableSO.id);
     }
+
+    private bool HasPlacementCost()
+    {
+        if (InventoryManager.Instance == null || cost == null || cost.Length == 0) return false;
+        Dictionary<int, int> required = new Dictionary<int, int>();
+        foreach (SItemStack item in cost)
+        {
+            if (SItemStack.IsEmpty(item) || item.amount <= 0) return false;
+            required.TryGetValue(item.id, out int amount);
+            required[item.id] = amount + item.amount;
+        }
+        foreach (var item in required)
+            if (InventoryManager.Instance.Get(item.Key) < item.Value) return false;
+        return true;
+    }
+
+    private bool HasDeckCapacity()
+    {
+        if (creationType != CreationType.Platform || MastManager.Instance == null) return true;
+        MastSystem mast = FindObjectOfType<MastSystem>();
+        int maximum = mast != null ? mast.GetMaxDeckCount() : 30;
+        return MastManager.Instance.currentDeckCount < maximum;
+    }
+
     private void Awake()
     {
         UtilityFunctions.Log($">> CreateObject : {gameObject.name}");
@@ -164,7 +194,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
         bool hasValidInstallableSelection = HasValidInstallableSelection();
 
-        if (!hasValidInstallableSelection && !isCountingDown)
+        if (!hasValidInstallableSelection || (_activeInstallableSO != null && (!HasPlacementCost() || !HasDeckCapacity())))
         {
             HideInstallProgressUi();
 
@@ -188,8 +218,20 @@ public class CreateObject : MonoBehaviour, IBegin
         }
 
         if (onHand == null) return;
+        if ((GameManager.Instance != null && GameManager.Instance.IsGameResultActive)
+            || (PlayerCore.Instance != null && PlayerCore.Instance.IsDead))
+        {
+            ExitInstallMode();
+            return;
+        }
+        if (Time.timeScale <= 0f) return;
 
         bool hasPendingPlacement = tempObj != null || isCountingDown;
+        if (hasPendingPlacement && Input.GetMouseButtonDown(1))
+        {
+            ExitInstallMode();
+            return;
+        }
         SetPreviewVisible(!hasPendingPlacement);
 
         if (hasPendingPlacement)
@@ -593,6 +635,11 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void MoveToCreate(Vector3 world, Vector3 local)
     {
+        if (!HasPlacementCost() || !HasValidInstallableSelection() || !HasDeckCapacity())
+        {
+            ExitInstallMode();
+            return;
+        }
         if (tempObj != null)
         {
             Destroy(tempObj);
@@ -693,10 +740,13 @@ public class CreateObject : MonoBehaviour, IBegin
         float t = 0f;
         while (t < installTimeSec)
         {
+            if (Time.timeScale <= 0f) { yield return null; continue; }
             // 취소 입력: 우클릭 / F
             if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.F))
             {
-                CancelInstallCountdown();
+                installRoutine = null;
+                isCountingDown = false;
+                ExitInstallMode();
                 yield break;
             }
 
@@ -712,9 +762,13 @@ public class CreateObject : MonoBehaviour, IBegin
             yield return null;
         }
 
-        if (tempObj == null)
+        if (tempObj == null || !HasPlacementCost() || !HasValidInstallableSelection() || !HasDeckCapacity()
+            || (GameManager.Instance != null && GameManager.Instance.IsGameResultActive)
+            || (PlayerCore.Instance != null && PlayerCore.Instance.IsDead))
         {
-            CancelInstallCountdown();
+            installRoutine = null;
+            isCountingDown = false;
+            ExitInstallMode();
             yield break;
         }
         var col = tempObj.GetComponent<Collider>();
@@ -738,7 +792,9 @@ public class CreateObject : MonoBehaviour, IBegin
 
         // 여기서 재료 차감
         InventoryManager.Instance.Remove(cost);
-        InventoryUiMain.instance.IconRefresh();
+        InventoryManager.Instance.UpdateSlot();
+        deckSelectionConsumed = InventoryManager.Instance.SelectedSlotInventory == null;
+        InventoryUiMain.instance?.IconRefresh();
 
         playerAgent.ResetPath();
         playerAgent.isStopped = false;
@@ -751,7 +807,15 @@ public class CreateObject : MonoBehaviour, IBegin
         installRoutine = null;
         isCountingDown = false;
 
-        ExitInstallMode();
+        if (_activeInstallableSO != null && _activeInstallableSO.id == 50001
+            && creationType == CreationType.Platform && HasPlacementCost()
+            && HasValidInstallableSelection() && HasDeckCapacity())
+        {
+            UnlockPlayerMovement();
+            SetPreviewVisible(true);
+        }
+        else
+            ExitInstallMode();
     }
 
     private void CancelInstallCountdown()
@@ -778,6 +842,13 @@ public class CreateObject : MonoBehaviour, IBegin
     // InGameUI에서 설치형 아이템 선택 시 호출
     public void EnterInstallMode(SInstallableObjectDataSO installableSO, SItemStack[] mCost)
     {
+        if (installableSO == null || InventoryManager.Instance == null || mCost == null || mCost.Length == 0)
+        {
+            ExitInstallMode();
+            return;
+        }
+        installSelectionIndex = InventoryManager.Instance.selectedSlotIndex;
+        deckSelectionConsumed = false;
 
         if (PlayerCore.Instance.currentState == PlayerCore.PlayerState.ActionFishing)
         {
@@ -791,7 +862,14 @@ public class CreateObject : MonoBehaviour, IBegin
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.InstallingObject);
 
-        cost = mCost;
+        cost = new SItemStack[mCost.Length];
+        for (int i = 0; i < mCost.Length; i++)
+            cost[i] = mCost[i] != null ? new SItemStack(mCost[i]) : null;
+        if (!HasPlacementCost())
+        {
+            ExitInstallMode();
+            return;
+        }
 
         UtilityFunctions.Assert(cost.Length > 0);
 
@@ -850,12 +928,17 @@ public class CreateObject : MonoBehaviour, IBegin
             tempObj = null;
         }
 
-        playerAgent.ResetPath();
-        playerAgent.isStopped = true;
+        if (playerAgent != null && playerAgent.isActiveAndEnabled && playerAgent.isOnNavMesh)
+        {
+            playerAgent.ResetPath();
+            playerAgent.isStopped = true;
+        }
 
         UnlockPlayerMovement();
 
         _activeInstallableSO = null;
+        installSelectionIndex = -1;
+        deckSelectionConsumed = false;
 
         UtilityFunctions.Log("[설치 모드 종료]");
     }

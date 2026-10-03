@@ -1735,6 +1735,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 743137f196cf8154dbe1effaed9b4052,
         type: 3}
+    - target: {fileID: 2091771367793310562, guid: 98b18744c0004ee44bf63dccd2e17b7e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 2387798761161775253, guid: 98b18744c0004ee44bf63dccd2e17b7e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 250
+      objectReference: {fileID: 0}
     - target: {fileID: 3025671567274234836, guid: 98b18744c0004ee44bf63dccd2e17b7e,
         type: 3}
       propertyPath: m_IsActive
@@ -1877,6 +1887,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7580822448496179868, guid: 98b18744c0004ee44bf63dccd2e17b7e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 250
+      objectReference: {fileID: 0}
     - target: {fileID: 8417857944306331084, guid: 98b18744c0004ee44bf63dccd2e17b7e,
         type: 3}
       propertyPath: m_Enabled
@@ -1896,21 +1911,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -150
-      objectReference: {fileID: 0}
-    - target: {fileID: 2091771367793310562, guid: 98b18744c0004ee44bf63dccd2e17b7e,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 150
-      objectReference: {fileID: 0}
-    - target: {fileID: 7580822448496179868, guid: 98b18744c0004ee44bf63dccd2e17b7e,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 250
-      objectReference: {fileID: 0}
-    - target: {fileID: 2387798761161775253, guid: 98b18744c0004ee44bf63dccd2e17b7e,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 250
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6995,6 +6995,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentDay: {fileID: 2050070090}
+  morningBriefingPanel: {fileID: 0}
+  dayText: {fileID: 0}
+  eventText: {fileID: 0}
+  descriptionText: {fileID: 0}
 --- !u!224 &1161916268 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 966442937336751219, guid: b5913059828db1d418df9482c7572996,
@@ -13353,7 +13357,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Day 1
+  m_text: "1\uC77C\uCC28 "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 005a72f148b52cf46bbfd3c457fedc6c, type: 2}
   m_sharedMaterial: {fileID: 7565190075971806515, guid: 005a72f148b52cf46bbfd3c457fedc6c,
@@ -13762,7 +13766,17 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<b>\ubc30\uc5d0\uc11c \uc0b4\uc544\ub0a8\uae30</b>\n\n\ub0ae\uc5d0\ub294 \uc790\uc6d0\uc744 \ubaa8\uc73c\uace0 \uc81c\uc791\ud558\uc5ec\n\ubc24\uc758 \uc2b5\uaca9\uc744 \uc900\ube44\ud558\uc138\uc694.\n\n\ubc30\uc640 \ub9c8\uc2a4\ud2b8\ub97c \uc9c0\ud0a4\uc138\uc694.\n\uc124\uce58\ud55c \ubb3c\uac74\uc744 \uc120\ud0dd\ud558\uba74\n\uc774\ub3d9 \u00b7 \ud68c\uc804 \u00b7 \uc81c\uac70\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.\n\n\uc138\uc774\ub80c\uc5d0\uac8c \ub9e4\ud639\ub41c \uc2b9\ubb34\uc6d0\uc740\n\uc138 \ubc88 \ud074\ub9ad\ud558\uba74 \uae68\uc5b4\ub0a9\ub2c8\ub2e4.\n\n\ud55c \ubc88 \ub358\uc9c0\uba74 \ud55c \ubc88 \uc778\uc591\ud569\ub2c8\ub2e4.\n\uac15\ud55c \uc785\uc9c8 \uc608\uace0 \ud6c4 \ud45c\uc2dc \uad6c\uac04\uc5d0 Space!\n\uc131\uacf5\ud558\uba74 \ud2b9\ubcc4 \ubcf4\uc0c1\uc744 \ub354 \uc5bb\uc2b5\ub2c8\ub2e4.\n\uc2e4\ud328\ud558\uba74 Q\ub97c \uae38\uac8c \ub20c\ub7ec \ub2e4\uc2dc \ub358\uc9c0\uc138\uc694."
+  m_text: "<b>\uBC30\uC5D0\uC11C \uC0B4\uC544\uB0A8\uAE30</b>\n\n\uB0AE\uC5D0\uB294
+    \uC790\uC6D0\uC744 \uBAA8\uC73C\uACE0 \uC81C\uC791\uD558\uC5EC\n\uBC24\uC758
+    \uC2B5\uACA9\uC744 \uC900\uBE44\uD558\uC138\uC694.\n\n\uBC30\uC640 \uB9C8\uC2A4\uD2B8\uB97C
+    \uC9C0\uD0A4\uC138\uC694.\n\uC124\uCE58\uD55C \uBB3C\uAC74\uC744 \uC120\uD0DD\uD558\uBA74\n\uC774\uB3D9
+    \xB7 \uD68C\uC804 \xB7 \uC81C\uAC70\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\n\uC138\uC774\uB80C\uC5D0\uAC8C
+    \uB9E4\uD639\uB41C \uC2B9\uBB34\uC6D0\uC740\n\uC138 \uBC88 \uD074\uB9AD\uD558\uBA74
+    \uAE68\uC5B4\uB0A9\uB2C8\uB2E4.\n\n\uD55C \uBC88 \uB358\uC9C0\uBA74 \uD55C \uBC88
+    \uC778\uC591\uD569\uB2C8\uB2E4.\n\uAC15\uD55C \uC785\uC9C8 \uC608\uACE0 \uD6C4
+    \uD45C\uC2DC \uAD6C\uAC04\uC5D0 Space!\n\uC131\uACF5\uD558\uBA74 \uD2B9\uBCC4
+    \uBCF4\uC0C1\uC744 \uB354 \uC5BB\uC2B5\uB2C8\uB2E4.\n\uC2E4\uD328\uD558\uBA74
+    Q\uB97C \uAE38\uAC8C \uB20C\uB7EC \uB2E4\uC2DC \uB358\uC9C0\uC138\uC694."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 84c2d1bcdc5abdf4a90663f7e6136cb4, type: 2}
   m_sharedMaterial: {fileID: 858949319293602093, guid: 84c2d1bcdc5abdf4a90663f7e6136cb4,
@@ -16437,6 +16451,22 @@ MonoBehaviour:
   prefabDroppedItemDefault: {fileID: 4318676492512200623, guid: baff6317da228a849a2d1548b7aea938,
     type: 3}
   pickUpTime: 2
+  fishingPickup:
+    spawnDistance: 1.5
+    spawnSideOffset: 0
+    waterHeightOffset: 0.05
+    fallbackHeightOffset: -0.35
+    spawnSpread: 0.25
+    pickupOffset: {x: -0.7, y: 0, z: 0}
+    startDelay: 0
+    itemInterval: 0.15
+    popDuration: 0.12
+    popHeight: 0.65
+    popForwardDistance: 0.15
+    magnetDelay: 0.1
+    magnetDuration: 0.5
+    curveHeight: 0.45
+    curveSideOffset: 0.5
 --- !u!1 &1007700218028048721
 GameObject:
   m_ObjectHideFlags: 0
@@ -27488,8 +27518,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 0
     m_RotationOrder: 4
-  dayDuration: 120
-  nightDuration: 60
+  dayDuration: 150
+  nightDuration: 50
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -27518,33 +27548,33 @@ MonoBehaviour:
     minion: 3
     crawler: 0
     titan: 0
-  - total: 6
+  - total: 5
     minion: 4
-    crawler: 2
+    crawler: 1
     titan: 0
-  - total: 10
+  - total: 8
     minion: 5
+    crawler: 2
+    titan: 1
+  - total: 9
+    minion: 6
+    crawler: 2
+    titan: 1
+  - total: 12
+    minion: 7
     crawler: 3
     titan: 2
-  - total: 13
-    minion: 6
-    crawler: 4
-    titan: 3
-  - total: 17
-    minion: 8
-    crawler: 5
-    titan: 4
   enemyScaleTable:
   - attackPercent: 0
     hpPercent: 0
   - attackPercent: 0
     hpPercent: 0
   - attackPercent: 0
-    hpPercent: 0
+    hpPercent: 10
+  - attackPercent: 10
+    hpPercent: 15
   - attackPercent: 20
-    hpPercent: 40
-  - attackPercent: 50
-    hpPercent: 60
+    hpPercent: 25
   marinerPrefab: {fileID: 3339714784095837873, guid: f3e442d20a70e9b4a909094d9a360df6,
     type: 3}
   mast: {fileID: 2034679919}
@@ -32989,7 +33019,7 @@ MonoBehaviour:
   slider: {fileID: 593082013}
   SuccessRange: {fileID: 1578387606}
   arrow: {fileID: 656878882}
-  offset: {x: 0, y: 1.5, z: 0}
+  offset: {x: 0, y: -2.25, z: 0}
   moveDuration: 1.5
 --- !u!1 &8164079273781385114
 GameObject:
@@ -34166,7 +34196,7 @@ MonoBehaviour:
     m_Bits: 128
   rejectColor: {r: 1, g: 0, b: 0, a: 0.19607843}
   permitColor: {r: 0.040236473, g: 1, b: 0, a: 0.19607843}
-  previewAlpha: 0.55
+  previewAlpha: 0.3
   creationList:
     platform: {fileID: 4244338817040961781, guid: b99079866b76cf24b94795fd1cd56036,
       type: 3}

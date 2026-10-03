@@ -460,100 +460,10 @@ public class MarinerAI : MarinerBase, IBegin
             OnNightApproaching();
             yield break;
         }
-        // 인벤토리 체크 - 7개 이상이면 보관함으로 이동
-        MarinerInventory inventory = GetComponent<MarinerInventory>();
-        if (inventory != null && inventory.ShouldMoveToStorage())
-        {
-            //Debug.Log($"승무원 {marinerId}: 인벤토리가 가득함 ({inventory.GetAllItem()}개) - 보관함으로 이동");
-
-            // 보관함 찾기
-            GameObject storage = GameObject.FindWithTag("Engine");
-            if (storage != null)
-            {
-                // NavMeshAgent로 보관함으로 이동
-                if (agent != null && agent.isOnNavMesh)
-                {
-                    agent.SetDestination(storage.transform.position);
-
-                    // 보관함에 도착할 때까지 대기
-                    while (!IsArrived())
-                    {
-                        if (!isSecondPriorityStarted)
-                        {
-                            yield break;
-                        }
-
-                        if (GameManager.Instance.TimeUntilNight() <= 30f)
-                        {
-                            OnNightApproaching();
-                            yield break;
-                        }
-                        yield return null;
-                    }
-
-                    //Debug.Log($"승무원 {marinerId}: 보관함에 도착 - 아이템 저장");
-
-                    // 보관함에 아이템 저장
-                    var storageInventory = storage.GetComponent<InventoryBase>();
-                    if (storageInventory != null)
-                    {
-                        inventory.TransferAllItemsToStorage(storageInventory);
-                    }
-                    else // 보관함 구현 후 삭제? or 에러처리? 
-                    {
-                        //Debug.LogWarning("보관함에 InventoryBase가 없음 - 아이템 제거, 보관함 구현 후 삭제?");
-
-                        List<SItemStack> itemsToRemove = new List<SItemStack>();
-                        for (int i = 0; i < inventory.itemLists.Count; i++)
-                        {
-                            if (inventory.itemLists[i] != null)
-                            {
-                                itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
-                            }
-                        }
-
-                        if (itemsToRemove.Count > 0)
-                        {
-                            inventory.Remove(itemsToRemove.ToArray());
-                        }
-                    }
-
-                    //Debug.Log($"승무원 {marinerId}: 보관함 저장 완료 - 1순위 행동 재확인");
-
-                    // 보관함 저장 후 1순위 행동(수리) 재확인
-                    isSecondPriorityStarted = false;
-                    StartRepair();
-                    yield break;
-                }
-            }
-            else
-            {
-                //Debug.LogWarning($"승무원 {marinerId}: 보관함을 찾을 수 없음 - 3초간 랜덤 이동 후 재시도");
-
-                SetRandomDestination();
-
-                yield return new WaitForSeconds(3f); // 움직이고 3초 대기
-
-                isSecondPriorityStarted = false;
-                StartRepair();
-                yield break;
-            }
-        }
-        else
-        {
-            //Debug.Log($"승무원 {marinerId}: 개인 경계 탐색 및 파밍 시작");
-            isSecondPriorityStarted = true;
-            yield return MoveToMyEdgeAndFarm();
-
-            var needRepairList = MarinerManager.Instance.GetNeedsRepair();
-            isSecondPriorityStarted = false;
-
-            if (needRepairList.Count > 0)
-                StartRepair();
-
-            yield break;
-        }
-
+        yield return MoveToMyEdgeAndFarm();
+        isSecondPriorityStarted = false;
+        if (MarinerManager.Instance != null && MarinerManager.Instance.GetNeedsRepair().Count > 0)
+            StartRepair();
     }
 
     protected override float GetRepairSuccessRate()
@@ -568,6 +478,15 @@ public class MarinerAI : MarinerBase, IBegin
         nightRoamRoutine = StartCoroutine(NightApproachRoutine());
     }
 
+
+    public override void TakeDamage(int damage, GameObject attacker)
+    {
+        if (IsDead) return;
+        base.TakeDamage(damage, attacker);
+        if (damage > 0 && attacker != null
+            && (attacker.GetComponent<EnemyBase>() != null || attacker.GetComponent<ZombieMarinerAI>() != null))
+            AudioManager.instance?.PlaySfx(AudioManager.SFX.Hit2);
+    }
 
     public override void WhenDestroy()
     {
@@ -585,45 +504,25 @@ public class MarinerAI : MarinerBase, IBegin
 
     protected override void OnPersonalFarmingCompleted()
     {
+        if (ItemDropManager.instance == null) return;
         int acquiredItemID = GetRandomItemIDByProbability(FixedItemDrops);
+        SItemStack reward = acquiredItemID == 30009 && TreasureBoxManager.instance != null
+            ? TreasureBoxManager.instance.GetReward() : new SItemStack(acquiredItemID, 1);
+        int dropIndex = ItemDropManager.instance.DropFishing(reward, transform.position, personalSeaDirection);
 
-        MarinerInventory inventory = GetComponent<MarinerInventory>();
-
-        if (inventory != null)
+        if (OceanEventManager.instance != null
+            && OceanEventManager.instance.currentEvent is OceanEventWaterBloom bloom)
         {
-            // 만약 acquiredItemID -> 보물상자가 아님 -> 그냥 받음
-            // 만약 acquiredItemID -> 보물상자가 맞음 ->  TreasureBoxManager SItemStack GetReward()
-
-            //int amount = 1; // 기본 1개
-
-            if (acquiredItemID == 30009)
+            SItemTypeSO bonus = bloom.GetMoreItem();
+            if (bonus != null)
             {
-                SItemStack treasure = TreasureBoxManager.instance.GetReward();
-                acquiredItemID = treasure.id;
-                //amount = treasure.amount;
+                SItemStack extra = bonus.id == 30009 && TreasureBoxManager.instance != null
+                    ? TreasureBoxManager.instance.GetReward() : new SItemStack(bonus.id, 1);
+                dropIndex += ItemDropManager.instance.DropFishing(extra, transform.position, personalSeaDirection, dropIndex);
             }
-
-            bool result = inventory.AddItem(acquiredItemID, 1);
-
-            // 바다이벤트 녹조로 얻는 추가 아이템 획득 
-            if (OceanEventManager.instance != null && OceanEventManager.instance.currentEvent is OceanEventWaterBloom)
-            {
-                OceanEventWaterBloom waterBloomEnvent = OceanEventManager.instance.currentEvent as OceanEventWaterBloom;
-
-                SItemTypeSO bonusItem = waterBloomEnvent.GetMoreItem();
-
-                if (bonusItem != null)
-                {
-                    inventory.AddItem(bonusItem.id, 1);
-                }
-            }
-
-            //Debug.Log($"AddItem 결과: {result}, 획득 아이템 ID: {acquiredItemID}");
         }
-        if (AudioManager.instance != null)
-            AudioManager.instance.PlaySfx(AudioManager.SFX.ItemGet);
 
-        //Debug.Log($"승무원 {marinerId}: 개인 경계에서 자원 수집 완료");
+        if (dropIndex > 0) GetComponent<MarinerInventory>()?.ShowFishingSuccess();
     }
 
     private int GetRandomItemIDByProbability(ItemDrop[] dropList)
@@ -693,54 +592,8 @@ public class MarinerAI : MarinerBase, IBegin
             isShowingAttackBox = false;
         }
 
-        // 수납 로직 (필요 시)
-        var inventory = GetComponent<MarinerInventory>();
-        if (inventory != null && inventory.GetAllItem() > 0)
-        {
-            var storage = GameObject.FindWithTag("Engine");
-            if (storage != null && agent != null && agent.isOnNavMesh)
-            {
-                agent.SetDestination(storage.transform.position);
-                while (!IsArrived())
-                {
-                    if (target != null || isChasing)
-                    {   // 적 만나면 전투로
-                        isNightRoaming = false;
-                        nightRoamRoutine = null;
-                        yield break;
-                    }
-                    yield return null;
-                }
-
-                var storageInventory = storage.GetComponent<InventoryBase>();
-                if (storageInventory != null)
-                {
-                    inventory.TransferAllItemsToStorage(storageInventory);
-                    //Debug.Log($"승무원 {marinerId}: 보관함 도착 및 수납 완료");
-                }
-                else
-                {
-                    // 보관함에 InventoryBase 없음 → 제거 후 이동
-                    var itemsToRemove = new List<SItemStack>();
-                    for (int i = 0; i < inventory.itemLists.Count; i++)
-                        if (inventory.itemLists[i] != null)
-                            itemsToRemove.Add(new SItemStack(inventory.itemLists[i].id, inventory.itemLists[i].amount));
-                    if (itemsToRemove.Count > 0) inventory.Remove(itemsToRemove.ToArray());
-                }
-            }
-            else
-            {
-                // 보관함 없거나 agent 불가 → 일단 이동 시작
-                if (agent != null && agent.isOnNavMesh) SetRandomDestination();
-                yield return new WaitForSeconds(0.5f);
-            }
-        }
-        else
-        {
-            // 아이템 없음 → 바로 이동 시작
-            if (agent != null && agent.isOnNavMesh) SetRandomDestination();
-            yield return new WaitForSeconds(0.5f);
-        }
+        if (agent != null && agent.isOnNavMesh) SetRandomDestination();
+        yield return new WaitForSeconds(0.5f);
 
         //  낮의 마지막 30초 + 밤 동안 계속 배회
         while (GameManager.Instance != null &&
@@ -800,14 +653,13 @@ public class MarinerAI : MarinerBase, IBegin
             }
 
             OnPersonalFarmingCompleted();
+            AudioManager.instance?.PlaySfx(AudioManager.SFX.GetFishing);
             hasFoundPersonalEdge = false;
         }
         finally
         {
             // 정리
             anim?.StopFishing();
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.GetFishing);
             if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
         }
     }

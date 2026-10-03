@@ -100,46 +100,12 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         {
             CommonUI.instance.StopCraft(InGameUI.instance.currentFabricationUi);
         }
-        //if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-        //{
-        //    InventoryManager.Instance.MouseSplit(index);
-        //}
-        else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-        {
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
             InventoryManager.Instance.MouseSingle(index);
-        }
+        else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            InventoryManager.Instance.MouseSplit(index);
         else
-        {
-            SItemStack clickedItem = InventoryManager.Instance.itemLists[index];
-            bool canUseByDoubleClick =
-                InventoryManager.Instance.mouseInventory == null &&
-                clickedItem != null &&
-                (clickedItem.itemBaseType.categories == EDataType.ConsumeItem ||
-                 clickedItem.itemBaseType.categories == EDataType.BuildObject);
-
-            if (canUseByDoubleClick)
-            {
-                if (IsDoubleClick(index))
-                {
-                    WithdrawSingleClick(index);
-                    DoubleClick(index);
-                    EndCheckDoubleClick(index);
-                }
-                else
-                {
-                    WithdrawSingleClick(index);
-                    PrepareSingleClick(index);
-                    BeginCheckDoubleClick(index);
-                }
-            }
-            else
-            {
-                WithdrawSingleClick(index);
-                EndCheckDoubleClick(index);
-                clickTime = 0.0f;
-                InventoryManager.Instance.MouseSwitch(index);
-            }
-        }
+            InventoryManager.Instance.MouseSwitch(index);
 
         // 마우스 슬롯 이미지 업뎃 + 클릭한 슬롯 이미지 업데이트
         mouseUI.Show(InventoryManager.Instance.mouseInventory);

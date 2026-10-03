@@ -13,9 +13,12 @@ public class MarinerInventory : InventoryBase
     [SerializeField] private SpriteRenderer exclamationMarkSprite;
 
     private Transform playerTransform;
+    private MarinerAI normalMariner;
+    private float fishingNoticeUntil;
 
     void Start()
     {
+        normalMariner = GetComponent<MarinerAI>();
         if (ThisIsPlayer.Player != null)
         {
             playerTransform = ThisIsPlayer.Player.transform;
@@ -24,6 +27,13 @@ public class MarinerInventory : InventoryBase
 
     void Update()
     {
+        if (normalMariner != null)
+        {
+            if (exclamationMarkSprite != null)
+                exclamationMarkSprite.enabled = !normalMariner.IsDead && normalMariner.isActiveAndEnabled
+                    && Time.time < fishingNoticeUntil;
+            return;
+        }
         // 리스트 초기화 체크
         if (itemLists == null || itemLists.Count == 0)
         {
@@ -43,8 +53,20 @@ public class MarinerInventory : InventoryBase
         }
     }
 
+    public void ShowFishingSuccess()
+    {
+        fishingNoticeUntil = Time.time + 1.2f;
+        if (exclamationMarkSprite != null) exclamationMarkSprite.enabled = true;
+    }
+
+    private void OnDisable()
+    {
+        ShutdownUI();
+    }
+
     public void ShutdownUI()
     {
+        fishingNoticeUntil = 0f;
         if (exclamationMarkSprite != null)
             exclamationMarkSprite.enabled = false;
     }

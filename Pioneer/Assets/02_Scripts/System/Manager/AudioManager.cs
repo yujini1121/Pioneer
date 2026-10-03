@@ -88,7 +88,11 @@ public class AudioManager : MonoBehaviour, IBegin
         Punch3_Player = 51,
         SuccessCrafting2 = 52,
         To_night2 = 53,
-        grunt_effort_struggle_male_b_17 = 54
+        grunt_effort_struggle_male_b_17 = 54,
+        MorningBell = 55,
+        NightBell = 56,
+        FishingAlert = 57,
+        ItemPickup = 58
     }
 
     [Header("Vol UI")]
@@ -143,12 +147,13 @@ public class AudioManager : MonoBehaviour, IBegin
             case SFX.Click: case SFX.SelectQuickSlot: case SFX.RotateInstallTypeObject:
             case SFX.RemoveItem: case SFX.ArrayItem: return SfxGroup.UI;
             case SFX.Hurricane: case SFX.HeavyRain: return SfxGroup.Environment;
+            case SFX.MorningBell: case SFX.NightBell: case SFX.FishingAlert:
             case SFX.GameOver: case SFX.GameStartButton: case SFX.ToNight: case SFX.To_night2:
             case SFX.Hunger: case SFX.MeetEnemy: case SFX.meetEnemy2:
             case SFX.Scream2: case SFX.LaughSaren: case SFX.Thunder: return SfxGroup.Event;
             case SFX.SuccessCrafting: case SFX.SuccessCrafting2: case SFX.GreatSuccessCrafting:
             case SFX.GreatSuccessCrafting2: case SFX.InstallObject: case SFX.FortifyObject:
-            case SFX.GetFishing: case SFX.OpenBox: case SFX.LevelUp: return SfxGroup.Interaction;
+            case SFX.ItemPickup: case SFX.GetFishing: case SFX.OpenBox: case SFX.LevelUp: return SfxGroup.Interaction;
             default: return SfxGroup.General;
         }
     }
@@ -540,7 +545,6 @@ public class AudioManager : MonoBehaviour, IBegin
             case SFX.Punch1_Player:
             case SFX.Punch3_Player:
             case SFX.Hit:
-            case SFX.Hit2:
                 cooldown = 0.025f; maxConcurrent = 3; priority = 2; break;
             case SFX.BeforeAttack_Minion:
             case SFX.BeforeAttack_Crawler:
@@ -552,6 +556,13 @@ public class AudioManager : MonoBehaviour, IBegin
             case SFX.AfterAttack_Titan:
             case SFX.BalistaAttack:
                 cooldown = 0.06f; maxConcurrent = 2; priority = 2; break;
+            case SFX.Hit2:
+                cooldown = 0.08f; maxConcurrent = 1; priority = 3; break;
+            case SFX.ItemPickup:
+                cooldown = 0.075f; maxConcurrent = 2; priority = 2; break;
+            case SFX.MorningBell:
+            case SFX.NightBell:
+            case SFX.FishingAlert:
             case SFX.GameStartButton:
             case SFX.LevelUp:
             case SFX.ToNight:

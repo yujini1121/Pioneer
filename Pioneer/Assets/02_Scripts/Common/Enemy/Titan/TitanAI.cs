@@ -42,6 +42,7 @@ public class TitanAI : EnemyBase, IBegin
         }
 
         SetAttribute();
+        ApplySpawnScaling();
         if (agent != null) agent.speed = speed;
 
         originalSpeed = speed;

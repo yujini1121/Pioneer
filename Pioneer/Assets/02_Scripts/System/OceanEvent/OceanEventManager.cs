@@ -158,7 +158,8 @@ public class OceanEventManager : MonoBehaviour
             : currentEvent is OceanEventWind ? "돌풍 — 다가오는 바람을 피하세요."
             : currentEvent is OceanEventWaterBloom ? "녹조 — 낚시에서 추가 자원을 얻을 수 있습니다."
             : currentEvent is OceanEventFog ? "안개 — 주변의 위협을 살피세요." : null;
-        if (hint != null) InGameUI.instance?.ShowActionFeedback(hint, 1);
+        if (hint != null && (GameManager.Instance == null || !GameManager.Instance.HasMorningBriefingUI))
+            InGameUI.instance?.ShowActionFeedback(hint, 1);
     }
 
 #region

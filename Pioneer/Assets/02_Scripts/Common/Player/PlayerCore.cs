@@ -465,6 +465,9 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (IsDead) return;
         base.TakeDamage(damage, attacker);
+        if (damage > 0 && attacker != null
+            && (attacker.GetComponent<EnemyBase>() != null || attacker.GetComponent<ZombieMarinerAI>() != null))
+            AudioManager.instance?.PlaySfx(AudioManager.SFX.Hit2);
         PlayerHpChanged?.Invoke(hp);
 
         if (hp <= 29 && !isPlaySFXLowHp)

@@ -122,7 +122,7 @@ public class PlayerFishing : MonoBehaviour
 
 
                 InGameUI.instance?.ShowActionFeedback("강한 입질! 잠시 후 표시 구간에 맞춰 Space!", 1);
-                AudioManager.instance?.PlaySfx(AudioManager.SFX.BeforeFishing);
+                AudioManager.instance?.PlaySfx(AudioManager.SFX.FishingAlert);
                 yield return new WaitForSeconds(0.8f);
                 yield return fishingEventUI.StartQTE(res => eventResult = res);
 
@@ -215,7 +215,7 @@ public class PlayerFishing : MonoBehaviour
             else
             {
                 if (ItemDropManager.instance != null)
-                    dropIndex += ItemDropManager.instance.DropFishing(itemStack, transform.position, fishingDirection, dropIndex);
+                    dropIndex += ItemDropManager.instance.CatchFishing(itemStack, transform, fishingDirection, dropIndex);
                 fishingExp = isDoubleBonus ? 10 : 5;
             }
 
@@ -234,8 +234,8 @@ public class PlayerFishing : MonoBehaviour
                 else
                 {
                     if (ItemDropManager.instance != null)
-                        dropIndex += ItemDropManager.instance.DropFishing(new SItemStack(caughtItem.id, 1),
-                            transform.position, fishingDirection, dropIndex);
+                        dropIndex += ItemDropManager.instance.CatchFishing(new SItemStack(caughtItem.id, 1),
+                            transform, fishingDirection, dropIndex);
                 }
                 UtilityFunctions.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
             }
@@ -264,7 +264,7 @@ public class PlayerFishing : MonoBehaviour
                     SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
                     if (bonusItem == treasureItem) TreasureBoxManager.instance?.GetBox();
                     else if (ItemDropManager.instance != null)
-                        ItemDropManager.instance.DropFishing(waterBloombonusItemStack, transform.position, fishingDirection, dropIndex);
+                        ItemDropManager.instance.CatchFishing(waterBloombonusItemStack, transform, fishingDirection, dropIndex);
                     InGameUI.instance?.ShowActionFeedback("녹조 보너스! 추가 자원을 획득했습니다.");
                 }
             }
