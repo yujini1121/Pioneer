@@ -12,7 +12,7 @@ using UnityEngine;
 
 public class OceanEventWaterBloom : OceanEventBase
 {
-    private int getMoreProbability = 80;
+    private int getMoreProbability = 50;
 
     List<PlayerFishing.FishingDropItem> getMoreDropItems;
 
@@ -41,9 +41,19 @@ public class OceanEventWaterBloom : OceanEventBase
 
         if (Random.Range(0, 100) < getMoreProbability)
         {
-            int randomIndex = Random.Range(0, getMoreDropItems.Count);
-
-            PlayerFishing.FishingDropItem bonusItem = getMoreDropItems[randomIndex];
+            float totalWeight = 0f;
+            foreach (var entry in getMoreDropItems)
+                if (entry.itemData != null) totalWeight += Mathf.Max(0f, entry.dropProbability);
+            if (totalWeight <= 0f) return null;
+            float roll = Random.value * totalWeight;
+            PlayerFishing.FishingDropItem bonusItem = default;
+            foreach (var entry in getMoreDropItems)
+            {
+                if (entry.itemData == null || entry.dropProbability <= 0f) continue;
+                bonusItem = entry;
+                roll -= entry.dropProbability;
+                if (roll <= 0f) break;
+            }
             if (bonusItem.itemData == null) return null;
 
             UtilityFunctions.Log($"[OceanEventWaterBloom][녹조 추가 아이템 획득 : {bonusItem.itemData.name}]");

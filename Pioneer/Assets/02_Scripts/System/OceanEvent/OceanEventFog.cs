@@ -125,15 +125,15 @@ public class OceanEventFog : OceanEventBase
     {
         while (IsRunning && GameManager.Instance != null && GameManager.Instance.IsDaytime)
         {
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(18f);
 
             if (!IsRunning || GameManager.Instance == null || !GameManager.Instance.IsDaytime) yield break;
 
-            if (Random.value <= 0.5f)
+            if (Random.value <= 0.75f)
             {
                 if (GameManager.Instance != null)
                 {
-                    int spawnCount = Random.Range(1, 3);
+                    int spawnCount = 1;
 
                     // 바다이벤트 : 안개 낮 효과 -> 30초마다 50% 확률로 미니언 1~2마리 스폰
                     GameManager.Instance.SpawnFogMinions(spawnCount);
@@ -146,7 +146,7 @@ public class OceanEventFog : OceanEventBase
     {
         while (IsRunning && GameManager.Instance != null && GameManager.Instance.IsDaytime)
         {
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(30f);
 
             if (!IsRunning || GameManager.Instance == null || !GameManager.Instance.IsDaytime) yield break;
 

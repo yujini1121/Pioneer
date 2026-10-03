@@ -26,6 +26,7 @@ public class PlayerFishing : MonoBehaviour
 
 
     private Coroutine fishingLoopCoroutine;
+    private Vector3 fishingDirection;
 
     private int fishingExp = 5;
 
@@ -40,6 +41,8 @@ public class PlayerFishing : MonoBehaviour
     public void BeginFishing(Vector3 dir)
     {
         if (PlayerCore.Instance == null) return;
+        dir.y = 0f;
+        fishingDirection = dir.normalized;
         // 좌/우만 사용: x>=0 → 1(오른쪽), x<0 → 0(왼쪽). 정지면 마지막 값 유지되므로 1로 처리
         int idx = (Mathf.Abs(dir.x) < 1e-6f) ? 1 : (dir.x >= 0f ? 1 : 0);
 
@@ -197,6 +200,7 @@ public class PlayerFishing : MonoBehaviour
             : "인양 완료! Q를 길게 눌러 다시 던지세요.", 1);
         // Longer, manual casts return a small bundle; the normal material pool stays intact.
         int count = caughtItem == treasureItem ? 1 : 2;
+        int dropIndex = 0;
         if (isDoubleBonus) TreasureBoxManager.instance?.GetSpecialBox();
         SItemStack itemStack = new SItemStack(caughtItem.id, count);
 
@@ -205,12 +209,13 @@ public class PlayerFishing : MonoBehaviour
             if (caughtItem == treasureItem)
             {
                 // TreasureBoxManager.instance.GetBox();
-                for (int i = 0; i < count; i++) TreasureBoxManager.instance.GetBox();
+                for (int i = 0; i < count; i++) TreasureBoxManager.instance?.GetBox();
                 fishingExp = 10;
             }
             else
             {
-                InventoryManager.Instance.Add(itemStack);
+                if (ItemDropManager.instance != null)
+                    dropIndex += ItemDropManager.instance.DropFishing(itemStack, transform.position, fishingDirection, dropIndex);
                 fishingExp = isDoubleBonus ? 10 : 5;
             }
 
@@ -224,11 +229,13 @@ public class PlayerFishing : MonoBehaviour
             {
                 if (caughtItem == treasureItem)
                 {
-                    TreasureBoxManager.instance.GetBox();
+                    TreasureBoxManager.instance?.GetBox();
                 }
                 else
                 {
-                    InventoryManager.Instance.Add(new SItemStack(caughtItem.id, 1));
+                    if (ItemDropManager.instance != null)
+                        dropIndex += ItemDropManager.instance.DropFishing(new SItemStack(caughtItem.id, 1),
+                            transform.position, fishingDirection, dropIndex);
                 }
                 UtilityFunctions.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
             }
@@ -240,7 +247,7 @@ public class PlayerFishing : MonoBehaviour
                     //SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
                     //InventoryManager.Instance.Add(treasureItemStack);
 
-                    TreasureBoxManager.instance.GetBox();
+                    TreasureBoxManager.instance?.GetBox();
                     UtilityFunctions.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
                 }
             }
@@ -256,7 +263,8 @@ public class PlayerFishing : MonoBehaviour
                 {
                     SItemStack waterBloombonusItemStack = new SItemStack(bonusItem.id, 1);
                     if (bonusItem == treasureItem) TreasureBoxManager.instance?.GetBox();
-                    else InventoryManager.Instance.Add(waterBloombonusItemStack);
+                    else if (ItemDropManager.instance != null)
+                        ItemDropManager.instance.DropFishing(waterBloombonusItemStack, transform.position, fishingDirection, dropIndex);
                     InGameUI.instance?.ShowActionFeedback("녹조 보너스! 추가 자원을 획득했습니다.");
                 }
             }

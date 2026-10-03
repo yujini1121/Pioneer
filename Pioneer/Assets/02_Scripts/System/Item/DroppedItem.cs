@@ -19,15 +19,50 @@ public class DroppedItem : MonoBehaviour
     {
         UtilityFunctions.Log($">> DroppedItem.SetItem(SItemStack item) : 호출됨 / isItemNull : {item == null}");
 
+        isCanPickUp = false;
+        isAttracting = false;
         itemValue = item;
-        slotUI.Show(item);
+        if (slotUI != null) slotUI.Show(item);
         this.pickUpTime = pickUpTime;
         IEnumerator EnablePickUpAfterTime()
         {
             yield return new WaitForSeconds(pickUpTime);
             isCanPickUp = true;
         }
-        StartCoroutine(EnablePickUpAfterTime());
+        if (pickUpTime >= 0f) StartCoroutine(EnablePickUpAfterTime());
+    }
+
+    public void FlyToDeck(Vector3 landing, float stagger)
+    {
+        StartCoroutine(FishingFlight(landing, stagger));
+    }
+
+    private IEnumerator FishingFlight(Vector3 landing, float stagger)
+    {
+        isCanPickUp = false;
+        Vector3 start = transform.position;
+        bool slotWasActive = slotUI != null && slotUI.gameObject.activeSelf;
+        if (slotWasActive) slotUI.gameObject.SetActive(false);
+        if (stagger > 0f) yield return new WaitForSeconds(stagger);
+        if (slotWasActive && slotUI != null) slotUI.gameObject.SetActive(true);
+
+        const float duration = 0.5f;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            if (ItemDropManager.instance != null
+                && !Physics.Raycast(landing + Vector3.up * 3f, Vector3.down, 8f,
+                    LayerMask.GetMask("Platform"), QueryTriggerInteraction.Ignore)
+                && ItemDropManager.instance.TryGetFishingFloor(landing, out RaycastHit floor))
+                landing = floor.point + Vector3.up * 0.2f;
+            float t = Mathf.Clamp01(elapsed / duration);
+            transform.position = Vector3.Lerp(start, landing, t) + Vector3.up * (4f * t * (1f - t));
+            yield return null;
+        }
+        transform.position = landing;
+        yield return new WaitForSeconds(0.3f);
+        isCanPickUp = true;
     }
 
     private void OnTriggerEnter(Collider collision)
@@ -80,7 +115,7 @@ public class DroppedItem : MonoBehaviour
 
     private void PickUp()
     {
-        if (isCanPickUp == false)
+        if (isCanPickUp == false || InventoryManager.Instance == null)
         {
             return;
         }
@@ -89,8 +124,8 @@ public class DroppedItem : MonoBehaviour
 
         InventoryManager.Instance.Add(itemValue);
         InventoryManager.Instance.UpdateSlot();
-        PlayerStatUI.Instance.UpdateBasicStatUI();
-        InventoryUiMain.instance.IconRefresh();
+        if (PlayerStatUI.Instance != null) PlayerStatUI.Instance.UpdateBasicStatUI();
+        if (InventoryUiMain.instance != null) InventoryUiMain.instance.IconRefresh();
 
         Destroy(gameObject);
     }

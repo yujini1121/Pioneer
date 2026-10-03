@@ -199,10 +199,6 @@ public class PlayerStatsLevel : MonoBehaviour
             }
             // ===========================================
             StatLevelUp?.Invoke(type); // ui 업데이트 이벤튼
-            string label = type == GrowStatType.Combat ? "전투" : type == GrowStatType.Crafting ? "제작" : "낚시";
-            string benefit = type == GrowStatType.Combat ? "공격력 · 내구도 효율 증가"
-                : type == GrowStatType.Crafting ? "대성공 확률 증가" : "추가 보상 확률 증가";
-            InGameUI.instance?.ShowActionFeedback($"{label} Lv. {growState.level} — {benefit}", 2);
         }
         UtilityFunctions.Log($"{type} 스탯 경험치 {amount} 획득");
     }

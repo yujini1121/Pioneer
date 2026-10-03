@@ -206,7 +206,9 @@ public class OceanEventThunder : OceanEventBase
     {
         if (targetDeck != null)
         {
-            targetDeck.DestroyByThunder();
+            int deckDamage = Mathf.Min(Mathf.Max(0, targetDeck.hp - 1),
+                Mathf.Max(1, Mathf.RoundToInt(targetDeck.maxHp * 0.1f)));
+            if (deckDamage > 0) targetDeck.TakeDamage(deckDamage, null);
         }
 
         Collider[] hits = Physics.OverlapSphere(center, thunderRadius);
@@ -241,11 +243,11 @@ public class OceanEventThunder : OceanEventBase
             CreatureBase creature = commonBase as CreatureBase;
             if (creature != null)
             {
-                int damage = Mathf.Max(1, Mathf.RoundToInt(creature.maxHp * 0.3f));
+                int damage = Mathf.Max(1, Mathf.RoundToInt(creature.maxHp * 0.2f));
                 creature.TakeDamage(damage, null);
 
                 StunHandler stunHandler = creature.GetComponent<StunHandler>();
-                if (stunHandler != null)
+                if (stunHandler != null && !creature.IsDead)
                 {
                     stunHandler.ApplyStun(stunDuration);
                     stunnedTargets.Add(stunHandler);

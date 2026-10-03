@@ -19,10 +19,10 @@ public class OceanEventManager : MonoBehaviour
     [Header("뇌우")]
     [SerializeField] private GameObject thunderEffect;
     [SerializeField] private GameObject rainEffect;
-    [SerializeField] private float thunderInterval = 30f;
+    [SerializeField] private float thunderInterval = 22f;
     [SerializeField] private float thunderWarningDuration = 2f;
-    [SerializeField] private float thunderRadius = 3f;
-    [SerializeField] private float thunderStunDuration = 2f;
+    [SerializeField] private float thunderRadius = 2f;
+    [SerializeField] private float thunderStunDuration = 0.75f;
     
     [Header("세이렌")]
     [SerializeField] private GameObject sirenDebuffEffect;
@@ -31,14 +31,14 @@ public class OceanEventManager : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private float sirenCheckInterval = 30f;
     [SerializeField] private float sirenCharmDuration = 10f;
-    [SerializeField] private float sirenProcChance = 0.5f;
+    [SerializeField] private float sirenProcChance = 0.75f;
 
     [Header("안개")]
     [SerializeField] private FogFade fogFade;
 
     [Header("돌풍")]
     [SerializeField] private GameObject windEffect;
-    [SerializeField] private float windInterval = 7f;
+    [SerializeField] private float windInterval = 16f;
     [SerializeField] private float windMoveSpeed = 16f;
     [SerializeField] private float windLifetime = 5f;
     [SerializeField] private float windSpawnDistance = 10f;

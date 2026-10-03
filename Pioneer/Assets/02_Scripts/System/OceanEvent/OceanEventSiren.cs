@@ -76,13 +76,16 @@ public class OceanEventSiren : OceanEventBase
         if (GameManager.Instance == null) yield break;
         float totalDuration = GameManager.Instance.dayDuration + GameManager.Instance.nightDuration;
         float elapsed = 0f; // 하루 전체 체크용
+        int charmCount = 0;
 
         while (elapsed < totalDuration && IsRunning)
         {
             yield return new WaitForSeconds(Mathf.Max(0.1f, checkInterval));
             elapsed += Mathf.Max(0.1f, checkInterval);
 
-            if (!IsRunning) yield break;
+            if (!IsRunning || elapsed >= totalDuration || charmCount >= 2) yield break;
+            charmedMariners.RemoveAll(mariner => mariner == null || mariner.IsDead || !mariner.isCharmed);
+            if (charmedMariners.Count > 0) continue;
 
             if (Random.value <= procChance)
             {
@@ -92,6 +95,7 @@ public class OceanEventSiren : OceanEventBase
                 MarinerAI target = mariners[Random.Range(0, mariners.Length)];
                 if (target == null || !target.isActiveAndEnabled || target.isCharmed || target.IsDead) continue;
 
+                charmCount++;
                 OceanEventManager.instance.BeginCoroutine(CharmRoutine(target));
             }
         }
@@ -113,7 +117,7 @@ public class OceanEventSiren : OceanEventBase
         if (target.Agent != null && target.Agent.isActiveAndEnabled && target.Agent.isOnNavMesh)
             target.Agent.isStopped = false;
 
-        float attackInterval = 1f;
+        float attackInterval = 2f;
         int clickCount = 0;
         float timer = 0f;
         float nextAttackTime = attackInterval;
@@ -167,7 +171,7 @@ public class OceanEventSiren : OceanEventBase
             nextAttackTime += attackInterval;
 
             //주변 피해 (Player, Mariner)
-            Collider[] hits = Physics.OverlapBox(target.transform.position, new Vector3(4f, 1f, 4f));
+            Collider[] hits = Physics.OverlapBox(target.transform.position, new Vector3(1.5f, 1f, 1.5f));
             HashSet<CommonBase> damagedTargets = new HashSet<CommonBase>();
             foreach (var hit in hits)
             {
@@ -175,7 +179,7 @@ public class OceanEventSiren : OceanEventBase
                 if (layer == LayerMask.NameToLayer("Player") || layer == LayerMask.NameToLayer("Mariner"))
                 {
                     CommonBase cb = hit.GetComponentInParent<CommonBase>();
-                    if (cb != null && !cb.IsDead && damagedTargets.Add(cb))
+                    if (cb != null && cb != target && !cb.IsDead && damagedTargets.Add(cb))
                     {
                         int dmg = Mathf.Max(1, Mathf.RoundToInt(cb.maxHp * 0.01f));
                         cb.TakeDamage(dmg, target.gameObject);

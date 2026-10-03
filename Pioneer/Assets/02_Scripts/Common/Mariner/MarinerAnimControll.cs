@@ -167,14 +167,18 @@ public class MarinerAnimControll : MonoBehaviour
     // 낚시 시작/종료
     public void StartFishing(Vector3 lookPoint, Transform self)
     {
-        if (animator == null) return;
+        if (animator == null || self == null) return;
 
         // 바라볼 방향 스냅(L/R/Front/Back)
         Vector3 w = (lookPoint - self.position); w.y = 0f;
         if (w.sqrMagnitude < 0.0001f) w = self.right; // 기본 오른쪽
-        Vector2 d = new Vector2(w.x, w.z).normalized;
-        if (Mathf.Abs(d.x) > Mathf.Abs(d.y)) d = new Vector2(Mathf.Sign(d.x), 0);
-        else d = new Vector2(0, Mathf.Sign(d.y));
+        Camera viewCamera = Camera.main;
+        float screenX = viewCamera != null
+            ? viewCamera.WorldToScreenPoint(self.position + w).x - viewCamera.WorldToScreenPoint(self.position).x
+            : w.x;
+        float side = Mathf.Abs(screenX) > 0.001f ? Mathf.Sign(screenX)
+            : (lastMoveDir.x < 0f ? -1f : 1f);
+        Vector2 d = new Vector2(side, 0f);
 
         aimDir = d;
         lastMoveDir = Snap4Direction(d);

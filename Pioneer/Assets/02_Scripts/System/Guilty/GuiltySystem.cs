@@ -312,7 +312,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
     // 바다 이벤트: 안개 밤 효과 -> 현재 죄책감의 20%만큼 증가
     public void AddFogNightWeight()
     {
-        int addValue = Mathf.RoundToInt(currentAttackWeight * 0.2f);
+        int addValue = Mathf.Min(3, Mathf.RoundToInt(currentAttackWeight * 0.2f));
 
         if (addValue <= 0)
             return;

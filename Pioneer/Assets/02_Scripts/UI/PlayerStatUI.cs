@@ -89,7 +89,7 @@ public class PlayerStatUI : MonoBehaviour
 #warning 버그 터지면 수정해야할 부분
     private void OnEnable()
     {
-        PlayerStatsLevel.StatLevelUp += UpdatePlayerGrowStatUI;
+        PlayerStatsLevel.StatLevelUp += OnStatLevelUp;
         PlayerCore.PlayerHpChanged += UpdateHpUI;
         PlayerCore.PlayerFullnessChanged += UpdateFullnessUI;
         PlayerCore.PlayerMentalChanged += UpdateMentalUI;
@@ -97,7 +97,7 @@ public class PlayerStatUI : MonoBehaviour
 
     private void OnDisable()
     {
-        PlayerStatsLevel.StatLevelUp -= UpdatePlayerGrowStatUI;
+        PlayerStatsLevel.StatLevelUp -= OnStatLevelUp;
         PlayerCore.PlayerHpChanged -= UpdateHpUI;
         PlayerCore.PlayerFullnessChanged -= UpdateFullnessUI;
         PlayerCore.PlayerMentalChanged -= UpdateMentalUI;
@@ -106,6 +106,25 @@ public class PlayerStatUI : MonoBehaviour
         CleanupBarState(fullnessState);
         CleanupBarState(mentalState);
         CleanupBarState(guiltyState);
+        if (combatIcon != null) combatIcon.transform.DOKill();
+        if (combatLevel != null) combatLevel.transform.DOKill();
+        if (craftingIcon != null) craftingIcon.transform.DOKill();
+        if (craftingLevel != null) craftingLevel.transform.DOKill();
+        if (fishingIcon != null) fishingIcon.transform.DOKill();
+        if (fishingLevel != null) fishingLevel.transform.DOKill();
+    }
+
+    private void OnStatLevelUp(GrowStatType type)
+    {
+        UpdatePlayerGrowStatUI(type);
+        Image icon = type == GrowStatType.Combat ? combatIcon
+            : type == GrowStatType.Crafting ? craftingIcon : fishingIcon;
+        TextMeshProUGUI level = type == GrowStatType.Combat ? combatLevel
+            : type == GrowStatType.Crafting ? craftingLevel : fishingLevel;
+        if (icon != null && icon.gameObject.activeInHierarchy)
+            UITweenHelper.PunchScale(icon.transform, 0.18f, 0.45f, true);
+        if (level != null && level.gameObject.activeInHierarchy)
+            UITweenHelper.PunchScale(level.transform, 0.10f, 0.45f, true);
     }
 
     void UpdateUI()
@@ -537,7 +556,7 @@ public class PlayerStatUI : MonoBehaviour
     void UpdatePlayerGrowStatUI(GrowStatType type)
     {
         PlayerStatsLevel statLevel = PlayerStatsLevel.Instance;
-        GrowState state = statLevel.growStates[type];
+        if (statLevel == null || !statLevel.growStates.TryGetValue(type, out GrowState state)) return;
         int currentLv = state.level;
 
         switch (type)

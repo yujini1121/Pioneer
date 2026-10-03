@@ -9780,10 +9780,10 @@ MonoBehaviour:
   thunderEffect: {fileID: 4885947771507182583, guid: b56b5aef84b459c4aac2b1c5c8e0175c,
     type: 3}
   rainEffect: {fileID: 2050597532}
-  thunderInterval: 4
+  thunderInterval: 22
   thunderWarningDuration: 2
   thunderRadius: 2
-  thunderStunDuration: 2
+  thunderStunDuration: 0.75
   sirenDebuffEffect: {fileID: 4463460724980371824, guid: 56c724db92875684c8bbbbcebf2efc71,
     type: 3}
   sirenAppearLeftEffect: {fileID: 927584275950016700, guid: 0e5e941169895e74395a7dbe874d4f1f,
@@ -9791,13 +9791,13 @@ MonoBehaviour:
   sirenAppearRightEffect: {fileID: 927584275950016700, guid: a89a539a60e1350418ecab94737dd1a1,
     type: 3}
   mainCamera: {fileID: 1897114962}
-  sirenCheckInterval: 5
-  sirenCharmDuration: 3
-  sirenProcChance: 1
+  sirenCheckInterval: 30
+  sirenCharmDuration: 10
+  sirenProcChance: 0.75
   fogFade: {fileID: 1832681769}
   windEffect: {fileID: 3239474330589372491, guid: 01fdfa40097a5fb4ebf7a58ea2945a69,
     type: 3}
-  windInterval: 7
+  windInterval: 16
   windMoveSpeed: 16
   windLifetime: 5
   windSpawnDistance: 10
