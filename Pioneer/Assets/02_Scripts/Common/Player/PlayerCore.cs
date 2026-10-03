@@ -637,6 +637,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         currentFullness += increase;
         currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
+        UpdateFullnessState();
 
         PlayerFullnessChanged?.Invoke(currentFullness);
     }

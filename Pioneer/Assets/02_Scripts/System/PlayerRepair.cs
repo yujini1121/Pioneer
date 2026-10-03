@@ -35,7 +35,8 @@ public class PlayerRepair : MonoBehaviour
 
     public void Repair(StructureBase target)
     {
-        if (isAction) return;
+        if (isAction || target == null || target.IsDead || RepairSystem.instance == null
+            || RepairSystem.instance.remainRepairCount <= 0) return;
 
         UtilityFunctions.Log($"수리 버튼 눌림");
 
@@ -44,8 +45,6 @@ public class PlayerRepair : MonoBehaviour
 
     IEnumerator RepairCoroutine(StructureBase target)
     {
-        UtilityFunctions.Log($"수리 버튼 눌림");
-
         isAction = true;
 
         // effect.SetActive(true);
@@ -61,9 +60,12 @@ public class PlayerRepair : MonoBehaviour
         // effect.SetActive(false);
         circuleBack.SetActive(false);
         ringImage.enabled = false;
-        target.Heal(target.maxHp);
-
         isAction = false;
+
+        if (target == null || target.IsDead || RepairSystem.instance == null
+            || RepairSystem.instance.remainRepairCount <= 0) yield break;
+
+        target.Heal(target.maxHp);
         RepairSystem.instance.remainRepairCount--;
         //InventoryManager.Instance.Remove(new SItemStack(40007, 1));
     }

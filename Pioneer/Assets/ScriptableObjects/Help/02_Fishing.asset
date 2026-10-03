@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed31bbf8d0a76d94d8c70c3810cf59ac, type: 3}
+  m_Name: 02_Fishing
+  m_EditorClassIdentifier:
+  order: 1
+  categoryName: "낚시"
+  categorySprite: {fileID: 21300000, guid: c8905c39f2d7668408058c09017dfbef, type: 3}
+  contentTitle: "낚시"
+  description: ""
+  contentImage: {fileID: 0}
+  entries:
+  - order: 0
+    entryName: "낚시 방법"
+    contentTitle: "낚시 방법"
+    description: "뗏목 가장자리에서 Q를 길게 눌러 낚시를 시작합니다.\n한 번 던지면 한 번 인양한 뒤 낚시가 종료됩니다.\n다시 낚시하려면 Q를 길게 눌러 다시 던지세요.\n\n낚시 중에는 이동과 일부 행동이 제한됩니다."
+    contentImage: {fileID: 0}
+  - order: 1
+    entryName: "돌발 이벤트"
+    contentTitle: "돌발 이벤트"
+    description: "낚시 중 일정 확률로 타이밍 맞추기가 시작됩니다.\n표시가 성공 구간에 들어왔을 때 Space를 누르세요.\n\n성공하면 추가 보물 보상을 얻습니다.\n실패하거나 시간을 넘기면 해당 낚시 보상을 얻지 못합니다."
+    contentImage: {fileID: 0}
+  - order: 2
+    entryName: "보물상자"
+    contentTitle: "보물상자"
+    description: "보물 보상은 발견 즉시 지급됩니다. 이미지의 받기/버리기 안내와 달리 현재 팝업은 결과를 확인하는 창입니다."
+    contentImage: {fileID: 21300000, guid: f3b3cde878b15ce7957f40e0213842cf, type: 3}

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed31bbf8d0a76d94d8c70c3810cf59ac, type: 3}
+  m_Name: 05_Stats
+  m_EditorClassIdentifier:
+  order: 4
+  categoryName: "스탯"
+  categorySprite: {fileID: 21300000, guid: da3dc403c7ec3664883274941b85a39c, type: 3}
+  contentTitle: "스탯"
+  description: ""
+  contentImage: {fileID: 0}
+  entries:
+  - order: 0
+    entryName: "배고픔"
+    contentTitle: "배고픔"
+    description: "포만감은 시간이 지나면 감소합니다. HP가 50 미만이면 감소가 빨라집니다. 이동이 느려지는 시점은 포만감 0입니다."
+    contentImage: {fileID: 21300000, guid: 5af0b6925545592eab0aceac81aeb7cd, type: 3}
+  - order: 1
+    entryName: "정신력"
+    contentTitle: "정신력"
+    description: "정신력 회복 아이템과 술을 활용할 수 있습니다. 술은 60초 동안 정신력 감소를 막습니다."
+    contentImage: {fileID: 21300000, guid: 54705ff938bc5ff68577cd1b1c84c835, type: 3}
+  - order: 2
+    entryName: "스탯"
+    contentTitle: "스탯"
+    description: "Tab에서 현재 능력치와 성장을 확인합니다. 전투는 직접 가한 피해, 제작은 제작 완료, 낚시는 획득 결과에 따라 경험치를 얻습니다."
+    contentImage: {fileID: 21300000, guid: 4f356b03584c5a56a5dc436fd3791d70, type: 3}
+  - order: 3
+    entryName: "상태 이상"
+    contentTitle: "상태 이상"
+    description: "포만감 80 이상: 이동 속도가 증가합니다.\n포만감 0: 이동이 느려지고 체력이 감소합니다.\n\n정신력이 낮아지면 전투와 행동에 불이익이 생깁니다.\n뇌우와 돌풍은 이동을 방해할 수 있습니다.\n\n효과의 지속 시간과 현재 상태는 상태 표시를 확인하세요."
+    contentImage: {fileID: 0}
+  - order: 4
+    entryName: "죄책감"
+    contentTitle: "죄책감"
+    description: "승무원의 죽음과 일부 바다 이벤트로 죄책감이 쌓입니다. 현재 일반 플레이에는 시간 경과나 음주로 죄책감을 줄이는 흐름이 연결되어 있지 않습니다."
+    contentImage: {fileID: 21300000, guid: 8d27f34395885d1a9a6aa847dee6c4cd, type: 3}

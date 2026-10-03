@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed31bbf8d0a76d94d8c70c3810cf59ac, type: 3}
+  m_Name: 04_Environment
+  m_EditorClassIdentifier:
+  order: 3
+  categoryName: "환경"
+  categorySprite: {fileID: 21300000, guid: fba23ca95ddcabb46985ee05efe56b93, type: 3}
+  contentTitle: "환경"
+  description: ""
+  contentImage: {fileID: 0}
+  entries:
+  - order: 0
+    entryName: "밤"
+    contentTitle: "밤"
+    description: "밤에는 적이 습격합니다. 돛대와 뗏목을 지키고 다음 아침을 준비하세요."
+    contentImage: {fileID: 21300000, guid: 455a41d196365c19a92d8ece510c2688, type: 3}
+  - order: 1
+    entryName: "승무원"
+    contentTitle: "승무원"
+    description: "2일차부터 아침마다 1명이 승선하며, 생존 승무원은 최대 5명입니다. 날마다 승선 인원 자체가 늘어나지는 않습니다."
+    contentImage: {fileID: 21300000, guid: bce75ebaf57f5d50a0f064573bcb7a37, type: 3}
+  - order: 2
+    entryName: "바다 이벤트"
+    contentTitle: "바다 이벤트"
+    description: "2일차부터 아침에 바다 이벤트가 결정됩니다.\n\n안개: 시야와 정신력에 영향을 주고 적이 나타납니다.\n세이렌: 매혹된 승무원을 가까이에서 공격 조작으로 깨웁니다.\n뇌우: 이동이 느려지고 경고 뒤 번개가 떨어집니다.\n녹조: 낚시에서 추가 아이템을 얻을 수 있습니다.\n돌풍: 돌풍이 이동과 시설에 영향을 줍니다."
+    contentImage: {fileID: 0}
+  - order: 3
+    entryName: "감염"
+    contentTitle: "감염"
+    description: "현재 감염은 10일차부터 발생합니다. 이미지의 3일차 안내와 다르며, 기본 5일 생존 이후 무한 모드에서 만나게 됩니다."
+    contentImage: {fileID: 21300000, guid: 80f72c0cd7225be4b12c7a8dedb490c6, type: 3}

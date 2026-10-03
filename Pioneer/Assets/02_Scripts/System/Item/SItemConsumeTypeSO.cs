@@ -72,20 +72,16 @@ public class SItemConsumeTypeSO : SItemTypeSO
                 break;
             //배고픔 해소
             case 804://
-                PlayerCore.Instance.currentFullness = Mathf.Min
-                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 5);
+                PlayerCore.Instance.EatFoodFullness(5);
                 break;
             case 805://
-                PlayerCore.Instance.currentFullness = Mathf.Min
-                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 20);
+                PlayerCore.Instance.EatFoodFullness(20);
                 break;
             case 806://
-                PlayerCore.Instance.currentFullness = Mathf.Min
-                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 40);
+                PlayerCore.Instance.EatFoodFullness(40);
                 break;
             case 807://
-                PlayerCore.Instance.currentFullness = Mathf.Min
-                    (PlayerCore.Instance.maxFullness, PlayerCore.Instance.currentFullness + 70);
+                PlayerCore.Instance.EatFoodFullness(70);
                 break;
             //정신력 상승?
             case 808:

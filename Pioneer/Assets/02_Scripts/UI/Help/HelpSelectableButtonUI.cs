@@ -11,7 +11,6 @@ public class HelpSelectableButtonUI : MonoBehaviour
     public List<Graphic> targetGraphics = new List<Graphic>();
 
     private readonly List<Graphic> runtimeGraphics = new List<Graphic>();
-    private readonly List<Color> runtimeColors = new List<Color>();
 
     private void Awake()
     {
@@ -26,7 +25,6 @@ public class HelpSelectableButtonUI : MonoBehaviour
     private void CacheGraphics()
     {
         runtimeGraphics.Clear();
-        runtimeColors.Clear();
 
         if (targetGraphics != null && targetGraphics.Count > 0)
         {
@@ -35,7 +33,6 @@ public class HelpSelectableButtonUI : MonoBehaviour
                 Graphic graphic = targetGraphics[index];
                 if (graphic == null) continue;
                 runtimeGraphics.Add(graphic);
-                runtimeColors.Add(graphic.color);
             }
         }
         else
@@ -43,12 +40,10 @@ public class HelpSelectableButtonUI : MonoBehaviour
             if (label != null)
             {
                 runtimeGraphics.Add(label);
-                runtimeColors.Add(label.color);
             }
             if (icon != null)
             {
                 runtimeGraphics.Add(icon);
-                runtimeColors.Add(icon.color);
             }
         }
     }
@@ -64,19 +59,18 @@ public class HelpSelectableButtonUI : MonoBehaviour
         {
             icon.sprite = displaySprite;
             icon.enabled = useIcon && displaySprite != null;
+            icon.preserveAspect = true;
         }
     }
 
-    public void SetSelected(bool isSelected, float selectedAlpha, float normalAlpha)
+    public void SetSelected(bool isSelected, Color selectedColor, Color normalColor)
     {
-        float alpha = isSelected ? selectedAlpha : normalAlpha;
+        Color color = isSelected ? selectedColor : normalColor;
 
         for (int index = 0; index < runtimeGraphics.Count; ++index)
         {
             if (runtimeGraphics[index] == null) continue;
 
-            Color color = runtimeColors[index];
-            color.a = alpha;
             runtimeGraphics[index].color = color;
         }
     }

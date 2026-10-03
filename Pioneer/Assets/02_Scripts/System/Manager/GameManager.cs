@@ -507,6 +507,8 @@ public class GameManager : MonoBehaviour, IBegin
         if (gameOverUI != null)
             gameOverUI.HideGameOverScreen();
 
+        PresentMorning();
+
         UtilityFunctions.Log("[GameMode] 무한 모드로 전환되어 게임을 이어서 진행합니다.");
     }
 

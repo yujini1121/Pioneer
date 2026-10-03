@@ -25,8 +25,8 @@ public class HelpUIController : MonoBehaviour
     [SerializeField] private Button closeButton;
 
     [Header("선택 표시")]
-    [SerializeField, Range(0f, 1f)] private float selectedAlpha = 1f;
-    [SerializeField, Range(0f, 1f)] private float normalAlpha = 0.55f;
+    [SerializeField] private Color selectedColor = new Color32(140, 140, 140, 255);
+    [SerializeField] private Color normalColor = Color.white;
 
     private readonly List<HelpSelectableButtonUI> categoryButtons = new List<HelpSelectableButtonUI>();
     private readonly List<HelpSelectableButtonUI> subCategoryButtons = new List<HelpSelectableButtonUI>();
@@ -54,15 +54,12 @@ public class HelpUIController : MonoBehaviour
     {
         RebuildCategoryButtons();
 
-        if (sortedCategories.Count > 0)
-        {
-            SelectCategory(0);
-        }
-        else
-        {
-            ClearSubCategoryButtons();
-            ApplyContent(null, null, null);
-        }
+        currentCategoryIndex = -1;
+        currentEntryIndex = -1;
+        currentEntries.Clear();
+        ClearSubCategoryButtons();
+        if (subCategoryPanel != null) subCategoryPanel.SetActive(false);
+        ApplyContent(null, null, null);
     }
 
     public void Close()
@@ -92,6 +89,7 @@ public class HelpUIController : MonoBehaviour
             if (buttonUI == null) continue;
 
             buttonUI.SetData(category.categoryName, category.categorySprite, true);
+            buttonUI.SetSelected(false, selectedColor, normalColor);
             buttonUI.button.onClick.RemoveAllListeners();
             buttonUI.button.onClick.AddListener(() => SelectCategory(buttonIndex));
             categoryButtons.Add(buttonUI);
@@ -140,7 +138,7 @@ public class HelpUIController : MonoBehaviour
 
         for (int buttonIndex = 0; buttonIndex < categoryButtons.Count; ++buttonIndex)
         {
-            categoryButtons[buttonIndex].SetSelected(buttonIndex == currentCategoryIndex, selectedAlpha, normalAlpha);
+            categoryButtons[buttonIndex].SetSelected(buttonIndex == currentCategoryIndex, selectedColor, normalColor);
         }
 
         SHelpCategorySO category = sortedCategories[index];
@@ -174,7 +172,7 @@ public class HelpUIController : MonoBehaviour
 
         for (int buttonIndex = 0; buttonIndex < subCategoryButtons.Count; ++buttonIndex)
         {
-            subCategoryButtons[buttonIndex].SetSelected(buttonIndex == currentEntryIndex, selectedAlpha, normalAlpha);
+            subCategoryButtons[buttonIndex].SetSelected(buttonIndex == currentEntryIndex, selectedColor, normalColor);
         }
 
         SHelpEntryData entry = currentEntries[index];
@@ -192,17 +190,25 @@ public class HelpUIController : MonoBehaviour
         if (contentTitleText != null)
         {
             contentTitleText.text = string.IsNullOrEmpty(title) ? string.Empty : title;
+            contentTitleText.gameObject.SetActive(sprite == null && !string.IsNullOrEmpty(title));
         }
 
         if (contentDescriptionText != null)
         {
             contentDescriptionText.text = string.IsNullOrEmpty(description) ? string.Empty : description;
+            contentDescriptionText.fontSize = sprite != null ? 24f : 30f;
+            contentDescriptionText.enableAutoSizing = true;
+            contentDescriptionText.fontSizeMin = 18f;
+            contentDescriptionText.fontSizeMax = sprite != null ? 24f : 30f;
+            contentDescriptionText.rectTransform.anchorMax = new Vector2(1f, sprite != null ? 0.14f : 0.87f);
         }
 
         if (contentImage != null)
         {
             contentImage.sprite = sprite;
             contentImage.enabled = sprite != null;
+            contentImage.preserveAspect = true;
+            contentImage.raycastTarget = false;
         }
     }
 
@@ -212,6 +218,7 @@ public class HelpUIController : MonoBehaviour
         {
             if (categoryButtons[index] != null)
             {
+                categoryButtons[index].gameObject.SetActive(false);
                 Destroy(categoryButtons[index].gameObject);
             }
         }
@@ -224,6 +231,7 @@ public class HelpUIController : MonoBehaviour
         {
             if (subCategoryButtons[index] != null)
             {
+                subCategoryButtons[index].gameObject.SetActive(false);
                 Destroy(subCategoryButtons[index].gameObject);
             }
         }

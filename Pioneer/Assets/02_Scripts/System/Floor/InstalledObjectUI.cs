@@ -141,7 +141,6 @@ public class InstalledObjectUI : MonoBehaviour
                 break;
 
             case Mode.Move:
-                UtilityFunctions.Log("설치물 이동 모드 진행 중");
                 current.TickRelocate(cam);
                 if (!current.IsRelocating)          // 이동 종료 시 Idle 복귀
                 {

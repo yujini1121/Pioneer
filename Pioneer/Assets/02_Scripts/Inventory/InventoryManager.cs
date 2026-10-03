@@ -245,6 +245,11 @@ public class InventoryManager : InventoryBase
         {
             mouseInventory = null;
         }
+
+        if (selectedSlotIndex >= 0 && selectedSlotIndex < itemLists.Count)
+            UpdateSlot();
+        else
+            SelectedSlotInventory = null;
     }
 
     private void Awake()

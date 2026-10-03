@@ -6,7 +6,7 @@ public class PlayerInteract : MonoBehaviour
 {
 	public static PlayerInteract instance;
 
-	List<StructureBase> ready;
+	readonly List<StructureBase> ready = new List<StructureBase>();
 	StructureBase closestOne;
 
 	public static void Add(StructureBase one)
@@ -72,7 +72,7 @@ public class PlayerInteract : MonoBehaviour
             }
 		}
 
-		ready = new List<StructureBase>();
+		ready.Clear();
 		
 		if (closestOne != null &&
 			closestOne.CanInteract == false)

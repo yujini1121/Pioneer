@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed31bbf8d0a76d94d8c70c3810cf59ac, type: 3}
+  m_Name: 03_Crafting
+  m_EditorClassIdentifier:
+  order: 2
+  categoryName: "제작"
+  categorySprite: {fileID: 21300000, guid: daa8958228d05d01865d7bb12af2d540, type: 3}
+  contentTitle: "제작"
+  description: ""
+  contentImage: {fileID: 0}
+  entries:
+  - order: 0
+    entryName: "간이 제작"
+    contentTitle: "간이 제작"
+    description: "가방과 간이 제작을 여는 키는 Tab입니다."
+    contentImage: {fileID: 21300000, guid: d6b0b04aceb353b18d04de01ef2f87fd, type: 3}
+  - order: 1
+    entryName: "제작대 활용"
+    contentTitle: "제작대 활용"
+    description: "제작대 근처에서 E로 상호작용합니다. 이미지의 R 안내는 이전 조작입니다."
+    contentImage: {fileID: 21300000, guid: b52244d020925bbc8a6994c01c4975b2, type: 3}
+  - order: 2
+    entryName: "아이템 사용"
+    contentTitle: "아이템 사용"
+    description: "Tab으로 가방을 열고 퀵슬롯에 등록한 뒤 1~9와 좌클릭으로 사용합니다. 수리망치는 획득 시 수리 횟수로 저장됩니다."
+    contentImage: {fileID: 21300000, guid: 7e0a799e656850658fe6ce0e73eeab06, type: 3}
+  - order: 3
+    entryName: "오브젝트 설치"
+    contentTitle: "오브젝트 설치"
+    description: "초록색 위치에 좌클릭하여 설치합니다. 마우스 휠로 회전하고 F로 설치 모드를 나갑니다."
+    contentImage: {fileID: 21300000, guid: 92884d93152157adb3566748985a1a46, type: 3}
