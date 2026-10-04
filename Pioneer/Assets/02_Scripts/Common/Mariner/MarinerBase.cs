@@ -463,13 +463,14 @@ public class MarinerBase : CreatureBase
 
     protected void CancelSecondPriorityAction()
     {
-        if (!isSecondPriorityStarted) return;
         isSecondPriorityStarted = false;
+        hasFoundPersonalEdge = false;
         if (secondPriorityRoutine != null)
         {
             StopCoroutine(secondPriorityRoutine);
             secondPriorityRoutine = null;
         }
+        GetComponentInChildren<MarinerAnimControll>(true)?.StopFishing();
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
         //Debug.Log($"{GetCrewTypeName()} {GetMarinerId()}: 2순위 작업 취소");
     }

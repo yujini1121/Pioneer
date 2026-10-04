@@ -296,6 +296,8 @@ public class PlayerCore : CreatureBase, IBegin
     public void SetState(PlayerState state)
     {
         currentState = state;
+        if (state == PlayerState.ChargingFishing || state == PlayerState.ActionFishing)
+            StopHorizontalMovement();
         UtilityFunctions.Log("Player State Changed to: " + state);
     }
 

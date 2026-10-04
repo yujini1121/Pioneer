@@ -77,9 +77,12 @@ public class CreateObject : MonoBehaviour, IBegin
     [SerializeField] private float installTimeSec = 2f; // Installable SO에서 덮어쓸 수 있음
     [SerializeField] private Image ringBackground;
     [SerializeField] private Image ringFill;
-    [SerializeField] private float installProgressSideOffset = -0.85f;
-    [SerializeField] private float installProgressHeightOffset = 0f;
+    [Tooltip("설치 대상 상단 중앙에서 카메라 기준 좌우 간격 (월드 단위)")]
+    [SerializeField] private float installProgressSideOffset = 0f;
+    [Tooltip("설치 대상의 렌더링 영역 맨 위에서 추가로 띄울 높이 (월드 단위)")]
+    [SerializeField] private float installProgressHeightOffset = 0.75f;
     private RectTransform installProgressRect;
+    private Renderer[] installProgressRenderers;
 
     [SerializeField] private const float defaultCellSize = 2f;
 
@@ -280,7 +283,7 @@ public class CreateObject : MonoBehaviour, IBegin
 
     private void UpdateInstallProgressUiTransform()
     {
-        if (installProgressRect == null || playerTrans == null || mainCamera == null)
+        if (installProgressRect == null || tempObj == null || mainCamera == null)
             return;
 
         Vector3 sideDir = mainCamera.transform.right;
@@ -295,8 +298,25 @@ public class CreateObject : MonoBehaviour, IBegin
             sideDir.Normalize();
         }
 
+        Vector3 anchor = tempObj.transform.position;
+        bool hasBounds = false;
+        Bounds objectBounds = default;
+        if (installProgressRenderers != null)
+        {
+            foreach (Renderer targetRenderer in installProgressRenderers)
+            {
+                if (targetRenderer == null || !targetRenderer.enabled || !targetRenderer.gameObject.activeInHierarchy)
+                    continue;
+
+                if (hasBounds) objectBounds.Encapsulate(targetRenderer.bounds);
+                else { objectBounds = targetRenderer.bounds; hasBounds = true; }
+            }
+        }
+        if (hasBounds)
+            anchor = new Vector3(objectBounds.center.x, objectBounds.max.y, objectBounds.center.z);
+
         installProgressRect.position =
-            playerTrans.position +
+            anchor +
             sideDir * installProgressSideOffset +
             Vector3.up * installProgressHeightOffset;
 
@@ -664,6 +684,7 @@ public class CreateObject : MonoBehaviour, IBegin
         tempObj = Instantiate(creationDict[creationType], worldSpaceParent);
         tempObj.transform.localPosition = new Vector3(local.x, 0f, local.z);
         tempObj.transform.rotation = onHand.transform.rotation;
+        installProgressRenderers = tempObj.GetComponentsInChildren<Renderer>();
 
         var col = tempObj.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;

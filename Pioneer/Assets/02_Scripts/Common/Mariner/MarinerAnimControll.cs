@@ -41,6 +41,9 @@ public class MarinerAnimControll : MonoBehaviour
     // ★ Fishing
     static readonly int H_FishingTrigger = Animator.StringToHash("FishingTrigger");
     static readonly int H_IsFishing = Animator.StringToHash("IsFishing");
+    static readonly int S_FishingLeft = Animator.StringToHash("Base Layer.Mariner_StateMachine.Mariner_Fishing_Side_L");
+    static readonly int S_FishingRight = Animator.StringToHash("Base Layer.Mariner_StateMachine.Mariner_Fishing_Side_R");
+    static readonly int S_DefaultIdle = Animator.StringToHash("Base Layer.Mariner_StateMachine.Mariner_Idle_Front");
 
     static readonly int H_IsZombie = Animator.StringToHash("isZombie");
     static readonly int H_ZombieAttack = Animator.StringToHash("ZombieAttack");
@@ -168,6 +171,7 @@ public class MarinerAnimControll : MonoBehaviour
     public void StartFishing(Vector3 lookPoint, Transform self)
     {
         if (animator == null || self == null) return;
+        if (animator.GetBool(H_IsFishing)) return;
 
         // 바라볼 방향 스냅(L/R/Front/Back)
         Vector3 w = (lookPoint - self.position); w.y = 0f;
@@ -177,7 +181,7 @@ public class MarinerAnimControll : MonoBehaviour
             ? viewCamera.WorldToScreenPoint(self.position + w).x - viewCamera.WorldToScreenPoint(self.position).x
             : w.x;
         float side = Mathf.Abs(screenX) > 0.001f ? Mathf.Sign(screenX)
-            : (lastMoveDir.x < 0f ? -1f : 1f);
+            : (Mathf.Abs(w.x) > 0.001f ? Mathf.Sign(w.x) : (w.z < 0f ? -1f : 1f));
         Vector2 d = new Vector2(side, 0f);
 
         aimDir = d;
@@ -190,16 +194,26 @@ public class MarinerAnimControll : MonoBehaviour
         animator.SetFloat(H_Speed, 0f);
 
         // 상태 진입
+        animator.ResetTrigger(H_Attack);
+        animator.SetBool(H_IsAttacking, false);
         animator.ResetTrigger(H_FishingTrigger);
-        animator.SetTrigger(H_FishingTrigger);
         animator.SetBool(H_IsFishing, true);
+        animator.Play(side < 0f ? S_FishingLeft : S_FishingRight, 0, 0f);
     }
 
     public void StopFishing()
     {
         if (animator == null) return;
+        bool wasFishing = animator.GetBool(H_IsFishing);
+        animator.ResetTrigger(H_FishingTrigger);
         animator.SetBool(H_IsFishing, false); // 종료 조건 해제 → Idle로 복귀
+        if (!wasFishing) return;
+
         ClearAim();
+        wasMoving = false;
+        forceIdlePose = true;
+        animator.SetFloat(H_Speed, 0f);
+        animator.Play(S_DefaultIdle, 0, 0f);
     }
     public void EndFishingFromEvent()  // 애니메이션 이벤트에서 호출
     {

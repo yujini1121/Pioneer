@@ -16,8 +16,8 @@ public class CrawlerAI : EnemyBase, IBegin
     private GameObject revengeTarget;
     private bool isAttack = false;
     private float attackTimer = 0f;
-    private const float AttackHitDelay = 0.1f;
-    private const float AttackRecoveryDelay = 0.45f;
+    private const float AttackHitDelay = 0.2f;
+    private const float AttackRecoveryDelay = 0.8f;
 
     private StunHandler stunHandler;
     private float originalSpeed;
@@ -26,6 +26,11 @@ public class CrawlerAI : EnemyBase, IBegin
     {
         if (animator == null) animator = GetComponentInChildren<Animator>();
         stunHandler = GetComponent<StunHandler>();
+        if (TryGetComponent(out Rigidbody body))
+        {
+            body.useGravity = false;
+            body.isKinematic = true;
+        }
     }
 
     void Start()
@@ -113,8 +118,45 @@ public class CrawlerAI : EnemyBase, IBegin
 
     private bool CanAttack()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, detectMask);
-        return hitColliders.Length > 0 && attackTimer <= 0f;
+        if (attackTimer > 0f || isAttack) return false;
+
+        Vector3 origin = GetAttackOrigin();
+        Collider[] nearby = Physics.OverlapSphere(origin, attackRange, detectMask, QueryTriggerInteraction.Ignore);
+        CommonBase nearest = null;
+        float nearestDistance = float.MaxValue;
+        foreach (Collider hit in nearby)
+        {
+            CommonBase candidate = hit.GetComponentInParent<CommonBase>();
+            if (candidate == null || candidate == this || candidate.IsDead) continue;
+            float distance = (hit.ClosestPoint(origin) - origin).sqrMagnitude;
+            if (distance >= nearestDistance) continue;
+            nearest = candidate;
+            nearestDistance = distance;
+        }
+        if (nearest == null) return false;
+
+        currentAttackTarget = nearest.gameObject;
+        Vector3 direction = nearest.transform.position - transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude > 0.0001f) lastMoveDirection = direction.normalized;
+        return DetectCrawlerAttackRange().Any(hit => hit.GetComponentInParent<CommonBase>() == nearest);
+    }
+
+    private Vector3 GetAttackOrigin()
+    {
+        Vector3 origin = transform.position;
+        if (TryGetComponent(out CapsuleCollider body)) origin.y = body.bounds.min.y + 1f;
+        return origin;
+    }
+
+    private Collider[] DetectCrawlerAttackRange()
+    {
+        Vector3 direction = lastMoveDirection;
+        direction.y = 0f;
+        direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector3.forward;
+        Vector3 center = GetAttackOrigin() + direction * (attackRange * 0.5f);
+        return Physics.OverlapBox(center, new Vector3(0.65f, 1.25f, attackRange * 0.5f),
+            Quaternion.LookRotation(direction), detectMask, QueryTriggerInteraction.Ignore);
     }
 
     private void Move()
@@ -160,6 +202,7 @@ public class CrawlerAI : EnemyBase, IBegin
         }
 
         ChangeAttackByIndex(lastMoveDirection);
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.BeforeAttack_Crawler);
         StartCoroutine(AttackSequence());
         attackTimer = attackDelayTime;
     }
@@ -174,7 +217,8 @@ public class CrawlerAI : EnemyBase, IBegin
             isAttack = false;
             yield break;
         }
-        Collider[] hitColliders = DetectAttackRange();
+        AudioManager.instance?.PlaySfx(AudioManager.SFX.AfterAttack_Crawler);
+        Collider[] hitColliders = DetectCrawlerAttackRange();
         var damaged = new HashSet<CommonBase>();
 
         for (int i = 0; i < hitColliders.Length; i++)

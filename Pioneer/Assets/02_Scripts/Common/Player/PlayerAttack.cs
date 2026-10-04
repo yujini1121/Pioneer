@@ -33,6 +33,22 @@ public class PlayerAttack : MonoBehaviour, IBegin
         TryDealDamage(other);
     }
 
+    private void FixedUpdate()
+    {
+        if (attackCollider != null && attackCollider.enabled) CheckActiveHitbox();
+    }
+
+    private void CheckActiveHitbox()
+    {
+        if (!(attackCollider is BoxCollider box)) return;
+        Vector3 scale = box.transform.lossyScale;
+        Vector3 halfExtents = Vector3.Scale(box.size,
+            new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z))) * 0.5f;
+        foreach (Collider hit in Physics.OverlapBox(box.transform.TransformPoint(box.center),
+            halfExtents, box.transform.rotation, enemyLayer, QueryTriggerInteraction.Ignore))
+            TryDealDamage(hit);
+    }
+
     private void TryDealDamage(Collider other)
     {
         if (attackCollider == null || !attackCollider.enabled) return;
@@ -131,6 +147,8 @@ public class PlayerAttack : MonoBehaviour, IBegin
             UtilityFunctions.Log(">> PlayerAttack.EnableAttackCollider() 호출");
             hitTargets.Clear();
             attackCollider.enabled = true;
+            Physics.SyncTransforms();
+            CheckActiveHitbox();
         }
     }
 

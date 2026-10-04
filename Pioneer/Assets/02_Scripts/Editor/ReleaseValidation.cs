@@ -525,7 +525,7 @@ public static class ReleaseValidation
                 "Actual weapon box reaches the same crawler accepted by the input check");
             attack.damage = 1; attack.EnableAttackCollider();
             foreach (var hit in hits) Call(attack, "TryDealDamage", hit);
-            Require(ai.hp == 49, "Crawler receives one damage application with its original collider");
+            Require(ai.hp == 49, "Crawler receives one damage application with its authored collider");
             attack.DisableAttackCollider();
             crawler.transform.position = player.transform.position + Vector3.right * 3f;
             Physics.SyncTransforms();

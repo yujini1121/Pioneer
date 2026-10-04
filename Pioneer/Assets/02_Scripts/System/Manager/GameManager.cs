@@ -45,6 +45,8 @@ public class GameManager : MonoBehaviour, IBegin
     public AnimationCurve exposureCurve;
     public float dayDuration = 150f;
     public float nightDuration = 50f;
+    [Tooltip("해질녘/새벽에 밝기가 전환되는 시간 (초)")]
+    [SerializeField, Min(0.1f)] private float lightingTransitionDuration = 8f;
     private float oneDayDuration;
 
     private ColorAdjustments colorAdjustments;
@@ -173,6 +175,7 @@ public class GameManager : MonoBehaviour, IBegin
     private void Start()
     {
         oneDayDuration = dayDuration + nightDuration;
+        UpdateDayNightLighting();
         dayUI = FindObjectOfType<DayUI>(true);
         if (oceanEventManager == null) oceanEventManager = OceanEventManager.instance;
         PresentMorning();
@@ -191,72 +194,79 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void Update()
     {
-        if (IsGameResultActive) return;
-        if (Time.timeScale > 0)
-        {
-            currentGameTime += Time.deltaTime;
-            cycleTime += Time.deltaTime;
-        }
+        if (IsGameResultActive || Time.timeScale <= 0f) return;
+        currentGameTime += Time.deltaTime;
+        cycleTime += Time.deltaTime;
 
         UpdateDayNightCycle();
     }
 
     private void UpdateDayNightCycle()
     {
-        // 현재 페이즈(낮/밤)에 맞는 설정을 한 번에 가져옴
-        bool isDay = IsDaytime;
-        float duration = isDay ? dayDuration : nightDuration;
-        Gradient grad = isDay ? dayToNightGradient : nightToDayGradient;
-
-        // 진행도 0~1f
-        float t = Mathf.Clamp01(cycleTime / duration);
-
-        // 컬러/노출 보정
-        if (colorAdjustments != null)
+        while (cycleTime >= GetPhaseDuration())
         {
-            colorAdjustments.colorFilter.value = grad.Evaluate(t);
-            colorAdjustments.postExposure.value = exposureCurve.Evaluate(t);
-        }
-
-        // 아직 페이즈가 끝나지 않았으면 리턴
-        if (cycleTime < duration) return;
-
-        // 페이즈 종료 처리
-        cycleTime = 0f;
-
-        if (isDay)
-        {
-            // 낮 -> 밤 전환
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlaySfx(AudioManager.SFX.NightBell);
-
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
-
-            UtilityFunctions.Log($"밤이 되었습니다. (Day {currentDay})");
-            IsDaytime = false;
-            InGameUI.instance?.ShowActionFeedback("밤이 찾아왔습니다. 배를 지키세요.", 1);
-            OnNightStart();
-        }
-        else
-        {
-            // 밤 -> 낮 전환
-            IsDaytime = true;
-            currentDay++;
-
-            if (AudioManager.instance != null)
-                AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
-
-            OnNightEnd();
-            UtilityFunctions.Log($"아침이 되었습니다. (Day {currentDay})");
-
-            // 일반 모드일 때만 6일차 엔딩 발생
-            if (!GameModeState.IsInfiniteMode && currentDay >= 6)
+            cycleTime -= GetPhaseDuration();
+            if (IsDaytime)
             {
-                TriggerGameClear();
-                return;
+                // 낮 -> 밤 전환
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlaySfx(AudioManager.SFX.NightBell);
+
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
+
+                UtilityFunctions.Log($"밤이 되었습니다. (Day {currentDay})");
+                IsDaytime = false;
+                InGameUI.instance?.ShowActionFeedback("밤이 찾아왔습니다. 배를 지키세요.", 1);
+                OnNightStart();
+            }
+            else
+            {
+                // 밤 -> 낮 전환
+                IsDaytime = true;
+                currentDay++;
+
+                if (AudioManager.instance != null)
+                    AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
+
+                OnNightEnd();
+                UtilityFunctions.Log($"아침이 되었습니다. (Day {currentDay})");
+
+                // 일반 모드일 때만 6일차 엔딩 발생
+                if (!GameModeState.IsInfiniteMode && currentDay >= 6)
+                {
+                    UpdateDayNightLighting();
+                    TriggerGameClear();
+                    return;
+                }
             }
         }
+        UpdateDayNightLighting();
+    }
+
+    private float GetPhaseDuration()
+    {
+        return Mathf.Max(0.01f, IsDaytime ? dayDuration : nightDuration);
+    }
+
+    private void UpdateDayNightLighting()
+    {
+        if (colorAdjustments == null) return;
+
+        float duration = GetPhaseDuration();
+        float transition = Mathf.Min(duration, Mathf.Max(0.1f, lightingTransitionDuration));
+        float progress = Mathf.SmoothStep(0f, 1f,
+            Mathf.Clamp01((cycleTime - (duration - transition)) / transition));
+        float nightBlend = IsDaytime ? progress : 1f - progress;
+
+        Gradient gradient = dayToNightGradient;
+        Color filter = gradient != null ? gradient.Evaluate(nightBlend)
+            : nightToDayGradient != null ? nightToDayGradient.Evaluate(1f - nightBlend) : Color.white;
+        colorAdjustments.colorFilter.overrideState = true;
+        colorAdjustments.colorFilter.value = filter;
+        colorAdjustments.postExposure.overrideState = true;
+        if (exposureCurve != null)
+            colorAdjustments.postExposure.value = exposureCurve.Evaluate(1f - nightBlend);
     }
 
     private void OnNightStart()

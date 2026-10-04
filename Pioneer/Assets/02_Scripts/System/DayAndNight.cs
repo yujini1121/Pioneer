@@ -16,15 +16,23 @@ public class DayAndNight : MonoBehaviour, IBegin
 
     void Start()
     {
-        volume.profile.TryGet(out colorAdjustments);
+        if (volume != null && volume.profile != null)
+            volume.profile.TryGet(out colorAdjustments);
     }
 
     void Update()
     {
-        timer += Time.deltaTime;
-        float t = (timer % dayDuration) / dayDuration;
+        if (GameManager.Instance != null || colorAdjustments == null || Time.timeScale <= 0f) return;
 
-        colorAdjustments.colorFilter.value = nightToDay.Evaluate(t);
-        colorAdjustments.postExposure.value = exposureByTime.Evaluate(t);
+        timer += Time.deltaTime;
+        float duration = Mathf.Max(0.01f, dayDuration);
+        float phase = Mathf.Repeat(timer, duration * 2f) / duration;
+        float nightBlend = phase <= 1f ? phase : 2f - phase;
+
+        colorAdjustments.colorFilter.overrideState = true;
+        if (dayToNight != null) colorAdjustments.colorFilter.value = dayToNight.Evaluate(nightBlend);
+        else if (nightToDay != null) colorAdjustments.colorFilter.value = nightToDay.Evaluate(1f - nightBlend);
+        colorAdjustments.postExposure.overrideState = true;
+        if (exposureByTime != null) colorAdjustments.postExposure.value = exposureByTime.Evaluate(1f - nightBlend);
     }
 }

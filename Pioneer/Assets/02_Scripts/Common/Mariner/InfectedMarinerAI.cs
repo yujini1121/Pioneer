@@ -276,6 +276,8 @@ public class InfectedMarinerAI : MarinerBase, IBegin
 
         if (secondPriorityRoutine != null) { StopCoroutine(secondPriorityRoutine); secondPriorityRoutine = null; }
 
+        GetComponentInChildren<MarinerAnimControll>(true)?.StopFishing();
+
         // 아이템 수납 시도 (보관함 없거나 접근 불가면 전량 버림)
         var inventory = GetComponent<MarinerInventory>();
         if (inventory != null && inventory.GetAllItem() > 0)
