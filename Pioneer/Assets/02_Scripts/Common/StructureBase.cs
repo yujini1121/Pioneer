@@ -41,6 +41,13 @@ public class StructureBase : CommonBase
         if (CanInteract) PlayerInteract.Add(this);
     }
     #region HP 관리
+    public override void TakeDamage(int damage, GameObject attacker)
+    {
+        int before = hp;
+        base.TakeDamage(damage, attacker);
+        if (!IsDead && hp < before) StructureHitFeedback.Play(gameObject);
+    }
+
     public void Heal(int amount)
     {
         if (amount <= 0) return;
@@ -65,7 +72,6 @@ public class StructureBase : CommonBase
     public virtual void Interactive() { }
     public virtual void Use()
     {
-        UtilityFunctions.Log(">> StructureBase.Use()");
         isUsing = true;
     }
     public virtual void UnUse() { isUsing = false; }

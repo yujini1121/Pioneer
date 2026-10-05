@@ -5,14 +5,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
+using DG.Tweening;
 
-public class ItemSlotUI : MonoBehaviour, 
+public class ItemSlotUI : MonoBehaviour,
     IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    const bool IS_DEBUG_LOG = false;
-
     const float DURABILITY_FILL_SCALE = 0.9f;
     static Sprite durabilityFillSprite;
+    private SlotTypeBorder typeBorder;
+    private Tween selectionTween;
+    private Vector3 restingScale;
 
 
     public int index;
@@ -35,6 +37,7 @@ public class ItemSlotUI : MonoBehaviour,
     private void Awake()
     {
         buttonClickAction = new List<System.Action>();
+        restingScale = transform.localScale;
         EnsureDurabilityFill();
     }
 
@@ -43,14 +46,12 @@ public class ItemSlotUI : MonoBehaviour,
         [CallerLineNumber] int line = 0,
         [CallerMemberName] string member = "")
     {
-        if (IS_DEBUG_LOG) UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 호출됨");
 
         if (item == null || item.id == 0)
         {
             Clear();
             return;
         }
-        if (IS_DEBUG_LOG) UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : 내구도 = {item.duability}");
 
 
         UtilityFunctions.Assert(item != null);
@@ -58,10 +59,9 @@ public class ItemSlotUI : MonoBehaviour,
         UtilityFunctions.Assert(ItemTypeManager.Instance != null);
         UtilityFunctions.Assert(ItemTypeManager.Instance.itemTypeSearch != null);
         UtilityFunctions.Assert(ItemTypeManager.Instance.itemTypeSearch[item.id] != null);
-        if (IS_DEBUG_LOG) 
-            UtilityFunctions.Log($">> ItemSlotUI.Show(SItemStack item)/IS_DEBUG_LOG : {item.id} / {item.amount}");
 
         SItemTypeSO itemType = ItemTypeManager.Instance.itemTypeSearch[item.id];
+        SetTypeBorder(itemType);
         bool isNeedShowDuability = itemType.categories == EDataType.WeaponItem;
 
         if (ItemTypeManager.Instance.itemTypeSearch[item.id].image != null)
@@ -88,12 +88,29 @@ public class ItemSlotUI : MonoBehaviour,
     }
     public void Clear()
     {
-        //Debug.Log($">> {gameObject.name} -> ItemSlotUI.Clear() : 호출됨");
-        
+
         image.enabled = false;
         count.text = "";
         durability.text = "";
         HideDurabilityFill();
+        if (typeBorder != null) typeBorder.enabled = false;
+    }
+
+    private void SetTypeBorder(SItemTypeSO type)
+    {
+        if (!isSlot) return;
+        if (typeBorder == null)
+        {
+            var frame = new GameObject("TypeBorder", typeof(RectTransform), typeof(CanvasRenderer), typeof(SlotTypeBorder));
+            frame.transform.SetParent(transform, false);
+            typeBorder = frame.GetComponent<SlotTypeBorder>();
+            typeBorder.raycastTarget = false;
+            var rect = typeBorder.rectTransform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(3f, 3f); rect.offsetMax = new Vector2(-3f, -3f);
+        }
+        typeBorder.color = ItemPresentation.CategoryColor(type.categories);
+        typeBorder.enabled = true;
     }
 
     #region
@@ -184,8 +201,11 @@ public class ItemSlotUI : MonoBehaviour,
 #region
     public void PlaySelectedFeedback()
     {
-        Transform target = image != null && image.enabled ? image.transform : transform;
-        UITweenHelper.PunchScale(target, 0.14f, 0.18f);
+        selectionTween?.Kill();
+        transform.DOKill();
+        transform.localScale = restingScale;
+        selectionTween = transform.DOPunchScale(restingScale * 0.07f, 0.18f, 1, 0.3f)
+            .OnKill(() => { if (this != null) transform.localScale = restingScale; });
     }
 
     public void PlayClickFeedback()
@@ -226,11 +246,20 @@ public class ItemSlotUI : MonoBehaviour,
             RepairUI.instance.ClickSlot(index);
         }
 
-        PlayClickFeedback();
+        if (!isSlot) PlayClickFeedback();
 
         foreach (var one in buttonClickAction)
         {
             one();
         }
+    }
+
+    private void OnDisable()
+    {
+        selectionTween?.Kill(); selectionTween = null;
+        transform.DOKill();
+        transform.localScale = restingScale;
+        if (image != null) image.transform.DOKill();
+        InventoryUiMain.instance?.currentSelectedSlot?.Remove(this);
     }
 }

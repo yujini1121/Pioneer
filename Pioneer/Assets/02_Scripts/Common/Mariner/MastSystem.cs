@@ -44,12 +44,10 @@ public class MastSystem : CommonBase
     private void Awake()
     {
         Instance = this;
-        UtilityFunctions.Log("[MastSystem] Awake 실행됨");
     }
 
     void Start()
     {
-        UtilityFunctions.Log("[MastSystem] Start 초기화");
 
         SetMastLevel(mastLevel);
         hp = maxHp;
@@ -62,7 +60,6 @@ public class MastSystem : CommonBase
         if (closeButton) closeButton.onClick.AddListener(CloseAllUI);
         if (backButton) backButton.onClick.AddListener(BackToMainUI);
 
-        UtilityFunctions.Log("[MastSystem] Start 완료");
     }
 
     void Update()
@@ -91,13 +88,12 @@ public class MastSystem : CommonBase
         bool newState = hits.Length > 0;
 
         if (newState != playerInRange)
-            UtilityFunctions.Log($"[MastSystem] playerInRange 변경: {playerInRange} → {newState}");
+            ;
 
         playerInRange = newState;
 
         if (!playerInRange && isUIOpen)
         {
-            UtilityFunctions.Log("[MastSystem] 플레이어 범위 벗어남 → UI 닫음");
             CloseAllUI();
         }
     }
@@ -108,11 +104,9 @@ public class MastSystem : CommonBase
 
         if (Input.GetMouseButtonDown(1))
         {
-            UtilityFunctions.Log("[MastSystem] 우클릭 감지됨");
 
             if (!isUIOpen)
             {
-                UtilityFunctions.Log("[MastSystem] UI Open 조건 만족 → OpenUI 실행");
                 OpenUI();
 
                 InGameUI.instance.OpenUI(new System.Collections.Generic.List<GameObject>() { },
@@ -125,32 +119,27 @@ public class MastSystem : CommonBase
             }
             else
             {
-                UtilityFunctions.Log("[MastSystem] UI 이미 열려있음 (무시)");
             }
         }
     }
 
     void OpenUI()
     {
-        UtilityFunctions.Log("[MastSystem] OpenUI()");
 
         isUIOpen = true;
-        //isUpgradeMenuOpen = false;
 
-        if (mastUI == null) Debug.LogError("[MastSystem] mastUI 가 Inspector에 연결되지 않음!");
-        if (upgradeUI == null) Debug.LogError("[MastSystem] upgradeUI 가 Inspector에 연결되지 않음!");
+        if (mastUI == null) Debug.LogError("돛대 화면이 연결되지 않았습니다.");
+        if (upgradeUI == null) Debug.LogError("돛대 강화 화면이 연결되지 않았습니다.");
 
         mastUI?.SetActive(true);
-        //upgradeUI?.SetActive(false);
         InGameUI.instance.CloseUI(InGameUI.ID_MAST_UPGRADE);
     }
 
     void OpenUpgradeMenu()
     {
-        UtilityFunctions.Log("[MastSystem] OpenUpgradeMenu()");
-        
+
         InGameUI.instance.CloseUI(InGameUI.ID_MAST_UI);
-        
+
         isUpgradeMenuOpen = true;
         upgradeUI?.SetActive(true);
         InGameUI.instance.OpenUI(new System.Collections.Generic.List<GameObject>() { },
@@ -160,12 +149,10 @@ public class MastSystem : CommonBase
                            upgradeUI?.SetActive(false);
                        });
 
-        //mastUI?.SetActive(false);
     }
 
     void BackToMainUI()
     {
-        UtilityFunctions.Log("[MastSystem] BackToMainUI()");
 
         isUIOpen = true;
         mastUI?.SetActive(true);
@@ -178,15 +165,11 @@ public class MastSystem : CommonBase
                     );
 
         InGameUI.instance.CloseUI(InGameUI.ID_MAST_UPGRADE);
-        //isUpgradeMenuOpen = false;
 
-        //mastUI?.SetActive(true);
-        //upgradeUI?.SetActive(false);
     }
 
     public void CloseAllUI()
     {
-        UtilityFunctions.Log("[MastSystem] CloseAllUI()");
 
         isUIOpen = false;
         isUpgradeMenuOpen = false;
@@ -215,7 +198,6 @@ public class MastSystem : CommonBase
             return;
         }
 
-        // 강화 화면 UI
         int woodId = MastManager.Instance?.woodItemID ?? 0;
         int clothId = MastManager.Instance?.clothItemID ?? 0;
 
@@ -276,7 +258,6 @@ public class MastSystem : CommonBase
 
     void EnhanceMast()
     {
-        UtilityFunctions.Log("[MastSystem] EnhanceMast() 시도");
 
         if (mastLevel >= 2)
         {
@@ -317,7 +298,7 @@ public class MastSystem : CommonBase
         if (IsDead) return;
 
         hp -= damage;
-        UtilityFunctions.Log($"[MastSystem] 돛대 데미지 {damage}, 현재 HP {hp}");
+        if (damage > 0 && hp > 0) StructureHitFeedback.Play(gameObject, 0.65f);
 
         this.attacker = attacker;
 
@@ -334,7 +315,6 @@ public class MastSystem : CommonBase
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.GameOver);
 
-        UtilityFunctions.Log("[MastSystem] WhenDestroy() → 게임오버 호출");
         GameManager.Instance?.TriggerGameOver();
     }
 }

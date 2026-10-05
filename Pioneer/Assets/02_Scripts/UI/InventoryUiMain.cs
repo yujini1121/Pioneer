@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class InventoryUiMain : MonoBehaviour, IBegin
 {
     static public InventoryUiMain instance;
-    
+
     public List<ItemSlotUI> currentSelectedSlot;
     [SerializeField] ItemSlotUI mouseUI;
     public ItemSlotUI MouseUI => mouseUI;
@@ -35,19 +35,30 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     float clickTime = 0.0f;
     int clickedSlotIndex = -1;
     Coroutine clickCoroutine = null;
+    private string lastDescription;
+    private bool inventoryVisibilityInitialized;
+    private bool inventoryVisible;
+    private readonly Vector3[] tooltipCorners = new Vector3[4];
+
+    private readonly List<int> regularSlotIndices = new List<int>();
+    public IReadOnlyList<int> RegularSlotIndices => regularSlotIndices;
 
     public void InventoryExpand(bool value)
     {
-#region
+        if (inventoryVisibilityInitialized && inventoryVisible == value) return;
         foreach (GameObject i in inventorySlot)
         {
-            CanvasGroup cg = i.GetComponent<CanvasGroup>();
-            if (cg == null)
-                cg = i.AddComponent<CanvasGroup>();
-
-            UITweenHelper.FadeCanvasGroup(cg, value, 0.16f, true);
+            if (!inventoryVisibilityInitialized && !value)
+            {
+                var cg = UITweenHelper.EnsureCanvasGroup(i);
+                cg.alpha = 0f;
+                cg.interactable = cg.blocksRaycasts = false;
+            }
+            else if (value) UITweenHelper.PlayOpen(i);
+            else UITweenHelper.PlayClose(i, null);
         }
-#endregion
+        inventoryVisible = value;
+        inventoryVisibilityInitialized = true;
     }
 
     public void HideWindow()
@@ -72,10 +83,53 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             return;
         }
 
-        //Debug.Log($">> 아이템 스택 : {currentSelectedSlot[0].index} / {mItemStack.id} {mItemStack.amount}");
 
-        // windowMouseText.text = 
         (windowMouseTextType.text, windowMouseTextCategory.text, windowMouseTextInfo.text) = GetInfomation(mItemStack); // 마우스
+        LayoutDescription();
+        ClampDescriptionToCanvas();
+    }
+
+    private void ClampDescriptionToCanvas()
+    {
+        var outer = windowMouse.transform.Find("BackGround1") as RectTransform;
+        var canvasRect = canvas.transform as RectTransform;
+        if (outer == null || canvasRect == null) return;
+        outer.GetWorldCorners(tooltipCorners);
+        Vector3 min = canvasRect.InverseTransformPoint(tooltipCorners[0]);
+        Vector3 max = canvasRect.InverseTransformPoint(tooltipCorners[2]);
+        Rect bounds = canvasRect.rect;
+        const float margin = 12f;
+        Vector3 offset = Vector3.zero;
+        offset.x = Mathf.Max(0f, bounds.xMin + margin - min.x) - Mathf.Max(0f, max.x - bounds.xMax + margin);
+        offset.y = Mathf.Max(0f, bounds.yMin + margin - min.y) - Mathf.Max(0f, max.y - bounds.yMax + margin);
+        followUiRect2.position += canvasRect.TransformVector(offset);
+    }
+
+    private void LayoutDescription()
+    {
+        if (lastDescription == windowMouseTextInfo.text) return;
+        lastDescription = windowMouseTextInfo.text;
+        windowMouseTextInfo.richText = true;
+        windowMouseTextInfo.enableAutoSizing = false;
+        windowMouseTextInfo.fontSize = 20f;
+        windowMouseTextInfo.alignment = TextAlignmentOptions.TopLeft;
+        var rect = windowMouseTextInfo.rectTransform;
+        rect.pivot = new Vector2(0.5f, 1f);
+        rect.anchoredPosition = new Vector2(0f, 22f);
+        float height = windowMouseTextInfo.GetPreferredValues(lastDescription, 210f, Mathf.Infinity).y;
+        rect.sizeDelta = new Vector2(210f, height);
+        var outer = windowMouse.transform.Find("BackGround1") as RectTransform;
+        var body = windowMouse.transform.Find("BackGround3") as RectTransform;
+        if (outer != null)
+        {
+            outer.sizeDelta = new Vector2(235f, height + 130f);
+            outer.anchoredPosition = new Vector2(0f, 130f - outer.sizeDelta.y * 0.5f);
+        }
+        if (body != null)
+        {
+            body.sizeDelta = new Vector2(220f, height + 20f);
+            body.anchoredPosition = new Vector2(0f, 30f - body.sizeDelta.y * 0.5f);
+        }
     }
 
     public void RightClickSlot(int index)
@@ -123,12 +177,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         if (SItemStack.IsEmpty(InventoryManager.Instance.mouseInventory) == false)
         {
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭 {InventoryManager.Instance.mouseInventory.id} / {InventoryManager.Instance.mouseInventory.amount}");
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭1");
             InventoryManager.Instance.MouseDrop();
-            //Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭2");
             mouseUI.Clear();
-			//Debug.Log($">> {gameObject.name} -> InventoryUiMain.ClickOut() : 아이템 드롭3");
 			InventoryUiMain.instance.IconRefresh();
 			PlayerStatUI.Instance.UpdateBasicStatUI();
 			return;
@@ -137,7 +187,6 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         if(PlayerCore.Instance.currentState != PlayerCore.PlayerState.ActionFishing)
         {
             // 플레이어 아이템 핸들
-            UtilityFunctions.Log($">> InventoryUiMain.ClickOut() : 아이템이 비어 있습니다.");
             if (SItemStack.IsEmpty(InventoryManager.Instance.SelectedSlotInventory) ||
                 InventoryManager.Instance.SelectedSlotInventory.itemBaseType.categories == EDataType.NormalItem)
             {
@@ -162,21 +211,11 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             InventoryUiMain.instance.IconRefresh();
             PlayerStatUI.Instance.UpdateBasicStatUI();
 
-            //if (InventoryManager.Instance.SelectedSlotInventory != null)
             //{
-            //    SItemTypeSO receved = ItemTypeManager.
-            //                            Instance.
-            //                            types[InventoryManager.Instance.SelectedSlotInventory.id];
             //    // 만약 무기다 && 내구도가 있다
-            //    SItemWeaponTypeSO weaponObject = receved as SItemWeaponTypeSO;
-            //    if (weaponObject != null && InventoryManager.Instance.SelectedSlotInventory.duability > 0)
             //    {
-            //        PlayerCore.Instance.BeginCoroutine()
-            //        PlayerCore.Instance.Attack(weaponObject);
-            //        return;
             //    }
             //    // 소비형 아이템이다
-            //    SItemConsumeTypeSO consumeObject = receved as SItemConsumeTypeSO;
             //}
             // 내구도가 만료된 무기 혹은 맨손
         }
@@ -201,7 +240,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
     {
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.RemoveItem);
-        
+
         InventoryManager.Instance.RemoveMouseItem();
         mouseUI.Clear();
     }
@@ -211,13 +250,14 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         UtilityFunctions.Assert(index < slotGameObjects.Count, $"!!>> {index} / {slotGameObjects.Count}");
         UtilityFunctions.Assert(InventoryManager.Instance != null);
 
+        bool changed = InventoryManager.Instance.selectedSlotIndex != index || mCurrentSelectedHotbarSlot == null;
         InventoryManager.Instance.SelectSlot(index);
 
-        if (AudioManager.instance != null)
+        if (changed && AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.SelectQuickSlot);
         mCurrentSelectedHotbarSlot = slotGameObjects[index].GetComponent<ItemSlotUI>();
         IconRefresh();
-        if (mCurrentSelectedHotbarSlot != null)
+        if (changed && mCurrentSelectedHotbarSlot != null)
             mCurrentSelectedHotbarSlot.PlaySelectedFeedback();
         PlayerStatUI.Instance.UpdateBasicStatUI();
 
@@ -241,7 +281,6 @@ public class InventoryUiMain : MonoBehaviour, IBegin
 
         if (InventoryManager.Instance.SelectedSlotInventory == null)
         {
-            //Debug.Log($">> 선택된 슬롯 아이템 ID : 현재 쥔 아이템은 빈 아이템입니다.");
             return;
         }
         else
@@ -249,16 +288,16 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             switch (InventoryManager.Instance.SelectedSlotInventory.id)
             {
                 case 20001:
-                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : 나무검");
+                    ;
                     break;
                 case 20002:
-                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : 철 검");
+                    ;
                     break;
                 case 20003:
-                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : 해신의 뿔피리");
+                    ;
                     break;
                 default:
-                    UtilityFunctions.Log($">> 선택된 슬롯 아이템 ID : {InventoryManager.Instance.SelectedSlotInventory.id}");
+                    ;
                     break;
             }
         }
@@ -275,12 +314,16 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         {
             itemSlotUIs[index] = slotGameObjects[index].GetComponent<ItemSlotUI>();
         }
+        regularSlotIndices.Clear();
+        foreach (var slot in inventorySlot)
+        {
+            int i = slotGameObjects.IndexOf(slot);
+            if (i >= 0 && !quickSlot.Contains(slot)) regularSlotIndices.Add(i);
+        }
         currentSelectedSlot = new List<ItemSlotUI>();
     }
 
-    // Start is called before the first frame update
     public void Start()
-    //void Start()
     {
         followUiRect1 = imageMouseHoldingItem.GetComponent<RectTransform>();
         followUiRect2 = windowMouse.GetComponent<RectTransform>();
@@ -345,9 +388,9 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameResultActive) return;
         Vector2 mMousePos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvas.transform as RectTransform,
@@ -360,6 +403,8 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         followUiRect2.anchoredPosition = mMousePos + new Vector2(50, 50);
 
         ShowWindow();
+
+        if (Time.timeScale <= 0f) return;
 
         // 인벤토리 핫키 선택 시작
         int hotkeyInventoryNum = -1;
@@ -391,8 +436,6 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         }
 
 # warning 나중에 채빈씨 브랜치 머지 하고 업데이트 된경우 주석 풀기
-        //if (hotkeyInventoryNum > -1 &&
-        //    PlayerCore.Instance.currentState != PlayerCore.PlayerState.Default) SelectSlot(hotkeyInventoryNum);
         // ~~종료~~ 인벤토리 핫키 선택 시작
     }
 
@@ -418,8 +461,7 @@ public class InventoryUiMain : MonoBehaviour, IBegin
             categoriesName = $"{categoriesName} · {target.duability}%";
         }
 
-        // return $"{info.typeName}\n{categoriesName}\n{info.infomation}";
-        return (info.typeName, categoriesName, info.infomation);
+        return (info.typeName, categoriesName, ItemPresentation.Description(info));
     }
 
     public void IconRefresh()
@@ -429,7 +471,6 @@ public class InventoryUiMain : MonoBehaviour, IBegin
         // + 내구도 체크
         for (int index = 0; index < slotGameObjects.Count; ++index)
         {
-            //if (InventoryManager.Instance.itemLists[index] == null) continue;
 
             ItemSlotUI _forUi = slotGameObjects[index].GetComponent<ItemSlotUI>();
 

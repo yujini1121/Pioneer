@@ -24,26 +24,23 @@ public class PlayerFishing : MonoBehaviour
     [SerializeField] private float eventChance = 0.3f;
     private int nonEventCount = 0;
 
-
+    private static readonly Vector3 FishingEffectOffset = new Vector3(0f, 0f, 0.95f);
+    private ParticleSystem fishingEffect;
     private Coroutine fishingLoopCoroutine;
     private Vector3 fishingDirection;
 
     private int fishingExp = 5;
 
-    private CreatureEffect creatureEffect;
     private void Awake()
     {
         instance = this;
-        creatureEffect = GetComponent<CreatureEffect>();
     }
 
-    // PlayerFishing.cs
     public void BeginFishing(Vector3 dir)
     {
         if (PlayerCore.Instance == null) return;
         dir.y = 0f;
         fishingDirection = dir.normalized;
-        // 좌/우만 사용: x>=0 → 1(오른쪽), x<0 → 0(왼쪽). 정지면 마지막 값 유지되므로 1로 처리
         int idx = (Mathf.Abs(dir.x) < 1e-6f) ? 1 : (dir.x >= 0f ? 1 : 0);
 
         // 안전장치: 리스트가 2개 미만이면 0으로 강제
@@ -54,9 +51,7 @@ public class PlayerFishing : MonoBehaviour
         int maxHold = (slots.fisingHold != null) ? Mathf.Max(0, slots.fisingHold.Count - 1) : 0;
         idx = Mathf.Clamp(idx, 0, Mathf.Min(maxReady, maxHold));
 
-        //PlayerCore.Instance.SetState(PlayerCore.PlayerState.ActionFishing);
         PlayerCore.Instance.FishingReady(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
-        //PlayerCore.Instance.FishingHold(new Vector3(idx == 1 ? 1f : -1f, 0, 0));
     }
 
 
@@ -74,10 +69,9 @@ public class PlayerFishing : MonoBehaviour
 
     public void StopFishingLoop()
     {
+        StopFishingEffect();
         if (fishingLoopCoroutine != null)
         {
-            //creatureEffect.Effects[5].Stop();
-            //creatureEffect.Effects[3].Stop();
             StopCoroutine(fishingLoopCoroutine);
             fishingLoopCoroutine = null;
         }
@@ -86,38 +80,74 @@ public class PlayerFishing : MonoBehaviour
             PlayerCore.Instance.SetState(PlayerCore.PlayerState.Default);
     }
 
+    private void StopFishingEffect()
+    {
+        CreatureEffect.StopLoopingEffect(fishingEffect);
+        fishingEffect = null;
+    }
+
+    public Vector3 GetFishingEffectPosition(Vector3 direction)
+    {
+        return GetFishingEffectPosition(transform.position, direction);
+    }
+
+    public Vector3 GetFishingEffectPosition(Vector3 origin, Vector3 direction)
+    {
+        direction.y = 0f;
+        var controller = GetComponent<PlayerController>();
+        if (direction.sqrMagnitude < 0.001f)
+        {
+            direction = controller != null ? controller.lastMoveDirection : Vector3.right;
+            direction.y = 0f;
+        }
+        if (direction.sqrMagnitude < 0.001f) direction = Vector3.right;
+        direction.Normalize();
+
+        Vector3 sideways = Vector3.Cross(Vector3.up, direction);
+        Vector3 position = origin + direction * FishingEffectOffset.z
+            + sideways * FishingEffectOffset.x;
+        int groundMask = controller != null ? controller.groundLayer.value : LayerMask.GetMask("Platform");
+        int waterMask = controller != null ? controller.seaLayer.value : LayerMask.GetMask("Water");
+
+        for (int step = 0; step < 12; step++)
+        {
+            if (!Physics.Raycast(position + Vector3.up * 3f, Vector3.down, 8f,
+                groundMask, QueryTriggerInteraction.Ignore)) break;
+            position += direction * 0.25f;
+        }
+
+        position.y = origin.y - 0.8f + FishingEffectOffset.y;
+        if (Physics.Raycast(position + Vector3.up * 3f, Vector3.down, out RaycastHit water,
+            8f, waterMask, QueryTriggerInteraction.Collide))
+            position.y = water.point.y + FishingEffectOffset.y;
+        return position;
+    }
+
     // 낚시로 아이템 추가하는 코드
     private IEnumerator FishingLoop()
     {
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.SFX.BeforeFishing);
 
-        // One cast now resolves exactly one attempt.
+        try
         {
             // 낚시 시작
             UtilityFunctions.Log("낚시 시작");
 
-            if (CreatureEffect.Instance != null)
+            if (CreatureEffect.Instance != null && fishingEffect == null)
             {
                 ParticleSystem ps = CreatureEffect.Instance.GetEffect(8);
-                CreatureEffect.Instance.PlayEffect(ps, PlayerCore.Instance.transform.position + new Vector3(0f, -0.8f, 0.3f));
+                fishingEffect = CreatureEffect.Instance.PlayLoopingEffect(ps,
+                    GetFishingEffectPosition(fishingDirection), transform);
             }
             yield return new WaitForSeconds(Random.Range(3f, 5f));
 
 
-            /* 낚시 이벤트
-             * 아이템 획득 전 30% 확률로 발생하는 슬라이드 바 타이밍 맞추기 이벤트
-             * 4초마다 30% 확률로 이벤트 발생
-             * 이벤트 연속 발생 횟수가 5번 이상일 경우 다음 낚시 돌발 이벤트 반드시 발생
-             * 플레이어 머리 위에 낚시 이벤트 UI 발생
-             */
 
             bool isSuccess = true;
             bool eventResult = false;
             if (fishingEventUI != null && (nonEventCount >= 5 || Random.value < eventChance))
             {
-                // isSuccess = true;
-                UtilityFunctions.Log("<color=orange>돌발 이벤트 발생!</color>");
                 nonEventCount = 0;
 
 
@@ -146,6 +176,7 @@ public class PlayerFishing : MonoBehaviour
                 UtilityFunctions.Log($"돌발 이벤트 미발생 (누적: {nonEventCount})");
             }
 
+            StopFishingEffect();
             GetItemProcess(isSuccess && eventResult);
 
             UtilityFunctions.Log("낚시 끝");
@@ -153,6 +184,11 @@ public class PlayerFishing : MonoBehaviour
             PlayerController completedController = GetComponent<PlayerController>();
             if (completedController != null) completedController.CancelFishing();
             else StopFishingLoop();
+        }
+        finally
+        {
+            StopFishingEffect();
+            fishingLoopCoroutine = null;
         }
     }
 
@@ -184,7 +220,7 @@ public class PlayerFishing : MonoBehaviour
             // 4. 당첨되지않았으면 현재 아이템 가중치를 빼고 다음 아이템으로 넘어감
             randomNum -= item.dropProbability;
         }
-        
+
         return dropItemTable[dropItemTable.Count - 1].itemData;
     }
 
@@ -198,7 +234,6 @@ public class PlayerFishing : MonoBehaviour
         else InGameUI.instance?.ShowActionFeedback(isDoubleBonus
             ? "인양 성공! 자원과 특별 보상을 획득했습니다."
             : "인양 완료! Q를 길게 눌러 다시 던지세요.", 1);
-        // Longer, manual casts return a small bundle; the normal material pool stays intact.
         int count = caughtItem == treasureItem ? 1 : 2;
         int dropIndex = 0;
         if (isDoubleBonus) TreasureBoxManager.instance?.GetSpecialBox();
@@ -208,7 +243,6 @@ public class PlayerFishing : MonoBehaviour
         {
             if (caughtItem == treasureItem)
             {
-                // TreasureBoxManager.instance.GetBox();
                 for (int i = 0; i < count; i++) TreasureBoxManager.instance?.GetBox();
                 fishingExp = 10;
             }
@@ -221,7 +255,6 @@ public class PlayerFishing : MonoBehaviour
 
             if (PlayerStatsLevel.Instance == null) return;
             PlayerStatsLevel.Instance.AddExp(GrowStatType.Fishing, fishingExp);
-            UtilityFunctions.Log($">> PlayerFishing.FishingLoop() 아이템 획득: 숫자 {caughtItem.id}, 이름 {caughtItem.typeName}, 경험치 +{fishingExp}");
 
             (float extraItemChance, float treasureChestChance) chances = PlayerStatsLevel.Instance.FishingChance();
 
@@ -237,18 +270,14 @@ public class PlayerFishing : MonoBehaviour
                         dropIndex += ItemDropManager.instance.CatchFishing(new SItemStack(caughtItem.id, 1),
                             transform, fishingDirection, dropIndex);
                 }
-                UtilityFunctions.Log($"<color=cyan>[낚시 레벨 보너스!]</color> {caughtItem.typeName}을(를) 추가로 획득했습니다! (확률: {chances.extraItemChance * 100:F2}%)");
             }
 
             if (Random.Range(0f, 1f) < chances.treasureChestChance)
             {
                 if (treasureItem != null)
                 {
-                    //SItemStack treasureItemStack = new SItemStack(treasureItem.id, 1);
-                    //InventoryManager.Instance.Add(treasureItemStack);
 
                     TreasureBoxManager.instance?.GetBox();
-                    UtilityFunctions.Log($"<color=yellow>[낚시 레벨 보너스!]</color> 보물상자를 추가로 획득했습니다! (확률: {chances.treasureChestChance * 100:F2}%)");
                 }
             }
 
@@ -269,7 +298,6 @@ public class PlayerFishing : MonoBehaviour
                 }
             }
 
-            //creatureEffect.Effects[3].Play();
         }
     }
 
@@ -280,6 +308,7 @@ public class PlayerFishing : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopFishingEffect();
         if (instance == this) instance = null;
     }
 }

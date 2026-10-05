@@ -7,32 +7,8 @@ using UnityEngine.Rendering.VirtualTexturing;
 using static MarinerBase;
 
 #region 그냥 메모
-/* =============================================================
- * PlayerStats (CreatureBase 상속) : 체력, 공격력 같은 핵심 스탯 및 TakeDamage 같은 기능 관리
- [있어야 할 변수]
-int hp = 100;					// 체력
-int fullness = 100;				// 포만감
-int mental = 100;					// 정신력
-int attackDamage = 2; 				// 공격력
-float beforeAttackDelay = 0.6f;		// 공격 전 지연 시간 
-float AttackCooldown = 0.4f;			// 공격 후 지연 시간
-float totalAttackTime = 1.0f;			// 총 공격 시간
-int attackPerSecond = 1;			// 초당 공격 가능 횟수
-float attackRange = 0.4f;			// 공격 거리
-===============================================================
-25.09.07 남은 일
-    - 음식 섭취 했을 때 어떻게 구현할 것인지
-    - 정신력 구현
-    - 스테이터스 레벨 구현
-25.09.09
-    - 플레이어 배 바닥 밖으로 못 나가게 해놔야함 
-    - 정신력 구현
-    - 스테이터스 레벨 구현
-    - 포만감 및 정신력 최소, 최대 제한 걸어두기
- ============================================================= */
 #endregion
 
-// TODO : 죄책감 시스템.cs : 멘탈 디버프 있을때 죄책감 레벨 + 1 / CommonUi.cs : 대성공 확률 -40%;
 public class PlayerCore : CreatureBase, IBegin
 {
     public static PlayerCore Instance;
@@ -44,10 +20,9 @@ public class PlayerCore : CreatureBase, IBegin
         ChargingFishing,    // 낚시 키 누르는 중
         ActionFishing,      // 낚시 중
         Dead                // 사망
-    }    
+    }
 
     // { 생체 시스템 변수 } //
-    // 포만감 열거형 (fullness 변수 값에 따른 상태)
     public enum FullnessState
     {
         Full,       // 배부름 (80 ~ 100)
@@ -79,7 +54,7 @@ public class PlayerCore : CreatureBase, IBegin
     private float lastEffectTime = -999f;
 
     [Header("포만감 변수")]
-    // [ 포만감 변수 ]  
+    // [ 포만감 변수 ]
     public int currentFullness;                                            // 현재 포만감 값
     public int maxFullness = 100;                                          // 최대 포만감 값
     int minFullness = 0;                                            // 최소 포만감 값
@@ -98,12 +73,16 @@ public class PlayerCore : CreatureBase, IBegin
     public int maxMental = 100;                                            // 최대 정신력 값
     int minMental = 0;                                              // 최소 정신력 값
     bool isDrunk = false;                                           // 만취 상태 여부
-    private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴 
+    [SerializeField, Min(0.01f)] private float drunkDuration = 60f;
+    private float drunkUntil;
+    private Coroutine drunkCoroutine;
+    public float DrunkRemaining => isDrunk ? Mathf.Max(0f, drunkUntil - Time.time) : 0f;
+    private Coroutine enemyExistCoroutine;                          // 일정 범위 안 에너미 존재시 실행되는 코루틴
     bool isApplyDebuff = false;
 
     [Header("정신력 설정")]
     [SerializeField] private float existEnemyMentalCool = 2f;        // 일정 범위 안 에너미 존재시 정신력이 깎이는 시간 텀
-    [SerializeField] private int existEnemyMentalDecrease = -1;      // 일정 범위 안 에너미 존재시 깎이는 정신력 값 
+    [SerializeField] private int existEnemyMentalDecrease = -1;      // 일정 범위 안 에너미 존재시 깎이는 정신력 값
     [SerializeField] private int attackedFromEnemy = -3;             // 에너미한테 공격 당했을 경우 깎이는 정신력 값
     [SerializeField] private float reduceMentalOnMarinerDie = 0.2f; // 승무원 사망시 깎이는 정신력 값
     [SerializeField] private int eatFoodincreaseMental = 10;
@@ -130,23 +109,20 @@ public class PlayerCore : CreatureBase, IBegin
     private Animator animator;
 
     private Vector3 currentDirection;
-    private int _curIdleIdx = -1; // 0:F, 1:B, 2:L, 3:R
-    private int _curRunIdx = -1; 
-    private int _curFishingReadyIdx = -1; 
-    public int _curFishingHoldIdx = -1; 
+    private int _curIdleIdx = -1;
+    private int _curRunIdx = -1;
+    private int _curFishingReadyIdx = -1;
+    public int _curFishingHoldIdx = -1;
 
     [SerializeField] private SItemWeaponTypeSO handAttackStartDefault;
-	public SItemWeaponTypeSO handAttackCurrentValueRaw; // 해당 값을 즉시 호출하지 말 것. CalculatedHandAttack 사용
+	public SItemWeaponTypeSO handAttackCurrentValueRaw;
 
     public Transform mast;
 
-    // 배고픔 29 이하 소리 한 번 출력 확인 bool 변수
     private bool isPlaySFXHunger = false;
 
-    // 정신력 29 이하 소리 한 번 출력 확인 bool 변수
     private bool isPlaySFXMental = false;
 
-    // 체력 29 이하 소리 한 번 출력 확인 bool 변수
     private bool isPlaySFXLowHp = false;
 
     private StunHandler stunHandler;
@@ -157,7 +133,7 @@ public class PlayerCore : CreatureBase, IBegin
         {
             SItemWeaponTypeSO returnValue = ScriptableObject.CreateInstance<SItemWeaponTypeSO>();
             returnValue.DeepCopyFrom(handAttackCurrentValueRaw);
-            
+
             if (IsMentalDebuff())
             {
 #warning [생체 시스템 : 정신력 시스템] 정신력 40미만 공격력 감소량 구체적으로 작성
@@ -202,7 +178,7 @@ public class PlayerCore : CreatureBase, IBegin
 
         handAttackCurrentValueRaw.DeepCopyFrom(handAttackStartDefault);
         dummyHandAttackItem = new SItemStack(-1, -1);
- 
+
         // 애니메이션
         slots = playerController.animSlots;
         animator = playerController.animator;
@@ -216,11 +192,9 @@ public class PlayerCore : CreatureBase, IBegin
         int platformLayer = LayerMask.NameToLayer("Platform");
         if (playerLayer < 0 || platformLayer < 0) return;
 
-        // Platform floor tiles use separate colliders; physical player/platform
-        // contacts can snag the capsule on tile seams while manual movement runs.
         Physics.IgnoreLayerCollision(playerLayer, platformLayer, true);
     }
-    
+
     new void Start()
     {
         base.Start();
@@ -258,11 +232,9 @@ public class PlayerCore : CreatureBase, IBegin
 
         fov.DetectTargets(enemyLayer);
         if(!isDrunk)
-        { 
+        {
         }
         NearEnemy();
-        //MentalState();
-        // UnityEngine.Debug.Log($"정신력 수치 : {currentMental}");
     }
     public override void WhenDestroy()
     {
@@ -281,7 +253,6 @@ public class PlayerCore : CreatureBase, IBegin
     // =============================================================
     void SetSetAttribute()
     {
-        //maxHp = 100;
         maxHp = 100;
         hp = maxHp;                 // 체력
         speed = 1.8f;               // 이동 속도
@@ -290,7 +261,7 @@ public class PlayerCore : CreatureBase, IBegin
         currentMental = maxMental;         // 정신력 (시작 값 100)
         attackDamage = 2;           // 공격력
         attackDelayTime = 0.4f;     // 공격 쿨타임
-        attackRange = 0.4f;       // 공격 범위 (이미 attack box 크기를 0.4로 지정해둠)
+        attackRange = 0.4f;
     }
 
     public void SetState(PlayerState state)
@@ -298,7 +269,6 @@ public class PlayerCore : CreatureBase, IBegin
         currentState = state;
         if (state == PlayerState.ChargingFishing || state == PlayerState.ActionFishing)
             StopHorizontalMovement();
-        UtilityFunctions.Log("Player State Changed to: " + state);
     }
 
     public static int Get4DirIndex(in Vector3 v)
@@ -306,14 +276,14 @@ public class PlayerCore : CreatureBase, IBegin
         if (v.sqrMagnitude < 1e-6f) return -1;
         float ax = Mathf.Abs(v.x);
         float az = Mathf.Abs(v.z);
-        if (ax >= az) return (v.x >= 0f) ? 3 : 2; // Right : Left
-        else return (v.z <= 0f) ? 0 : 1; // Front : Back
+        if (ax >= az) return (v.x >= 0f) ? 3 : 2;
+        else return (v.z <= 0f) ? 0 : 1;
     }
 
     public static int Get2DirIndex(in Vector3 v)
     {
         if (v.sqrMagnitude < 1e-6f) return -1;   // 정지면 -1
-        return (v.x >= 0f) ? 1 : 0;              // 1:Right, 0:Left
+        return (v.x >= 0f) ? 1 : 0;
     }
 
     void ChangeIdleByIndex(int idx)
@@ -346,7 +316,7 @@ public class PlayerCore : CreatureBase, IBegin
     public void ChangeFishingHoldByIndex(int idx)
     {
         if (idx < 0) return;
-        var target = slots.fisingHold[idx];          // ← fisingHold 로 반드시
+        var target = slots.fisingHold[idx];
 
         playerController.ChangeAnimationClip(slots.curFishingHoldClip, target);
         playerController.nextAnimTrigger = "SetFishingHold";
@@ -360,7 +330,6 @@ public class PlayerCore : CreatureBase, IBegin
         int idx = Get4DirIndex(moveInput);
         if (isDebugging)
         {
-            UtilityFunctions.Log($"Idle idx : {idx}");
         }
 
         if (idx != _curRunIdx)
@@ -420,8 +389,6 @@ public class PlayerCore : CreatureBase, IBegin
 
         ChangeFishingReadyByIndex(idx);
 
-        //if (idx != _curFishingReadyIdx) { ChangeFishingReadyByIndex(idx); _curFishingReadyIdx = idx; }
-        //if (idx != _curFishingHoldIdx) { ChangeFishingHoldByIndex(idx); _curFishingHoldIdx = idx; }
     }
 
     // =============================================================
@@ -445,7 +412,7 @@ public class PlayerCore : CreatureBase, IBegin
 
     public bool IsMentalDebuff()
     {
-        return currentMental < 40.0f; 
+        return currentMental < 40.0f;
     }
 
     public bool BeginCoroutine(IEnumerator coroutine)
@@ -467,6 +434,7 @@ public class PlayerCore : CreatureBase, IBegin
     {
         if (IsDead) return;
         base.TakeDamage(damage, attacker);
+        if (damage > 0) InGameUI.instance?.ShowPlayerDamage(damage, maxHp);
         if (damage > 0 && attacker != null
             && (attacker.GetComponent<EnemyBase>() != null || attacker.GetComponent<ZombieMarinerAI>() != null))
             AudioManager.instance?.PlaySfx(AudioManager.SFX.Hit2);
@@ -491,7 +459,6 @@ public class PlayerCore : CreatureBase, IBegin
         {
             SetState(PlayerState.Default);
 
-            // ++++ 낚시 ui 바꿔야하는데 음 
             if (playerController != null)
             {
                 playerController.CancelFishing();
@@ -501,7 +468,6 @@ public class PlayerCore : CreatureBase, IBegin
 
         if(hp <= 0)
         {
-            // creatureEffect.Effects[3].Play();
         }
     }
     #endregion
@@ -511,7 +477,7 @@ public class PlayerCore : CreatureBase, IBegin
        { 포만감 }
     - 시작시 80으로 설정, 최대 100 최소 0
     - 현실 시간 5초에 한 번씩 1씩 감소
-    - 플레이어 체력이 50% 미만이면 감소 속도 30% 증가 
+    - 플레이어 체력이 50% 미만이면 감소 속도 30% 증가
         - 100 ~ 80 배부름 상태 : 속도 20% 증가
         - 79 ~ 30 배부름 상태 해제
         - 29 ~ 1 배고픔 상태 : 속도 30% 감소
@@ -523,11 +489,7 @@ public class PlayerCore : CreatureBase, IBegin
     ============================================================= */
 
 
-    /// <summary>
-    /// 초당 포만감 1씩 감소 Start 함수에서 시작 (코루틴)
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator FullnessSystemCoroutine()
+         private IEnumerator FullnessSystemCoroutine()
     {
         while(true)
         {
@@ -554,10 +516,7 @@ public class PlayerCore : CreatureBase, IBegin
         }
     }
 
-    /// <summary>
-    /// 포만감 수치에 따라 상태 갱신 함수
-    /// </summary>
-    private void UpdateFullnessState()
+         private void UpdateFullnessState()
     {
         FullnessState fullnessState;
 
@@ -614,28 +573,19 @@ public class PlayerCore : CreatureBase, IBegin
         }
     }
 
-    /// <summary>
-    /// 초당 체력 1씩 감소하는 굶주림 함수 (코루틴)
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator StarvingDamageCorountine()
+         private IEnumerator StarvingDamageCorountine()
     {
         UtilityFunctions.Log("굶주림 상태 : 체력 감소 시작");
         for(int i = 0; i < fullnessStarvingMax; i++)
         {
             yield return new WaitForSeconds(1f);
-            //TakeDamage(1, this.gameObject);
             hp -= 1;
             hp = Mathf.Clamp(hp, 0, maxHp);
             PlayerHpChanged?.Invoke(hp);
-        }        
+        }
     }
 
-    /// <summary>
-    /// 음식 섭취시 포만감 증가, 증가값 매개변수로 전달
-    /// </summary>
-    /// <param name="increase"></param>
-    public void EatFoodFullness(int increase)
+         public void EatFoodFullness(int increase)
     {
         currentFullness += increase;
         currentFullness = Mathf.Clamp(currentFullness, minFullness, maxFullness);
@@ -644,7 +594,7 @@ public class PlayerCore : CreatureBase, IBegin
         PlayerFullnessChanged?.Invoke(currentFullness);
     }
 
-    // 굶주림 제거 
+    // 굶주림 제거
     public void RemoveStarvingIEnumerator()
     {
         if(starvationCoroutine != null)
@@ -658,34 +608,8 @@ public class PlayerCore : CreatureBase, IBegin
     #region 정신력
 
 
-    /* =============================================================
-        { 정신력 }
-    - 시작시 100으로 시작, 0 ~ 100 사이의 값을 가짐
-    - 정신력 40 ~ 100 : 효과 없음
-    - 정신력 0 ~ 39 : 공격력, 설치 작업 대성공 확률, 죄책감 시스템 레벨 감소
 
-    [증가 조건]
-    - 둘 다 아이템 사용시 증가값만 전달하면 정신력 추가하는 함수를 추가
-        - 아이템 사용에 따라 5 ~ 80까지 증가 가능
-        - 음식 섭취 시 10씩 증가 (종류 상관 없음)
-
-    [감소 조건]    
-        - 플레이어 반경 2M 내 에너미가 존재할 경우 2초당 1씩 감소
-        - 에너미에게 공격 받은 경우 공격 1회당 3씩 감소 (반경 내 에너미 존재 조건과 중첩 가능)
-        - 승무원 AI 사망시 현재 정신력의 20% 감소
-
-    [동결 조건]
-    - 아이템 중 술을 마시면 만취 상태가 됨
-    - 만취 상태 : 정신력 증가 및 감소 불가, 동결됨
-
-    TODO : 
-    ============================================================= */
-
-    /// <summary>
-    /// 정신력 계산 ? 메서드 
-    /// </summary>
-    /// <param name="increase"></param>
-    public void UpdateMental(int increase)
+         public void UpdateMental(int increase)
     {
         if(isDrunk)
             return;
@@ -703,7 +627,6 @@ public class PlayerCore : CreatureBase, IBegin
 
         if (CreatureEffect.Instance != null && Time.time - lastEffectTime >= 10f)
         {
-            //creatureEffect.Effects[2].Play();
             if (increase <= 0)
             {
                 var ps = CreatureEffect.Instance.GetEffect(5);
@@ -726,34 +649,25 @@ public class PlayerCore : CreatureBase, IBegin
         // 수치에 따라 디버프 부여,,
     }
 
-    // 바다이벤트 : 안개 -> 정신력 감소 
+    // 바다이벤트 : 안개 -> 정신력 감소
     public void ReduceMentalByFog()
     {
         int reduceValue = Mathf.RoundToInt(maxMental * 0.1f);
         UpdateMental(-reduceValue);
     }
 
-    /// <summary>
-    /// 에너미에게 공격 받은 경우 정신력 감소 시키는 함수 -3
-    /// </summary>
-    public void AttackedFromEnemy()
+         public void AttackedFromEnemy()
     {
         UpdateMental(attackedFromEnemy);
     }
 
-    /// <summary>
-    /// 승무원 죽었을때 호출, 정신력 감소, 현재 정신력의 20%
-    /// </summary>
-    public void ReduceMentalOnMarinerDie()
+         public void ReduceMentalOnMarinerDie()
     {
         float reduce = currentMental * reduceMentalOnMarinerDie;
         UpdateMental(Mathf.RoundToInt(-reduce)); // 반올림하고 았는데 그냥 . 아래 수 버릴거면 수정 가능
     }
 
-    /// <summary>
-    /// 반경 2m 내에 에너미가 존재 여부를 확인하고 정신력 감소 코루틴 실행 및 중단할때 호출 
-    /// </summary>
-    public void NearEnemy()
+         public void NearEnemy()
     {
         if (fov.visibleTargets.Count > 0 && enemyExistCoroutine == null)
         {
@@ -766,38 +680,69 @@ public class PlayerCore : CreatureBase, IBegin
         }
     }
 
-    /// <summary>
-    /// 에너미 존재시 2초에 한 번 정신력 감소 -1
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator EnemyExist()
+         private IEnumerator EnemyExist()
     {
         while(true)
         {
             yield return new WaitForSeconds(existEnemyMentalCool);
             UpdateMental(existEnemyMentalDecrease);
-        }        
+        }
     }
 
-    public bool IsDrunk() // 만취상태인지만 리턴하는 메서드 
+    public bool IsDrunk() // 만취상태인지만 리턴하는 메서드
     {
         return isDrunk;
     }
 
     public void StartDrunk()
     {
-
-        StartCoroutine(Drunk());
+        if (drunkCoroutine != null) StopCoroutine(drunkCoroutine);
+        drunkCoroutine = StartCoroutine(Drunk());
     }
 
     // 술 아이템 사용시 호출
     public IEnumerator Drunk()
     {
         isDrunk = true;
-
-        yield return new WaitForSeconds(60f);
-
+        drunkUntil = Time.time + Mathf.Max(0.01f, drunkDuration);
+        RefreshStatusEffectUI();
+        while (Time.time < drunkUntil) yield return null;
         isDrunk = false;
+        drunkCoroutine = null;
+        RefreshStatusEffectUI();
+    }
+
+    public void RefreshStatusEffectUI()
+    {
+        var hud = BuffUIManager.Instance;
+        if (hud == null || !isActiveAndEnabled || IsDead) return;
+        var fullness = currentFullnessState == FullnessState.Full ? EffectType.Fullness_Full
+            : currentFullnessState == FullnessState.Hungry ? EffectType.Fullness_Hungry
+            : currentFullnessState == FullnessState.Starving ? EffectType.Fullness_Starving : EffectType.None;
+        hud.SetFullnessUI(fullness);
+        if (IsMentalDebuff()) hud.BeginUI(EffectType.Mental_Unstable, false);
+        else hud.EndUI(EffectType.Mental_Unstable);
+        if (isDrunk)
+        {
+            hud.BeginUI(EffectType.Drunk, true);
+            hud.SetRemainingTime(EffectType.Drunk, DrunkRemaining);
+        }
+        else hud.EndUI(EffectType.Drunk);
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (drunkCoroutine != null) StopCoroutine(drunkCoroutine);
+        drunkCoroutine = null;
+        isDrunk = false;
+        if (Instance == this) BuffUIManager.Instance?.ClearAll();
+    }
+
+    protected override void OnDestroy()
+    {
+        if (Instance == this) { BuffUIManager.Instance?.ClearAll(); Instance = null; }
+        base.OnDestroy();
     }
     #endregion
 

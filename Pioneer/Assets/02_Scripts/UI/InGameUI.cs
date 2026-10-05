@@ -4,7 +4,6 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 모든 게임 UI 열기/닫기 연결 스크립트
 // 각종 조작은 이 컴포넌트를 경유해서 처리합니다
 public class InGameUI : MonoBehaviour, IBegin
 {
@@ -20,12 +19,14 @@ public class InGameUI : MonoBehaviour, IBegin
     public const int ID_ESC_OPTION_SETTINGS = 8;
     public const int ID_ESC_OPTION_HELP = 9;
 
-    [Header("Sub UI GameObjects")]
+    [Header("하위 화면 오브젝트")]
     public GameObject gameObjectBarChart;
     public GameObject gameObjectGuiltyBarChart; // 죄책감
     public GameObject gameObjectBuffEffect;
     public GameObject gameObjectItemGet;
     public GameObject gameObjectClock;
+    [SerializeField] private PlayerHitScreen playerHitScreen;
+    public void ShowPlayerDamage(int damage, int maxHp) => playerHitScreen?.Play(damage, maxHp);
     public GameObject gameObjectGameOverUI;
     public GameObject gameObjectRepair;
     public GameObject gameObjectBackgroundWhiteScreen;
@@ -45,7 +46,7 @@ public class InGameUI : MonoBehaviour, IBegin
     public GameObject ManuDenyUI;
     public List<GameObject> gameObjectListExpandedInventory; // 인벤토리 칸 / 정렬 버튼 / 버리기 버튼
 
-    [Header("Sub UI Logic")]
+    [Header("하위 화면 기능")]
     public CraftUiMain mainCraft;
     public MakeshiftCraftUiMain makeshiftCraft;
     [HideInInspector] public DefaultFabrication currentFabricationUi;
@@ -61,7 +62,6 @@ public class InGameUI : MonoBehaviour, IBegin
     private int actionFeedbackPriority;
     private float actionFeedbackUntil;
 
-    // Brief outcomes use the existing HUD font and never capture gameplay input.
     public void ShowActionFeedback(string message, int priority = 0)
     {
         if (!isActiveAndEnabled || string.IsNullOrEmpty(message)
@@ -113,6 +113,16 @@ public class InGameUI : MonoBehaviour, IBegin
         mainCraftSelectUi = new List<GameObject>();
     }
 
+    private void OnDisable()
+    {
+        actionFeedbackTween?.Kill();
+        actionFeedbackTween = null;
+        if (actionFeedback != null) actionFeedback.alpha = 0f;
+        var pending = new List<InGameUiChunk>(closingChunks.Values);
+        closingChunks.Clear();
+        foreach (var chunk in pending) chunk.CloseAction?.Invoke();
+    }
+
     void Start()
     {
         InitializeClosedPanelState();
@@ -123,7 +133,6 @@ public class InGameUI : MonoBehaviour, IBegin
         if (GameManager.Instance != null && GameManager.Instance.IsGameResultActive) return;
         if (Input.GetKeyDown(KeyCode.J))
         {
-            UtilityFunctions.Log($"InGameUI - makeshiftCraftUI 상태 : {makeshiftCraftUI.activeInHierarchy}");
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -147,7 +156,6 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void ShowDefaultCraftUI()
     {
-        UtilityFunctions.Log($">> InGameUI.ShowDefaultCraftUI() / start / defaultCraftUI before={defaultCraftUI.activeSelf} / isCraftButtonExist={isCraftButtonExist} / categories={(ItemCategoryManager.Instance != null && ItemCategoryManager.Instance.categories != null ? ItemCategoryManager.Instance.categories.Count : -1)}");
         CommonUI.instance.CloseTab(mainCraft.ui);
         CloseUI(ID_MAKESHIFT);
 
@@ -156,7 +164,6 @@ public class InGameUI : MonoBehaviour, IBegin
         OpenUI(new List<GameObject>() { defaultCraftUI }, ID_CRAFTTABLE,
             () =>
             {
-                UtilityFunctions.Log("InGameUI.CloseAction 닫기 - defaultCraftUI");
                 defaultCraftUI.SetActive(false);
             }
         );
@@ -200,7 +207,6 @@ public class InGameUI : MonoBehaviour, IBegin
                 UtilityFunctions.Assert(mainCraft.ui != null);
                 UtilityFunctions.Assert(geometryCategoryButton != null);
                 UtilityFunctions.Assert(geometryItemSelectButton != null);
-                UtilityFunctions.Log($">> InGameUI.ShowDefaultCraftUI() / create category button / idx={index} / name={ItemCategoryManager.Instance.categories[index].categoryName}");
                 CommonUI.instance.ShowCategoryButton(
                     defaultCraftUiSubPivot,
                     ItemCategoryManager.Instance.categories[index],
@@ -214,12 +220,10 @@ public class InGameUI : MonoBehaviour, IBegin
 
         currentFabricationUi = mainCraft.ui;
         isNearCraft = true;
-        UtilityFunctions.Log($">> InGameUI.ShowDefaultCraftUI() / end / defaultCraftUI active={defaultCraftUI.activeSelf} / currentFabricationUi active={mainCraft.ui.gameObject.activeSelf} / spawnedSelectUi={mainCraftSelectUi.Count}");
     }
 
     public void CloseDefaultCraftUI()
     {
-        UtilityFunctions.Log("InGameUI.CloseDefaultCraftUI() called");
         InventoryUiMain.instance.IconRefresh();
         currentFabricationUi = makeshiftCraft.ui;
         isNearCraft = false;
@@ -235,10 +239,6 @@ public class InGameUI : MonoBehaviour, IBegin
         if (uiChunkStack.Count > 0)
         {
             CloseUI();
-        }
-        else if (ManuUI.activeInHierarchy)
-        {
-            Option.instance.SetDeactivateEscUI();
         }
         else
         {
@@ -295,8 +295,6 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void UseTab()
     {
-        // 간이 제작 UI 열림
-        // 인벤토리 UI 확장
         // 정렬 버튼
         // 버리기 버튼
         // 장비 창
@@ -317,20 +315,16 @@ public class InGameUI : MonoBehaviour, IBegin
         }
         if (isPannelExpand == true && isNearCraft == false)
         {
-            UtilityFunctions.Log(">> InGameUI.UseTab() 열기");
 
             OpenUI(new List<GameObject>() { gameObjectPlayerStatUiParent }, ID_CHAR_PANNEL,
                 () => {
-                    UtilityFunctions.Log("InGameUI.CloseAction 닫기 - gameObjectPlayerStatUiParent");
                     gameObjectPlayerStatUiParent.SetActive(false);
                 }
             );
             OpenUI(new List<GameObject>() { makeshiftCraftUI }, ID_MAKESHIFT,
                 () => {
-                    UtilityFunctions.Log("InGameUI.CloseAction 닫기 - makeshiftCraftUI");
                     makeshiftCraftUI.SetActive(false);
                     UtilityFunctions.Assert(makeshiftCraftUI.activeInHierarchy == false);
-                    UtilityFunctions.Log($"InGameUI.CloseAction 닫기 - makeshiftCraftUI 상태 : {makeshiftCraftUI.activeInHierarchy}");
                 }
             );
 
@@ -357,7 +351,6 @@ public class InGameUI : MonoBehaviour, IBegin
         OpenUI(uiGameobjects, id,
             () =>
             {
-                UtilityFunctions.Log("InGameUI.CloseAction 닫기");
                 foreach (GameObject go in uiGameobjects) { go.SetActive(false); }
             });
     }
@@ -366,7 +359,6 @@ public class InGameUI : MonoBehaviour, IBegin
     {
         if (uiGameobjects == null || IsOpened(id)) return;
         closingChunks.Remove(id);
-        UtilityFunctions.Log("InGameUI.OpenUI 열기");
 
         foreach (GameObject g in uiGameobjects)
         {
@@ -390,7 +382,6 @@ public class InGameUI : MonoBehaviour, IBegin
 
     public void CloseUI()
     {
-        UtilityFunctions.Log($"InGameUI.CloseUI() / Count = {uiChunkStack.Count}");
 
         if (uiChunkStack.Count <= 0) return;
 

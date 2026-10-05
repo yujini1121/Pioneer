@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Cinemachine;
 
-#region 임시 Stats
+#region 임시 능력치
 public class EnemyStats : MonoBehaviour
 {
     public float baseHP = 100f;
@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour, IBegin
 {
     public static GameManager Instance;
 
-    [Header("Balance Settings")]
+    [Header("밸런스 설정")]
     [SerializeField] private GameBalanceSettings balanceSettings;
     [SerializeField] private bool loadDefaultBalanceSettings = true;
 
@@ -58,6 +58,9 @@ public class GameManager : MonoBehaviour, IBegin
     private Vector3 resultCameraStartPosition;
     private bool restoreCameraBrain;
     private float cycleTime = 0f;
+    public float CurrentPhaseDuration => GetPhaseDuration();
+    public float CurrentPhaseRemaining => Mathf.Max(0f, CurrentPhaseDuration - cycleTime);
+    public float CurrentPhaseProgress => Mathf.Clamp01(cycleTime / CurrentPhaseDuration);
 
     [Header("스포너 지점")]
     public GameObject[] spawnPoints;
@@ -77,7 +80,7 @@ public class GameManager : MonoBehaviour, IBegin
     public Canvas[] allUICanvas;
     public bool IsGameResultActive { get; private set; }
 
-    [Header("Game Result Presentation")]
+    [Header("게임 결과 연출")]
     [SerializeField] private float gameOverPresentationDuration = 1.8f;
     [SerializeField] private float gameOverAudioFadeDuration = 1.6f;
     [SerializeField] private float gameOverCameraZoomDistance = 1.8f;
@@ -85,8 +88,8 @@ public class GameManager : MonoBehaviour, IBegin
     [SerializeField] private float gameOverVignetteIntensity = 0.55f;
     [SerializeField] private float gameOverVignetteSmoothness = 0.6f;
 
-    [Header("동적 스포너(EnemySpawnerFinder)")]
-    [SerializeField] private EnemySpawnerFinder spawnerFinder;          // Inspector에서 할당
+    [Header("동적 스폰 지점")]
+    [SerializeField] private EnemySpawnerFinder spawnerFinder;
     [SerializeField] private float spawnLiftY = 0.05f;                   // 살짝 띄워서 스폰
     [SerializeField] private string spawnRootName = "__SPAWNPOINTS__";   // 하이어라키 정리용
     private Transform spawnRoot;                                         // 스폰 포인트 부모
@@ -94,7 +97,6 @@ public class GameManager : MonoBehaviour, IBegin
     [Header("바다이벤트")]
     [SerializeField] private OceanEventManager oceanEventManager;
 
-    // EnemySpawnerFinder에서 찾은 스폰 포인트 수
     private int activeSpawnCount = 0;
 
     // 생성된 에너미 리스트
@@ -139,14 +141,14 @@ public class GameManager : MonoBehaviour, IBegin
     };
 
     [Header("승무원 스폰")]
-    [SerializeField] private GameObject marinerPrefab;   
-    [SerializeField] private Transform mast;            
+    [SerializeField] private GameObject marinerPrefab;
+    [SerializeField] private Transform mast;
     [SerializeField] private Vector3 marinerSpawnOffset = Vector3.zero;
 
     [Header("전체 둥지 개수 체크")]
     public int checkTotalNest;
 
-    #region 임시 정리 
+    #region 임시 정리
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -180,8 +182,6 @@ public class GameManager : MonoBehaviour, IBegin
         if (oceanEventManager == null) oceanEventManager = OceanEventManager.instance;
         PresentMorning();
 
-        UtilityFunctions.Log($">> GameManager.Start()");
-        UtilityFunctions.Log($"[GameMode] Infinite Mode: {GameModeState.IsInfiniteMode}");
 
         if (AudioManager.instance != null)
             AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
@@ -189,7 +189,7 @@ public class GameManager : MonoBehaviour, IBegin
         if (InventoryUiMain.instance != null)
             InventoryUiMain.instance.Start();
         else
-            UtilityFunctions.Log($">> GameManager.Start() : InventoryUiMain 인스턴스가 없음");
+            ;
     }
 
     private void Update()
@@ -215,7 +215,6 @@ public class GameManager : MonoBehaviour, IBegin
                 if (AudioManager.instance != null)
                     AudioManager.instance.PlayBgm(AudioManager.BGM.Night);
 
-                UtilityFunctions.Log($"밤이 되었습니다. (Day {currentDay})");
                 IsDaytime = false;
                 InGameUI.instance?.ShowActionFeedback("밤이 찾아왔습니다. 배를 지키세요.", 1);
                 OnNightStart();
@@ -230,7 +229,6 @@ public class GameManager : MonoBehaviour, IBegin
                     AudioManager.instance.PlayBgm(AudioManager.BGM.Morning);
 
                 OnNightEnd();
-                UtilityFunctions.Log($"아침이 되었습니다. (Day {currentDay})");
 
                 // 일반 모드일 때만 6일차 엔딩 발생
                 if (!GameModeState.IsInfiniteMode && currentDay >= 6)
@@ -277,7 +275,6 @@ public class GameManager : MonoBehaviour, IBegin
         RefreshSpawnPointsFromFinder();
 
         var s = GetScaleRowForDay(currentDay);
-        UtilityFunctions.Log($"[ScaleTable] Day {currentDay} -> ATK +{s.attackPercent}%, HP +{s.hpPercent}%");
         SpawnEnemiesForCurrentDay();
     }
 
@@ -317,6 +314,7 @@ public class GameManager : MonoBehaviour, IBegin
             return;
 
         IsGameResultActive = true;
+        BuffUIManager.Instance?.ClearAll();
 
         if (PlayerController.instance != null)
             PlayerController.instance.LockForGameResult();
@@ -353,7 +351,6 @@ public class GameManager : MonoBehaviour, IBegin
         resultCamera = cam;
         resultCameraBrain = cam != null ? cam.GetComponent<CinemachineBrain>() : null;
         restoreCameraBrain = resultCameraBrain != null && resultCameraBrain.enabled;
-        // The active Brain writes the camera transform in LateUpdate even at timeScale zero.
         if (restoreCameraBrain) resultCameraBrain.enabled = false;
         Vector3 startCameraPosition = cam != null ? cam.transform.position : Vector3.zero;
         resultCameraStartPosition = startCameraPosition;
@@ -449,7 +446,6 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void SpawnEnemiesForCurrentDay()
     {
-        UtilityFunctions.Log("Spawn Enemies");
 
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
@@ -464,7 +460,6 @@ public class GameManager : MonoBehaviour, IBegin
         SpawnOf(titan, row.titan, scale);       // 타이탄
 
         int spawnedCount = row.minion + row.crawler + row.titan;
-        UtilityFunctions.Log($"[Spawn] Day {currentDay}: Minion {row.minion}, Crawler {row.crawler}, Titan {row.titan} (총 {spawnedCount})");
     }
 
     // 바다이벤트 : 안개 낮 효과 -> 미니언 추가 스폰
@@ -510,7 +505,6 @@ public class GameManager : MonoBehaviour, IBegin
             }
         }
 
-        // 숨겼던 UI 다시 켜기
         ShowAllUI();
 
         // 게임오버 패널 닫기
@@ -519,25 +513,22 @@ public class GameManager : MonoBehaviour, IBegin
 
         PresentMorning();
 
-        UtilityFunctions.Log("[GameMode] 무한 모드로 전환되어 게임을 이어서 진행합니다.");
     }
 
     // 일차별 공격력 적용된 에너미 생성
     private void SpawnOf(GameObject prefab, int count, EnemyScaleRow scale)
     {
         DayEnemyRow row = GetSpawnRowForDay(currentDay);
-        UtilityFunctions.Log($"[Table] Day{currentDay} -> M:{row.minion}, C:{row.crawler}, T:{row.titan}");
 
         if (prefab == null || count <= 0) return;
 
-        // 부모 컨테이너 
+        // 부모 컨테이너
         EnsureEnemyRoot();
 
         for (int i = 0; i < count; i++)
         {
-            if (spawnPoints == null || activeSpawnCount == 0) { Debug.LogWarning("[Spawn] 활성 스폰 포인트 없음"); return; }
+            if (spawnPoints == null || activeSpawnCount == 0) { Debug.LogWarning("활성 스폰 지점이 없습니다."); return; }
 
-            // 활성화 된 것만 대상으로 랜덤(Found=true인 인덱스 선택)
             int spIndex = -1;
             for (int safe = 0; safe < 16; safe++)
             {
@@ -547,7 +538,7 @@ public class GameManager : MonoBehaviour, IBegin
                     spIndex = tryIdx; break;
                 }
             }
-            if (spIndex == -1) { Debug.LogWarning("[Spawn] 활성 스폰 포인트 선택 실패"); return; }
+            if (spIndex == -1) { Debug.LogWarning("활성 스폰 지점을 선택하지 못했습니다."); return; }
 
             Transform p = spawnPoints[spIndex].transform;
             Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0f, Random.Range(-1.5f, 1.5f));
@@ -570,13 +561,11 @@ public class GameManager : MonoBehaviour, IBegin
 
     private void DespawnAllEnemies()
     {
-        UtilityFunctions.Log($"DespawnAllEnemies 들어옴 / {GameObject.FindGameObjectsWithTag("Enemy").Length}");
 
         foreach (GameObject one in GameObject.FindGameObjectsWithTag("Enemy"))
         {
             if (one == null) continue;
 
-            UtilityFunctions.Log($"DespawnAllEnemies : {one.name}");
 
             UnitFadeController fade = EnsureUnitFadeController(one);
             if (fade != null)
@@ -587,7 +576,6 @@ public class GameManager : MonoBehaviour, IBegin
 
         spawnedEnemies.Clear();
 
-        UtilityFunctions.Log("[Despawn] 밤 종료로 모든 에너미 제거");
     }
 
     private DayEnemyRow GetSpawnRowForDay(int day)
@@ -640,19 +628,16 @@ public class GameManager : MonoBehaviour, IBegin
         int add = CalcMarinerEmbarkCount(currentDay, Mathf.Max(0, totalMarinerMembers - deadMarinerMembers));
         if (add <= 0)
         {
-            UtilityFunctions.Log($"[Mariner] Day {currentDay} 아침: 승선 0명 → 총 {totalMarinerMembers}명");
             return;
         }
 
         SpawnMariner(add);
-        UtilityFunctions.Log($"[Mariner] Day {currentDay} 아침: 승선 {add}명 → 총 {totalMarinerMembers}명");
     }
 
     // 1일차 0명, 2일차 1명, 3일차 2명, 4일차 3명,
     // 5일차: 현재 승무원 수 ≤3 → 4명, 현재 승무원 수 ≥4 → 5명
     private int CalcMarinerEmbarkCount(int day, int marinerNow)
     {
-        // Keep the small deck readable, including during Infinite Mode.
         if (marinerNow >= 5) return 0;
         switch (Mathf.Clamp(day, 1, 5))
         {
@@ -687,7 +672,7 @@ public class GameManager : MonoBehaviour, IBegin
             ApplyBalanceSettings();
     }
 
-    [ContextMenu("Apply Balance Settings")]
+    [ContextMenu("밸런스 설정 적용")]
     public void ApplyBalanceSettings()
     {
         if (balanceSettings == null)
@@ -808,7 +793,6 @@ public class GameManager : MonoBehaviour, IBegin
 
     private GameObject CreateOrGetSpawnPoint(int index)
     {
-        // 기존 public GameObject[] spawnPoints 를 그대로 사용
         if (spawnPoints == null || spawnPoints.Length < 4)
         {
             // 길이가 4가 아니면 4로 맞춰 재할당(기존 값은 유지 불가 → 새로 채움)
@@ -825,15 +809,11 @@ public class GameManager : MonoBehaviour, IBegin
         return spawnPoints[index];
     }
 
-    /// <summary>
-    /// EnemySpawnerFinder의 4방향 결과를 읽어와 spawnPoints를 ‘현재 플랫폼 상태’로 동기화.
-    /// 4개 전부 성공하면 true, 일부만 있으면 false(있는 것만 활성).
-    /// </summary>
-    private bool RefreshSpawnPointsFromFinder()
+         private bool RefreshSpawnPointsFromFinder()
     {
         if (spawnerFinder == null)
         {
-            Debug.LogWarning("[Spawner] EnemySpawnerFinder가 할당되지 않았습니다.");
+            Debug.LogWarning("동적 스폰 지점 탐색기가 연결되지 않았습니다.");
             activeSpawnCount = 0;
             return false;
         }
@@ -841,7 +821,6 @@ public class GameManager : MonoBehaviour, IBegin
         // 최신 플랫폼 배치 반영
         bool ok = spawnerFinder.Refresh();
 
-        // Finder에서 찾은 방향들만 반영(최대 4)
         int count = 0;
         for (int i = 0; i < 4; i++)
         {
@@ -854,7 +833,6 @@ public class GameManager : MonoBehaviour, IBegin
             count++;
         }
 
-        // 못 찾은 방향은 null 처리(스폰 대상에서 제외)
         for (int i = 0; i < 4; i++)
         {
             if (!spawnerFinder.found[i] && spawnPoints != null && i < spawnPoints.Length)
@@ -870,7 +848,7 @@ public class GameManager : MonoBehaviour, IBegin
 
         activeSpawnCount = count;
         if (count == 0)
-            Debug.LogWarning("[Spawner] 사용 가능한 동적 스폰 포인트가 없습니다. 플랫폼을 설치하세요.");
+            Debug.LogWarning("사용 가능한 동적 스폰 지점이 없습니다. 플랫폼을 설치하세요.");
 
         // 4개 모두 채워졌는지 반환
         return ok;
@@ -903,13 +881,13 @@ public class GameManager : MonoBehaviour, IBegin
 
         if (marinerPrefab == null)
         {
-            Debug.LogWarning("[Mariner] marinerPrefab이 비어 있습니다. 프리팹을 할당하세요.");
+            Debug.LogWarning("승무원 프리팹이 연결되지 않았습니다.");
             return;
         }
 
         if (spawnPoints == null || activeSpawnCount == 0)
         {
-            Debug.LogWarning("[Mariner] 활성 스폰 포인트가 없습니다.");
+            Debug.LogWarning("승무원의 활성 스폰 지점이 없습니다.");
             return;
         }
 
@@ -928,7 +906,7 @@ public class GameManager : MonoBehaviour, IBegin
 
             if (spIndex == -1)
             {
-                Debug.LogWarning("[Mariner] 활성 스폰 포인트 선택 실패");
+                Debug.LogWarning("승무원의 활성 스폰 지점을 선택하지 못했습니다.");
                 return;
             }
 

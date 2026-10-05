@@ -14,14 +14,12 @@ public class InventoryManager : InventoryBase
     public SItemStack mouseInventory;
     public int selectedSlotIndex;
     public SItemStack SelectedSlotInventory;
-    //public List<SItemStack> itemLists;
-    //public Dictionary<int, SItemStack> fastSearch;
     [SerializeField] int inventoryCount;
     [SerializeField] Transform positionDrop;
     private Vector3 dropOffset = new Vector3(0.5f, -0.75f, -0.5f); // 오프셋
     private bool isThisFrameReloadCraft = false;
 
-    [Header("DEBUG")]
+    [Header("디버깅")]
     [SerializeField] bool isDebugging;
     [SerializeField] bool isDebuggingAdd;
     bool IsDebuggingAdd => isDebugging && isDebuggingAdd;
@@ -49,7 +47,6 @@ public class InventoryManager : InventoryBase
             return;
         }
 
-        //Debug.Log("!!!");
 
         SItemStack temp = itemLists[index];
 
@@ -80,9 +77,7 @@ public class InventoryManager : InventoryBase
 
     public void MouseDrop()
     {
-        UtilityFunctions.Log($">> InventoryManager.MouseDrop() : 호출됨");
 
-        // ItemDropManager.instance.Drop(mouseInventory, positionDrop.position);
         ItemDropManager.instance.Drop(mouseInventory, ThisIsPlayer.Player.transform.position + dropOffset);
 
         mouseInventory = null;
@@ -102,7 +97,6 @@ public class InventoryManager : InventoryBase
         {
             return;
         }
-        // 여러 개의 아이템이 마우스 위에 존재할 때 , ctrl를 누른 상태로 좌클릭 시 한 개 씩 그 칸에 놓아진다.
         else if (mouseInventory != null)
         {
             if (itemLists[index] == null)
@@ -134,7 +128,6 @@ public class InventoryManager : InventoryBase
     {
         if (IsDebuggingAdd)
         {
-            UtilityFunctions.Log($">> InventoryManager.Add(SItemStack item) => 아이템 추가됨 : {item.id}를 {item.amount}갯수만큼 추가");
         }
         isThisFrameReloadCraft = true;
 
@@ -145,7 +138,7 @@ public class InventoryManager : InventoryBase
         }
 
         UtilityFunctions.Assert(InventoryUiMain.instance != null);
-        SItemStack remain;// = null;
+        SItemStack remain;
         if (TryAdd(item, out remain) == false)
         {
             ItemDropManager.instance.Drop(remain, positionDrop.transform.position);
@@ -154,63 +147,24 @@ public class InventoryManager : InventoryBase
         {
             ItemGetNoticeUI.Instance.Add(item);
         }
-        
+
         InventoryUiMain.instance.IconRefresh();
     }
 
     public void SortSelf()
     {
-        // 완전히 합침
-        // 그뒤 아이템 추가
-        for (int index = 0; index < inventoryCount; index++)
-        {
-            if (itemLists[index] == null) continue;
-            if (itemLists[index].itemBaseType.maxStack == 1) continue;
+        var ui = InventoryUiMain.instance;
+        if (ui == null) return;
+        InventorySort.Sort(itemLists, ui.RegularSlotIndices);
+        UpdateSlot();
+    }
 
-            for (int x = index + 1; x < inventoryCount; ++x)
-            {
-                if (itemLists[x] == null) continue;
-                if (itemLists[index].id == itemLists[x].id)
-                {
-                    itemLists[index].amount += itemLists[x].amount;
-                    itemLists[x] = null;
-                }
-            }
-        }
+    public bool ConsumeOne(SItemStack stack)
+    {
+        if (stack == null || stack.amount <= 0 || (!itemLists.Contains(stack) && mouseInventory != stack)) return false;
+        stack.amount--;
         SafeClean();
-        List<SItemStack> list = new List<SItemStack>();
-        for (int index = 0; index < inventoryCount; index++)
-        {
-            if (itemLists[index] == null) continue;
-            list.Add(itemLists[index]);
-            itemLists[index] = null;
-        }
-
-        // 여기서부터 정렬
-
-        list = list
-            .OrderBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].categories)
-            .ThenBy(w => ItemTypeManager.Instance.itemTypeSearch[w.id].typeName, StringComparer.Create(
-            new CultureInfo("ko-KR"), ignoreCase: false)).ToList();
-        for (int listIndex = 0; listIndex < list.Count; ++listIndex)
-        {
-            Add(list[listIndex]);
-        }
-        list = new List<SItemStack>();
-        for (int index = 0; index < inventoryCount; index++)
-        {
-            list.Add(itemLists[index]);
-        }
-        // 9번부터 채우도록 이동함
-        for (int index = 9; index < inventoryCount; index++)
-        {
-            itemLists[index] = list[index - 9];
-        }
-        for (int index = 0; index < 9; index++)
-        {
-            itemLists[index] = list[index + 18];
-        }
-        SafeClean();
+        return true;
     }
 
     public void SelectSlot(int index)
@@ -257,12 +211,10 @@ public class InventoryManager : InventoryBase
         Instance = this;
 
         itemLists = new List<SItemStack>();
-        //fastSearch = new Dictionary<int, SItemStack>();
 
         for (int i = 0; i < inventoryCount; ++i)
         {
             itemLists.Add(null);
-            // Debug.Log($"awake : {itemLists[i].id}");
         }
 
         mouseInventory = null;
@@ -311,21 +263,7 @@ public class InventoryManager : InventoryBase
 
     private void Demo()
     {
-        //Add(new SItemStack(30001, 10));
-        //Add(new SItemStack(30002, 10));
 
-        //itemLists[0] = new SItemStack(30002, 100);
-        //itemLists[1] = new SItemStack(100, 100);
-        //itemLists[2] = new SItemStack(101, 100);
-        //itemLists[3] = new SItemStack(102, 100);
-        //itemLists[4] = new SItemStack(103, 100);
-        //itemLists[5] = new SItemStack(30001, 200);
-        //itemLists[6] = new SItemStack(20001, 1);
-        //itemLists[7] = new SItemStack(40001, 200);
-        //Add(new SItemStack(100, 80));
-        //Add(new SItemStack(101, 80));
-        //Add(new SItemStack(102, 80));
-        //Add(new SItemStack(103, 80));
         Add(new SItemStack(20001, 1, 100));
         Add(new SItemStack(20002, 1, 100));
         Add(new SItemStack(20003, 1, 100));
@@ -337,7 +275,6 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(30006, 80));
         Add(new SItemStack(30007, 80));
         Add(new SItemStack(30008, 80));
-        //Add(new SItemStack(30009, 80));
         Add(new SItemStack(30010, 80));
         Add(new SItemStack(30011, 80));
         Add(new SItemStack(30012, 80));
@@ -351,7 +288,7 @@ public class InventoryManager : InventoryBase
         Add(new SItemStack(30020, 80));
         Add(new SItemStack(30021, 80));
         Add(new SItemStack(30022, 80));
-        
+
         Add(new SItemStack(40001, 80));
         Add(new SItemStack(40009, 80));
         Add(new SItemStack(40007, 80));

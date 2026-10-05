@@ -36,6 +36,37 @@ public class CreatureEffect : MonoBehaviour
         return Effects != null && index >= 0 && index < Effects.Length ? Effects[index] : null;
     }
 
+    public ParticleSystem PlayLoopingEffect(ParticleSystem source, Vector3 position, Transform owner)
+    {
+        if (source == null || owner == null) return null;
+        var effect = Instantiate(source, position, source.transform.rotation);
+        effect.transform.localScale *= 0.5f;
+        effect.transform.SetParent(owner, worldPositionStays: true);
+        effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        foreach (var particles in effect.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var main = particles.main;
+            main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            main.loop = true;
+            main.startDelay = 0f;
+            main.stopAction = ParticleSystemStopAction.None;
+        }
+        effect.gameObject.SetActive(true);
+        effect.Clear(true);
+        effect.Play(true);
+        effect.Simulate(0.01f, true, true);
+        effect.Play(true);
+        return effect;
+    }
+
+    public static void StopLoopingEffect(ParticleSystem effect)
+    {
+        if (effect == null) return;
+        effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        effect.gameObject.SetActive(false);
+        Destroy(effect.gameObject);
+    }
+
     public void PlayEffect(ParticleSystem pooled, Vector3 pos)
     {
         if (!pooled) return;
@@ -107,7 +138,6 @@ public class CreatureEffect : MonoBehaviour
         return maxT;
     }
 
-    // CreatureEffect 안에 추가
     public void PlayEffectFollow(ParticleSystem pooled, Transform target, Vector3 localOffset)
     {
         if (!pooled || !target) return;
@@ -127,7 +157,6 @@ public class CreatureEffect : MonoBehaviour
         }
 
         // 풀링된 개체 재사용
-        // Keep the pooled object under the persistent manager when its target's scene unloads.
         pooled.transform.position = target.TransformPoint(localOffset);
         var main = pooled.main;
         main.loop = false;
@@ -154,15 +183,4 @@ public class CreatureEffect : MonoBehaviour
         go.transform.SetParent(transform, worldPositionStays: true); // 풀로 되돌림(원하면 전용 부모 사용)
         go.SetActive(false);
     }
-    /*public void PlayEffect(GameObject effectPrefab, Vector3 position)
-    {
-        if (effectPrefab != null)
-        {
-            Instantiate(effectPrefab, position, Quaternion.identity);
-        }
-        else
-        {
-            Debug.Log("이펙트 널 버그");
-        }
-    }*/
 }

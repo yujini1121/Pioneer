@@ -7,13 +7,13 @@ public class MarinerAnimControll : MonoBehaviour
     public Animator animator;
     public SpriteRenderer sprite;
 
-    [Header("Move Tuning")]
+    [Header("이동 설정")]
     public float idleThreshold = 0.05f;
     public float damp = 0.08f;
     public bool invertX = false;
     public bool invertZ = false;
 
-    [Header("Idle Pose Sprites")]
+    [Header("대기 스프라이트")]
     public Sprite defaultIdleFront;
     public Sprite defaultIdleBack;
     public Sprite defaultIdleLeft;
@@ -31,14 +31,13 @@ public class MarinerAnimControll : MonoBehaviour
     // 공격 조준 고정
     private bool aimOverride = false;
     private Vector2 aimDir;
+    private ParticleSystem fishingEffect;
 
-    //Animator Hashes
     static readonly int H_Attack = Animator.StringToHash("Attack");
     static readonly int H_IsAttacking = Animator.StringToHash("IsAttacking");
     static readonly int H_DirX = Animator.StringToHash("DirX");
     static readonly int H_DirZ = Animator.StringToHash("DirZ");
     static readonly int H_Speed = Animator.StringToHash("Speed");
-    // ★ Fishing
     static readonly int H_FishingTrigger = Animator.StringToHash("FishingTrigger");
     static readonly int H_IsFishing = Animator.StringToHash("IsFishing");
     static readonly int S_FishingLeft = Animator.StringToHash("Base Layer.Mariner_StateMachine.Mariner_Fishing_Side_L");
@@ -115,7 +114,6 @@ public class MarinerAnimControll : MonoBehaviour
             sprite.flipX = false;
     }
 
-    //Zombie 그대로 유지 
     public void SetZombieModeTrigger()
     {
         if (animator == null) animator = GetComponentInChildren<Animator>(true);
@@ -173,7 +171,6 @@ public class MarinerAnimControll : MonoBehaviour
         if (animator == null || self == null) return;
         if (animator.GetBool(H_IsFishing)) return;
 
-        // 바라볼 방향 스냅(L/R/Front/Back)
         Vector3 w = (lookPoint - self.position); w.y = 0f;
         if (w.sqrMagnitude < 0.0001f) w = self.right; // 기본 오른쪽
         Camera viewCamera = Camera.main;
@@ -199,14 +196,22 @@ public class MarinerAnimControll : MonoBehaviour
         animator.ResetTrigger(H_FishingTrigger);
         animator.SetBool(H_IsFishing, true);
         animator.Play(side < 0f ? S_FishingLeft : S_FishingRight, 0, 0f);
+
+        if (CreatureEffect.Instance != null && PlayerFishing.instance != null)
+        {
+            Vector3 effectPosition = PlayerFishing.instance.GetFishingEffectPosition(self.position, w);
+            fishingEffect = CreatureEffect.Instance.PlayLoopingEffect(
+                CreatureEffect.Instance.GetEffect(8), effectPosition, self);
+        }
     }
 
     public void StopFishing()
     {
+        StopFishingEffect();
         if (animator == null) return;
         bool wasFishing = animator.GetBool(H_IsFishing);
         animator.ResetTrigger(H_FishingTrigger);
-        animator.SetBool(H_IsFishing, false); // 종료 조건 해제 → Idle로 복귀
+        animator.SetBool(H_IsFishing, false);
         if (!wasFishing) return;
 
         ClearAim();
@@ -218,6 +223,22 @@ public class MarinerAnimControll : MonoBehaviour
     public void EndFishingFromEvent()  // 애니메이션 이벤트에서 호출
     {
         StopFishing();
+    }
+
+    private void StopFishingEffect()
+    {
+        CreatureEffect.StopLoopingEffect(fishingEffect);
+        fishingEffect = null;
+    }
+
+    private void OnDisable()
+    {
+        StopFishingEffect();
+    }
+
+    private void OnDestroy()
+    {
+        StopFishingEffect();
     }
 
     void Update()

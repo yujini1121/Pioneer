@@ -18,60 +18,19 @@ public static class UITweenHelper
         return canvasGroup;
     }
 
-    public static void PlayOpen(GameObject target, float duration = 0.18f)
+    public static void PlayOpen(GameObject target, float duration = 0.16f)
     {
         if (target == null) return;
-
         target.SetActive(true);
-
-        CanvasGroup canvasGroup = EnsureCanvasGroup(target);
-        Transform targetTransform = target.transform;
-
-        DOTween.Kill(target);
-        canvasGroup.DOKill();
-        targetTransform.DOKill();
-        Vector3 baseScale = targetTransform.localScale;
-
-        canvasGroup.alpha = 0f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
-        targetTransform.localScale = baseScale * 0.96f;
-
-        Sequence sequence = DOTween.Sequence().SetTarget(target).SetUpdate(true)
-            .SetLink(target, LinkBehaviour.KillOnDisable);
-        sequence.Join(canvasGroup.DOFade(1f, duration).SetEase(Ease.OutCubic));
-        sequence.Join(targetTransform.DOScale(baseScale, duration).SetEase(Ease.OutCubic));
-        sequence.OnKill(() => { if (targetTransform != null) targetTransform.localScale = baseScale; });
+        var panel = target.GetComponent<UIPanelTween>() ?? target.AddComponent<UIPanelTween>();
+        panel.Open(duration);
     }
 
-    public static void PlayClose(GameObject target, Action onComplete, float duration = 0.12f)
+    public static void PlayClose(GameObject target, Action onComplete, float duration = 0.1f)
     {
-        if (target == null)
-        {
-            onComplete?.Invoke();
-            return;
-        }
-
-        CanvasGroup canvasGroup = EnsureCanvasGroup(target);
-        Transform targetTransform = target.transform;
-
-        DOTween.Kill(target);
-        canvasGroup.DOKill();
-        targetTransform.DOKill();
-        Vector3 baseScale = targetTransform.localScale;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
-
-        Sequence sequence = DOTween.Sequence().SetTarget(target).SetUpdate(true)
-            .SetLink(target, LinkBehaviour.KillOnDisable);
-        sequence.Join(canvasGroup.DOFade(0f, duration).SetEase(Ease.InCubic));
-        sequence.Join(targetTransform.DOScale(baseScale * 0.98f, duration).SetEase(Ease.InCubic));
-        sequence.OnKill(() => { if (targetTransform != null) targetTransform.localScale = baseScale; });
-        sequence.OnComplete(() =>
-        {
-            if (targetTransform != null) targetTransform.localScale = baseScale;
-            onComplete?.Invoke();
-        });
+        if (target == null || !target.activeInHierarchy) { onComplete?.Invoke(); return; }
+        var panel = target.GetComponent<UIPanelTween>() ?? target.AddComponent<UIPanelTween>();
+        panel.Close(onComplete, duration);
     }
 
     public static void FadeCanvasGroup(CanvasGroup canvasGroup, bool visible, float duration = 0.16f, bool ignoreTimeScale = false)
