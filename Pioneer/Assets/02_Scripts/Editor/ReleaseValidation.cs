@@ -23,6 +23,10 @@ using Object = UnityEngine.Object;
 public static class ReleaseValidation
 {
     private const string ActiveKey = "Pioneer.ReleaseValidation.Active";
+    private const string OwnerKey = "Pioneer.ReleaseValidation.Owner";
+    private const string RestorePendingKey = "Pioneer.ReleaseValidation.RestorePending";
+    private static readonly int EditorProcessId = System.Diagnostics.Process.GetCurrentProcess().Id;
+    private static readonly DateTime EditorStartedUtc = System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
     private const string StageKey = "Pioneer.ReleaseValidation.Stage";
     private const string ReportKey = "Pioneer.ReleaseValidation.Report";
     private const string SetupKey = "Pioneer.ReleaseValidation.Setup";
@@ -48,41 +52,86 @@ public static class ReleaseValidation
     }
     [Serializable] private class Setup { public SceneSetup[] scenes; }
     private static Report report;
+    public static bool IsRunning => SessionState.GetBool(ActiveKey, false)
+        && SessionState.GetInt(OwnerKey, -1) == EditorProcessId
+        && EditorApplication.isPlayingOrWillChangePlaymode;
 
     static ReleaseValidation()
     {
+        EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        EditorApplication.quitting -= ClearActiveSession;
+        EditorApplication.quitting += ClearActiveSession;
         EditorApplication.delayCall += CheckRequest;
         if (SessionState.GetBool(ActiveKey, false))
         {
+            if (!IsRunning) { ClearActiveSession(); return; }
             report = JsonUtility.FromJson<Report>(SessionState.GetString(ReportKey, "{}"));
+            if (report == null || report.status != "running") { ClearActiveSession(); return; }
             deadline = EditorApplication.timeSinceStartup + 180;
+            EditorApplication.update -= Tick;
             EditorApplication.update += Tick;
+            Application.logMessageReceived -= CaptureLog;
             Application.logMessageReceived += CaptureLog;
         }
+        if (SessionState.GetBool(RestorePendingKey, false) && !EditorApplication.isPlayingOrWillChangePlaymode)
+            EditorApplication.delayCall += Finish;
+    }
+
+    private static void ClearActiveSession()
+    {
+        SessionState.SetBool(ActiveKey, false);
+        SessionState.EraseInt(OwnerKey);
+        EditorApplication.update -= Tick;
+        Application.logMessageReceived -= CaptureLog;
+        LastPolishValidation.Reset();
+    }
+
+    private static void OnPlayModeStateChanged(PlayModeStateChange state)
+    {
+        if (state == PlayModeStateChange.ExitingPlayMode && SessionState.GetBool(ActiveKey, false))
+        {
+            if (SessionState.GetInt(OwnerKey, -1) == EditorProcessId && report != null)
+            {
+                if (SessionState.GetInt(StageKey, 0) != 100)
+                    report.errors.Add("Validation cancelled when its Play session ended.");
+                SessionState.SetBool(RestorePendingKey, true);
+                SaveReport();
+            }
+            ClearActiveSession();
+        }
+        if (state == PlayModeStateChange.EnteredEditMode && SessionState.GetBool(RestorePendingKey, false)) Finish();
     }
 
     private static void CheckRequest()
     {
-        if (!File.Exists(RequestPath) || SessionState.GetBool(ActiveKey, false)) return;
+        if (!File.Exists(RequestPath)) return;
+
+        DateTime requestedUtc = File.GetLastWriteTimeUtc(RequestPath);
+        bool fresh = requestedUtc >= EditorStartedUtc && DateTime.UtcNow - requestedUtc < TimeSpan.FromMinutes(5);
         string request = File.ReadAllText(RequestPath).Trim();
         File.Delete(RequestPath);
+        if (!fresh || SessionState.GetBool(ActiveKey, false)
+            || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
         if (request == "build") BuildWindows();
-        else Run();
+        else if (request == "run") Run();
     }
 
     [MenuItem("Tools/Pioneer/출시 검증/기본 검사")]
     public static void Run()
     {
-        LastPolishValidation.Reset();
-        report = new Report { unityVersion = Application.unityVersion, status = "running" };
         if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling
             || Enumerable.Range(0, SceneManager.sceneCount).Any(i => SceneManager.GetSceneAt(i).isDirty))
         {
+            if (IsRunning) return;
+            report = new Report { unityVersion = Application.unityVersion };
             report.status = "검증 전에 씬을 저장하고 플레이를 종료하세요.";
             SaveReport();
             if (Application.isBatchMode) EditorApplication.Exit(2);
             return;
         }
+        ClearActiveSession();
+        report = new Report { unityVersion = Application.unityVersion, status = "running" };
         try
         {
             SessionState.SetString(SetupKey, JsonUtility.ToJson(new Setup { scenes = EditorSceneManager.GetSceneManagerSetup() }));
@@ -91,6 +140,7 @@ public static class ReleaseValidation
             AuditScenes();
             SessionState.SetInt("Pioneer.ReleaseValidation.Unlock", PlayerPrefs.GetInt("InfiniteModeUnlocked", -1));
             SessionState.SetBool(ActiveKey, true);
+            SessionState.SetInt(OwnerKey, EditorProcessId);
             SessionState.SetInt(StageKey, 0);
             deadline = EditorApplication.timeSinceStartup + 180;
             EditorApplication.update -= Tick;
@@ -103,6 +153,7 @@ public static class ReleaseValidation
         }
         catch (Exception error)
         {
+            ClearActiveSession();
             report.errors.Add(error.ToString()); report.status = "failed"; SaveReport();
             if (Application.isBatchMode) EditorApplication.Exit(1);
         }
@@ -156,8 +207,8 @@ public static class ReleaseValidation
     private static void Tick()
     {
         if (!SessionState.GetBool(ActiveKey, false)) return;
+        if (!IsRunning) { ClearActiveSession(); return; }
         int stage = SessionState.GetInt(StageKey, 0);
-        if (stage == 100 && !EditorApplication.isPlayingOrWillChangePlaymode) { Finish(); return; }
         if (!EditorApplication.isPlaying || EditorApplication.isCompiling) return;
         if (EditorApplication.timeSinceStartup < nextTick) return;
         try
@@ -847,9 +898,10 @@ public static class ReleaseValidation
 
     private static void Finish()
     {
-        EditorApplication.update -= Tick;
-        Application.logMessageReceived -= CaptureLog;
-        SessionState.SetBool(ActiveKey, false);
+        SessionState.SetBool(RestorePendingKey, false);
+        ClearActiveSession();
+        if (report == null) report = JsonUtility.FromJson<Report>(SessionState.GetString(ReportKey, "{}"));
+        if (report == null) return;
         report.status = report.errors.Count == 0 ? "passed" : "failed";
         var setup = JsonUtility.FromJson<Setup>(SessionState.GetString(SetupKey, "{}"));
         if (setup != null && setup.scenes != null && setup.scenes.Any(s => s.isLoaded && s.isActive && !string.IsNullOrEmpty(s.path)))
@@ -899,8 +951,19 @@ public static class ReleaseValidation
 public static class LastPolishValidation
 {
     private static bool started, complete;
+    private static Coroutine runningChecks;
+    private static GameManager checksOwner;
+    private static IEnumerator checksIterator;
     public static bool HasStarted => started;
-    public static void Reset() { started = complete = false; failure = null; }
+    public static void Reset()
+    {
+        if (checksOwner != null && runningChecks != null) checksOwner.StopCoroutine(runningChecks);
+        // Explicitly dispose so saved gameplay state is restored even on cancellation.
+        try { (checksIterator as IDisposable)?.Dispose(); }
+        catch (Exception error) { Debug.LogWarning("Validation cleanup: " + error.Message); }
+        runningChecks = null; checksOwner = null; checksIterator = null;
+        started = complete = false; failure = null;
+    }
     private static Exception failure;
     private static float pausedProgress;
     private static Vector3 pausedClockScale;
@@ -919,12 +982,15 @@ public static class LastPolishValidation
 
     public static bool RunChecks(Action<bool, string> check)
     {
+        if (!ReleaseValidation.IsRunning) throw new InvalidOperationException("Gameplay checks require an explicitly owned ReleaseValidation Play session.");
         if (failure != null) throw failure;
         if (complete) return true;
         if (!started)
         {
             started = true;
-            GameManager.Instance.StartCoroutine(RunGuarded(Checks(check)));
+            checksOwner = GameManager.Instance;
+            checksIterator = Checks(check);
+            runningChecks = checksOwner.StartCoroutine(RunGuarded(checksIterator));
         }
         return false;
     }

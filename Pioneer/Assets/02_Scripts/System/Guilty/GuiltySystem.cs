@@ -37,6 +37,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
     [SerializeField] List<float> screamSoundChance;
     [SerializeField] List<float> screamSoundTerm;
     [SerializeField] List<float> screamSoundVolume;
+    [Tooltip("Optional dedicated guilt-effect Volume. Do not assign the GameManager day/night Volume.")]
     [SerializeField] Volume volumeScreenTransformation;
     private int darkFogPoolSize = 100;
     private Vector3 darkFogPoolPosition = new Vector3(0, 4, 0);
@@ -98,7 +99,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
         if (GuiltyLevel >= 2)
         {
-            volumeScreenTransformation.enabled = true;
+            SetScreenTransformationEnabled(true);
 
             if (screamCoroutine == null)
             {
@@ -116,7 +117,7 @@ public class GuiltySystem : MonoBehaviour, IBegin
             if (AudioSourceScream != null && AudioSourceScream.isPlaying)
                 AudioSourceScream.Stop();
 
-            volumeScreenTransformation.enabled = false;
+            SetScreenTransformationEnabled(false);
         }
         if (GuiltyLevel >= 1)
         {
@@ -133,6 +134,13 @@ public class GuiltySystem : MonoBehaviour, IBegin
                 darkObjectCoroutine = null;
             }
         }
+    }
+
+    private void SetScreenTransformationEnabled(bool enabled)
+    {
+        if (volumeScreenTransformation == null) return;
+        if (GameManager.Instance != null && volumeScreenTransformation == GameManager.Instance.postProcessVolume) return;
+        volumeScreenTransformation.enabled = enabled;
     }
 
     public void CrewDead()
@@ -174,7 +182,6 @@ public class GuiltySystem : MonoBehaviour, IBegin
         };
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         darkFogPool = new GuiltyPool<DarkFog>();
@@ -192,7 +199,6 @@ public class GuiltySystem : MonoBehaviour, IBegin
 
     }
 
-    // Update is called once per frame
     void Update()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

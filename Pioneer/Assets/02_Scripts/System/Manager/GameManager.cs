@@ -58,6 +58,14 @@ public class GameManager : MonoBehaviour, IBegin
     private Vector3 resultCameraStartPosition;
     private bool restoreCameraBrain;
     private float cycleTime = 0f;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    public float LightingCycleTime => cycleTime;
+    public float LightingTransitionDuration => Mathf.Min(GetPhaseDuration(), Mathf.Max(0.1f, lightingTransitionDuration));
+    public float IntendedNightBlend { get; private set; }
+    public Color IntendedColorFilter { get; private set; }
+    public float IntendedPostExposure { get; private set; }
+    public ColorAdjustments RuntimeColorAdjustments => colorAdjustments;
+#endif
     public float CurrentPhaseDuration => GetPhaseDuration();
     public float CurrentPhaseRemaining => Mathf.Max(0f, CurrentPhaseDuration - cycleTime);
     public float CurrentPhaseProgress => Mathf.Clamp01(cycleTime / CurrentPhaseDuration);
@@ -265,6 +273,11 @@ public class GameManager : MonoBehaviour, IBegin
         colorAdjustments.postExposure.overrideState = true;
         if (exposureCurve != null)
             colorAdjustments.postExposure.value = exposureCurve.Evaluate(1f - nightBlend);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        IntendedNightBlend = nightBlend;
+        IntendedColorFilter = filter;
+        IntendedPostExposure = colorAdjustments.postExposure.value;
+#endif
     }
 
     private void OnNightStart()
